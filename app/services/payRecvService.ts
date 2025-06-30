@@ -27,27 +27,27 @@ export class PayRecvService {
     params: PayRecvOperParams
   ): Promise<ApiResponse<PayRecvOperData[]>> {
     return ApiClient.get<PayRecvOperData[]>(
-      "",
-      params as Record<string, string | number | boolean>
+      "/pay-recv/oper-list",
+      params as unknown as Record<string, string | number | boolean>
     );
   }
 
   static async createOper(
     data: Omit<PayRecvOperData, "pay_oper">
   ): Promise<ApiResponse<PayRecvOperData>> {
-    return ApiClient.post<PayRecvOperData>("/createPayRecvOper.do", data);
+    return ApiClient.post<PayRecvOperData>("/pay-recv/oper", data);
   }
 
   static async updateOper(
     oper_id: string,
     data: Partial<PayRecvOperData>
   ): Promise<ApiResponse<PayRecvOperData>> {
-    return ApiClient.put<PayRecvOperData>(`/updatePayRecvOper.do`, data, {
+    return ApiClient.put<PayRecvOperData>(`/pay-recv/oper`, data, {
       oper_id,
     });
   }
 
   static async deleteOper(oper_id: string): Promise<ApiResponse<void>> {
-    return ApiClient.delete<void>("/deletePayRecvOper.do", { oper_id });
+    return ApiClient.delete<void>("/pay-recv/oper", { oper_id });
   }
 }

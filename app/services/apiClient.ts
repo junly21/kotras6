@@ -14,8 +14,8 @@ export interface ApiRequestConfig {
 }
 
 export class ApiClient {
-  // Next.js 프록시 API를 사용
-  private static baseUrl = "/api/proxy";
+  // 엔드포인트별 API Routes 사용
+  private static baseUrl = "/api";
 
   static async request<T = unknown>(
     endpoint: string,
@@ -33,7 +33,9 @@ export class ApiClient {
       });
 
       const queryString = urlParams.toString();
-      const url = `${this.baseUrl}${queryString ? `?${queryString}` : ""}`;
+      const url = `${this.baseUrl}${endpoint}${
+        queryString ? `?${queryString}` : ""
+      }`;
 
       console.log("API 요청:", { method, url, headers, body });
 

@@ -1,5 +1,6 @@
 "use client";
 import TestGrid from "@/app/components/TestGrid";
+import Spinner from "@/app/components/Spinner";
 import {
   AllCommunityModule,
   ModuleRegistry,
@@ -37,8 +38,6 @@ export default function TestGridPage() {
     onSuccess,
     onError,
   });
-
-  const rowData = apiData || [];
 
   const colDefs = [
     {
@@ -86,8 +85,13 @@ export default function TestGridPage() {
         </div>
       )}
 
-      <div>
-        <TestGrid rowData={rowData} columnDefs={colDefs} />
+      <div className="relative">
+        {loading && (
+          <div className="absolute inset-0 flex items-center justify-center bg-white/80 z-10">
+            <Spinner />
+          </div>
+        )}
+        <TestGrid rowData={loading ? null : apiData} columnDefs={colDefs} />
       </div>
     </div>
   );

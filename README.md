@@ -1,36 +1,60 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Kotras6 Project
 
-## Getting Started
+Next.js 기반의 대시보드 애플리케이션입니다.
 
-First, run the development server:
+## 주요 기능
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+- **2-depth 사이드바 메뉴**: Zustand를 사용한 상태 관리
+- **API 통합**: 외부 API와의 통신을 위한 프록시 구조
+- **AG Grid**: 데이터 그리드 표시
+- **반응형 레이아웃**: Tailwind CSS를 사용한 모던한 UI
+
+## 기술 스택
+
+- **Frontend**: Next.js 14, React, TypeScript
+- **Styling**: Tailwind CSS
+- **State Management**: Zustand
+- **Data Grid**: AG Grid
+- **API**: Fetch API with Proxy
+
+## 프로젝트 구조
+
+```
+app/
+├── api/           # Next.js API Routes
+├── components/    # 재사용 가능한 컴포넌트
+├── hooks/         # 커스텀 훅
+├── services/      # API 서비스 레이어
+├── store/         # Zustand 스토어
+└── test-grid/     # 테스트 페이지
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## 설치 및 실행
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+# 의존성 설치
+npm install
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+# 개발 서버 실행
+npm run dev
 
-## Learn More
+# 빌드
+npm run build
 
-To learn more about Next.js, take a look at the following resources:
+# 프로덕션 실행
+npm start
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## 환경 설정
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- Node.js 18+ 필요
+- 포트 3000에서 실행 (기본값)
 
-## Deploy on Vercel
+## API 구조
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+- **프록시 API**: `/api/proxy` - CORS 문제 해결을 위한 프록시
+- **외부 API**: `http://192.168.111.152:8080/kotras6/` - 실제 데이터 소스
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## 라이센스
+
+MIT License

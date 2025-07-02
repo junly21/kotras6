@@ -91,66 +91,149 @@ export const useSidebarStore = create<SidebarState>((set, get) => ({
 // 메뉴 데이터 정의
 export const getMenuData = (): MenuItem[] => [
   {
-    id: "dashboard",
-    label: "대시보드",
-    path: "/dashboard",
-  },
-  {
-    id: "shipping",
-    label: "운송 관리",
+    id: "transaction",
+    label: "거래내역",
     children: [
       {
-        id: "shipping-list",
-        label: "운송 목록",
-        path: "/shipping/list",
+        id: "transaction-analysis",
+        label: "내역 분석",
+        path: "/transaction/analysis",
       },
       {
-        id: "shipping-create",
-        label: "운송 등록",
-        path: "/shipping/create",
-      },
-      {
-        id: "shipping-tracking",
-        label: "운송 추적",
-        path: "/shipping/tracking",
+        id: "transaction-detail",
+        label: "상세 조회",
+        path: "/transaction/detail",
       },
     ],
   },
   {
-    id: "customer",
-    label: "고객 관리",
+    id: "network",
+    label: "네트워크",
     children: [
       {
-        id: "customer-list",
-        label: "고객 목록",
-        path: "/customer/list",
+        id: "network-map",
+        label: "지도 조회",
+        path: "/network/map",
       },
       {
-        id: "customer-create",
-        label: "고객 등록",
-        path: "/customer/create",
+        id: "network-line",
+        label: "노선도 조회",
+        path: "/network/line",
+      },
+      {
+        id: "network-optimal-route",
+        label: "최적경로",
+        path: "/network/optimal-route",
+      },
+      {
+        id: "network-file-upload",
+        label: "파일등록",
+        path: "/network/file-upload",
       },
     ],
   },
   {
-    id: "reports",
-    label: "보고서",
+    id: "route-search",
+    label: "경로탐색",
     children: [
       {
-        id: "reports-sales",
-        label: "매출 보고서",
-        path: "/reports/sales",
+        id: "route-search-result",
+        label: "결과 조회",
+        path: "/route-search/result",
+      },
+    ],
+  },
+  {
+    id: "settlement",
+    label: "정산결과",
+    children: [
+      {
+        id: "settlement-overview",
+        label: "정산 결과",
+        path: "/settlement/overview",
       },
       {
-        id: "reports-shipping",
-        label: "운송 보고서",
-        path: "/reports/shipping",
+        id: "settlement-by-institution",
+        label: "기관별 조회",
+        path: "/settlement/by-institution",
+      },
+      {
+        id: "settlement-by-route",
+        label: "노선별 조회",
+        path: "/settlement/by-route",
+      },
+      {
+        id: "settlement-by-station",
+        label: "역사별 조회",
+        path: "/settlement/by-station",
+      },
+      {
+        id: "settlement-by-od",
+        label: "OD별 조회",
+        path: "/settlement/by-od",
+      },
+    ],
+  },
+  {
+    id: "mock-settlement",
+    label: "모의정산",
+    children: [
+      {
+        id: "mock-settlement-register",
+        label: "정산 등록",
+        path: "/mock-settlement/register",
+      },
+      {
+        id: "mock-settlement-result",
+        label: "정산 결과",
+        path: "/mock-settlement/result",
+      },
+      {
+        id: "mock-settlement-by-institution",
+        label: "기관별 조회",
+        path: "/mock-settlement/by-institution",
+      },
+      {
+        id: "mock-settlement-by-route",
+        label: "노선별 조회",
+        path: "/mock-settlement/by-route",
+      },
+      {
+        id: "mock-settlement-by-station",
+        label: "역사별 조회",
+        path: "/mock-settlement/by-station",
+      },
+      {
+        id: "mock-settlement-by-od",
+        label: "OD별 조회",
+        path: "/mock-settlement/by-od",
       },
     ],
   },
   {
     id: "settings",
-    label: "설정",
-    path: "/settings",
+    label: "환경설정",
+    children: [
+      {
+        id: "settings-common-codes",
+        label: "공통코드 관리",
+        path: "/settings/common-codes",
+      },
+      {
+        id: "settings-detail-codes",
+        label: "상세코드 관리",
+        path: "/settings/detail-codes",
+      },
+      {
+        id: "settings-logs",
+        label: "작업로그 조회",
+        path: "/settings/logs",
+      },
+    ],
+  },
+  {
+    id: "test-grid",
+    label: "테스트 그리드",
+    path: "/test-grid",
   },
 ];

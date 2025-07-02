@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect } from "react";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useSidebarStore, getMenuData, MenuItem } from "../store/sidebarStore";
 
 const MenuItemComponent: React.FC<{ item: MenuItem; level: number }> = ({
@@ -9,14 +9,22 @@ const MenuItemComponent: React.FC<{ item: MenuItem; level: number }> = ({
   level,
 }) => {
   const { isMenuOpen, toggleMenu, isCurrentPath } = useSidebarStore();
+  const router = useRouter();
 
   const hasChildren = item.children && item.children.length > 0;
   const isOpen = isMenuOpen(item.id);
   const isActive = item.path ? isCurrentPath(item.path) : false;
+  const isClickable = !hasChildren && item.path; // 클릭 가능한지 여부
 
-  const handleClick = () => {
+  const handleClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+
     if (hasChildren) {
+      // 자식이 있는 경우 토글만
       toggleMenu(item.id);
+    } else if (item.path) {
+      // 자식이 없고 경로가 있는 경우 페이지 이동
+      router.push(item.path);
     }
   };
 
@@ -30,11 +38,14 @@ const MenuItemComponent: React.FC<{ item: MenuItem; level: number }> = ({
     ? "font-medium text-gray-900"
     : "text-gray-700";
 
+  // 클릭 가능한 경우 cursor-pointer 추가
+  const cursorClasses = isClickable ? "cursor-pointer" : "";
+
   return (
     <div className={`${level > 0 ? "ml-4" : ""}`}>
       <button
         onClick={handleClick}
-        className={`${baseClasses} ${activeClasses} ${parentClasses}`}>
+        className={`${baseClasses} ${activeClasses} ${parentClasses} ${cursorClasses}`}>
         <span>{item.label}</span>
         {hasChildren && (
           <svg

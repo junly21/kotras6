@@ -1,13 +1,13 @@
 "use client";
-import TestGrid from "@/app/components/TestGrid";
-import Spinner from "@/app/components/Spinner";
+import TestGrid from "@/components/TestGrid";
+import Spinner from "@/components/Spinner";
 import {
   AllCommunityModule,
   ModuleRegistry,
   ValueGetterParams,
 } from "ag-grid-community";
-import { useApi } from "../hooks/useApi";
-import { PayRecvService, PayRecvOperData } from "../services/payRecvService";
+import { useApi } from "@/hooks/useApi";
+import { PayRecvService, PayRecvOperData } from "@/services/payRecvService";
 import { useCallback } from "react";
 
 // Register all Community features
@@ -65,8 +65,6 @@ export default function TestGridPage() {
 
   return (
     <div>
-      <h1>테스트 그리드 페이지</h1>
-
       {loading && (
         <div className="bg-blue-100 border border-blue-400 text-blue-700 px-4 py-3 rounded mb-4">
           <strong>로딩 중...</strong> 데이터를 가져오는 중입니다.

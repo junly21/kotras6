@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { ApiResponse } from "../services/apiClient";
+import { ApiResponse } from "@/services/apiClient";
 
 interface UseApiOptions<T> {
   autoFetch?: boolean;

@@ -1,6 +1,7 @@
 "use client";
 import TestGrid from "@/components/TestGrid";
 import Spinner from "@/components/Spinner";
+import CsvExportButton from "@/components/CsvExportButton";
 import {
   AllCommunityModule,
   ModuleRegistry,
@@ -8,15 +9,21 @@ import {
 } from "ag-grid-community";
 import { useApi } from "@/hooks/useApi";
 import { PayRecvService, PayRecvOperData } from "@/services/payRecvService";
-import { useCallback } from "react";
+import { useCallback, useRef, useState } from "react";
+import { AgGridReact } from "ag-grid-react";
+import { UnitRadioGroup, type Unit } from "@/components/ui/UnitRadioGroup";
+import { useUnitConversion } from "@/hooks/useUnitConversion";
 
 // Register all Community features
 ModuleRegistry.registerModules([AllCommunityModule]);
 
 export default function TestGridPage() {
+  // gridRef 생성
+  const gridRef = useRef<AgGridReact>(null);
+  const [unit, setUnit] = useState<Unit>("원");
   // apiCall 함수를 메모이제이션
   const apiCall = useCallback(
-    () => PayRecvService.getOperList({ oper_id: "test" }),
+    () => PayRecvService.getOperList({ limit: 1 }),
     []
   );
 
@@ -63,6 +70,8 @@ export default function TestGridPage() {
     { headerName: "경기철도", field: "경기철도" },
   ];
 
+  const rowData = useUnitConversion(apiData, unit);
+
   return (
     <div>
       {loading && (
@@ -82,14 +91,27 @@ export default function TestGridPage() {
           <strong>성공:</strong> API 데이터를 성공적으로 받았습니다.
         </div>
       )}
+      {/* CSV 내보내기 버튼을 그리드 우상단에 배치 */}
 
+      <div className="mb-2 flex justify-end gap-4">
+        <UnitRadioGroup value={unit} onChange={setUnit} />
+        <CsvExportButton
+          gridRef={gridRef}
+          fileName="pay_recv_data.csv"
+          className="shadow-lg bg-accent-500"
+        />
+      </div>
       <div className="relative">
         {loading && (
           <div className="absolute inset-0 flex items-center justify-center bg-white/80 z-10">
             <Spinner />
           </div>
         )}
-        <TestGrid rowData={loading ? null : apiData} columnDefs={colDefs} />
+        <TestGrid
+          rowData={loading ? null : rowData}
+          columnDefs={colDefs}
+          gridRef={gridRef}
+        />
       </div>
     </div>
   );

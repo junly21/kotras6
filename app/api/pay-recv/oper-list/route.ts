@@ -31,10 +31,17 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     console.log("PayRecvOperList POST API 호출됨");
+    console.log("Body:", body);
+
+    // body 안의 params 객체에서 limit 추출
+    const limit = body.params?.limit || 3;
+    console.log("Extracted limit:", limit);
 
     const { data } = await callExternalApi("selectPayRecvOperList.do", {
       method: "POST",
-      body,
+      body: {
+        limit: limit,
+      },
     });
 
     return NextResponse.json(data, {

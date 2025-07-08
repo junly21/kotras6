@@ -2,7 +2,8 @@ import { ApiClient, ApiResponse } from "./apiClient";
 
 // 타입 정의
 export interface PayRecvOperParams {
-  oper_id: string;
+  limit: number;
+  // oper_id: string;
 }
 
 export interface PayRecvOperData {
@@ -26,9 +27,16 @@ export class PayRecvService {
   static async getOperList(
     params: PayRecvOperParams
   ): Promise<ApiResponse<PayRecvOperData[]>> {
-    return ApiClient.get<PayRecvOperData[]>(
+    // POST 요청으로 변경하고 body 안에 params 객체로 limit 포함
+    const requestBody = {
+      params: {
+        limit: params.limit,
+      },
+    };
+    console.log("requestBody", requestBody);
+    return ApiClient.post<PayRecvOperData[]>(
       "/pay-recv/oper-list",
-      params as unknown as Record<string, string | number | boolean>
+      requestBody
     );
   }
 

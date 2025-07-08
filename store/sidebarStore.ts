@@ -236,4 +236,9 @@ export const getMenuData = (): MenuItem[] => [
     label: "테스트 그리드",
     path: "/test-grid",
   },
+  {
+    id: "test-page",
+    label: "테스트 페이지",
+    path: "/test-page",
+  },
 ];

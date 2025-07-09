@@ -110,6 +110,16 @@
   --sidebar-ring: oklch(0.556 0 0);
 }
 
+/* AG Grid 헤더와 데이터 셀의 padding을 동일하게 맞춤 */
+.ag-theme-alpine .ag-header-cell-label {
+  padding-left: 16px !important;
+  padding-right: 16px !important;
+}
+.ag-theme-alpine .ag-cell {
+  padding-left: 16px !important;
+  padding-right: 16px !important;
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;

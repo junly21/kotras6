@@ -5,11 +5,10 @@ export interface TransactionAnalysisFilters {
 
 // 거래내역 분석 데이터 타입
 export interface TransactionAnalysisData {
-  rank: number; // 순위
-  agency: string; // 기관명
-  boardingStation: string; // 승차역
-  alightingStation: string; // 하차역
-  dataCount: number; // 데이터 건수
+  oper_nm: string; // 승차기관명
+  ride_nm: string; // 승차역
+  algh_nm: string; // 하차역
+  cnt: number; // 데이터 건수
 }
 
 // 기관 옵션 타입

@@ -23,7 +23,7 @@ export default function TestGridPage() {
   const [unit, setUnit] = useState<Unit>("원");
   // apiCall 함수를 메모이제이션
   const apiCall = useCallback(
-    () => PayRecvService.getOperList({ limit: 1 }),
+    () => PayRecvService.getOperList({ limit: 13 }),
     []
   );
 

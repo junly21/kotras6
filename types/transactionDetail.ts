@@ -6,14 +6,15 @@ export interface TransactionDetailFilters {
 
 // 상세조회 데이터 타입
 export interface TransactionDetailData {
-  cardNumber: string; // 카드번호
-  boardingDateTime: string; // 승차일시
-  alightingDateTime: string; // 하차일시
-  firstBoardingStation: string; // 최초승차역
-  finalAlightingStation: string; // 최종하차역
-  totalAmount: number; // 총배분금
-  baseFare: number; // 기본운임
-  subwaySurcharge: number; // 도시철도 부가금
+  trcr_no: string; // 카드번호
+  ride_dtm: number; // 승차시간 (timestamp)
+  algh_dtm: number; // 하차시간 (timestamp)
+  ride_nm: string; // 최초승차역
+  algh_nm: string; // 최종하차역
+  fnl_dist_amt: number; // 총배분금
+  base_dist_amt: number; // 기본배분금
+  ubrw_adtn_use_amt: number; // 도시철도부가사용금
+  card_div: string; // 카드구분
 }
 
 // 카드구분 옵션 타입

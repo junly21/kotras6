@@ -55,10 +55,10 @@ export default function TransactionDetailPage() {
   });
 
   useEffect(() => {
-    if (filters.tradeDate && filters.cardType) {
+    if (hasSearched) {
       refetch();
     }
-  }, [filters, refetch]);
+  }, [filters, refetch, hasSearched]);
 
   const handleSearch = useCallback((values: TransactionDetailFilters) => {
     setHasSearched(true); // ✅ 검색 시작
@@ -69,58 +69,66 @@ export default function TransactionDetailPage() {
   const colDefs = [
     {
       headerName: "카드번호",
-      field: "cardNumber",
+      field: "trcr_no",
       width: 200,
       resizable: false,
     },
     {
-      headerName: "승차일시",
-      field: "boardingDateTime",
+      headerName: "승차시간",
+      field: "ride_dtm",
       width: 180,
-      resizable: false,
+      valueFormatter: (params: { value: number | null | undefined }) => {
+        if (!params.value) return "";
+        return new Date(params.value).toLocaleString();
+      },
+      resizable: true,
     },
     {
-      headerName: "하차일시",
-      field: "alightingDateTime",
+      headerName: "하차시간",
+      field: "algh_dtm",
       width: 180,
-      resizable: false,
+      valueFormatter: (params: { value: number | null | undefined }) => {
+        if (!params.value) return "";
+        return new Date(params.value).toLocaleString();
+      },
+      resizable: true,
     },
     {
       headerName: "최초승차역",
-      field: "firstBoardingStation",
+      field: "ride_nm",
       width: 150,
       resizable: false,
     },
     {
       headerName: "최종하차역",
-      field: "finalAlightingStation",
+      field: "algh_nm",
       width: 150,
       resizable: false,
     },
     {
       headerName: "총배분금",
-      field: "totalAmount",
+      field: "fnl_dist_amt",
       width: 150,
-      valueFormatter: (params: { value: number }) =>
-        params.value.toLocaleString() + "원",
+      valueFormatter: (params: { value: number | null | undefined }) =>
+        (params.value || 0).toLocaleString() + "원",
       cellStyle: { textAlign: "right" },
       resizable: false,
     },
     {
-      headerName: "기본운임",
-      field: "baseFare",
+      headerName: "기본배분금",
+      field: "base_dist_amt",
       width: 150,
-      valueFormatter: (params: { value: number }) =>
-        params.value.toLocaleString() + "원",
+      valueFormatter: (params: { value: number | null | undefined }) =>
+        (params.value || 0).toLocaleString() + "원",
       cellStyle: { textAlign: "right" },
       resizable: false,
     },
     {
-      headerName: "도시철도 부가금",
-      field: "subwaySurcharge",
+      headerName: "도시철도부가사용금",
+      field: "ubrw_adtn_use_amt",
       width: 200,
-      valueFormatter: (params: { value: number }) =>
-        params.value.toLocaleString() + "원",
+      valueFormatter: (params: { value: number | null | undefined }) =>
+        (params.value || 0).toLocaleString() + "원",
       cellStyle: { textAlign: "right" },
       resizable: false,
     },
@@ -145,7 +153,8 @@ export default function TransactionDetailPage() {
 
       {hasSearched && !loading && apiData && (
         <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded">
-          <strong>성공:</strong> 상세조회 데이터를 성공적으로 받았습니다.
+          <strong>성공:</strong> 상세조회 데이터를 성공적으로 받았습니다. (총{" "}
+          {apiData.length}건)
         </div>
       )}
 
@@ -166,7 +175,7 @@ export default function TransactionDetailPage() {
           </div>
         )}
         <TestGrid
-          rowData={hasSearched ? apiData ?? [] : []} // ✅ null 대신 빈 배열
+          rowData={hasSearched ? apiData ?? [] : []} // ✅ 모든 데이터 렌더링
           columnDefs={colDefs}
           gridRef={gridRef}
           gridOptions={{
@@ -176,7 +185,7 @@ export default function TransactionDetailPage() {
             headerHeight: 50,
             rowHeight: 45,
             suppressScrollOnNewData: true,
-            domLayout: "autoHeight",
+            // domLayout 제거하여 고정 높이로 설정
           }}
         />
       </div>

@@ -5,11 +5,14 @@ import { AgGridReact } from "ag-grid-react";
 import { AllCommunityModule, ModuleRegistry } from "ag-grid-community";
 import TestGrid from "@/components/TestGrid";
 import Spinner from "@/components/Spinner";
+import { Button } from "@/components/ui/button";
+import { Toast } from "@/components/ui/Toast";
 import { useApi } from "@/hooks/useApi";
 import { CommonCodeService } from "@/services/commonCodeService";
 import { DetailCodeService } from "@/services/detailCodeService";
 import { CommonCodeData } from "@/types/commonCode";
-import { DetailCodeData } from "@/types/detailCode";
+import { DetailCodeData, DetailCodeFormData } from "@/types/detailCode";
+import { DetailCodeModal } from "@/components/DetailCodeModal";
 
 // Register all Community features
 ModuleRegistry.registerModules([AllCommunityModule]);
@@ -19,25 +22,51 @@ export default function SettingsDetailCodesPage() {
   const rightGridRef = useRef<AgGridReact>(null);
   const [selectedCommonCode, setSelectedCommonCode] =
     useState<CommonCodeData | null>(null);
+  const [selectedDetailCodes, setSelectedDetailCodes] = useState<
+    DetailCodeData[]
+  >([]);
   const [detailCodeData, setDetailCodeData] = useState<DetailCodeData[]>([]);
   const [detailCodeLoading, setDetailCodeLoading] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [modalMode, setModalMode] = useState<"add" | "edit">("add");
+  const [editingData, setEditingData] = useState<
+    DetailCodeFormData | undefined
+  >();
+  const [modalLoading, setModalLoading] = useState(false);
+
+  // 토스트 상태
+  const [toast, setToast] = useState<{
+    isVisible: boolean;
+    message: string;
+    type: "success" | "error" | "info";
+  }>({
+    isVisible: false,
+    message: "",
+    type: "info",
+  });
 
   // 공통코드 목록 API 호출
   const apiCall = useCallback(() => CommonCodeService.getCommonCodeList(), []);
 
   const onSuccess = useCallback((data: CommonCodeData[]) => {
     console.log("공통코드 목록 로드 성공:", data);
+    setToast({
+      isVisible: true,
+      message: `공통코드 목록을 성공적으로 받았습니다. (총 ${data.length}건)`,
+      type: "success",
+    });
   }, []);
 
   const onError = useCallback((error: string) => {
     console.error("공통코드 목록 로드 실패:", error);
+    setToast({
+      isVisible: true,
+      message: `데이터 로드 실패: ${error}`,
+      type: "error",
+    });
   }, []);
 
-  const {
-    data: commonCodeData,
-    error,
-    loading,
-  } = useApi<CommonCodeData[]>(apiCall, {
+  const { data: commonCodeData, loading } = useApi<CommonCodeData[]>(apiCall, {
     autoFetch: true,
     onSuccess,
     onError,
@@ -76,7 +105,7 @@ export default function SettingsDetailCodesPage() {
     {
       headerName: "값2",
       field: "value_2",
-      width: 150,
+      width: 200,
       resizable: true,
     },
     {
@@ -140,29 +169,163 @@ export default function SettingsDetailCodesPage() {
     []
   );
 
+  // 상세코드 선택 변경
+  const onDetailCodeSelectionChanged = useCallback(() => {
+    if (rightGridRef.current) {
+      const selectedNodes = rightGridRef.current.api.getSelectedNodes();
+      const selectedData = selectedNodes.map(
+        (node: { data: DetailCodeData }) => node.data
+      );
+      setSelectedDetailCodes(selectedData);
+    }
+  }, []);
+
+  // 상세코드 더블클릭 시 수정 모달
+  const onDetailCodeRowDoubleClicked = useCallback(
+    (event: { data: DetailCodeData }) => {
+      const data = event.data;
+
+      // syscd_yn이 Y인 경우 수정 불가
+      if (data.syscd_yn === "Y") {
+        alert("시스템 코드는 수정할 수 없습니다.");
+        return;
+      }
+
+      setEditingData({
+        DETAIL_CODE: data.detail_code,
+        COMMON_CODE: data.common_code,
+        VALUE_1: data.value_1 || "",
+        VALUE_2: data.value_2 || "",
+        VALUE_3: data.value_3 || "",
+        REMARK: data.remark || "",
+        USE_YN: data.use_yn || "N",
+        SYSCD_YN: data.syscd_yn || "N",
+      });
+      setModalMode("edit");
+      setIsModalOpen(true);
+    },
+    []
+  );
+
+  // 모달 핸들러
+  const handleAddClick = useCallback(() => {
+    if (!selectedCommonCode) {
+      alert("공통코드를 먼저 선택해주세요.");
+      return;
+    }
+
+    setEditingData(undefined);
+    setModalMode("add");
+    setIsModalOpen(true);
+  }, [selectedCommonCode]);
+
+  const handleDeleteClick = useCallback(async () => {
+    if (selectedDetailCodes.length === 0) {
+      alert("삭제할 항목을 선택해주세요.");
+      return;
+    }
+
+    if (selectedDetailCodes.length > 1) {
+      alert("한 번에 하나의 항목만 삭제할 수 있습니다.");
+      return;
+    }
+
+    const selectedRow = selectedDetailCodes[0];
+
+    // 시스템코드가 Y인 항목 체크
+    if (selectedRow.syscd_yn === "Y") {
+      alert("시스템 코드는 삭제할 수 없습니다.");
+      return;
+    }
+
+    if (!confirm(`"${selectedRow.detail_code}" 항목을 삭제하시겠습니까?`)) {
+      return;
+    }
+
+    try {
+      await DetailCodeService.deleteDetailCode({
+        DETAIL_CODE: selectedRow.detail_code,
+        COMMON_CODE: selectedRow.common_code,
+      });
+      alert("삭제가 완료되었습니다.");
+      // 상세코드 목록 새로고침
+      if (selectedCommonCode) {
+        const response = await DetailCodeService.getDetailCodeList({
+          COMMON_CODE: selectedCommonCode.common_code,
+        });
+        if (response.success && response.data) {
+          setDetailCodeData(response.data);
+        }
+      }
+    } catch (error) {
+      console.error("삭제 실패:", error);
+      alert("삭제 중 오류가 발생했습니다.");
+    }
+  }, [selectedDetailCodes, selectedCommonCode]);
+
+  const handleModalSubmit = useCallback(
+    async (data: DetailCodeFormData) => {
+      setModalLoading(true);
+      try {
+        if (modalMode === "add") {
+          await DetailCodeService.addDetailCode(data);
+          alert("등록이 완료되었습니다.");
+        } else {
+          await DetailCodeService.updateDetailCode(data);
+          alert("수정이 완료되었습니다.");
+        }
+        setIsModalOpen(false);
+
+        // 상세코드 목록 새로고침
+        if (selectedCommonCode) {
+          const response = await DetailCodeService.getDetailCodeList({
+            COMMON_CODE: selectedCommonCode.common_code,
+          });
+          if (response.success && response.data) {
+            setDetailCodeData(response.data);
+          }
+        }
+      } catch (error) {
+        console.error("처리 실패:", error);
+        alert("처리 중 오류가 발생했습니다.");
+      } finally {
+        setModalLoading(false);
+      }
+    },
+    [modalMode, selectedCommonCode]
+  );
+
+  const handleModalClose = useCallback(() => {
+    setIsModalOpen(false);
+    setEditingData(undefined);
+  }, []);
+
   return (
     <div className="p-6 space-y-6">
       <h1 className="text-2xl font-bold">상세코드 관리</h1>
 
-      {error && (
-        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
-          <strong>에러:</strong> {error}
-        </div>
-      )}
-
-      {!loading && commonCodeData && (
-        <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded">
-          <strong>성공:</strong> 공통코드 목록을 성공적으로 받았습니다. (총{" "}
-          {commonCodeData.length}건)
-        </div>
-      )}
+      {/* 버튼 영역 */}
+      <div className="flex justify-end gap-2">
+        <Button
+          onClick={handleAddClick}
+          disabled={!selectedCommonCode}
+          className="bg-blue-500 hover:bg-blue-600">
+          추가
+        </Button>
+        <Button
+          onClick={handleDeleteClick}
+          disabled={selectedDetailCodes.length === 0}
+          className="bg-red-500 hover:bg-red-600">
+          삭제
+        </Button>
+      </div>
 
       {/* 좌우 그리드 레이아웃 */}
       <div className="grid grid-cols-4 gap-6 h-[600px]">
         {/* 왼쪽: 공통코드 그리드 */}
-        <div className="col-span-1 space-y-4">
+        <div className="col-span-1 flex flex-col h-full">
           <h2 className="text-lg font-semibold">공통코드 목록</h2>
-          <div className="relative">
+          <div className="relative flex-1 h-full">
             {loading && (
               <div className="absolute inset-0 flex items-center justify-center bg-white/80 z-10">
                 <Spinner />
@@ -187,7 +350,7 @@ export default function SettingsDetailCodesPage() {
         </div>
 
         {/* 오른쪽: 상세코드 그리드 */}
-        <div className="col-span-3 space-y-4">
+        <div className="col-span-3 flex flex-col h-full">
           <h2 className="text-lg font-semibold">
             상세코드 목록
             {selectedCommonCode && (
@@ -196,7 +359,7 @@ export default function SettingsDetailCodesPage() {
               </span>
             )}
           </h2>
-          <div className="relative">
+          <div className="relative flex-1 h-full">
             {detailCodeLoading && (
               <div className="absolute inset-0 flex items-center justify-center bg-white/80 z-10">
                 <Spinner />
@@ -225,12 +388,33 @@ export default function SettingsDetailCodesPage() {
                   rowHeight: 45,
                   suppressScrollOnNewData: true,
                   rowSelection: "multiple",
+                  onRowDoubleClicked: onDetailCodeRowDoubleClicked,
+                  onSelectionChanged: onDetailCodeSelectionChanged,
                 }}
               />
             )}
           </div>
         </div>
       </div>
+
+      {/* 모달 */}
+      <DetailCodeModal
+        isOpen={isModalOpen}
+        onClose={handleModalClose}
+        onSubmit={handleModalSubmit}
+        initialData={editingData}
+        mode={modalMode}
+        loading={modalLoading}
+        selectedCommonCode={selectedCommonCode?.common_code}
+      />
+
+      {/* 토스트 알림 */}
+      <Toast
+        isVisible={toast.isVisible}
+        message={toast.message}
+        type={toast.type}
+        onClose={() => setToast((prev) => ({ ...prev, isVisible: false }))}
+      />
     </div>
   );
 }

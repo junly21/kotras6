@@ -12,6 +12,7 @@ interface TestGridProps {
   gridRef: React.RefObject<any>;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   gridOptions?: any;
+  height?: number | string; // 높이 props 추가
 }
 
 export default function TestGrid({
@@ -20,9 +21,10 @@ export default function TestGrid({
   pinnedBottomRowData,
   gridRef,
   gridOptions = {},
+  height = "100%", // 기본값
 }: TestGridProps) {
   return (
-    <div className="ag-theme-alpine" style={{ height: 500 }}>
+    <div className="ag-theme-alpine" style={{ height }}>
       <AgGridReact
         ref={gridRef}
         rowData={rowData}

@@ -2,6 +2,7 @@
 import TestGrid from "@/components/TestGrid";
 import Spinner from "@/components/Spinner";
 import { FilterForm } from "@/components/ui/FilterForm";
+import { Toast } from "@/components/ui/Toast";
 import { AllCommunityModule, ModuleRegistry } from "ag-grid-community";
 import { useApi } from "@/hooks/useApi";
 import { TransactionAnalysisService } from "@/services/transactionAnalysisService";
@@ -28,6 +29,17 @@ export default function TransactionAnalysisPage() {
   // ✅ 검색 수행 여부 상태 추가
   const [hasSearched, setHasSearched] = useState(false);
 
+  // 토스트 상태
+  const [toast, setToast] = useState<{
+    isVisible: boolean;
+    message: string;
+    type: "success" | "error" | "info";
+  }>({
+    isVisible: false,
+    message: "",
+    type: "info",
+  });
+
   const apiCall = useCallback(
     () => TransactionAnalysisService.getAnalysisData(filters),
     [filters]
@@ -35,15 +47,24 @@ export default function TransactionAnalysisPage() {
 
   const onSuccess = useCallback((data: TransactionAnalysisData[]) => {
     console.log("거래내역 분석 데이터 로드 성공:", data);
+    setToast({
+      isVisible: true,
+      message: "거래내역 분석 데이터를 성공적으로 받았습니다.",
+      type: "success",
+    });
   }, []);
 
   const onError = useCallback((error: string) => {
     console.error("거래내역 분석 데이터 로드 실패:", error);
+    setToast({
+      isVisible: true,
+      message: `데이터 로드 실패: ${error}`,
+      type: "error",
+    });
   }, []);
 
   const {
     data: apiData,
-    error,
     loading,
     refetch,
   } = useApi<TransactionAnalysisData[]>(apiCall, {
@@ -103,20 +124,8 @@ export default function TransactionAnalysisPage() {
         onSearch={handleSearch}
       />
 
-      {error && (
-        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
-          <strong>에러:</strong> {error}
-        </div>
-      )}
-
-      {hasSearched && !loading && apiData && (
-        <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded">
-          <strong>성공:</strong> 거래내역 분석 데이터를 성공적으로 받았습니다.
-        </div>
-      )}
-
       {/* 그리드 */}
-      <div className="relative">
+      <div className="relative h-[600px] overflow-y-auto">
         {hasSearched && loading && (
           <div className="absolute inset-0 flex items-center justify-center bg-white/80 z-10">
             <Spinner />
@@ -126,6 +135,7 @@ export default function TransactionAnalysisPage() {
           rowData={hasSearched ? apiData ?? [] : []} // ✅ null 대신 빈 배열
           columnDefs={colDefs}
           gridRef={gridRef}
+          height={600}
           gridOptions={{
             suppressColumnResize: true,
             suppressRowClickSelection: true,
@@ -133,10 +143,17 @@ export default function TransactionAnalysisPage() {
             headerHeight: 50,
             rowHeight: 45,
             suppressScrollOnNewData: true,
-            domLayout: "autoHeight",
           }}
         />
       </div>
+
+      {/* 토스트 알림 */}
+      <Toast
+        isVisible={toast.isVisible}
+        message={toast.message}
+        type={toast.type}
+        onClose={() => setToast((prev) => ({ ...prev, isVisible: false }))}
+      />
     </div>
   );
 }

@@ -6,6 +6,7 @@ import { AllCommunityModule, ModuleRegistry } from "ag-grid-community";
 import TestGrid from "@/components/TestGrid";
 import Spinner from "@/components/Spinner";
 import { Button } from "@/components/ui/button";
+import { Toast } from "@/components/ui/Toast";
 import { useApi } from "@/hooks/useApi";
 import { CommonCodeService } from "@/services/commonCodeService";
 import { CommonCodeData, CommonCodeFormData } from "@/types/commonCode";
@@ -24,19 +25,39 @@ export default function SettingsCommonCodesPage() {
   >();
   const [modalLoading, setModalLoading] = useState(false);
 
+  // 토스트 상태
+  const [toast, setToast] = useState<{
+    isVisible: boolean;
+    message: string;
+    type: "success" | "error" | "info";
+  }>({
+    isVisible: false,
+    message: "",
+    type: "info",
+  });
+
   const apiCall = useCallback(() => CommonCodeService.getCommonCodeList(), []);
 
   const onSuccess = useCallback((data: CommonCodeData[]) => {
     console.log("공통코드 목록 로드 성공:", data);
+    setToast({
+      isVisible: true,
+      message: `공통코드 목록을 성공적으로 받았습니다. (총 ${data.length}건)`,
+      type: "success",
+    });
   }, []);
 
   const onError = useCallback((error: string) => {
     console.error("공통코드 목록 로드 실패:", error);
+    setToast({
+      isVisible: true,
+      message: `데이터 로드 실패: ${error}`,
+      type: "error",
+    });
   }, []);
 
   const {
     data: apiData,
-    error,
     loading,
     refetch,
   } = useApi<CommonCodeData[]>(apiCall, {
@@ -217,19 +238,6 @@ export default function SettingsCommonCodesPage() {
     <div className="p-6 space-y-6">
       <h1 className="text-2xl font-bold">공통코드 관리</h1>
 
-      {error && (
-        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
-          <strong>에러:</strong> {error}
-        </div>
-      )}
-
-      {!loading && apiData && (
-        <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded">
-          <strong>성공:</strong> 공통코드 목록을 성공적으로 받았습니다. (총{" "}
-          {apiData.length}건)
-        </div>
-      )}
-
       {/* 버튼 영역 */}
       <div className="flex justify-end gap-2">
         <Button
@@ -256,6 +264,7 @@ export default function SettingsCommonCodesPage() {
           rowData={loading ? [] : apiData ?? []}
           columnDefs={colDefs}
           gridRef={gridRef}
+          height={600}
           gridOptions={{
             suppressColumnResize: false,
             suppressRowClickSelection: false,
@@ -278,6 +287,14 @@ export default function SettingsCommonCodesPage() {
         initialData={editingData}
         mode={modalMode}
         loading={modalLoading}
+      />
+
+      {/* 토스트 알림 */}
+      <Toast
+        isVisible={toast.isVisible}
+        message={toast.message}
+        type={toast.type}
+        onClose={() => setToast((prev) => ({ ...prev, isVisible: false }))}
       />
     </div>
   );

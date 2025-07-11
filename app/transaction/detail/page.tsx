@@ -3,6 +3,7 @@ import TestGrid from "@/components/TestGrid";
 import Spinner from "@/components/Spinner";
 import CsvExportButton from "@/components/CsvExportButton";
 import { FilterForm } from "@/components/ui/FilterForm";
+import { Toast } from "@/components/ui/Toast";
 import { AllCommunityModule, ModuleRegistry } from "ag-grid-community";
 import { useApi } from "@/hooks/useApi";
 import { TransactionDetailService } from "@/services/transactionDetailService";
@@ -30,6 +31,17 @@ export default function TransactionDetailPage() {
   // ✅ 검색 수행 여부 상태 추가
   const [hasSearched, setHasSearched] = useState(false);
 
+  // 토스트 상태
+  const [toast, setToast] = useState<{
+    isVisible: boolean;
+    message: string;
+    type: "success" | "error" | "info";
+  }>({
+    isVisible: false,
+    message: "",
+    type: "info",
+  });
+
   const apiCall = useCallback(
     () => TransactionDetailService.getDetailData(filters),
     [filters]
@@ -37,15 +49,24 @@ export default function TransactionDetailPage() {
 
   const onSuccess = useCallback((data: TransactionDetailData[]) => {
     console.log("상세조회 데이터 로드 성공:", data);
+    setToast({
+      isVisible: true,
+      message: `상세조회 데이터를 성공적으로 받았습니다. (총 ${data.length}건)`,
+      type: "success",
+    });
   }, []);
 
   const onError = useCallback((error: string) => {
     console.error("상세조회 데이터 로드 실패:", error);
+    setToast({
+      isVisible: true,
+      message: `데이터 로드 실패: ${error}`,
+      type: "error",
+    });
   }, []);
 
   const {
     data: apiData,
-    error,
     loading,
     refetch,
   } = useApi<TransactionDetailData[]>(apiCall, {
@@ -145,19 +166,6 @@ export default function TransactionDetailPage() {
         onSearch={handleSearch}
       />
 
-      {error && (
-        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
-          <strong>에러:</strong> {error}
-        </div>
-      )}
-
-      {hasSearched && !loading && apiData && (
-        <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded">
-          <strong>성공:</strong> 상세조회 데이터를 성공적으로 받았습니다. (총{" "}
-          {apiData.length}건)
-        </div>
-      )}
-
       {/* CSV 내보내기 버튼 */}
       <div className="flex justify-end">
         <CsvExportButton
@@ -178,6 +186,7 @@ export default function TransactionDetailPage() {
           rowData={hasSearched ? apiData ?? [] : []} // ✅ 모든 데이터 렌더링
           columnDefs={colDefs}
           gridRef={gridRef}
+          height={600}
           gridOptions={{
             suppressColumnResize: true,
             suppressRowClickSelection: true,
@@ -189,6 +198,14 @@ export default function TransactionDetailPage() {
           }}
         />
       </div>
+
+      {/* 토스트 알림 */}
+      <Toast
+        isVisible={toast.isVisible}
+        message={toast.message}
+        type={toast.type}
+        onClose={() => setToast((prev) => ({ ...prev, isVisible: false }))}
+      />
     </div>
   );
 }

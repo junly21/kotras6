@@ -2,6 +2,7 @@
 import TestGrid from "@/components/TestGrid";
 import Spinner from "@/components/Spinner";
 import CsvExportButton from "@/components/CsvExportButton";
+import { Toast } from "@/components/ui/Toast";
 import {
   AllCommunityModule,
   ModuleRegistry,
@@ -21,6 +22,18 @@ export default function TestGridPage() {
   // gridRef 생성
   const gridRef = useRef<AgGridReact>(null);
   const [unit, setUnit] = useState<Unit>("원");
+
+  // 토스트 상태
+  const [toast, setToast] = useState<{
+    isVisible: boolean;
+    message: string;
+    type: "success" | "error" | "info";
+  }>({
+    isVisible: false,
+    message: "",
+    type: "info",
+  });
+
   // apiCall 함수를 메모이제이션
   const apiCall = useCallback(
     () => PayRecvService.getOperList({ limit: 13 }),
@@ -30,17 +43,23 @@ export default function TestGridPage() {
   // 콜백 함수들도 메모이제이션
   const onSuccess = useCallback((data: PayRecvOperData[]) => {
     console.log("데이터 로드 성공:", data);
+    setToast({
+      isVisible: true,
+      message: "API 데이터를 성공적으로 받았습니다.",
+      type: "success",
+    });
   }, []);
 
   const onError = useCallback((error: string) => {
     console.error("데이터 로드 실패:", error);
+    setToast({
+      isVisible: true,
+      message: `데이터 로드 실패: ${error}`,
+      type: "error",
+    });
   }, []);
 
-  const {
-    data: apiData,
-    error,
-    loading,
-  } = useApi<PayRecvOperData[]>(apiCall, {
+  const { data: apiData, loading } = useApi<PayRecvOperData[]>(apiCall, {
     autoFetch: true,
     onSuccess,
     onError,
@@ -74,23 +93,6 @@ export default function TestGridPage() {
 
   return (
     <div>
-      {loading && (
-        <div className="bg-blue-100 border border-blue-400 text-blue-700 px-4 py-3 rounded mb-4">
-          <strong>로딩 중...</strong> 데이터를 가져오는 중입니다.
-        </div>
-      )}
-
-      {error && (
-        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-          <strong>에러:</strong> {error}
-        </div>
-      )}
-
-      {apiData && !loading && (
-        <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
-          <strong>성공:</strong> API 데이터를 성공적으로 받았습니다.
-        </div>
-      )}
       {/* CSV 내보내기 버튼을 그리드 우상단에 배치 */}
 
       <div className="mb-2 flex justify-end gap-4">
@@ -111,8 +113,17 @@ export default function TestGridPage() {
           rowData={loading ? null : rowData}
           columnDefs={colDefs}
           gridRef={gridRef}
+          height={600}
         />
       </div>
+
+      {/* 토스트 알림 */}
+      <Toast
+        isVisible={toast.isVisible}
+        message={toast.message}
+        type={toast.type}
+        onClose={() => setToast((prev) => ({ ...prev, isVisible: false }))}
+      />
     </div>
   );
 }

@@ -1,0 +1,13 @@
+version: "3.8"
+
+services:
+  kotras-app:
+    build: .
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+    restart: unless-stopped
+    # 외부 API 서버 정보 (필요시)
+    # environment:
+    #   - EXTERNAL_API_URL=http://your-api-server.com

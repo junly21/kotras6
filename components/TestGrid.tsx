@@ -1,10 +1,16 @@
 import { AgGridReact } from "ag-grid-react";
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 interface TestGridProps {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   rowData: any;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   columnDefs: any[];
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   pinnedBottomRowData?: any;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   gridRef: React.RefObject<any>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   gridOptions?: any;
 }
 

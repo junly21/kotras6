@@ -1,19 +1,8 @@
 import { z } from "zod";
-import type { FieldConfig } from "@/types/filterForm";
+import { settlementByInstitutionFields } from "./fields";
 
-// 필터 스키마
 export const settlementByInstitutionSchema = z.object({
-  agency: z.string().min(1, "기관을 선택해주세요"),
+  agency: z.string().optional(),
 });
 
-// 필터 필드 설정
-export const settlementByInstitutionFields: FieldConfig[] = [
-  {
-    name: "agency",
-    label: "기관명",
-    type: "select",
-    required: true,
-    placeholder: "기관을 선택하세요",
-    optionsEndpoint: "/api/common/agencies",
-  },
-];
+export { settlementByInstitutionFields };

@@ -19,6 +19,7 @@ import {
 } from "@/features/settlementByInstitution/filterConfig";
 import { UnitRadioGroup, type Unit } from "@/components/ui/UnitRadioGroup";
 import { useUnitConversion } from "@/hooks/useUnitConversion";
+import { InstitutionChart } from "@/components/charts/InstitutionChart";
 
 // Register all Community features
 ModuleRegistry.registerModules([AllCommunityModule]);
@@ -206,12 +207,15 @@ export default function SettlementByInstitutionPage() {
                   </p>
                 </div>
               </div>
+            ) : hasSearched && apiData && apiData.length > 0 ? (
+              <div className="h-full w-full">
+                <InstitutionChart data={apiData} unit={unit} />
+              </div>
             ) : (
               <div className="h-full flex items-center justify-center bg-gray-50 border-2 border-dashed border-gray-300 rounded">
                 <div className="text-center text-gray-500">
-                  <p className="text-lg font-medium">차트 영역</p>
-                  <p className="text-sm">여기에 차트가 들어갈 예정입니다.</p>
-                  <p className="text-sm">차트 라이브러리 선택 후 구현 예정</p>
+                  <p className="text-lg font-medium">데이터가 없습니다</p>
+                  <p className="text-sm">조회된 데이터가 없습니다.</p>
                 </div>
               </div>
             )}

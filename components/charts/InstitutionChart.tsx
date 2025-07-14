@@ -9,6 +9,7 @@ import {
   Tooltip,
   ResponsiveContainer,
   Legend,
+  Cell,
 } from "recharts";
 import { SettlementByInstitutionData } from "@/types/settlementByInstitution";
 import { Unit } from "@/components/ui/UnitRadioGroup";
@@ -19,58 +20,76 @@ interface Props {
 }
 
 export function InstitutionChart({ data, unit }: Props) {
-  // 데이터가 없으면 빈 div 반환
-  if (!data || data.length === 0) {
-    return (
-      <div className="h-full flex items-center justify-center bg-gray-50 border-2 border-dashed border-gray-300 rounded">
-        <div className="text-center text-gray-500">
-          <p className="text-lg font-medium">차트 데이터가 없습니다</p>
-        </div>
-      </div>
-    );
-  }
-
-  // 데이터 디버깅
-  console.log("InstitutionChart - 원본 데이터:", data);
-
-  // 차트용 데이터 변환 - 단순화
-  const chartData = data.map((item) => ({
-    name: item.oper_nm,
-    지급: Number(item.payment_amount),
-    수급: Number(item.receipt_amount),
-  }));
-
-  console.log("InstitutionChart - 변환된 차트 데이터:", chartData);
-
-  // 단위별 포맷터 함수
-  const formatValue = (value: number) => {
-    if (unit === "원") {
-      return value.toLocaleString() + "원";
-    } else {
-      return value.toLocaleString() + unit;
+  // 차액만 표시: 지급 > 수급이면 음수, 수급 > 지급이면 양수
+  const chartData = data.map((item) => {
+    const payment = Number(item.payment_amount);
+    const receipt = Number(item.receipt_amount);
+    let value = 0;
+    let type: "지급" | "수급" = "지급";
+    if (receipt > payment) {
+      value = receipt - payment; // 오른쪽(양수)
+      type = "수급";
+    } else if (payment > receipt) {
+      value = -(payment - receipt); // 왼쪽(음수)
+      type = "지급";
     }
-  };
+    return {
+      name: item.oper_nm,
+      value,
+      type,
+    };
+  });
 
-  // 툴팁 포맷터
-  const tooltipFormatter = (value: number, name: string) => {
-    return [formatValue(value), name];
+  // 최대 절대값 계산 (0이면 1로 방어)
+  const maxAbs = Math.max(1, ...chartData.map((item) => Math.abs(item.value)));
+
+  const formatValue = (value: number) => {
+    if (unit === "원") return value.toLocaleString() + "원";
+    return value.toLocaleString() + unit;
   };
 
   return (
-    <div className="h-full w-full">
-      <ResponsiveContainer width="100%" height="100%">
-        <BarChart
-          data={chartData}
-          margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
-          <CartesianGrid strokeDasharray="3 3" />
-          <XAxis dataKey="name" />
-          <YAxis tickFormatter={(value) => formatValue(value)} />
-          <Tooltip formatter={tooltipFormatter} />
-          <Legend />
-          <Bar dataKey="지급" fill="#8884d8" isAnimationActive={false} />
-          <Bar dataKey="수급" fill="#82ca9d" isAnimationActive={false} />
-        </BarChart>
-      </ResponsiveContainer>
-    </div>
+    <ResponsiveContainer width="100%" height="100%">
+      <BarChart
+        data={chartData}
+        layout="vertical"
+        margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+        <CartesianGrid strokeDasharray="3 3" />
+        <XAxis
+          type="number"
+          domain={[-maxAbs, maxAbs]}
+          tickFormatter={(v) => formatValue(Math.abs(v))}
+        />
+        <YAxis
+          type="category"
+          dataKey="name"
+          width={150}
+          tick={{ fontSize: 12 }}
+        />
+        <Tooltip
+          formatter={(
+            v: number,
+            n: string,
+            p: { payload?: { type?: "지급" | "수급" } }
+          ) => [formatValue(Math.abs(v)), p?.payload?.type ?? ""]}
+          labelFormatter={(label) => `기관: ${label}`}
+        />
+        <Legend />
+        <Bar
+          dataKey="value"
+          name="정산 차액"
+          isAnimationActive={false}
+          barSize={10} // 굵기를 절반으로 줄임 (기존 20에서 10으로)
+          radius={[0, 5, 5, 0]} // 막대 끝을 둥글게
+        >
+          {chartData.map((entry, idx) => (
+            <Cell
+              key={`cell-${idx}`}
+              fill={entry.value < 0 ? "#3b82f6" : "#ef4444"} // 왼쪽(음수)은 파란색, 오른쪽(양수)은 빨간색
+            />
+          ))}
+        </Bar>
+      </BarChart>
+    </ResponsiveContainer>
   );
 }

@@ -13,6 +13,7 @@ import { DetailCodeService } from "@/services/detailCodeService";
 import { CommonCodeData } from "@/types/commonCode";
 import { DetailCodeData, DetailCodeFormData } from "@/types/detailCode";
 import { DetailCodeModal } from "@/components/DetailCodeModal";
+import { validateDetailCodeDeletion } from "@/utils/validation";
 
 // Register all Community features
 ModuleRegistry.registerModules([AllCommunityModule]);
@@ -232,9 +233,11 @@ export default function SettingsDetailCodesPage() {
 
     const selectedRow = selectedDetailCodes[0];
 
-    // 시스템코드가 Y인 항목 체크
-    if (selectedRow.syscd_yn === "Y") {
-      alert("시스템 코드는 삭제할 수 없습니다.");
+    // 삭제 가능 여부 검증
+    const validation = validateDetailCodeDeletion(selectedRow);
+
+    if (!validation.canDelete) {
+      alert(validation.reason);
       return;
     }
 

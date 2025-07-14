@@ -11,6 +11,7 @@ import { useApi } from "@/hooks/useApi";
 import { CommonCodeService } from "@/services/commonCodeService";
 import { CommonCodeData, CommonCodeFormData } from "@/types/commonCode";
 import { CommonCodeModal } from "@/components/CommonCodeModal";
+import { validateCommonCodeDeletion } from "@/utils/validation";
 
 // Register all Community features
 ModuleRegistry.registerModules([AllCommunityModule]);
@@ -178,23 +179,41 @@ export default function SettingsCommonCodesPage() {
 
     const selectedRow = selectedRows[0];
 
-    // 시스템코드가 Y인 항목 체크
-    if (selectedRow.syscd_yn === "Y") {
-      alert("시스템 코드는 삭제할 수 없습니다.");
-      return;
-    }
-
-    if (
-      !confirm(
-        `"${
-          selectedRow.common_code_name || selectedRow.common_code
-        }" 항목을 삭제하시겠습니까?`
-      )
-    ) {
-      return;
-    }
-
     try {
+      // 상세코드 존재 여부 확인
+      const detailCodeResponse = await CommonCodeService.checkDetailCodesExist(
+        selectedRow.common_code
+      );
+
+      if (detailCodeResponse.success && detailCodeResponse.data) {
+        const { hasDetailCodes } = detailCodeResponse.data;
+
+        // 삭제 가능 여부 검증
+        const validation = validateCommonCodeDeletion(
+          selectedRow,
+          hasDetailCodes
+        );
+
+        if (!validation.canDelete) {
+          alert(validation.reason);
+          return;
+        }
+      } else {
+        console.error("상세코드 존재 여부 확인 실패");
+        alert("상세코드 존재 여부를 확인할 수 없습니다.");
+        return;
+      }
+
+      if (
+        !confirm(
+          `"${
+            selectedRow.common_code_name || selectedRow.common_code
+          }" 항목을 삭제하시겠습니까?`
+        )
+      ) {
+        return;
+      }
+
       await CommonCodeService.deleteCommonCode({
         COMMON_CODE: selectedRow.common_code,
       });

@@ -3,7 +3,7 @@ import { callExternalApi, createCorsHeaders } from "../../utils/externalApi";
 
 export async function GET() {
   try {
-    console.log("기관 목록 API 호출됨");
+    console.log("공통 기관 목록 API 호출됨");
 
     const { data } = await callExternalApi("getSelectBox.do", {
       method: "POST",
@@ -23,7 +23,7 @@ export async function GET() {
       { headers: createCorsHeaders() }
     );
   } catch (error) {
-    console.error("기관 목록 API 처리 중 오류 발생:", error);
+    console.error("공통 기관 목록 API 처리 중 오류 발생:", error);
     // 에러 발생 시에도 "전체" 옵션만 포함하여 반환
     return NextResponse.json(
       {

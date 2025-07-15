@@ -1,5 +1,5 @@
 import { ApiClient } from "./apiClient";
-import { NetworkMapFilters, NetworkMapData } from "@/types/networkMap";
+import { NetworkMapFilters, NodeData, LineData } from "@/types/networkMap";
 
 export interface ApiResponse<T> {
   success: boolean;
@@ -96,8 +96,11 @@ export class NetworkMapService {
   // 네트워크 지도 데이터 조회
   static async getMapData(
     filters: NetworkMapFilters & { networkLabel: string }
-  ): Promise<ApiResponse<NetworkMapData[]>> {
-    return ApiClient.post<NetworkMapData[]>("/network/map/data", filters);
+  ): Promise<ApiResponse<{ nodeData: NodeData[]; lineData: LineData[] }>> {
+    return ApiClient.post<{ nodeData: NodeData[]; lineData: LineData[] }>(
+      "/network/map/data",
+      filters
+    );
   }
 
   // 네트워크 노드 목록 조회

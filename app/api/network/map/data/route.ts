@@ -27,6 +27,7 @@ export async function POST(request: NextRequest) {
         },
       }
     );
+    console.log("[selectNetWorkNodeList.do] nodeData:", nodeData);
 
     // 외부 API에 POST 요청 (노선 상세 목록)
     const { data: lineData } = await callExternalApi(

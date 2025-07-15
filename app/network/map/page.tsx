@@ -24,6 +24,7 @@ import { Style, Stroke, Circle as CircleStyle, Fill } from "ol/style";
 export default function NetworkMapPage() {
   const [filters, setFilters] = useState<NetworkMapFilters>({
     network: "",
+    agency: "",
     line: "",
   });
 
@@ -41,8 +42,11 @@ export default function NetworkMapPage() {
     type: "info",
   });
 
-  // 네트워크/노선 옵션 상태
+  // 네트워크/노선/기관 옵션 상태
   const [networkOptions, setNetworkOptions] = useState<
+    Array<{ value: string; label: string }>
+  >([]);
+  const [agencyOptions, setAgencyOptions] = useState<
     Array<{ value: string; label: string }>
   >([]);
   const [lineOptions, setLineOptions] = useState<
@@ -64,6 +68,15 @@ export default function NetworkMapPage() {
             label: String(option.label),
           }));
           setNetworkOptions(options);
+          // 네트워크 옵션 받아오면 첫 번째 값 자동 설정
+          if (options.length > 0) {
+            setFilters((prev) => ({
+              ...prev,
+              network: options[0].value,
+              agency: "",
+              line: "",
+            }));
+          }
         } else {
           setNetworkOptions([]);
           setToast({
@@ -83,12 +96,37 @@ export default function NetworkMapPage() {
       });
   }, []);
 
+  // 기관명(agency) 목록 로드
+  useEffect(() => {
+    // 네트워크가 선택된 경우에만 기관명 목록 요청
+    if (filters.network) {
+      fetch("/api/common/agencies")
+        .then((res) => res.json())
+        .then((data) => {
+          const options: { value: string; label: string }[] = Array.isArray(
+            data.options
+          )
+            ? data.options.map((option: { value: string; label: string }) => ({
+                value: String(option.value),
+                label: String(option.label),
+              }))
+            : [];
+          setAgencyOptions(options);
+        })
+        .catch(() => setAgencyOptions([]));
+    } else {
+      setAgencyOptions([]);
+    }
+  }, [filters.network]);
+
   // 네트워크 선택 시 노선 목록 로드 (의존성 분리)
   useEffect(() => {
-    if (filters.network) {
+    // 네트워크, 기관명 모두 선택된 경우에만 노선 목록 요청
+    if (filters.network && filters.agency) {
       NetworkMapService.getLineList({
         network: filters.network,
-        networkLabel: "서울교통공사", // 임시 하드코딩
+        networkLabel:
+          agencyOptions.find((a) => a.value === filters.agency)?.label || "",
       })
         .then((res) => {
           if (res.success) {
@@ -120,22 +158,26 @@ export default function NetworkMapPage() {
     } else {
       setLineOptions([]);
     }
-  }, [filters.network]);
+  }, [filters.network, filters.agency, agencyOptions]);
 
   // 지도 데이터 요청 useCallback
   const apiCall = useCallback(() => {
-    const networkLabel = "서울교통공사"; // 임시 하드코딩
+    // agencyOptions에서 현재 선택된 agency의 label을 찾음
+    const agencyLabel =
+      agencyOptions.find((a) => a.value === filters.agency)?.label || "";
     console.log("지도 데이터 요청", {
       network: filters.network,
+      agency: filters.agency,
       line: filters.line,
-      networkLabel,
+      networkLabel: agencyLabel,
     });
     return NetworkMapService.getMapData({
       network: filters.network,
+      agency: filters.agency,
       line: filters.line,
-      networkLabel,
+      networkLabel: agencyLabel,
     });
-  }, [filters]);
+  }, [filters, agencyOptions]);
 
   // 지도 데이터 조회 성공 시 점/선 그리기
   const onSuccess = useCallback(
@@ -274,15 +316,23 @@ export default function NetworkMapPage() {
             required: true,
           },
           {
+            name: "agency",
+            label: "기관명",
+            type: "select",
+            options: agencyOptions,
+            required: true,
+            disabled: !filters.network,
+          },
+          {
             name: "line",
             label: "노선",
             type: "select",
             options: lineOptions,
             required: false,
-            disabled: !filters.network,
+            disabled: !filters.network || !filters.agency,
           },
         ]}
-        defaultValues={{ network: "", line: "" }}
+        defaultValues={{ network: "", agency: "", line: "" }}
         values={filters}
         onChange={setFilters}
         onSearch={handleSearch}

@@ -1,6 +1,7 @@
 // 네트워크 지도 필터 타입
 export interface NetworkMapFilters {
   network: string; // 네트워크명
+  agency: string; // 기관명
   line: string; // 노선
 }
 

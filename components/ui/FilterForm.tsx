@@ -35,6 +35,9 @@ interface FilterFormProps<T extends FieldValues> {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   onSearch: (values: any) => void;
   className?: string;
+  // 컨트롤드 패턴 지원
+  values?: T;
+  onChange?: (values: T) => void;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -44,6 +47,8 @@ export function FilterForm<T extends FieldValues>({
   schema,
   onSearch,
   className,
+  values,
+  onChange,
 }: FilterFormProps<T>) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const form = useForm<any>({
@@ -54,6 +59,26 @@ export function FilterForm<T extends FieldValues>({
   const [dynamicOptions, setDynamicOptions] = useState<
     Record<string, FieldOption[]>
   >({});
+
+  // 컨트롤드 패턴: 외부 values가 바뀌면 내부 폼 값도 동기화
+  useEffect(() => {
+    if (values) {
+      Object.entries(values).forEach(([key, value]) => {
+        form.setValue(key, value);
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [values && JSON.stringify(values)]);
+
+  // 컨트롤드 패턴: 내부 값이 바뀌면 onChange 호출
+  useEffect(() => {
+    if (onChange) {
+      const subscription = form.watch((allValues) => {
+        onChange(allValues as T);
+      });
+      return () => subscription.unsubscribe();
+    }
+  }, [form, onChange]);
 
   useEffect(() => {
     fields.forEach((f) => {

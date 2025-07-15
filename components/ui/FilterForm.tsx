@@ -26,6 +26,7 @@ import {
   SelectItem,
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
+import { ComboBox } from "@/components/ui/ComboBox";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 interface FilterFormProps<T extends FieldValues> {
@@ -121,38 +122,50 @@ export function FilterForm<T extends FieldValues>({
                     {f.required && <span className="text-red-500">*</span>}
                   </FormLabel>
 
-                  {["text", "date", "select"].includes(f.type) && (
+                  {f.type === "combobox" ? (
                     <FormControl>
-                      {f.type === "text" ? (
-                        <Input
-                          {...field}
-                          placeholder={f.placeholder}
-                          disabled={f.disabled}
-                        />
-                      ) : f.type === "date" ? (
-                        <Input type="date" {...field} disabled={f.disabled} />
-                      ) : (
-                        <Select
-                          onValueChange={field.onChange}
-                          value={field.value}
-                          disabled={f.disabled}>
-                          <SelectTrigger className="w-36">
-                            <SelectValue
-                              placeholder={f.placeholder || "선택"}
-                            />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {options.map((opt) => (
-                              <SelectItem
-                                key={opt.value}
-                                value={String(opt.value)}>
-                                {opt.label}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      )}
+                      <ComboBox
+                        options={options}
+                        value={field.value}
+                        onChange={field.onChange}
+                        placeholder={f.placeholder}
+                        disabled={f.disabled}
+                      />
                     </FormControl>
+                  ) : (
+                    ["text", "date", "select"].includes(f.type) && (
+                      <FormControl>
+                        {f.type === "text" ? (
+                          <Input
+                            {...field}
+                            placeholder={f.placeholder}
+                            disabled={f.disabled}
+                          />
+                        ) : f.type === "date" ? (
+                          <Input type="date" {...field} disabled={f.disabled} />
+                        ) : (
+                          <Select
+                            onValueChange={field.onChange}
+                            value={field.value}
+                            disabled={f.disabled}>
+                            <SelectTrigger className="w-36">
+                              <SelectValue
+                                placeholder={f.placeholder || "선택"}
+                              />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {options.map((opt) => (
+                                <SelectItem
+                                  key={opt.value}
+                                  value={String(opt.value)}>
+                                  {opt.label}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        )}
+                      </FormControl>
+                    )
                   )}
 
                   <FormMessage />

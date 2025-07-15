@@ -123,10 +123,12 @@ export default function NetworkMapPage() {
   useEffect(() => {
     // 네트워크, 기관명 모두 선택된 경우에만 노선 목록 요청
     if (filters.network && filters.agency) {
+      const agencyLabelRaw =
+        agencyOptions.find((a) => a.value === filters.agency)?.label || "";
+      const agencyLabel = agencyLabelRaw === "전체" ? "ALL" : agencyLabelRaw;
       NetworkMapService.getLineList({
         network: filters.network,
-        networkLabel:
-          agencyOptions.find((a) => a.value === filters.agency)?.label || "",
+        networkLabel: agencyLabel,
       })
         .then((res) => {
           if (res.success) {
@@ -163,8 +165,9 @@ export default function NetworkMapPage() {
   // 지도 데이터 요청 useCallback
   const apiCall = useCallback(() => {
     // agencyOptions에서 현재 선택된 agency의 label을 찾음
-    const agencyLabel =
+    const agencyLabelRaw =
       agencyOptions.find((a) => a.value === filters.agency)?.label || "";
+    const agencyLabel = agencyLabelRaw === "전체" ? "ALL" : agencyLabelRaw;
     console.log("지도 데이터 요청", {
       network: filters.network,
       agency: filters.agency,
@@ -301,6 +304,10 @@ export default function NetworkMapPage() {
     };
   }, []);
 
+  // 기관명이 전체인지 여부
+  const isAllAgency =
+    agencyOptions.find((a) => a.value === filters.agency)?.label === "전체";
+
   return (
     <div className="p-6 space-y-6">
       <h1 className="text-2xl font-bold">지도 조회</h1>
@@ -326,7 +333,7 @@ export default function NetworkMapPage() {
           {
             name: "line",
             label: "노선",
-            type: "select",
+            type: isAllAgency ? "combobox" : "select",
             options: lineOptions,
             required: false,
             disabled: !filters.network || !filters.agency,

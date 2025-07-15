@@ -3,7 +3,8 @@ export type FieldType =
   | "date"
   | "daterange"
   | "select"
-  | "autocomplete";
+  | "autocomplete"
+  | "combobox";
 
 export interface FieldOption {
   label: string;

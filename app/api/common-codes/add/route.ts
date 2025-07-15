@@ -7,7 +7,7 @@ export async function POST(request: NextRequest) {
     console.log("공통코드 등록 API 호출됨");
     console.log("Body:", body);
 
-    const { data } = await callExternalApi("addCommonCode.do", {
+    const { data } = await callExternalApi("insertCommonCode.do", {
       method: "POST",
       body,
     });

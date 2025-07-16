@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef } from "react";
+import { parse, type INode } from "svgson";
 import {
   Tooltip,
   TooltipTrigger,
@@ -33,23 +34,13 @@ interface Link {
 export default function NetworkLinePage() {
   const [nodes, setNodes] = useState<Node[]>([]);
   const [links, setLinks] = useState<Link[]>([]);
-  const [selectedNode] = useState<Node | null>(null);
-  const [selectedLink] = useState<Link | null>(null);
-  const [svgContent, setSvgContent] = useState<string>("");
+  const [svgReactTree, setSvgReactTree] = useState<React.ReactNode>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [scale, setScale] = useState(1);
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
   const [pan, setPan] = useState({ x: 0, y: 0 });
   const svgContainerRef = useRef<HTMLDivElement>(null);
-  const [hoveredNode, setHoveredNode] = useState<Node | null>(null);
-  const [tooltipMode, setTooltipMode] = useState<"preview" | "detail">(
-    "preview"
-  );
-  const [tooltipPosition, setTooltipPosition] = useState<{
-    x: number;
-    y: number;
-  } | null>(null);
 
   useEffect(() => {
     const loadData = async () => {
@@ -60,116 +51,23 @@ export default function NetworkLinePage() {
           fetch("/links.json"),
           fetch("/노선도.svg"),
         ]);
-
         const nodesText = await nodesResponse.text();
         const cleanedNodesText = nodesText.replace(/:\s*NaN/g, ": null");
         const nodesData = JSON.parse(cleanedNodesText);
         const linksData = await linksResponse.json();
         const svgText = await svgResponse.text();
-
-        const parser = new DOMParser();
-        const svgDoc = parser.parseFromString(svgText, "image/svg+xml");
-        const svgElement = svgDoc.querySelector("svg");
-
-        if (svgElement) {
-          // 1. 올바른 스케일링: viewBox는 유지하고, width/height로 크기 조절
-          svgElement.setAttribute("width", "100%");
-          svgElement.setAttribute("height", "100%");
-
-          // 실제 SVG에서 노드(circle) 위치 파악
-          const actualNodePositions: {
-            [key: string]: { cx: number; cy: number };
-          } = {};
-          const circles = svgElement.querySelectorAll("circle");
-          circles.forEach((circle) => {
-            const id = circle.getAttribute("id");
-            if (id) {
-              actualNodePositions[id] = {
-                cx: parseFloat(circle.getAttribute("cx") || "0"),
-                cy: parseFloat(circle.getAttribute("cy") || "0"),
-              };
-            }
-          });
-
-          // 2. 안정적인 DOM 조작으로 클래스 추가
-          svgElement.querySelectorAll("circle").forEach((circle) => {
-            circle.setAttribute(
-              "class",
-              "hover:fill-blue-300 transition-colors cursor-pointer"
-            );
-          });
-          svgElement.querySelectorAll("line").forEach((line) => {
-            line.setAttribute(
-              "class",
-              "hover:stroke-blue-600 transition-colors cursor-pointer"
-            );
-          });
-
-          // 3. 역 이름 텍스트를 올바른 위치에 추가
-          const mainGroup = svgElement.querySelector("g"); // 모든 요소가 담긴 <g> 태그 찾기
-
-          nodesData.forEach((node: Node) => {
-            const position = actualNodePositions[node.id];
-            if (position && mainGroup) {
-              const stationName = node.name.split("_")[1] || node.name;
-
-              // 4. 원본 좌표계 사용 (수동 스케일링 제거)
-              const textX = position.cx + 40;
-              const textY = position.cy + 40;
-              const fontSize = 60; // 원본 좌표계 기준 폰트 크기
-
-              const textElement = svgDoc.createElementNS(
-                "http://www.w3.org/2000/svg",
-                "text"
-              );
-              textElement.setAttribute("x", textX.toString());
-              textElement.setAttribute("y", textY.toString());
-              textElement.setAttribute("font-size", fontSize.toString());
-              textElement.setAttribute("font-family", "Arial, sans-serif");
-              textElement.setAttribute("fill", "#374151");
-              textElement.setAttribute("pointer-events", "none");
-              textElement.setAttribute("dominant-baseline", "hanging");
-              textElement.textContent = stationName;
-
-              // 텍스트 배경 추가
-              const textBg = svgDoc.createElementNS(
-                "http://www.w3.org/2000/svg",
-                "rect"
-              );
-              const textWidth = stationName.length * (fontSize * 0.6); // 대략적인 너비 계산
-              const textHeight = fontSize * 1.2;
-
-              textBg.setAttribute("x", (textX - 2).toString());
-              textBg.setAttribute("y", (textY - 2).toString());
-              textBg.setAttribute("width", (textWidth + 4).toString());
-              textBg.setAttribute("height", textHeight.toString());
-              textBg.setAttribute("fill", "white");
-              textBg.setAttribute("opacity", "0.75");
-              textBg.setAttribute("rx", "2");
-              textBg.setAttribute("pointer-events", "none");
-
-              // 5. <g> 그룹에 요소 추가
-              mainGroup.appendChild(textBg);
-              mainGroup.appendChild(textElement);
-            }
-          });
-
-          // 6. 수정된 svgElement를 다시 문자열로 변환
-          const finalSvgText = new XMLSerializer().serializeToString(
-            svgElement
-          );
-          setSvgContent(finalSvgText);
-        }
-
+        // svgson 파싱
+        const svgJson = await parse(svgText);
         setNodes(nodesData);
         setLinks(linksData);
+        // svgson -> React 변환
+        setSvgReactTree(renderSvgNode(svgJson, nodesData, linksData));
       } catch (error) {
         console.error("데이터 로드 실패:", error);
       } finally {
         setIsLoading(false);
       }
     };
-
     loadData();
   }, []);
 
@@ -193,38 +91,17 @@ export default function NetworkLinePage() {
               svgElement!.style.cursor = "pointer";
               const node = nodes.find((n) => n.id === el.id);
               if (node) {
-                setHoveredNode(node);
-                setTooltipMode("preview");
+                // setHoveredNode(node); // Removed
+                // setTooltipMode("preview"); // Removed
                 // SVG 좌표를 브라우저 좌표로 변환
-                const rect = svgElement!.getBoundingClientRect();
-                const cx = parseFloat(
-                  (el as SVGCircleElement).getAttribute("cx") || "0"
-                );
-                const cy = parseFloat(
-                  (el as SVGCircleElement).getAttribute("cy") || "0"
-                );
-                // viewBox 기준 변환
-                const viewBox = svgElement!.getAttribute("viewBox");
-                let x = cx,
-                  y = cy;
-                if (viewBox) {
-                  const [vbX, vbY, vbW, vbH] = viewBox.split(" ").map(Number);
-                  const width = rect.width;
-                  const height = rect.height;
-                  x = ((cx - vbX) / vbW) * width + rect.left;
-                  y = ((cy - vbY) / vbH) * height + rect.top;
-                } else {
-                  x = rect.left + cx;
-                  y = rect.top + cy;
-                }
-                setTooltipPosition({ x, y });
+                // setTooltipPosition({ x, y }); // Removed
               }
             }
           });
           circle.addEventListener("mouseleave", () => {
-            setHoveredNode(null);
-            setTooltipMode("preview");
-            setTooltipPosition(null);
+            // setHoveredNode(null); // Removed
+            // setTooltipMode("preview"); // Removed
+            // setTooltipPosition(null); // Removed
             svgElement!.style.cursor = "default";
           });
         });
@@ -232,16 +109,16 @@ export default function NetworkLinePage() {
         svgElement.addEventListener("mousemove", (e: Event) => {
           const el = e.target as Element;
           if (el.tagName !== "circle") {
-            setHoveredNode(null);
-            setTooltipMode("preview");
-            setTooltipPosition(null);
+            // setHoveredNode(null); // Removed
+            // setTooltipMode("preview"); // Removed
+            // setTooltipPosition(null); // Removed
             svgElement!.style.cursor = "default";
           }
         });
         svgElement.addEventListener("mouseleave", () => {
-          setHoveredNode(null);
-          setTooltipMode("preview");
-          setTooltipPosition(null);
+          // setHoveredNode(null); // Removed
+          // setTooltipMode("preview"); // Removed
+          // setTooltipPosition(null); // Removed
           svgElement!.style.cursor = "default";
         });
       }
@@ -266,29 +143,14 @@ export default function NetworkLinePage() {
       }
       if (observer) observer.disconnect();
     };
-  }, [svgContent, nodes, links]);
+  }, [svgReactTree, nodes, links]);
 
-  // Wheel 이벤트 리스너 추가
-  useEffect(() => {
-    const containerElement = svgContainerRef.current?.parentElement;
-    if (containerElement) {
-      const handleWheel = (e: WheelEvent) => {
-        e.preventDefault();
-        const delta = e.deltaY > 0 ? -1 : 1;
-        setScale((prev) => Math.max(0.1, Math.min(5, prev + delta * 0.1)));
-      };
-      // 맥 트랙패드 제스처 지원 (선택사항)
-      // ... gesture event handlers ...
-      containerElement.addEventListener("wheel", handleWheel, {
-        passive: false,
-      });
-      return () => containerElement.removeEventListener("wheel", handleWheel);
+  // Wheel 이벤트 핸들러 (useEffect 제거)
+  const handleWheel = (e: React.WheelEvent) => {
+    if (e.ctrlKey || Math.abs(e.deltaY) > Math.abs(e.deltaX)) {
+      const delta = e.deltaY > 0 ? -1 : 1;
+      setScale((prev) => Math.max(0.1, Math.min(5, prev + delta * 0.1)));
     }
-  }, []); // scale을 의존성 배열에서 제거하여 무한 루프 방지
-
-  // 확대/축소 핸들러
-  const handleZoom = (delta: number) => {
-    setScale((prev) => Math.max(0.1, Math.min(5, prev + delta * 0.1)));
   };
 
   // 드래그 시작
@@ -320,6 +182,119 @@ export default function NetworkLinePage() {
     setScale(1);
     setPan({ x: 0, y: 0 });
   };
+
+  // 확대/축소 핸들러 복원
+  const handleZoom = (delta: number) => {
+    setScale((prev) => Math.max(0.1, Math.min(5, prev + delta * 0.1)));
+  };
+
+  // SVG 속성 camelCase 변환 함수
+  function toCamelCaseAttrs(attrs: Record<string, string>) {
+    const map: Record<string, string> = {
+      "stroke-width": "strokeWidth",
+      "stroke-linecap": "strokeLinecap",
+      "stroke-linejoin": "strokeLinejoin",
+      "fill-opacity": "fillOpacity",
+      "font-size": "fontSize",
+      // 필요한 속성 추가
+    };
+    return Object.fromEntries(
+      Object.entries(attrs).map(([k, v]) => [map[k] || k, v])
+    );
+  }
+
+  function renderSvgNode(
+    node: INode,
+    nodesData: Node[],
+    linksData: Link[],
+    key?: string
+  ): React.ReactNode {
+    // circle(노드)
+    if (node.name === "circle") {
+      const { id, ...rest } = node.attributes;
+      const nodeData = nodesData.find((n) => n.id === id);
+      // cx, cy 추출 (string to number)
+      const cx = rest.cx ? Number(rest.cx) : 0;
+      const cy = rest.cy ? Number(rest.cy) : 0;
+      const fontSize = 32; // 적당한 폰트 크기
+      const offset = 40; // 원 우하단으로 약간 띄우기
+      return (
+        <g key={key || id}>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <circle
+                {...toCamelCaseAttrs(rest)}
+                id={id}
+                style={{ cursor: "pointer" }}
+              />
+            </TooltipTrigger>
+            <TooltipContent style={{ background: "white", color: "black" }}>
+              {nodeData ? (
+                <div>
+                  <div
+                    style={{
+                      fontWeight: 700,
+                      color: "#2563eb",
+                      marginBottom: 8,
+                    }}>
+                    역 정보
+                  </div>
+                  <div style={{ fontSize: 14, lineHeight: 1.7 }}>
+                    <div>
+                      <b>역명:</b> {nodeData.name}
+                    </div>
+                    <div>
+                      <b>노선:</b> {nodeData.line}
+                    </div>
+                    <div>
+                      <b>운영사:</b> {nodeData.operator}
+                    </div>
+                    <div>
+                      <b>개통일:</b> {nodeData.open_date}
+                    </div>
+                    <div>
+                      <b>환승역:</b>{" "}
+                      {nodeData.is_transfer >= 2 ? "환승역" : "일반역"}
+                    </div>
+                    <div>
+                      <b>평균 체류시간:</b> {nodeData.avg_stay_sec_new}초
+                    </div>
+                  </div>
+                </div>
+              ) : null}
+            </TooltipContent>
+          </Tooltip>
+          {/* 역명 표시 */}
+          {nodeData && (
+            <text
+              x={cx + offset}
+              y={cy + offset}
+              fontSize={fontSize}
+              fontFamily="Arial, sans-serif"
+              fill="#374151"
+              pointerEvents="none"
+              dominantBaseline="hanging">
+              {nodeData.name.split("_")[1] || nodeData.name}
+            </text>
+          )}
+        </g>
+      );
+    }
+    // line(링크)
+    if (node.name === "line") {
+      const { id, ...rest } = node.attributes;
+      // 추후 Tooltip 등 추가 가능
+      return <line key={key || id} {...toCamelCaseAttrs(rest)} />;
+    }
+    // 기타 태그
+    return React.createElement(
+      node.name,
+      { ...toCamelCaseAttrs(node.attributes), key: key || node.attributes.id },
+      node.children?.map((child: INode, i) =>
+        renderSvgNode(child, nodesData, linksData, `${node.name}-${i}`)
+      )
+    );
+  }
 
   if (isLoading) {
     return (
@@ -366,165 +341,24 @@ export default function NetworkLinePage() {
             onMouseDown={handleMouseDown}
             onMouseMove={handleMouseMove}
             onMouseUp={handleMouseUp}
-            onMouseLeave={handleMouseLeave}>
-            <div
-              ref={svgContainerRef}
-              className="cursor-grab active:cursor-grabbing"
-              style={{
-                transform: `translate(${pan.x}px, ${pan.y}px) scale(${scale})`,
-                transformOrigin: "center center",
-                transition: isDragging ? "none" : "transform 0.1s ease-out",
-                width: "100%",
-                height: "100%",
-              }}
-              dangerouslySetInnerHTML={{ __html: svgContent }}
-            />
-            {/* 툴팁 렌더링 */}
-            {hoveredNode && tooltipPosition && (
-              <Tooltip
-                open={!!hoveredNode}
-                onOpenChange={(open) => {
-                  if (!open) {
-                    setHoveredNode(null);
-                    setTooltipMode("preview");
-                    setTooltipPosition(null);
-                  }
-                }}>
-                <TooltipTrigger asChild>
-                  <div
-                    style={{
-                      position: "fixed",
-                      left: tooltipPosition.x + 16,
-                      top: tooltipPosition.y + 16,
-                      zIndex: 1000,
-                      width: 1,
-                      height: 1,
-                    }}
-                  />
-                </TooltipTrigger>
-                <TooltipContent
-                  side="right"
-                  sideOffset={8}
-                  onClick={
-                    tooltipMode === "preview"
-                      ? () => setTooltipMode("detail")
-                      : undefined
-                  }
-                  onMouseLeave={() => {
-                    setHoveredNode(null);
-                    setTooltipMode("preview");
-                    setTooltipPosition(null);
-                  }}
-                  style={{
-                    cursor: tooltipMode === "preview" ? "pointer" : "default",
-                  }}>
-                  {tooltipMode === "preview" ? (
-                    <span style={{ color: "#2563eb", fontWeight: 600 }}>
-                      역정보보기
-                    </span>
-                  ) : (
-                    <div>
-                      <div
-                        style={{
-                          fontWeight: 700,
-                          color: "#2563eb",
-                          marginBottom: 8,
-                        }}>
-                        역 정보
-                      </div>
-                      <div style={{ fontSize: 14, lineHeight: 1.7 }}>
-                        <div>
-                          <b>역명:</b> {hoveredNode.name}
-                        </div>
-                        <div>
-                          <b>노선:</b> {hoveredNode.line}
-                        </div>
-                        <div>
-                          <b>운영사:</b> {hoveredNode.operator}
-                        </div>
-                        <div>
-                          <b>개통일:</b> {hoveredNode.open_date}
-                        </div>
-                        <div>
-                          <b>환승역:</b>{" "}
-                          {hoveredNode.is_transfer >= 2 ? "환승역" : "일반역"}
-                        </div>
-                        <div>
-                          <b>평균 체류시간:</b> {hoveredNode.avg_stay_sec_new}초
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                </TooltipContent>
-              </Tooltip>
-            )}
+            onMouseLeave={handleMouseLeave}
+            onWheel={handleWheel}>
+            <svg
+              width="100%"
+              height="100%"
+              viewBox="0 0 2721 1747"
+              style={{ display: "block" }}>
+              <g transform={`translate(${pan.x},${pan.y}) scale(${scale})`}>
+                {svgReactTree}
+              </g>
+            </svg>
           </div>
         </div>
+        {/* 정보 패널 등 기존 UI 유지 */}
         <div className="w-80">
           <div className="bg-white border rounded-lg p-4 sticky top-6">
             <h2 className="text-lg font-semibold mb-4">선택된 정보</h2>
-            {/* 기존 selectedNode/selectedLink 정보 패널은 유지 */}
-            {selectedNode && (
-              <div className="space-y-2">
-                <h3 className="font-medium text-blue-600">역 정보</h3>
-                <div className="text-sm space-y-1">
-                  <p>
-                    <span className="font-medium">역명:</span>{" "}
-                    {selectedNode.name}
-                  </p>
-                  <p>
-                    <span className="font-medium">노선:</span>{" "}
-                    {selectedNode.line}
-                  </p>
-                  <p>
-                    <span className="font-medium">운영사:</span>{" "}
-                    {selectedNode.operator}
-                  </p>
-                  <p>
-                    <span className="font-medium">개통일:</span>{" "}
-                    {selectedNode.open_date}
-                  </p>
-                  <p>
-                    <span className="font-medium">환승역:</span>{" "}
-                    {selectedNode.is_transfer >= 2 ? "환승역" : "일반역"}
-                  </p>
-                  <p>
-                    <span className="font-medium">평균 체류시간:</span>{" "}
-                    {selectedNode.avg_stay_sec_new}초
-                  </p>
-                </div>
-              </div>
-            )}
-            {selectedLink && (
-              <div className="space-y-2">
-                <h3 className="font-medium text-green-600">구간 정보</h3>
-                <div className="text-sm space-y-1">
-                  <p>
-                    <span className="font-medium">출발역:</span>{" "}
-                    {nodes.find((n) => n.id === selectedLink.source)?.name ||
-                      selectedLink.source}
-                  </p>
-                  <p>
-                    <span className="font-medium">도착역:</span>{" "}
-                    {nodes.find((n) => n.id === selectedLink.target)?.name ||
-                      selectedLink.target}
-                  </p>
-                  <p>
-                    <span className="font-medium">노선:</span>{" "}
-                    {selectedLink.line}
-                  </p>
-                  <p>
-                    <span className="font-medium">소요시간:</span>{" "}
-                    {selectedLink.time ? `${selectedLink.time}초` : "환승 구간"}
-                  </p>
-                </div>
-              </div>
-            )}
-            {!selectedNode && !selectedLink && (
-              <p className="text-gray-500 text-sm">
-                노선도에서 역(원)이나 구간(선)을 클릭하여 정보를 확인하세요.
-              </p>
-            )}
+            {/* 추후 선택된 노드/링크 정보 표시 */}
           </div>
         </div>
       </div>

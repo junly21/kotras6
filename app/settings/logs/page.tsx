@@ -81,37 +81,47 @@ export default function SettingsLogsPage() {
   const colDefs = [
     {
       headerName: "프로세스구분",
-      field: "PROCESS_DIV",
+      field: "process_div",
       width: 150,
       resizable: true,
     },
     {
       headerName: "상세구분",
-      field: "DETAIL_DIV",
+      field: "detail_div",
       width: 200,
       resizable: true,
     },
     {
       headerName: "작업유형",
-      field: "ACTION_TYPE",
+      field: "action_type",
       width: 150,
       resizable: true,
     },
     {
       headerName: "작업일시",
-      field: "PROCESS_DTM",
+      field: "process_dtm",
       width: 200,
       resizable: true,
-      valueFormatter: (params: { value: string }) => {
+      valueFormatter: (params: { value: number }) => {
         if (!params.value) return "";
         return new Date(params.value).toLocaleString();
       },
     },
     {
       headerName: "작업구분",
-      field: "ACTION_DIV",
+      field: "action_div",
       width: 150,
       resizable: true,
+    },
+    {
+      headerName: "처리건수",
+      field: "process_cnt",
+      width: 120,
+      resizable: true,
+      valueFormatter: (params: { value: number }) => {
+        if (!params.value) return "0";
+        return params.value.toLocaleString();
+      },
     },
   ];
 

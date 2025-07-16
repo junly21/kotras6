@@ -5,7 +5,7 @@ export const settlementByInstitutionFields: FieldConfig[] = [
   {
     name: "agency",
     label: "기관명",
-    type: "combobox",
+    type: "select",
     required: true,
     placeholder: "기관을 선택하세요",
     optionsEndpoint: "/api/common/agencies",

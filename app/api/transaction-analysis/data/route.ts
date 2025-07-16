@@ -11,7 +11,7 @@ export async function POST(request: NextRequest) {
     const agency = body.params?.agency || "ALL";
     console.log("Selected agency:", agency);
 
-    const { data } = await callExternalApi("selectCntStatsList.do", {
+    const { data } = await callExternalApi("selectCntODPairStatsList.do", {
       method: "POST",
       body: {
         OPER_ID: agency,

@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from "react";
 import { parseSvg, toCamelCaseAttrs } from "./utils";
-import { TooltipContent } from "./TooltipContent";
+import { TooltipContent, TooltipContentLink } from "./TooltipContent";
 import type { Node, Link } from "./types";
 import {
   Tooltip,
@@ -16,6 +16,7 @@ interface NetworkMapProps {
   width?: number | string;
   height?: number | string;
   onNodeClick?: (node: Node) => void;
+  activeLine?: string | null;
 }
 
 export function NetworkMap({
@@ -25,6 +26,7 @@ export function NetworkMap({
   width = "100%",
   height = 800,
   onNodeClick,
+  activeLine,
 }: NetworkMapProps) {
   const [svgReactTree, setSvgReactTree] = useState<React.ReactNode>(null);
   const [scale, setScale] = useState(1);
@@ -35,11 +37,13 @@ export function NetworkMap({
 
   useEffect(() => {
     parseSvg(svgText).then((svgJson) => {
-      setSvgReactTree(renderSvgNode(svgJson, nodes, links, onNodeClick));
+      setSvgReactTree(
+        renderSvgNode(svgJson, nodes, links, onNodeClick, undefined, activeLine)
+      );
     });
-  }, [svgText, nodes, links, onNodeClick]);
+  }, [svgText, nodes, links, onNodeClick, activeLine]);
 
-  // 확대/축소/드래그 핸들러
+  // zoom & pan handlers (unchanged)...
   const handleWheel = (e: React.WheelEvent) => {
     if (e.ctrlKey || Math.abs(e.deltaY) > Math.abs(e.deltaX)) {
       const delta = e.deltaY > 0 ? -1 : 1;
@@ -69,25 +73,12 @@ export function NetworkMap({
 
   return (
     <div style={{ width, height, position: "relative", overflow: "hidden" }}>
+      {/* zoom buttons... */}
       <div className="flex gap-2 mb-2">
-        <button
-          onClick={() => handleZoom(1)}
-          className="px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors">
-          확대
-        </button>
-        <button
-          onClick={() => handleZoom(-1)}
-          className="px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors">
-          축소
-        </button>
-        <button
-          onClick={handleReset}
-          className="px-3 py-1 bg-gray-500 text-white rounded hover:bg-gray-600 transition-colors">
-          리셋
-        </button>
-        <span className="px-3 py-1 bg-gray-100 rounded text-sm">
-          확대율: {Math.round(scale * 100)}%
-        </span>
+        <button onClick={() => handleZoom(1)}>확대</button>
+        <button onClick={() => handleZoom(-1)}>축소</button>
+        <button onClick={handleReset}>리셋</button>
+        <span>확대율: {Math.round(scale * 100)}%</span>
       </div>
       <div
         style={{ width: "100%", height: "100%" }}
@@ -111,65 +102,120 @@ export function NetworkMap({
   );
 }
 
-// SVG 파싱 후 React로 변환 (툴팁/역명 포함)
+// matrix parsing & application (unchanged)
+function parseMatrix(transform: string): number[] | null {
+  const match = transform.match(/matrix\(([^)]+)\)/);
+  if (!match) return null;
+  return match[1]
+    .replace(/,/g, " ")
+    .split(/\s+/)
+    .map(Number)
+    .filter((n) => !isNaN(n));
+}
+function applyMatrixToPoint(cx: number, cy: number, m: number[]) {
+  const [a, b, c, d, e, f] = m;
+  return { x: a * cx + c * cy + e, y: b * cx + d * cy + f };
+}
+
+// **핵심: 모든 <path>를 순회하면서 id 패턴에 따라 node / link 분기**
 function renderSvgNode(
   node: INode,
   nodesData: Node[],
   linksData: Link[],
   onNodeClick?: (node: Node) => void,
-  key?: string
+  key?: string,
+  activeLine?: string | null
 ): React.ReactNode {
-  if (node.name === "circle") {
-    const { id, ...rest } = node.attributes;
+  // 1) **Node**: id 가 숫자만
+  if (node.name === "path" && /^\d+$/.test(node.attributes.id)) {
+    const id = node.attributes.id;
     const nodeData = nodesData.find((n) => n.id === id);
-    const cx = rest.cx ? Number(rest.cx) : 0;
-    const cy = rest.cy ? Number(rest.cy) : 0;
-    const fontSize = 32;
-    const offset = 40;
+    // 툴팁용 opacity 처리
+    const opacity = !activeLine || nodeData?.line === activeLine ? 1 : 0.2;
+
+    // 텍스트 위치: d 첫 번째 M 좌표를 찍어서 offset
+    let textPos = { x: 0, y: 0 };
+    const d = node.attributes.d || "";
+    const m = d.match(/M\s*([-\d.]+)[ ,]?([-\d.]+)/);
+    if (m) {
+      let [x, y] = [parseFloat(m[1]), parseFloat(m[2])];
+      if (node.attributes.transform?.includes("matrix")) {
+        const mat = parseMatrix(node.attributes.transform);
+        if (mat) {
+          const pt = applyMatrixToPoint(x, y, mat);
+          x = pt.x;
+          y = pt.y;
+        }
+      }
+      textPos = { x: x + 40, y: y + 5 };
+    }
+
     return (
-      <g key={key || id}>
+      <g key={key || id} style={{ opacity }}>
         <Tooltip>
           <TooltipTrigger asChild>
-            <circle
-              {...toCamelCaseAttrs(rest)}
-              id={id}
-              style={{ cursor: "pointer" }}
+            <path
+              {...toCamelCaseAttrs(node.attributes)}
               onClick={
                 nodeData && onNodeClick
                   ? () => onNodeClick(nodeData)
                   : undefined
               }
+              style={{
+                cursor: nodeData && onNodeClick ? "pointer" : undefined,
+              }}
             />
           </TooltipTrigger>
-          <RadixTooltipContent style={{ background: "white", color: "black" }}>
+          <RadixTooltipContent>
             {nodeData && <TooltipContent node={nodeData} />}
           </RadixTooltipContent>
         </Tooltip>
-        {/* 역명 표시 */}
         {nodeData && (
           <text
-            x={cx + offset}
-            y={cy + offset}
-            fontSize={fontSize}
+            x={textPos.x}
+            y={textPos.y}
+            fontSize={24}
             fontFamily="Arial, sans-serif"
             fill="#374151"
-            pointerEvents="none"
-            dominantBaseline="hanging">
-            {/* 역명에서 '_' 이후, 괄호 전까지만 표시 */}
+            pointerEvents="none">
             {(() => {
               const raw = nodeData.name.split("_")[1] || nodeData.name;
-              const parenIdx = raw.indexOf("(");
-              return parenIdx > -1 ? raw.slice(0, parenIdx) : raw;
+              const idx = raw.indexOf("(");
+              return idx > -1 ? raw.slice(0, idx) : raw;
             })()}
           </text>
         )}
       </g>
     );
   }
-  if (node.name === "line") {
-    const { id, ...rest } = node.attributes;
-    return <line key={key || id} {...toCamelCaseAttrs(rest)} />;
+
+  // 2) **Link**: id 가 "숫자-숫자"
+  if (node.name === "path" && /^\d+-\d+$/.test(node.attributes.id)) {
+    const id = node.attributes.id;
+    const [src, dst] = id.split("-");
+    const link = linksData.find(
+      (l) =>
+        (l.source === src && l.target === dst) ||
+        (l.source === dst && l.target === src)
+    );
+    const linkLine = link?.line;
+    const opacity = !activeLine || linkLine === activeLine ? 1 : 0.2;
+    return (
+      <Tooltip key={key || id}>
+        <TooltipTrigger asChild>
+          <path
+            {...toCamelCaseAttrs(node.attributes)}
+            style={{ opacity, cursor: link ? "pointer" : undefined }}
+          />
+        </TooltipTrigger>
+        <RadixTooltipContent>
+          {link && <TooltipContentLink link={link} />}
+        </RadixTooltipContent>
+      </Tooltip>
+    );
   }
+
+  // 3) 나머지 원소(예: <g>, <rect> 등)는 그대로 재귀
   return React.createElement(
     node.name,
     { ...toCamelCaseAttrs(node.attributes), key: key || node.attributes.id },
@@ -179,7 +225,8 @@ function renderSvgNode(
         nodesData,
         linksData,
         onNodeClick,
-        `${node.name}-${i}`
+        `${node.name}-${i}`,
+        activeLine
       )
     )
   );

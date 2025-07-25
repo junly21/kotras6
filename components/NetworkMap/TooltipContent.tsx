@@ -1,5 +1,6 @@
 import React from "react";
 import type { Node } from "./types";
+import type { Link } from "./types";
 
 interface TooltipContentProps {
   node: Node;
@@ -29,6 +30,30 @@ export function TooltipContent({ node }: TooltipContentProps) {
         </div>
         <div>
           <b>평균 체류시간:</b> {node.avg_stay_sec_new}초
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export function TooltipContentLink({ link }: { link: Link }) {
+  return (
+    <div>
+      <div style={{ fontWeight: 700, color: "#2563eb", marginBottom: 8 }}>
+        링크 정보
+      </div>
+      <div style={{ fontSize: 14, lineHeight: 1.7 }}>
+        <div>
+          <b>출발역:</b> {link.source}
+        </div>
+        <div>
+          <b>도착역:</b> {link.target}
+        </div>
+        <div>
+          <b>노선:</b> {link.line}
+        </div>
+        <div>
+          <b>소요시간:</b> {link.time}초
         </div>
       </div>
     </div>

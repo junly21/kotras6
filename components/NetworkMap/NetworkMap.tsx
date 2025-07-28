@@ -7,6 +7,7 @@ import {
   TooltipTrigger,
   TooltipContent as RadixTooltipContent,
 } from "../ui/tooltip";
+import { Button } from "../ui/button";
 import type { INode } from "svgson";
 
 interface NetworkMapProps {
@@ -32,8 +33,9 @@ export function NetworkMap({
   const [scale, setScale] = useState(1);
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
-  const [pan, setPan] = useState({ x: 0, y: 0 });
+  const [pan, setPan] = useState({ x: -2400, y: -2500 });
   const svgRef = useRef<SVGSVGElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     parseSvg(svgText).then((svgJson) => {
@@ -43,13 +45,41 @@ export function NetworkMap({
     });
   }, [svgText, nodes, links, onNodeClick, activeLine]);
 
-  // zoom & pan handlers (unchanged)...
-  const handleWheel = (e: React.WheelEvent) => {
-    if (e.ctrlKey || Math.abs(e.deltaY) > Math.abs(e.deltaX)) {
-      const delta = e.deltaY > 0 ? -1 : 1;
-      setScale((prev) => Math.max(0.1, Math.min(5, prev + delta * 0.1)));
-    }
-  };
+  // wheel 이벤트 리스너 추가 (passive 문제 해결)
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+
+    const handleWheelEvent = (e: WheelEvent) => {
+      if (e.ctrlKey || Math.abs(e.deltaY) > Math.abs(e.deltaX)) {
+        e.preventDefault();
+        const delta = e.deltaY > 0 ? -1 : 1;
+        const newScale = Math.max(0.5, Math.min(1.3, scale + delta * 0.1));
+
+        if (newScale !== scale) {
+          const rect = container.getBoundingClientRect();
+          const centerX = rect.width / 2;
+          const centerY = rect.height / 2;
+
+          const scaleRatio = newScale / scale;
+
+          // 화면 중앙을 기준으로 pan 조정
+          const newPanX = centerX - (centerX - pan.x) * scaleRatio;
+          const newPanY = centerY - (centerY - pan.y) * scaleRatio;
+
+          setScale(newScale);
+          setPan({ x: newPanX, y: newPanY });
+        }
+      }
+    };
+
+    container.addEventListener("wheel", handleWheelEvent, { passive: false });
+
+    return () => {
+      container.removeEventListener("wheel", handleWheelEvent);
+    };
+  }, [scale, pan]);
+
   const handleMouseDown = (e: React.MouseEvent) => {
     if (e.button === 0) {
       setIsDragging(true);
@@ -63,26 +93,51 @@ export function NetworkMap({
   };
   const handleMouseUp = () => setIsDragging(false);
   const handleMouseLeave = () => setIsDragging(false);
+  // 화면 중앙 기준 확대/축소
   const handleZoom = (delta: number) => {
-    setScale((prev) => Math.max(0.1, Math.min(5, prev + delta * 0.1)));
+    if (!containerRef.current) return;
+
+    const container = containerRef.current;
+    const rect = container.getBoundingClientRect();
+    const centerX = rect.width / 2;
+    const centerY = rect.height / 2;
+
+    const newScale = Math.max(0.5, Math.min(1.3, scale + delta * 0.1));
+    const scaleRatio = newScale / scale;
+
+    // 화면 중앙을 기준으로 pan 조정
+    const newPanX = centerX - (centerX - pan.x) * scaleRatio;
+    const newPanY = centerY - (centerY - pan.y) * scaleRatio;
+
+    setScale(newScale);
+    setPan({ x: newPanX, y: newPanY });
   };
+
   const handleReset = () => {
     setScale(1);
-    setPan({ x: 0, y: 0 });
+    setPan({ x: -2400, y: -2500 });
   };
 
   return (
     <div style={{ width, height, position: "relative", overflow: "hidden" }}>
       {/* zoom buttons... */}
       <div className="flex gap-2 mb-2">
-        <button onClick={() => handleZoom(1)}>확대</button>
-        <button onClick={() => handleZoom(-1)}>축소</button>
-        <button onClick={handleReset}>리셋</button>
-        <span>확대율: {Math.round(scale * 100)}%</span>
+        <Button onClick={() => handleZoom(1)} size="sm">
+          확대
+        </Button>
+        <Button onClick={() => handleZoom(-1)} size="sm">
+          축소
+        </Button>
+        <Button onClick={handleReset} size="sm" variant="outline">
+          리셋
+        </Button>
+        <span className="flex items-center px-2 text-sm text-muted-foreground">
+          확대율: {Math.round(scale * 100)}%
+        </span>
       </div>
       <div
+        ref={containerRef}
         style={{ width: "100%", height: "100%" }}
-        onWheel={handleWheel}
         onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
@@ -93,7 +148,12 @@ export function NetworkMap({
           height="100%"
           viewBox="0 0 2721 1747"
           style={{ display: "block" }}>
-          <g transform={`translate(${pan.x},${pan.y}) scale(${scale})`}>
+          <g
+            transform={`translate(${pan.x},${pan.y}) scale(${scale})`}
+            style={{
+              transition: "transform 0.3s ease-out",
+              transformOrigin: "center",
+            }}>
             {svgReactTree}
           </g>
         </svg>

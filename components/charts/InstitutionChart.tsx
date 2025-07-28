@@ -22,8 +22,8 @@ interface Props {
 export function InstitutionChart({ data, unit }: Props) {
   // 차액만 표시: 지급 > 수급이면 음수, 수급 > 지급이면 양수
   const chartData = data.map((item) => {
-    const payment = Number(item.payment_amount);
-    const receipt = Number(item.receipt_amount);
+    const payment = Number(item.지급액);
+    const receipt = Number(item.수급액);
     let value = 0;
     let type: "지급" | "수급" = "지급";
     if (receipt > payment) {
@@ -34,7 +34,7 @@ export function InstitutionChart({ data, unit }: Props) {
       type = "지급";
     }
     return {
-      name: item.oper_nm,
+      name: item.대상기관,
       value,
       type,
     };
@@ -63,7 +63,7 @@ export function InstitutionChart({ data, unit }: Props) {
         <YAxis
           type="category"
           dataKey="name"
-          width={150}
+          width={100}
           tick={{ fontSize: 12 }}
         />
         <Tooltip

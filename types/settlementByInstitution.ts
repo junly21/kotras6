@@ -3,13 +3,13 @@ export interface SettlementByInstitutionFilters {
   agency: string; // 기관명
 }
 
-// 정산결과 기관별 조회 데이터 타입
+// 정산결과 기관별 조회 데이터 타입 (외부 API 응답 구조)
 export interface SettlementByInstitutionData {
-  oper_id: string; // 기준 기관 ID (필수)
-  oper_nm: string; // 상대 기관명 (필수)
-  payment_amount: number; // 지급
-  receipt_amount: number; // 수급
-  total_amount: number; // 계
+  차액: number; // 계 (수급액 - 지급액)
+  지급액: number; // 지급
+  대상기관: string; // 기관명
+  seq: number; // 순번
+  수급액: number; // 수급
 }
 
 // 정산결과 기관별 조회 폼 데이터 타입

@@ -137,7 +137,14 @@ export function NetworkMap({
       </div>
       <div
         ref={containerRef}
-        style={{ width: "100%", height: "100%" }}
+        style={{
+          width: "100%",
+          height: "100%",
+          userSelect: "none",
+          WebkitUserSelect: "none",
+          MozUserSelect: "none",
+          msUserSelect: "none",
+        }}
         onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}

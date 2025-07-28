@@ -1,5 +1,5 @@
-// const EXTERNAL_BASE_URL = "http://192.168.111.152:8080/kotras6";
-const EXTERNAL_BASE_URL = "http://192.168.110.21:28480/kotras6";
+const EXTERNAL_BASE_URL = "http://192.168.111.152:8080/kotras6";
+// const EXTERNAL_BASE_URL = "http://192.168.110.21:28480/kotras6";
 
 export interface ExternalApiConfig {
   method?: "GET" | "POST" | "PUT" | "DELETE";

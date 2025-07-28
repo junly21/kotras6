@@ -97,14 +97,14 @@ export default function SettlementByInstitutionPage() {
   const colDefs = [
     {
       headerName: "기관명",
-      field: "oper_nm",
+      field: "대상기관",
       width: 200,
       resizable: true,
     },
     {
       headerName: "지급",
-      field: "payment_amount",
-      width: 150,
+      field: "지급액",
+      width: 200,
       resizable: true,
       valueFormatter: (params: { value: number }) => {
         if (unit === "원") {
@@ -117,8 +117,8 @@ export default function SettlementByInstitutionPage() {
     },
     {
       headerName: "수급",
-      field: "receipt_amount",
-      width: 150,
+      field: "수급액",
+      width: 200,
       resizable: true,
       valueFormatter: (params: { value: number }) => {
         if (unit === "원") {
@@ -131,8 +131,8 @@ export default function SettlementByInstitutionPage() {
     },
     {
       headerName: "계",
-      field: "total_amount",
-      width: 150,
+      field: "차액",
+      width: 200,
       resizable: true,
       valueFormatter: (params: { value: number }) => {
         if (unit === "원") {

@@ -3,6 +3,11 @@
 import React, { useEffect, useState } from "react";
 import { NetworkMap } from "@/components/NetworkMap/NetworkMap";
 import type { Node, Link } from "@/components/NetworkMap/types";
+import { FilterForm } from "@/components/ui/FilterForm";
+
+interface LineFilters {
+  line: string;
+}
 
 export default function NetworkLinePage() {
   const [nodes, setNodes] = useState<Node[]>([]);
@@ -10,6 +15,7 @@ export default function NetworkLinePage() {
   const [svgText, setSvgText] = useState<string>("");
   const [isLoading, setIsLoading] = useState(true);
   const [activeLine, setActiveLine] = useState<string | null>(null);
+  const [filters, setFilters] = useState<LineFilters>({ line: "" });
 
   useEffect(() => {
     const loadData = async () => {
@@ -69,28 +75,44 @@ export default function NetworkLinePage() {
     "서해선",
   ];
 
+  // FilterForm용 옵션 생성
+  const lineOptions = [
+    { label: "전체", value: "전체" },
+    ...lineList.map((line) => ({ label: line, value: line })),
+  ];
+
+  // 필터 변경 핸들러
+  const handleFilterChange = (values: LineFilters) => {
+    setFilters(values);
+    setActiveLine(values.line === "전체" ? null : values.line);
+  };
+
+  // 검색 핸들러 (실제로는 조회 버튼을 누를 때 호출되지만, 여기서는 즉시 적용)
+  const handleSearch = (values: LineFilters) => {
+    setActiveLine(values.line === "전체" ? null : values.line);
+  };
+
   return (
-    <div className="p-6">
-      <h1 className="text-2xl font-bold mb-4">노선도 조회</h1>
-      <div className="mb-4 flex gap-2">
-        {lineList.map((line) => (
-          <button
-            key={line}
-            className={`px-3 py-1 rounded ${
-              activeLine === line ? "bg-blue-600 text-white" : "bg-gray-200"
-            }`}
-            onClick={() => setActiveLine(line)}>
-            {line}
-          </button>
-        ))}
-        <button
-          className={`px-3 py-1 rounded ${
-            !activeLine ? "bg-blue-600 text-white" : "bg-gray-200"
-          }`}
-          onClick={() => setActiveLine(null)}>
-          전체
-        </button>
-      </div>
+    <div className="p-6 space-y-6">
+      <h1 className="text-2xl font-bold">노선도 조회</h1>
+
+      {/* FilterForm 적용 */}
+      <FilterForm<LineFilters>
+        fields={[
+          {
+            name: "line",
+            label: "노선",
+            type: "combobox",
+            options: lineOptions,
+            required: false,
+          },
+        ]}
+        defaultValues={{ line: "전체" }}
+        values={filters}
+        onChange={handleFilterChange}
+        onSearch={handleSearch}
+      />
+
       <div className="flex gap-6">
         <div className="flex-1 h-[920px] border rounded-lg p-4 bg-white">
           {isLoading ? (

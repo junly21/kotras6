@@ -198,6 +198,9 @@ function renderSvgNode(
         (l.source === src && l.target === dst) ||
         (l.source === dst && l.target === src)
     );
+    if (!link) {
+      console.log("linksData에 없는 링크:", id, "source:", src, "target:", dst);
+    }
     const linkLine = link?.line;
     const opacity = !activeLine || linkLine === activeLine ? 1 : 0.2;
     return (

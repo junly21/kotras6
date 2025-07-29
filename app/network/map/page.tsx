@@ -9,6 +9,7 @@ import { defaults } from "ol/control";
 import { fromLonLat } from "ol/proj";
 import { Toast } from "@/components/ui/Toast";
 import { useApi } from "@/hooks/useApi";
+import { NetworkService } from "@/services/networkService";
 import { NetworkMapService } from "@/services/networkMapService";
 import { NetworkMapFilters } from "@/types/networkMap";
 import type { NodeData, LineData } from "@/types/networkMap";
@@ -60,7 +61,7 @@ export default function NetworkMapPage() {
 
   // 네트워크 목록 로드
   useEffect(() => {
-    NetworkMapService.getNetworkList()
+    NetworkService.getNetworkList()
       .then((res) => {
         if (res.success) {
           const options = (res.data || []).map((option) => ({

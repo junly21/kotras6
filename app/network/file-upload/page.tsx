@@ -25,6 +25,7 @@ import {
   ModuleRegistry,
   CellClickedEvent,
 } from "ag-grid-community";
+import { NetworkFileUploadService } from "@/services/networkFileUploadService";
 
 // Register all Community features
 ModuleRegistry.registerModules([AllCommunityModule]);
@@ -142,18 +143,18 @@ export default function NetworkFileUploadPage() {
     try {
       console.log("네트워크 파일 등록 시작:", data);
 
-      // TODO: 실제 API 호출 로직 구현
-      // const response = await NetworkFileUploadService.uploadNetworkFiles(data);
+      const response = await NetworkFileUploadService.uploadNetworkFiles(data);
 
-      // 임시로 성공 메시지 표시
-      setTimeout(() => {
+      if (response.success) {
         alert("네트워크 파일 등록이 완료되었습니다.");
         setIsModalOpen(false);
         // 등록 후 목록 새로고침
         if (hasSearched) {
           handleSearch(filters);
         }
-      }, 1000);
+      } else {
+        alert(`등록 실패: ${response.error}`);
+      }
     } catch (error) {
       console.error("네트워크 파일 등록 실패:", error);
       alert("등록 중 오류가 발생했습니다.");

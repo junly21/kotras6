@@ -48,6 +48,7 @@ export function NetworkFileUploadModal({
   const [nodeFileName, setNodeFileName] = useState<string>("");
   const [linkFileName, setLinkFileName] = useState<string>("");
   const [platformFileName, setPlatformFileName] = useState<string>("");
+  const [validationError, setValidationError] = useState<string>("");
 
   const form = useForm<NetworkFileUploadFormData>({
     resolver: zodResolver(networkFileUploadSchema),
@@ -60,8 +61,80 @@ export function NetworkFileUploadModal({
     },
   });
 
-  const handleSubmit = (data: NetworkFileUploadFormData) => {
-    onSubmit(data);
+  // CSV 파일 유효성 검증
+  const validateCSVFile = (file: File): boolean => {
+    // 파일 확장자 검증
+    if (!file.name.toLowerCase().endsWith(".csv")) {
+      return false;
+    }
+
+    // 파일 크기 검증 (예: 10MB 이하)
+    const maxSize = 10 * 1024 * 1024; // 10MB
+    if (file.size > maxSize) {
+      return false;
+    }
+
+    return true;
+  };
+
+  // 파일 내용 유효성 검증 (간단한 CSV 구조 확인)
+  const validateCSVContent = async (file: File): Promise<boolean> => {
+    try {
+      const text = await file.text();
+      const lines = text.split("\n").filter((line) => line.trim());
+
+      // 최소 2줄 이상 (헤더 + 데이터)
+      if (lines.length < 2) {
+        return false;
+      }
+
+      // 첫 번째 줄에 쉼표가 있는지 확인 (CSV 구조)
+      const firstLine = lines[0];
+      if (!firstLine.includes(",")) {
+        return false;
+      }
+
+      return true;
+    } catch (error) {
+      console.error("CSV 파일 읽기 오류:", error);
+      return false;
+    }
+  };
+
+  const handleSubmit = async (data: NetworkFileUploadFormData) => {
+    setValidationError("");
+
+    try {
+      // 파일 유효성 검증
+      const files = [
+        { file: data.nodeFile, name: "노드" },
+        { file: data.linkFile, name: "링크" },
+        { file: data.platformFile, name: "플랫폼" },
+      ];
+
+      for (const { file, name } of files) {
+        // 기본 CSV 검증
+        if (!validateCSVFile(file)) {
+          setValidationError(`${name} 파일이 유효한 CSV 파일이 아닙니다.`);
+          return;
+        }
+
+        // 파일 내용 검증
+        const isValidContent = await validateCSVContent(file);
+        if (!isValidContent) {
+          setValidationError(
+            `${name} 파일의 내용이 올바른 CSV 형식이 아닙니다.`
+          );
+          return;
+        }
+      }
+
+      // 모든 검증 통과 시 제출
+      onSubmit(data);
+    } catch (error) {
+      console.error("파일 검증 중 오류:", error);
+      setValidationError("파일 검증 중 오류가 발생했습니다.");
+    }
   };
 
   const handleFileChange = (
@@ -70,7 +143,15 @@ export function NetworkFileUploadModal({
   ) => {
     const file = event.target.files?.[0];
     if (file) {
+      // 파일 유효성 검증
+      if (!validateCSVFile(file)) {
+        alert("CSV 파일만 선택 가능합니다.");
+        event.target.value = "";
+        return;
+      }
+
       form.setValue(field, file);
+      setValidationError("");
 
       // 파일명 표시
       switch (field) {
@@ -92,6 +173,7 @@ export function NetworkFileUploadModal({
     setNodeFileName("");
     setLinkFileName("");
     setPlatformFileName("");
+    setValidationError("");
     onClose();
   };
 
@@ -107,6 +189,12 @@ export function NetworkFileUploadModal({
             노드, 링크, 플랫폼 (.csv) 파일을 모두 등록하셔야 합니다.
           </p>
         </div>
+
+        {validationError && (
+          <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-md">
+            <p className="text-sm text-red-800">{validationError}</p>
+          </div>
+        )}
 
         <Form {...form}>
           <form

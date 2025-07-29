@@ -28,6 +28,7 @@ export const useNetworkFileUpload = () => {
   >([]);
   const [detailTitle, setDetailTitle] = useState<string>("");
   const [showDetailGrid, setShowDetailGrid] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [toast, setToast] = useState<ToastState>({
     isVisible: false,
     message: "",
@@ -53,7 +54,19 @@ export const useNetworkFileUpload = () => {
 
       if (response.success) {
         console.log("네트워크 파일 목록 조회 성공:", response.data);
-        setRowData(response.data as NetworkFileUploadData[]);
+        const networkData = response.data as NetworkFileUploadData[];
+        setRowData(networkData);
+
+        // 첫 번째 데이터가 있으면 노드를 자동으로 조회
+        if (networkData.length > 0) {
+          const firstNetwork = networkData[0];
+          console.log(
+            "첫 번째 네트워크의 노드 자동 조회:",
+            firstNetwork.net_dt
+          );
+          await handleNodeView(firstNetwork.net_dt);
+        }
+
         setToast({
           isVisible: true,
           message: "네트워크 파일 목록을 성공적으로 받았습니다.",
@@ -183,8 +196,9 @@ export const useNetworkFileUpload = () => {
     }
   }, []);
 
-  // 네트워크 옵션 로드
+  // 네트워크 옵션 로드 및 자동 조회
   const loadNetworkOptions = useCallback(async () => {
+    setLoading(true);
     try {
       const res = await NetworkService.getNetworkList();
       if (res.success) {
@@ -193,6 +207,16 @@ export const useNetworkFileUpload = () => {
           label: String(option.label),
         }));
         setNetworkOptions(options);
+
+        // 첫 번째 항목이 있으면 자동으로 선택하고 조회
+        if (options.length > 0) {
+          const firstOption = options[0];
+          const newFilters = { network: firstOption.value };
+          setFilters(newFilters);
+
+          // 자동 조회 실행
+          await handleSearch(newFilters);
+        }
       } else {
         setNetworkOptions([]);
         setToast({
@@ -208,8 +232,10 @@ export const useNetworkFileUpload = () => {
         message: String(error),
         type: "error",
       });
+    } finally {
+      setLoading(false);
     }
-  }, []);
+  }, [handleSearch]);
 
   // 토스트 닫기
   const closeToast = useCallback(() => {
@@ -230,6 +256,7 @@ export const useNetworkFileUpload = () => {
     detailData,
     detailTitle,
     showDetailGrid,
+    loading,
     toast,
 
     // 핸들러

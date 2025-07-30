@@ -24,7 +24,7 @@ export default function TestGrid({
   height = "100%", // 기본값
 }: TestGridProps) {
   return (
-    <div className="ag-theme-alpine" style={{ height }}>
+    <div className="ag-theme-alpine" style={{ height, ['--ag-header-row-border' as any]: "1px solid #363636", ['--ag-wrapper-border' as any]: 'transparent', ['--ag-wrapper-border-radius' as any]: '24px', ['--ag-header-background-color' as any]: '#fff'}}>
       <AgGridReact
         ref={gridRef}
         rowData={rowData}

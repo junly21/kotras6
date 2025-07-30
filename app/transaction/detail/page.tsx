@@ -91,7 +91,7 @@ export default function TransactionDetailPage() {
     {
       headerName: "카드번호",
       field: "trcr_no",
-      width: 200,
+      width: 180,
       resizable: false,
     },
     {
@@ -102,7 +102,7 @@ export default function TransactionDetailPage() {
         if (!params.value) return "";
         return new Date(params.value).toLocaleString();
       },
-      resizable: true,
+      resizable: false,
     },
     {
       headerName: "하차시간",
@@ -112,7 +112,7 @@ export default function TransactionDetailPage() {
         if (!params.value) return "";
         return new Date(params.value).toLocaleString();
       },
-      resizable: true,
+      resizable: false,
     },
     {
       headerName: "최초승차역",

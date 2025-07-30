@@ -125,10 +125,14 @@ export default function SettlementByRoutePage() {
                     suppressRowClickSelection: true,
                     suppressCellFocus: true,
                     suppressColumnMove: true, // 컬럼 드래그 앤 드롭 비활성화
+                    suppressColumnPinning: true, // 컬럼 고정 비활성화
+                    suppressMenuHide: true, // 컬럼 메뉴 숨김 비활성화
+                    suppressHeaderMenuButton: true, // 헤더 메뉴 버튼 비활성화
                     defaultColDef: {
                       sortable: false,
                       filter: false,
                       resizable: true,
+                      suppressMovable: true, // 개별 컬럼 이동 비활성화
                     },
                   }}
                 />

@@ -136,7 +136,7 @@ export function createSettlementByRouteColDefs(
     columns.push({
       headerName: group.groupName,
       children: group.columns,
-      headerClass: "ag-header-group-cell",
+      headerClass: "ag-header-group-cell center-group-header",
     });
   });
   console.log("dd", columns);

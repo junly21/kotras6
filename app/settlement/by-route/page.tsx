@@ -122,12 +122,12 @@ export default function SettlementByRoutePage() {
                   gridRef={gridRef}
                   gridOptions={{
                     headerHeight: 40, // 그룹핑된 헤더를 위한 높이 조정
-                    suppressRowClickSelection: true,
                     suppressCellFocus: true,
-                    suppressColumnMove: true, // 컬럼 드래그 앤 드롭 비활성화
-                    suppressColumnPinning: true, // 컬럼 고정 비활성화
+                    suppressMovableColumns: true, // 컬럼 드래그 앤 드롭 비활성화
                     suppressMenuHide: true, // 컬럼 메뉴 숨김 비활성화
-                    suppressHeaderMenuButton: true, // 헤더 메뉴 버튼 비활성화
+                    rowSelection: {
+                      enableClickSelection: false, // 행 클릭 선택 비활성화 (새로운 방식)
+                    },
                     defaultColDef: {
                       sortable: false,
                       filter: false,

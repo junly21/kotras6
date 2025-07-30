@@ -120,6 +120,24 @@
   padding-right: 16px !important;
 }
 
+/* AG Grid 그룹 헤더 중앙정렬 */
+.center-group-header .ag-header-cell-comp-wrapper {
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+}
+
+.center-group-header .ag-header-group-cell-label {
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+  width: 100% !important;
+}
+
+.center-group-header .ag-header-group-text {
+  text-align: center !important;
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;

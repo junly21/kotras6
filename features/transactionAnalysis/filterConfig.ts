@@ -14,6 +14,6 @@ export const transactionAnalysisFields: FieldConfig[] = [
     type: "select",
     required: true,
     placeholder: "기관을 선택하세요",
-    optionsEndpoint: "/api/common/agencies",
+    optionsEndpoint: "/api/common/agencies?includeAll=true",
   },
 ];

@@ -16,6 +16,6 @@ export const settlementByRouteFields: FieldConfig[] = [
     type: "select",
     placeholder: "보관기관을 선택하세요",
     required: true,
-    optionsEndpoint: "/api/common/agencies",
+    optionsEndpoint: "/api/common/agencies?includeAll=false",
   },
 ];

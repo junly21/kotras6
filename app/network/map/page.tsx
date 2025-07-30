@@ -25,8 +25,8 @@ import { Style, Stroke, Circle as CircleStyle, Fill } from "ol/style";
 export default function NetworkMapPage() {
   const [filters, setFilters] = useState<NetworkMapFilters>({
     network: "",
-    agency: "",
-    line: "",
+    agency: "ALL",
+    line: "ALL",
   });
 
   // 검색 수행 여부 상태
@@ -74,8 +74,8 @@ export default function NetworkMapPage() {
             setFilters((prev) => ({
               ...prev,
               network: options[0].value,
-              agency: "",
-              line: "",
+              agency: "ALL", // 기관명을 "전체"로 자동 설정
+              line: "ALL", // 노선을 "전체"로 자동 설정
             }));
           }
         } else {
@@ -101,7 +101,7 @@ export default function NetworkMapPage() {
   useEffect(() => {
     // 네트워크가 선택된 경우에만 기관명 목록 요청
     if (filters.network) {
-      fetch("/api/common/agencies")
+      fetch("/api/common/agencies?includeAll=true")
         .then((res) => res.json())
         .then((data) => {
           const options: { value: string; label: string }[] = Array.isArray(
@@ -336,11 +336,11 @@ export default function NetworkMapPage() {
             label: "노선",
             type: isAllAgency ? "combobox" : "select",
             options: lineOptions,
-            required: false,
+            required: true,
             disabled: !filters.network || !filters.agency,
           },
         ]}
-        defaultValues={{ network: "", agency: "", line: "" }}
+        defaultValues={{ network: "", agency: "ALL", line: "ALL" }}
         values={filters}
         onChange={setFilters}
         onSearch={handleSearch}

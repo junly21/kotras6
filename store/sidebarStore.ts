@@ -3,6 +3,7 @@ import { create } from "zustand";
 export interface MenuItem {
   id: string;
   label: string;
+  icon?: string;
   path?: string;
   children?: MenuItem[];
 }
@@ -93,6 +94,7 @@ export const getMenuData = (): MenuItem[] => [
   {
     id: "transaction",
     label: "거래내역",
+    icon: "/icon-gnb-transaction.svg",
     children: [
       {
         id: "transaction-analysis",
@@ -109,6 +111,7 @@ export const getMenuData = (): MenuItem[] => [
   {
     id: "network",
     label: "네트워크",
+    icon: "/icon-gnb-network.svg",
     children: [
       {
         id: "network-map",
@@ -135,6 +138,7 @@ export const getMenuData = (): MenuItem[] => [
   {
     id: "route-search",
     label: "경로탐색",
+    icon: "/icon-gnb-search.svg",
     children: [
       {
         id: "route-search-result",
@@ -146,6 +150,7 @@ export const getMenuData = (): MenuItem[] => [
   {
     id: "settlement",
     label: "정산결과",
+    icon: "/icon-gnb-result.svg",
     children: [
       {
         id: "settlement-overview",
@@ -177,6 +182,7 @@ export const getMenuData = (): MenuItem[] => [
   {
     id: "mock-settlement",
     label: "모의정산",
+    icon: "/icon-gnb-mok.svg",
     children: [
       {
         id: "mock-settlement-register",
@@ -213,6 +219,7 @@ export const getMenuData = (): MenuItem[] => [
   {
     id: "settings",
     label: "환경설정",
+    icon: "/icon-gnb-setting.svg",
     children: [
       {
         id: "settings-common-codes",

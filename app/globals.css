@@ -42,6 +42,8 @@
 }
 
 :root {
+  --font-sans: "Pretendard", ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji",
+      "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
   --radius: 0.625rem;
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
@@ -136,6 +138,11 @@
 
 .center-group-header .ag-header-group-text {
   text-align: center !important;
+}
+
+/* AG Grid 디자인 적용 */
+.ag-theme-alpine .ag-root-wrapper {
+  padding: 1.25em;
 }
 
 @layer base {

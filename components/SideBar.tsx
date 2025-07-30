@@ -29,10 +29,10 @@ const MenuItemComponent: React.FC<{ item: MenuItem; level: number }> = ({
   };
 
   const baseClasses =
-    "flex items-center justify-between w-full px-3 py-2 text-sm rounded-md transition-colors duration-200";
+    "flex text-[rgba(54,54,54,0.4)] items-center w-full px-3 py-2 text-sm rounded-full transition-colors duration-200";
   const activeClasses = isActive
     ? "bg-blue-100 text-blue-700 font-medium"
-    : "text-gray-700 hover:bg-gray-100";
+    : "text-[#363636] hover:bg-[#E6E6E6] hover:rounded-full";
 
   const parentClasses = hasChildren
     ? "font-medium text-gray-900"
@@ -42,31 +42,17 @@ const MenuItemComponent: React.FC<{ item: MenuItem; level: number }> = ({
   const cursorClasses = isClickable ? "cursor-pointer" : "";
 
   return (
-    <div className={`${level > 0 ? "ml-4" : ""}`}>
+    <div>
       <button
         onClick={handleClick}
         className={`${baseClasses} ${activeClasses} ${parentClasses} ${cursorClasses}`}>
-        <span>{item.label}</span>
-        {hasChildren && (
-          <svg
-            className={`w-4 h-4 transition-transform duration-200 ${
-              isOpen ? "rotate-180" : ""
-            }`}
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24">
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M19 9l-7 7-7-7"
-            />
-          </svg>
-        )}
+        <span className="flex items-center gap-2">
+          {item.icon && (<img className="size-8" src={item.icon}></img>)}
+          {item.label}</span>
       </button>
 
       {hasChildren && isOpen && (
-        <div className="mt-1 space-y-1">
+        <div className="mt-4 mb-4 p-4 bg-[#F6F6F6] rounded-xl">
           {item.children!.map((child) => (
             <MenuItemComponent key={child.id} item={child} level={level + 1} />
           ))}
@@ -86,12 +72,12 @@ export default function SideBar() {
   }, [pathname, setCurrentPath]);
 
   return (
-    <aside className="w-64 h-full bg-white border-r border-gray-200 p-4 hidden md:block">
-      <div className="mb-6">
-        <h2 className="text-lg font-semibold text-gray-900">메뉴</h2>
+    <aside className="w-64 h-full bg-white p-4 hidden md:block">
+      <div className="mb-6 hidden">
+        <h2>메뉴</h2>
       </div>
 
-      <nav className="space-y-1">
+      <nav className="space-y-4">
         {menuData.map((item) => (
           <MenuItemComponent key={item.id} item={item} level={0} />
         ))}

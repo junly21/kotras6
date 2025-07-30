@@ -114,7 +114,7 @@ export default function TransactionAnalysisPage() {
   ];
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="space-y-6">
       <h1 className="text-2xl font-bold">거래내역 분석</h1>
 
       <FilterForm<TransactionAnalysisFilters>

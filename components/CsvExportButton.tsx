@@ -24,7 +24,7 @@ export default function CsvExportButton({
   return (
     <button
       onClick={handleExport}
-      className={`bg-primary hover:bg-secondary-600 text-white px-4 py-2 rounded transition-colors duration-200 cursor-pointer ${className}`}
+      className={`bg-primary font-bold hover:bg-secondary-600 text-white px-4 py-2 rounded-lg transition-colors duration-200 cursor-pointer ${className}`}
       title="CSV 파일로 내보내기">
       CSV 내보내기
     </button>

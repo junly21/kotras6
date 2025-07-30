@@ -101,7 +101,7 @@ export function FilterForm<T extends FieldValues>({
       <form
         onSubmit={form.handleSubmit(onSearch)}
         className={cn(
-          "flex flex-wrap gap-4 items-end bg-white p-4 rounded shadow",
+          "flex flex-wrap gap-4 items-center bg-[#E9E9E9] border border-[#D9D9D9] p-4 rounded-xl",
           className
         )}>
         {fields.map((f) => {
@@ -148,7 +148,7 @@ export function FilterForm<T extends FieldValues>({
                             onValueChange={field.onChange}
                             value={field.value}
                             disabled={f.disabled}>
-                            <SelectTrigger className="w-36">
+                            <SelectTrigger className="w-36 bg-white border border-[#d9d9d9]">
                               <SelectValue
                                 placeholder={f.placeholder || "선택"}
                               />
@@ -175,8 +175,8 @@ export function FilterForm<T extends FieldValues>({
           );
         })}
 
-        <Button type="submit">조회</Button>
-        <Button type="button" variant="outline" onClick={() => form.reset()}>
+        <Button type="submit" className="rounded-lg">조회</Button>
+        <Button type="button" className="rounded-lg" variant="outline" onClick={() => form.reset()}>
           초기화
         </Button>
       </form>

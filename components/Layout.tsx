@@ -19,7 +19,7 @@ export default function Layout({ children }: LayoutProps) {
         {/* 컨텐츠 영역 */}
         <div className="flex-1 flex flex-col">
           {/* 메인 컨텐츠 */}
-          <main className="flex-1 bg-gray-100 p-8">{children}</main>
+          <main className="flex-1 px-6 py-10 bg-[#F6F6F6]">{children}</main>
           {/* 푸터 */}
           <Footer />
         </div>

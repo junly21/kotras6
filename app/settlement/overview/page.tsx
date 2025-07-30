@@ -95,7 +95,7 @@ export default function TestGridPage() {
     <div>
       {/* CSV 내보내기 버튼을 그리드 우상단에 배치 */}
 
-      <div className="mb-2 flex justify-end gap-4">
+      <div className="mb-2 flex justify-between gap-4">
         <UnitRadioGroup value={unit} onChange={setUnit} />
         <CsvExportButton
           gridRef={gridRef}

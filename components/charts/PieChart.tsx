@@ -9,11 +9,6 @@ import {
   Legend,
 } from "recharts";
 
-interface PieChartData {
-  name: string;
-  value: number;
-}
-
 interface Props {
   data: {
     card_div: string;
@@ -22,17 +17,16 @@ interface Props {
   }[];
 }
 
-const COLORS = [
-  "#0088FE",
-  "#00C49F",
-  "#FFBB28",
-  "#FF8042",
-  "#8884D8",
-  "#82CA9D",
-  "#FFC658",
-  "#FF6B6B",
-  "#4ECDC4",
-  "#45B7D1",
+// 세련된 그라데이션 색상 팔레트
+const GRADIENTS = [
+  { id: "gradient1", colors: ["#667eea", "#764ba2"] },
+  { id: "gradient2", colors: ["#f093fb", "#f5576c"] },
+  { id: "gradient3", colors: ["#4facfe", "#00f2fe"] },
+  { id: "gradient4", colors: ["#43e97b", "#38f9d7"] },
+  { id: "gradient5", colors: ["#fa709a", "#fee140"] },
+  { id: "gradient6", colors: ["#a8edea", "#fed6e3"] },
+  { id: "gradient7", colors: ["#ffecd2", "#fcb69f"] },
+  { id: "gradient8", colors: ["#ff9a9e", "#fecfef"] },
 ];
 
 export function PieChart({ data }: Props) {
@@ -49,28 +43,128 @@ export function PieChart({ data }: Props) {
     return value.toLocaleString();
   };
 
+  // 커스텀 라벨 렌더러
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const renderCustomLabel = (props: any) => {
+    const { cx, cy, midAngle, outerRadius, percent, name } = props;
+    if (!percent || percent < 0.05) return null; // 5% 미만은 라벨 숨김
+
+    const RADIAN = Math.PI / 180;
+    const radius = outerRadius * 1.2;
+    const x = cx + radius * Math.cos(-midAngle * RADIAN);
+    const y = cy + radius * Math.sin(-midAngle * RADIAN);
+
+    return (
+      <text
+        x={x}
+        y={y}
+        fill="#374151"
+        textAnchor={x > cx ? "start" : "end"}
+        dominantBaseline="central"
+        fontSize={12}
+        fontWeight={500}
+        fontFamily="Inter, system-ui, sans-serif">
+        {`${name} ${(percent * 100).toFixed(0)}%`}
+      </text>
+    );
+  };
+
+  // 커스텀 툴팁
+  const CustomTooltip = ({
+    active,
+    payload,
+  }: {
+    active?: boolean;
+    payload?: Array<{
+      value: number;
+      payload: { name: string; value: number };
+    }>;
+  }) => {
+    if (active && payload && payload.length) {
+      return (
+        <div className="bg-white border border-gray-200 rounded-lg shadow-lg p-3">
+          <p className="text-gray-900 font-medium">{payload[0].payload.name}</p>
+          <p className="text-blue-600 font-semibold">
+            {formatValue(payload[0].value)} 통행수
+          </p>
+          <p className="text-gray-500 text-sm">
+            {(
+              (payload[0].payload.value /
+                chartData.reduce((sum, item) => sum + item.value, 0)) *
+              100
+            ).toFixed(1)}
+            %
+          </p>
+        </div>
+      );
+    }
+    return null;
+  };
+
   return (
     <ResponsiveContainer width="100%" height="100%">
       <RechartsPieChart>
+        {/* SVG 필터 정의 - 그림자 효과 */}
+        <defs>
+          {GRADIENTS.map((gradient) => (
+            <linearGradient
+              key={gradient.id}
+              id={gradient.id}
+              x1="0%"
+              y1="0%"
+              x2="100%"
+              y2="100%">
+              <stop offset="0%" stopColor={gradient.colors[0]} />
+              <stop offset="100%" stopColor={gradient.colors[1]} />
+            </linearGradient>
+          ))}
+          <filter id="shadow" x="-50%" y="-50%" width="200%" height="200%">
+            <feDropShadow
+              dx="2"
+              dy="2"
+              stdDeviation="3"
+              floodColor="#000000"
+              floodOpacity="0.1"
+            />
+          </filter>
+        </defs>
+
         <Pie
           data={chartData}
           cx="50%"
-          cy="50%"
+          cy="45%"
+          innerRadius={60}
+          outerRadius={100}
+          paddingAngle={4}
+          dataKey="value"
+          label={renderCustomLabel}
           labelLine={false}
-          label={({ name, percent }) =>
-            `${name} ${(percent * 100).toFixed(0)}%`
-          }
-          outerRadius={80}
-          fill="#8884d8"
-          dataKey="value">
+          animationDuration={800}
+          isAnimationActive={true}
+          filter="url(#shadow)">
           {chartData.map((entry, index) => (
-            <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+            <Cell
+              key={`cell-${index}`}
+              fill={`url(#${GRADIENTS[index % GRADIENTS.length].id})`}
+            />
           ))}
         </Pie>
-        <Tooltip
-          formatter={(value: number) => [formatValue(value), "통행수"]}
+
+        <Tooltip content={<CustomTooltip />} />
+
+        <Legend
+          layout="horizontal"
+          verticalAlign="bottom"
+          align="center"
+          wrapperStyle={{
+            paddingTop: "20px",
+            fontSize: "12px",
+            fontFamily: "Inter, system-ui, sans-serif",
+          }}
+          formatter={(value) => (
+            <span style={{ color: "#374151", fontWeight: 500 }}>{value}</span>
+          )}
         />
-        <Legend />
       </RechartsPieChart>
     </ResponsiveContainer>
   );

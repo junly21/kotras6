@@ -54,7 +54,7 @@ export function NetworkMap({
       if (e.ctrlKey || Math.abs(e.deltaY) > Math.abs(e.deltaX)) {
         e.preventDefault();
         const delta = e.deltaY > 0 ? -1 : 1;
-        const newScale = Math.max(0.5, Math.min(1.3, scale + delta * 0.1));
+        const newScale = Math.max(0.5, Math.min(2.0, scale + delta * 0.1));
 
         if (newScale !== scale) {
           const rect = container.getBoundingClientRect();
@@ -102,7 +102,7 @@ export function NetworkMap({
     const centerX = rect.width / 2;
     const centerY = rect.height / 2;
 
-    const newScale = Math.max(0.5, Math.min(1.3, scale + delta * 0.1));
+    const newScale = Math.max(0.5, Math.min(2.0, scale + delta * 0.1));
     const scaleRatio = newScale / scale;
 
     // 화면 중앙을 기준으로 pan 조정

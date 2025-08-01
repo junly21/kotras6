@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from "react";
 import { parseSvg, toCamelCaseAttrs } from "./utils";
 import { TooltipContent, TooltipContentLink } from "./TooltipContent";
-import type { Node, Link } from "./types";
+import type { Node, Link } from "@/types/network";
 import {
   Tooltip,
   TooltipTrigger,

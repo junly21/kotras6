@@ -1,56 +1,164 @@
 "use client";
 
-import { useEffect } from "react";
-import "ol/ol.css";
-import { Map, View } from "ol";
-import { XYZ } from "ol/source";
-import { Tile } from "ol/layer";
-import { defaults } from "ol/control";
-import { fromLonLat } from "ol/proj";
+import { useEffect, useState } from "react";
+import { NetworkMap } from "@/components/NetworkMap/NetworkMap";
+import { PieChart } from "@/components/charts/PieChart";
+import { ODPairChart } from "@/components/charts/ODPairChart";
+import Spinner from "@/components/Spinner";
+import type { Node, Link } from "@/types/network";
+
+interface CardStatsData {
+  card_div: string;
+  cnt: number;
+  card_div_nm: string;
+}
+
+interface ODPairData {
+  ride_nm: string;
+  algh_nm: string;
+  oper_nm: string;
+  ride_stn_id: string;
+  cnt: number;
+  algh_stn_id: string;
+  oper_id: string;
+}
 
 export default function Home() {
+  const [nodes, setNodes] = useState<Node[]>([]);
+  const [links, setLinks] = useState<Link[]>([]);
+  const [svgText, setSvgText] = useState<string>("");
+  const [cardStats, setCardStats] = useState<CardStatsData[]>([]);
+  const [odPairStats, setOdPairStats] = useState<ODPairData[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
   useEffect(() => {
-    console.log("Home: Starting map initialization...");
+    const fetchMainData = async () => {
+      try {
+        setLoading(true);
+        setError(null);
 
-    // create Map instance
-    const map = new Map({
-      controls: defaults({ zoom: true, rotate: false }).extend([]),
-      layers: [
-        // VWorld Map
-        new Tile({
-          visible: true,
-          source: new XYZ({
-            url: `http://api.vworld.kr/req/wmts/1.0.0/1A2BB1EC-4324-34AA-B2D2-A9C06A2B5928/Base/{z}/{y}/{x}.png`,
-          }),
-        }),
-      ],
-      target: "map",
-      view: new View({
-        center: fromLonLat([127.189972804, 37.723058796]),
-        zoom: 15,
-      }),
-    });
+        // 1. SVG 파일 로드
+        const svgResponse = await fetch("/subway_link 1.svg");
+        const svgData = await svgResponse.text();
+        setSvgText(svgData);
 
-    console.log("Home: Map initialized successfully");
+        // 2. 정적 노드/링크 데이터 로드 (network/line/page.tsx와 동일한 방식)
+        const [nodesRes, linksRes] = await Promise.all([
+          fetch("/nodes.json"),
+          fetch("/links.json"),
+        ]);
 
-    // 컴포넌트 언마운트 시 정리
-    return () => {
-      if (map) {
-        map.setTarget(undefined);
+        const nodesText = await nodesRes.text();
+        const cleanedNodesText = nodesText.replace(/:\s*NaN/g, ": null");
+        setNodes(JSON.parse(cleanedNodesText));
+        setLinks(await linksRes.json());
+
+        // 3. 권종별 통행수 데이터
+        const cardStatsResponse = await fetch("/api/main", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ type: "card-stats" }),
+        });
+        const cardStatsData = await cardStatsResponse.json();
+        if (cardStatsData.success) {
+          console.log("권종별 통행수 데이터:", cardStatsData.data);
+          setCardStats(cardStatsData.data || []);
+        } else {
+          console.error("권종별 통행수 로딩 실패:", cardStatsData.error);
+        }
+
+        // 4. OD Pair 통계 데이터
+        const odPairResponse = await fetch("/api/main", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ type: "od-pair-stats" }),
+        });
+        const odPairData = await odPairResponse.json();
+        if (odPairData.success) {
+          console.log("OD Pair 통계 데이터:", odPairData.data);
+          setOdPairStats(odPairData.data || []);
+        } else {
+          console.error("OD Pair 통계 로딩 실패:", odPairData.error);
+        }
+      } catch (err) {
+        console.error("메인 데이터 로딩 실패:", err);
+        setError("데이터를 불러오는 중 오류가 발생했습니다.");
+      } finally {
+        setLoading(false);
       }
     };
+
+    fetchMainData();
   }, []);
 
+  const handleNodeClick = (node: Node) => {
+    console.log("노드 클릭:", node);
+  };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <Spinner />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <div className="text-red-500">{error}</div>
+      </div>
+    );
+  }
+
   return (
-    <div>
-      <h1>VWorld Map Test</h1>
-      <div
-        id="map"
-        style={{
-          width: "100%",
-          height: "600px",
-          border: "1px solid #ccc",
-        }}></div>
+    <div className="min-h-screen flex flex-col p-4 gap-4 overflow-hidden">
+      {/* 상단: 네트워크 맵 */}
+      <div className="h-[500px] bg-white rounded-lg shadow-md p-4">
+        <h2 className="text-lg font-semibold mb-4">네트워크 맵</h2>
+        <NetworkMap
+          nodes={nodes}
+          links={links}
+          svgText={svgText}
+          onNodeClick={handleNodeClick}
+          width="100%"
+          height={400}
+        />
+      </div>
+
+      {/* 하단: 좌우 분할 */}
+      <div className="flex gap-4 h-80">
+        {/* 좌측: 권종별 통행수 파이차트 */}
+        <div className="flex-1 bg-white rounded-lg shadow-md p-4">
+          <h2 className="text-lg font-semibold mb-4">권종별 통행수</h2>
+          <div className="h-full">
+            {cardStats.length > 0 ? (
+              <PieChart data={cardStats} />
+            ) : (
+              <div className="flex items-center justify-center h-full text-gray-500">
+                데이터를 불러오는 중...
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* 우측: OD Pair 차트 */}
+        <div className="flex-1 bg-white rounded-lg shadow-md p-4">
+          <h2 className="text-lg font-semibold mb-4">
+            OD Pair 통계 (상위 10개)
+          </h2>
+          <div className="h-full">
+            {odPairStats.length > 0 ? (
+              <ODPairChart data={odPairStats} />
+            ) : (
+              <div className="flex items-center justify-center h-full text-gray-500">
+                데이터를 불러오는 중...
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

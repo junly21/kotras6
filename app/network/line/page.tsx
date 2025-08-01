@@ -24,7 +24,7 @@ export default function NetworkLinePage() {
         const [nodesRes, linksRes, svgRes] = await Promise.all([
           fetch("/nodes.json"),
           fetch("/links.json"),
-          fetch("/subway_link 1.svg"),
+          fetch("/subway_link_transfer_updated.svg"),
         ]);
         const nodesText = await nodesRes.text();
         const cleanedNodesText = nodesText.replace(/:\s*NaN/g, ": null");

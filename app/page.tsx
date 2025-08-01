@@ -113,9 +113,9 @@ export default function Home() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col p-4 gap-4 overflow-hidden">
+    <div className="h-[calc(100vh-280px)] flex flex-col p-2 gap-4  ">
       {/* 상단: 네트워크 맵 */}
-      <div className="h-[500px] bg-white rounded-lg shadow-md p-4">
+      <div className="h-[400px] bg-white rounded-lg shadow-md p-4">
         <h2 className="text-lg font-semibold mb-4">네트워크 맵</h2>
         <NetworkMap
           nodes={nodes}
@@ -123,12 +123,12 @@ export default function Home() {
           svgText={svgText}
           onNodeClick={handleNodeClick}
           width="100%"
-          height={400}
+          height={300}
         />
       </div>
 
       {/* 하단: 좌우 분할 */}
-      <div className="flex gap-4 h-80">
+      <div className="flex gap-4 h-90">
         {/* 좌측: 권종별 통행수 파이차트 */}
         <div className="flex-1 bg-white rounded-lg shadow-md p-4">
           <h2 className="text-lg font-semibold mb-4">권종별 통행수</h2>
@@ -144,10 +144,11 @@ export default function Home() {
         </div>
 
         {/* 우측: OD Pair 차트 */}
-        <div className="flex-1 bg-white rounded-lg shadow-md p-4">
-          <h2 className="text-lg font-semibold mb-4">
-            OD Pair 통계 (상위 10개)
-          </h2>
+        <div className="flex-1 bg-white rounded-lg shadow-md justify-between items-center p-4">
+          <div className="flex justify-between items-center px-2">
+            <h2 className="text-lg font-semibold text-gray-900">OD Pair</h2>
+            <span className="text-sm text-gray-500">(단위: 데이터 건수)</span>
+          </div>
           <div className="h-full">
             {odPairStats.length > 0 ? (
               <ODPairChart data={odPairStats} />

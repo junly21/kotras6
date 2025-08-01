@@ -35,6 +35,13 @@ export function ComboBox({
   disabled,
 }: ComboBoxProps) {
   const [open, setOpen] = useState(false);
+  const [searchValue, setSearchValue] = useState("");
+
+  // 검색어에 따른 필터링된 옵션들
+  const filteredOptions = options.filter((opt) =>
+    opt.label.toLowerCase().includes(searchValue.toLowerCase())
+  );
+
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
@@ -48,17 +55,29 @@ export function ComboBox({
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-36 p-0">
-        <Command>
-          <CommandInput placeholder="검색..." className="h-9" />
+        <Command shouldFilter={false}>
+          <CommandInput
+            placeholder="검색..."
+            className="h-9"
+            value={searchValue}
+            onValueChange={setSearchValue}
+          />
           <CommandList>
             <CommandEmpty>결과 없음</CommandEmpty>
             <CommandGroup>
-              {options.map((opt) => (
+              {filteredOptions.map((opt) => (
                 <CommandItem
                   key={opt.value}
-                  value={String(opt.value)}
+                  value={opt.label}
                   onSelect={(v) => {
-                    onChange(v);
+                    // 선택된 label에 해당하는 option의 value를 찾아서 전달
+                    const selectedOption = options.find(
+                      (option) => option.label === v
+                    );
+                    if (selectedOption) {
+                      onChange(String(selectedOption.value));
+                    }
+                    setSearchValue(""); // 검색어 초기화
                     setOpen(false);
                   }}>
                   {opt.label}

@@ -1,15 +1,11 @@
 import { ApiResponse } from "@/services/apiClient";
-import {
-  RouteSearchFilter,
-  RouteSearchResult,
-  StationOption,
-} from "@/types/routeSearch";
+import { RouteSearchFilter, RouteSearchResult } from "@/types/routeSearch";
 
 export class RouteSearchService {
   // 네트워크 노드 목록 조회 (역 목록용) - Next.js API 라우트 사용
-  static async getStationOptions(): Promise<ApiResponse<StationOption[]>> {
+  static async getStationOptions(): Promise<ApiResponse<any[]>> {
     try {
-      const response = await fetch("/api/route-search/stations", {
+      const response = await fetch("/api/selectNetWorkNodeList", {
         method: "GET",
         headers: {
           "Content-Type": "application/json",

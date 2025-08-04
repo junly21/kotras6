@@ -7,7 +7,7 @@ export const settlementByStationFilterConfig: FieldConfig[] = [
     type: "combobox",
     placeholder: "역을 선택하세요",
     required: false,
-    optionsEndpoint: "/api/route-search/stations",
+    optionsEndpoint: "/api/selectNetWorkNodeList",
   },
   {
     name: "STN_ID2",
@@ -15,7 +15,7 @@ export const settlementByStationFilterConfig: FieldConfig[] = [
     type: "combobox",
     placeholder: "역을 선택하세요",
     required: false,
-    optionsEndpoint: "/api/route-search/stations",
+    optionsEndpoint: "/api/selectNetWorkNodeList",
   },
   {
     name: "STN_ID3",
@@ -23,7 +23,7 @@ export const settlementByStationFilterConfig: FieldConfig[] = [
     type: "combobox",
     placeholder: "역을 선택하세요",
     required: false,
-    optionsEndpoint: "/api/route-search/stations",
+    optionsEndpoint: "/api/selectNetWorkNodeList",
   },
   {
     name: "STN_ID4",
@@ -31,7 +31,7 @@ export const settlementByStationFilterConfig: FieldConfig[] = [
     type: "combobox",
     placeholder: "역을 선택하세요",
     required: false,
-    optionsEndpoint: "/api/route-search/stations",
+    optionsEndpoint: "/api/selectNetWorkNodeList",
   },
   {
     name: "STN_ID5",
@@ -39,6 +39,6 @@ export const settlementByStationFilterConfig: FieldConfig[] = [
     type: "combobox",
     placeholder: "역을 선택하세요",
     required: false,
-    optionsEndpoint: "/api/route-search/stations",
+    optionsEndpoint: "/api/selectNetWorkNodeList",
   },
 ];

@@ -1,21 +1,34 @@
 import { NextResponse } from "next/server";
 import { callExternalApi, createCorsHeaders } from "../utils/externalApi";
+import { NetworkNode } from "@/types/network";
+import { StationOption } from "@/types/routeSearch";
 
-export async function POST(request: Request) {
+export async function GET() {
   try {
     console.log("selectNetWorkNodeList API 호출됨");
-
-    const body = await request.json();
-    console.log("selectNetWorkNodeList 요청 데이터:", body);
 
     const { data } = await callExternalApi("selectNetWorkNodeList.do", {
       method: "POST",
       body: {
-        NET_DT: body.NET_DT,
+        NET_DT: "LATEST",
       },
     });
 
-    return NextResponse.json(data, { headers: createCorsHeaders() });
+    console.log("외부 API 응답:", data);
+
+    // NetworkNode 배열을 StationOption으로 변환
+    const rawData = data as NetworkNode[];
+    const stationOptions: StationOption[] = (rawData || []).map((node) => ({
+      label: node.sta_nm,
+      value: node.sta_num,
+    }));
+
+    console.log("변환된 역 옵션:", stationOptions);
+
+    return NextResponse.json(
+      { options: stationOptions },
+      { headers: createCorsHeaders() }
+    );
   } catch (error) {
     console.error("selectNetWorkNodeList API 처리 중 오류 발생:", error);
     return NextResponse.json(

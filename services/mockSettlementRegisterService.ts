@@ -1,0 +1,91 @@
+import { ApiResponse } from "./apiClient";
+import {
+  MockSettlementRegisterFilters,
+  MockSettlementRegisterData,
+} from "@/types/mockSettlementRegister";
+
+export class MockSettlementRegisterService {
+  // 모의정산 등록 데이터 조회
+  static async getMockSettlementData(
+    filters: MockSettlementRegisterFilters
+  ): Promise<ApiResponse<MockSettlementRegisterData[]>> {
+    try {
+      const response = await fetch("/api/mock-settlement/register", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(filters),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      return { success: true, data };
+    } catch (error) {
+      console.error("모의정산 등록 데이터 조회 에러:", error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : String(error),
+      };
+    }
+  }
+
+  // 정산명 목록 조회
+  static async getSettlementNames(): Promise<
+    ApiResponse<{ label: string; value: string }[]>
+  > {
+    try {
+      const response = await fetch("/api/mock-settlement/settlement-names", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({}),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      return { success: true, data: data.options || [] };
+    } catch (error) {
+      console.error("정산명 목록 조회 에러:", error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : String(error),
+      };
+    }
+  }
+
+  // 거래일자 목록 조회
+  static async getTransactionDates(): Promise<
+    ApiResponse<{ label: string; value: string }[]>
+  > {
+    try {
+      const response = await fetch("/api/mock-settlement/transaction-dates", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({}),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      return { success: true, data: data.options || [] };
+    } catch (error) {
+      console.error("거래일자 목록 조회 에러:", error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : String(error),
+      };
+    }
+  }
+}

@@ -1,59 +1,119 @@
 import { ColDef } from "ag-grid-community";
-import { SettlementByOdData } from "@/types/settlementByOd";
+
+interface SettlementByOdData {
+  path_detail: string;
+  path_prob: number;
+  path_id: string;
+  amt: number;
+  rn: number;
+  path_key: string;
+  confirmed_path: string;
+}
 
 export function createSettlementByOdColDefs(): ColDef<SettlementByOdData>[] {
   return [
     {
-      headerName: "출발역",
-      field: "stn_nm1",
-      width: 120,
-      sortable: true,
-      filter: true,
+      headerName: "번호",
+      field: "rn",
+      width: 100,
+      sortable: false,
+      filter: false,
+      cellRenderer: (params: any) => {
+        // 소계 행인 경우 번호 표시 안함
+        if (params.value === null || params.value === undefined) {
+          return "";
+        }
+        return params.value;
+      },
     },
     {
-      headerName: "도착역",
-      field: "stn_nm2",
-      width: 120,
-      sortable: true,
-      filter: true,
+      headerName: "확정경로 포함 여부",
+      field: "confirmed_path",
+      width: 180,
+      sortable: false,
+      filter: false,
+      cellRenderer: (params: any) => {
+        const value = params.value;
+        if (value === "O") {
+          return "포함";
+        } else if (value === "X") {
+          return "미포함";
+        } else if (value === "계") {
+          return "소계";
+        }
+        return value;
+      },
+      cellStyle: (params: any) => {
+        const value = params.value;
+        if (value === "O") {
+          return { color: "#059669", fontWeight: "bold" }; // 초록색
+        } else if (value === "X") {
+          return { color: "#DC2626", fontWeight: "bold" }; // 빨간색
+        } else if (value === "계") {
+          return { color: "#1F2937", fontWeight: "bold" }; // 회색
+        }
+        return {};
+      },
     },
     {
-      headerName: "정산금액",
-      field: "pay_amt",
-      width: 120,
-      sortable: true,
-      filter: true,
+      headerName: "경로",
+      field: "path_detail",
+      width: 600,
+      sortable: false,
+      filter: false,
+      cellRenderer: (params: any) => {
+        // 소계 행인 경우 경로 표시 안함
+        if (params.value === "-") {
+          return "";
+        }
+        return params.value;
+      },
+      cellStyle: (params: any) => {
+        // 소계 행인 경우 배경색 변경
+        if (params.value === "-") {
+          return { backgroundColor: "#F3F4F6", fontWeight: "bold" };
+        }
+        return {};
+      },
+    },
+    {
+      headerName: "경로 선택 확률",
+      field: "path_prob",
+      width: 150,
+      sortable: false,
+      filter: false,
+      valueFormatter: (params) => {
+        if (params.value != null) {
+          return params.value.toFixed(2) + "%";
+        }
+        return "";
+      },
+      cellStyle: (params: any) => {
+        // 소계 행인 경우 배경색 변경
+        if (params.data?.path_detail === "-") {
+          return { backgroundColor: "#F3F4F6", fontWeight: "bold" };
+        }
+        return {};
+      },
+    },
+    {
+      headerName: "배분금",
+      field: "amt",
+      width: 150,
+      sortable: false,
+      filter: false,
       valueFormatter: (params) => {
         if (params.value != null) {
           return params.value.toLocaleString() + "원";
         }
         return "";
       },
-    },
-    {
-      headerName: "수취금액",
-      field: "recv_amt",
-      width: 120,
-      sortable: true,
-      filter: true,
-      valueFormatter: (params) => {
-        if (params.value != null) {
-          return params.value.toLocaleString() + "원";
+      cellStyle: (params: any) => {
+        // 소계 행인 경우 배경색 변경
+        if (params.data?.path_detail === "-") {
+          return { backgroundColor: "#F3F4F6", fontWeight: "bold" };
         }
-        return "";
-      },
-    },
-    {
-      headerName: "순정산금액",
-      field: "net_amt",
-      width: 120,
-      sortable: true,
-      filter: true,
-      valueFormatter: (params) => {
-        if (params.value != null) {
-          return params.value.toLocaleString() + "원";
-        }
-        return "";
+        return {};
       },
     },
   ];

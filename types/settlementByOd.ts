@@ -4,10 +4,11 @@ export interface SettlementByOdFilters {
 }
 
 export interface SettlementByOdData {
-  stn_nm1: string; // 출발역명
-  stn_nm2: string; // 도착역명
-  pay_amt: number; // 정산금액
-  recv_amt: number; // 수취금액
-  net_amt: number; // 순정산금액
-  [key: string]: string | number; // 동적 필드 지원
+  path_detail: string; // 경로 상세
+  path_prob: number; // 경로 선택 확률
+  path_id: string; // 경로 ID
+  amt: number; // 배분금
+  rn: number; // 순위
+  path_key: string; // 경로 키
+  confirmed_path: string; // 확정경로 포함 여부 (O/X/계)
 }

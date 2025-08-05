@@ -1,18 +1,22 @@
 "use client";
 
-import { useState, useCallback, useMemo, useRef } from "react";
+import { useState, useCallback, useMemo, useRef, useEffect } from "react";
 import { z } from "zod";
 import { FilterForm } from "@/components/ui/FilterForm";
 import { settlementByOdFilterConfig } from "@/features/settlementByOd/filterConfig";
 import {
   SettlementByOdFilters,
   SettlementByOdData,
+  SettlementByOdDetailData,
 } from "@/types/settlementByOd";
 import { SettlementByOdService } from "@/services/settlementByOdService";
 import { createSettlementByOdColDefs } from "@/features/settlementByOd/gridConfig";
+import { createSettlementByOdDetailColDefs } from "@/features/settlementByOd/detailGridConfig";
 import TestGrid from "@/components/TestGrid";
 import CsvExportButton from "@/components/CsvExportButton";
 import Spinner from "@/components/Spinner";
+import { NetworkMap } from "@/components/NetworkMap/NetworkMap";
+import type { Node, Link } from "@/types/network";
 import { AllCommunityModule, ModuleRegistry } from "ag-grid-community";
 
 // Register all Community features
@@ -37,18 +41,97 @@ export default function SettlementByOdPage() {
   const [searchResults, setSearchResults] = useState<SettlementByOdData[]>([]);
   const [hasSearched, setHasSearched] = useState(false);
 
-  // AG Grid ref
+  // 경유지 상세정보 상태
+  const [detailData, setDetailData] = useState<SettlementByOdDetailData[]>([]);
+  const [selectedRow, setSelectedRow] = useState<SettlementByOdData | null>(
+    null
+  );
+  const [isDetailLoading, setIsDetailLoading] = useState(false);
+
+  // 네트워크 맵 상태
+  const [nodes, setNodes] = useState<Node[]>([]);
+  const [links, setLinks] = useState<Link[]>([]);
+  const [svgText, setSvgText] = useState<string>("");
+  const [isMapLoading, setIsMapLoading] = useState(true);
+
+  // AG Grid refs
   const gridRef = useRef(null);
+  const detailGridRef = useRef(null);
+
+  // 네트워크 데이터 로드
+  useEffect(() => {
+    const loadNetworkData = async () => {
+      setIsMapLoading(true);
+      try {
+        const [nodesRes, linksRes, svgRes] = await Promise.all([
+          fetch("/nodes.json"),
+          fetch("/links.json"),
+          fetch("/subway_link_transfer_updated.svg"),
+        ]);
+        const nodesText = await nodesRes.text();
+        const cleanedNodesText = nodesText.replace(/:\s*NaN/g, ": null");
+        setNodes(JSON.parse(cleanedNodesText));
+        setLinks(await linksRes.json());
+        setSvgText(await svgRes.text());
+      } catch (e) {
+        console.error("네트워크 데이터 로드 실패:", e);
+      } finally {
+        setIsMapLoading(false);
+      }
+    };
+    loadNetworkData();
+  }, []);
 
   // 컬럼 정의
   const columnDefs = useMemo(() => {
     return createSettlementByOdColDefs();
   }, []);
 
+  const detailColumnDefs = useMemo(() => {
+    return createSettlementByOdDetailColDefs();
+  }, []);
+
   // 필터 변경 핸들러
   const handleFilterChange = (values: SettlementByOdFilters) => {
     setFilters(values);
   };
+
+  // 경유지 상세정보 조회 핸들러
+  const fetchDetailData = useCallback(
+    async (pathKey: string, pathId: string) => {
+      setIsDetailLoading(true);
+      try {
+        const response = await SettlementByOdService.getSettlementDetailData(
+          pathKey,
+          pathId
+        );
+        if (response.success && response.data) {
+          setDetailData(response.data);
+        } else {
+          console.error("상세정보 조회 실패:", response.error);
+          setDetailData([]);
+        }
+      } catch (err) {
+        console.error("상세정보 조회 에러:", err);
+        setDetailData([]);
+      } finally {
+        setIsDetailLoading(false);
+      }
+    },
+    []
+  );
+
+  // 행 클릭 핸들러
+  const handleRowClick = useCallback(
+    (rowData: SettlementByOdData) => {
+      setSelectedRow(rowData);
+      // 소계 행이 아닌 경우에만 상세정보 조회
+      if (rowData.path_detail !== "-") {
+        fetchDetailData(rowData.path_key, rowData.path_id);
+      }
+    },
+    [fetchDetailData]
+  );
 
   // 검색 핸들러
   const handleSearchSubmit = useCallback(
@@ -62,6 +145,15 @@ export default function SettlementByOdPage() {
         const response = await SettlementByOdService.getSettlementData(values);
         if (response.success && response.data) {
           setSearchResults(response.data);
+
+          // 첫 번째 행(소계가 아닌)에 대해 자동으로 상세정보 조회
+          const firstValidRow = response.data.find(
+            (row) => row.path_detail !== "-"
+          );
+          if (firstValidRow) {
+            setSelectedRow(firstValidRow);
+            fetchDetailData(firstValidRow.path_key, firstValidRow.path_id);
+          }
         } else {
           setError(response.error || "데이터 조회에 실패했습니다.");
         }
@@ -73,7 +165,7 @@ export default function SettlementByOdPage() {
         setIsLoading(false);
       }
     },
-    []
+    [fetchDetailData]
   );
 
   return (
@@ -157,6 +249,9 @@ export default function SettlementByOdPage() {
                       resizable: true,
                       suppressMovable: true,
                     },
+                    onRowClicked: (event: { data: SettlementByOdData }) => {
+                      handleRowClick(event.data);
+                    },
                   }}
                 />
               </div>
@@ -168,6 +263,73 @@ export default function SettlementByOdPage() {
               <p className="text-yellow-800">조회된 데이터가 없습니다.</p>
             </div>
           )}
+
+          {/* 경유지 상세정보 영역 */}
+          {selectedRow && selectedRow.path_detail !== "-" && (
+            <div className="bg-white border border-gray-200 rounded-lg p-4">
+              <h3 className="text-lg font-semibold mb-4">경유지 상세정보</h3>
+
+              {isDetailLoading ? (
+                <div className="flex items-center justify-center h-32">
+                  <Spinner />
+                  <p className="ml-2 text-gray-600">
+                    상세정보를 조회하는 중...
+                  </p>
+                </div>
+              ) : (
+                <div className="h-96">
+                  <TestGrid
+                    rowData={detailData}
+                    columnDefs={detailColumnDefs}
+                    gridRef={detailGridRef}
+                    gridOptions={{
+                      headerHeight: 40,
+                      suppressCellFocus: true,
+                      suppressMovableColumns: true,
+                      suppressMenuHide: true,
+                      rowSelection: {
+                        enableClickSelection: false,
+                      },
+                      defaultColDef: {
+                        sortable: false,
+                        filter: false,
+                        resizable: true,
+                        suppressMovable: true,
+                      },
+                    }}
+                  />
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* 네트워크 맵 영역 */}
+          {selectedRow &&
+            selectedRow.path_detail !== "-" &&
+            !isDetailLoading && (
+              <div className="bg-white border border-gray-200 rounded-lg p-4">
+                <h3 className="text-lg font-semibold mb-4">경로 시각화</h3>
+
+                {isMapLoading ? (
+                  <div className="flex items-center justify-center h-64">
+                    <Spinner />
+                    <p className="ml-2 text-gray-600">
+                      노선도를 불러오는 중...
+                    </p>
+                  </div>
+                ) : (
+                  <div className="h-[600px]">
+                    <NetworkMap
+                      nodes={nodes}
+                      links={links}
+                      svgText={svgText}
+                      width="100%"
+                      height={600}
+                    />
+                  </div>
+                )}
+              </div>
+            )}
         </div>
       )}
     </div>

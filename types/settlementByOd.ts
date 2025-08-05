@@ -12,3 +12,13 @@ export interface SettlementByOdData {
   path_key: string; // 경로 키
   confirmed_path: string; // 확정경로 포함 여부 (O/X/계)
 }
+
+export interface SettlementByOdDetailData {
+  stn_nm: string; // 역명
+  base_amt: number; // 기본배분금
+  km: number; // 인.km
+  stn_seq: number; // 역 순서
+  recv_oper: string; // 기관
+  ubrw_amt: number; // 도시철도부가사용금
+  recv_line: string; // 노선
+}

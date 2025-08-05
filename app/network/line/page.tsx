@@ -1,85 +1,23 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useState, useMemo } from "react";
 import { NetworkMap } from "@/components/NetworkMap/NetworkMap";
-import type { Node, Link } from "@/components/NetworkMap/types";
 import { FilterForm } from "@/components/ui/FilterForm";
+import { useNetworkData } from "@/hooks/useNetworkData";
+import { LINE_OPTIONS } from "@/constants/subwayLines";
+import { NETWORK_MAP_CONFIGS } from "@/constants/networkMapConfigs";
+import type { NetworkMapHighlight } from "@/types/network";
 
 interface LineFilters {
   line: string;
 }
 
 export default function NetworkLinePage() {
-  const [nodes, setNodes] = useState<Node[]>([]);
-  const [links, setLinks] = useState<Link[]>([]);
-  const [svgText, setSvgText] = useState<string>("");
-  const [isLoading, setIsLoading] = useState(true);
-  const [activeLine, setActiveLine] = useState<string | null>(null);
   const [filters, setFilters] = useState<LineFilters>({ line: "" });
+  const [activeLine, setActiveLine] = useState<string | null>(null);
 
-  useEffect(() => {
-    const loadData = async () => {
-      setIsLoading(true);
-      try {
-        const [nodesRes, linksRes, svgRes] = await Promise.all([
-          fetch("/nodes.json"),
-          fetch("/links.json"),
-          fetch("/subway_link_transfer_updated.svg"),
-        ]);
-        const nodesText = await nodesRes.text();
-        const cleanedNodesText = nodesText.replace(/:\s*NaN/g, ": null");
-        setNodes(JSON.parse(cleanedNodesText));
-        setLinks(await linksRes.json());
-        setSvgText(await svgRes.text());
-      } catch (e) {
-        // eslint-disable-next-line no-console
-        console.error(e);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    loadData();
-  }, []);
-
-  const lineList = [
-    "1호선",
-    "경부선",
-    "경인선",
-    "경원선",
-    "장항선",
-    "2호선",
-    "3호선",
-    "4호선",
-    "4호선진접선",
-    "과천선",
-    "안산선",
-    "5호선",
-    "6호선",
-    "7호선",
-    "8호선",
-    "9호선",
-    "에버라인선",
-    "우이신설선",
-    "신림선",
-    "경의선",
-    "경의중앙선",
-    "중앙선",
-    "인천1호선",
-    "인천2호선",
-    "김포골드라인",
-    "신분당선",
-    "수인선",
-    "분당선",
-    "경강선",
-    "경춘선",
-    "서해선",
-  ];
-
-  // FilterForm용 옵션 생성
-  const lineOptions = [
-    { label: "전체", value: "전체" },
-    ...lineList.map((line) => ({ label: line, value: line })),
-  ];
+  // 네트워크 데이터 로드
+  const { nodes, links, svgText, isLoading, error } = useNetworkData();
 
   // 필터 변경 핸들러
   const handleFilterChange = (values: LineFilters) => {
@@ -87,10 +25,28 @@ export default function NetworkLinePage() {
     setActiveLine(values.line === "전체" ? null : values.line);
   };
 
-  // 검색 핸들러 (실제로는 조회 버튼을 누를 때 호출되지만, 여기서는 즉시 적용)
+  // 검색 핸들러
   const handleSearch = (values: LineFilters) => {
     setActiveLine(values.line === "전체" ? null : values.line);
   };
+
+  // 하이라이트 설정 - 메모이제이션
+  const highlights = useMemo((): NetworkMapHighlight[] => {
+    return activeLine ? [{ type: "line", value: activeLine }] : [];
+  }, [activeLine]);
+
+  // NetworkMap 설정 - 메모이제이션
+  const mapConfig = useMemo(() => NETWORK_MAP_CONFIGS.line, []);
+
+  if (error) {
+    return (
+      <div className="p-6">
+        <div className="bg-red-50 border border-red-200 rounded-md p-4">
+          <p className="text-red-600">네트워크 데이터 로드 실패: {error}</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="p-6 space-y-6">
@@ -103,7 +59,7 @@ export default function NetworkLinePage() {
             name: "line",
             label: "노선",
             type: "combobox",
-            options: lineOptions,
+            options: LINE_OPTIONS,
             required: false,
           },
         ]}
@@ -124,9 +80,8 @@ export default function NetworkLinePage() {
               nodes={nodes}
               links={links}
               svgText={svgText}
-              width="100%"
-              height={800}
-              activeLine={activeLine}
+              config={mapConfig}
+              highlights={highlights}
             />
           )}
         </div>

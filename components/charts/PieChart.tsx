@@ -1,5 +1,6 @@
 "use client";
 
+import React, { useMemo } from "react";
 import {
   PieChart as RechartsPieChart,
   Pie,
@@ -30,76 +31,93 @@ const GRADIENTS = [
 ];
 
 export function PieChart({ data }: Props) {
-  console.log("PieChart 데이터:", data);
+  // 차트 데이터 메모이제이션
+  const chartData = useMemo(() => {
+    console.log("PieChart 데이터:", data);
+    const transformed = data.map((item) => ({
+      name: item.card_div_nm,
+      value: item.cnt,
+    }));
+    console.log("PieChart 변환된 데이터:", transformed);
+    return transformed;
+  }, [data]);
 
-  const chartData = data.map((item) => ({
-    name: item.card_div_nm,
-    value: item.cnt,
-  }));
+  const formatValue = useMemo(
+    () => (value: number) => {
+      return value.toLocaleString();
+    },
+    []
+  );
 
-  console.log("PieChart 변환된 데이터:", chartData);
+  // 커스텀 라벨 렌더러 메모이제이션
+  const renderCustomLabel = useMemo(() => {
+    return (props: any) => {
+      const { cx, cy, midAngle, outerRadius, percent, name } = props;
+      if (!percent || percent < 0.05) return null; // 5% 미만은 라벨 숨김
 
-  const formatValue = (value: number) => {
-    return value.toLocaleString();
-  };
+      const RADIAN = Math.PI / 180;
+      const radius = outerRadius * 1.2;
+      const x = cx + radius * Math.cos(-midAngle * RADIAN);
+      const y = cy + radius * Math.sin(-midAngle * RADIAN);
 
-  // 커스텀 라벨 렌더러
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const renderCustomLabel = (props: any) => {
-    const { cx, cy, midAngle, outerRadius, percent, name } = props;
-    if (!percent || percent < 0.05) return null; // 5% 미만은 라벨 숨김
-
-    const RADIAN = Math.PI / 180;
-    const radius = outerRadius * 1.2;
-    const x = cx + radius * Math.cos(-midAngle * RADIAN);
-    const y = cy + radius * Math.sin(-midAngle * RADIAN);
-
-    return (
-      <text
-        x={x}
-        y={y}
-        fill="#374151"
-        textAnchor={x > cx ? "start" : "end"}
-        dominantBaseline="central"
-        fontSize={12}
-        fontWeight={500}
-        fontFamily="Inter, system-ui, sans-serif">
-        {`${name} ${(percent * 100).toFixed(0)}%`}
-      </text>
-    );
-  };
-
-  // 커스텀 툴팁
-  const CustomTooltip = ({
-    active,
-    payload,
-  }: {
-    active?: boolean;
-    payload?: Array<{
-      value: number;
-      payload: { name: string; value: number };
-    }>;
-  }) => {
-    if (active && payload && payload.length) {
       return (
-        <div className="bg-white border border-gray-200 rounded-lg shadow-lg p-3">
-          <p className="text-gray-900 font-medium">{payload[0].payload.name}</p>
-          <p className="text-blue-600 font-semibold">
-            {formatValue(payload[0].value)} 통행수
-          </p>
-          <p className="text-gray-500 text-sm">
-            {(
-              (payload[0].payload.value /
-                chartData.reduce((sum, item) => sum + item.value, 0)) *
-              100
-            ).toFixed(1)}
-            %
-          </p>
-        </div>
+        <text
+          x={x}
+          y={y}
+          fill="#374151"
+          textAnchor={x > cx ? "start" : "end"}
+          dominantBaseline="central"
+          fontSize={12}
+          fontWeight={500}
+          fontFamily="Inter, system-ui, sans-serif">
+          {`${name} ${(percent * 100).toFixed(0)}%`}
+        </text>
       );
-    }
-    return null;
-  };
+    };
+  }, []);
+
+  // 커스텀 툴팁 메모이제이션
+  const CustomTooltip = useMemo(() => {
+    return ({
+      active,
+      payload,
+    }: {
+      active?: boolean;
+      payload?: Array<{
+        value: number;
+        payload: { name: string; value: number };
+      }>;
+    }) => {
+      if (active && payload && payload.length) {
+        return (
+          <div className="bg-white border border-gray-200 rounded-lg shadow-lg p-3">
+            <p className="text-gray-900 font-medium">
+              {payload[0].payload.name}
+            </p>
+            <p className="text-blue-600 font-semibold">
+              {formatValue(payload[0].value)} 통행수
+            </p>
+            <p className="text-gray-500 text-sm">
+              {(
+                (payload[0].payload.value /
+                  chartData.reduce((sum, item) => sum + item.value, 0)) *
+                100
+              ).toFixed(1)}
+              %
+            </p>
+          </div>
+        );
+      }
+      return null;
+    };
+  }, [chartData, formatValue]);
+
+  // Legend formatter 메모이제이션
+  const legendFormatter = useMemo(() => {
+    return (value: string) => (
+      <span style={{ color: "#374151", fontWeight: 500 }}>{value}</span>
+    );
+  }, []);
 
   return (
     <ResponsiveContainer width="100%" height="100%">
@@ -161,9 +179,7 @@ export function PieChart({ data }: Props) {
             fontSize: "12px",
             fontFamily: "Inter, system-ui, sans-serif",
           }}
-          formatter={(value) => (
-            <span style={{ color: "#374151", fontWeight: 500 }}>{value}</span>
-          )}
+          formatter={legendFormatter}
         />
       </RechartsPieChart>
     </ResponsiveContainer>

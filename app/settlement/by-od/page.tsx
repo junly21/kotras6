@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useMemo, useRef, useEffect } from "react";
+import { useState, useCallback, useMemo, useRef } from "react";
 import { z } from "zod";
 import { FilterForm } from "@/components/ui/FilterForm";
 import { settlementByOdFilterConfig } from "@/features/settlementByOd/filterConfig";
@@ -16,7 +16,12 @@ import TestGrid from "@/components/TestGrid";
 import CsvExportButton from "@/components/CsvExportButton";
 import Spinner from "@/components/Spinner";
 import { NetworkMap } from "@/components/NetworkMap/NetworkMap";
-import type { Node, Link } from "@/types/network";
+import {
+  SettlementNodeTooltip,
+  SettlementLinkTooltip,
+} from "@/components/NetworkMap/DefaultTooltips";
+import { useNetworkData } from "@/hooks/useNetworkData";
+import type { NetworkMapHighlight, Node, Link } from "@/types/network";
 import { AllCommunityModule, ModuleRegistry } from "ag-grid-community";
 
 // Register all Community features
@@ -48,39 +53,70 @@ export default function SettlementByOdPage() {
   );
   const [isDetailLoading, setIsDetailLoading] = useState(false);
 
-  // 네트워크 맵 상태
-  const [nodes, setNodes] = useState<Node[]>([]);
-  const [links, setLinks] = useState<Link[]>([]);
-  const [svgText, setSvgText] = useState<string>("");
-  const [isMapLoading, setIsMapLoading] = useState(true);
+  // 네트워크 데이터 로드
+  const {
+    nodes,
+    links,
+    svgText,
+    isLoading: isMapLoading,
+    error: mapError,
+    findNodeIdsByStationNames,
+  } = useNetworkData();
 
   // AG Grid refs
   const gridRef = useRef(null);
   const detailGridRef = useRef(null);
 
-  // 네트워크 데이터 로드
-  useEffect(() => {
-    const loadNetworkData = async () => {
-      setIsMapLoading(true);
-      try {
-        const [nodesRes, linksRes, svgRes] = await Promise.all([
-          fetch("/nodes.json"),
-          fetch("/links.json"),
-          fetch("/subway_link_transfer_updated.svg"),
-        ]);
-        const nodesText = await nodesRes.text();
-        const cleanedNodesText = nodesText.replace(/:\s*NaN/g, ": null");
-        setNodes(JSON.parse(cleanedNodesText));
-        setLinks(await linksRes.json());
-        setSvgText(await svgRes.text());
-      } catch (e) {
-        console.error("네트워크 데이터 로드 실패:", e);
-      } finally {
-        setIsMapLoading(false);
+  // 경로 하이라이트 계산
+  const pathHighlights = useMemo((): NetworkMapHighlight[] => {
+    if (detailData.length === 0 || nodes.length === 0) {
+      return [];
+    }
+
+    // 총계 행을 제외하고 역명 순서대로 노드 ID 찾기
+    const stationNames = detailData
+      .filter((detail) => detail.stn_nm !== "-")
+      .map((detail) => detail.stn_nm);
+
+    const nodeIds = findNodeIdsByStationNames(stationNames);
+
+    if (nodeIds.length === 0) {
+      return [];
+    }
+
+    // 경로 하이라이트의 경우 선택된 노드들만 표시
+    return [
+      {
+        type: "nodes",
+        value: nodeIds,
+        color: "#ff0000",
+        opacity: 1,
+      },
+    ];
+  }, [detailData, nodes, findNodeIdsByStationNames]);
+
+  // 정산 데이터를 노드별로 매핑
+  const settlementDataMap = useMemo(() => {
+    const map = new Map<
+      string,
+      { base_amt: number; ubrw_amt: number; km: number }
+    >();
+
+    detailData.forEach((detail) => {
+      if (detail.stn_nm !== "-") {
+        const nodeId = findNodeIdsByStationNames([detail.stn_nm])[0];
+        if (nodeId) {
+          map.set(nodeId, {
+            base_amt: detail.base_amt,
+            ubrw_amt: detail.ubrw_amt,
+            km: detail.km,
+          });
+        }
       }
-    };
-    loadNetworkData();
-  }, []);
+    });
+
+    return map;
+  }, [detailData, findNodeIdsByStationNames]);
 
   // 컬럼 정의
   const columnDefs = useMemo(() => {
@@ -168,6 +204,22 @@ export default function SettlementByOdPage() {
     [fetchDetailData]
   );
 
+  // 커스텀 툴팁 함수들
+  const customTooltips = useMemo(
+    () => ({
+      node: (node: Node) => {
+        const settlementData = settlementDataMap.get(node.id);
+        return (
+          <SettlementNodeTooltip node={node} settlementData={settlementData} />
+        );
+      },
+      link: (link: Link) => {
+        return <SettlementLinkTooltip link={link} />;
+      },
+    }),
+    [settlementDataMap]
+  );
+
   return (
     <div className="p-6 space-y-6">
       <div className="flex items-center justify-between">
@@ -188,6 +240,13 @@ export default function SettlementByOdPage() {
       {error && (
         <div className="bg-red-50 border border-red-200 rounded-md p-4">
           <p className="text-red-600">{error}</p>
+        </div>
+      )}
+
+      {/* 네트워크 맵 에러 메시지 */}
+      {mapError && (
+        <div className="bg-red-50 border border-red-200 rounded-md p-4">
+          <p className="text-red-600">노선도 로드 실패: {mapError}</p>
         </div>
       )}
 
@@ -323,8 +382,14 @@ export default function SettlementByOdPage() {
                       nodes={nodes}
                       links={links}
                       svgText={svgText}
-                      width="100%"
-                      height={600}
+                      config={{
+                        width: "100%",
+                        height: 600,
+                        showZoomControls: true,
+                        showTooltips: true,
+                      }}
+                      highlights={pathHighlights}
+                      tooltips={customTooltips}
                     />
                   </div>
                 )}

@@ -1,82 +1,56 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { NetworkMap } from "@/components/NetworkMap/NetworkMap";
 import { PieChart } from "@/components/charts/PieChart";
 import { ODPairChart } from "@/components/charts/ODPairChart";
 import Spinner from "@/components/Spinner";
-import type { Node, Link } from "@/types/network";
+import { useNetworkData } from "@/hooks/useNetworkData";
 import { MainService, CardStats, ODPairStats } from "@/services/mainService";
+import { NETWORK_MAP_CONFIGS } from "@/constants/networkMapConfigs";
 
 export default function Home() {
-  const [nodes, setNodes] = useState<Node[]>([]);
-  const [links, setLinks] = useState<Link[]>([]);
-  const [svgText, setSvgText] = useState<string>("");
   const [cardStats, setCardStats] = useState<CardStats[]>([]);
   const [odPairStats, setOdPairStats] = useState<ODPairStats[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  // 네트워크 데이터
+  const {
+    nodes,
+    links,
+    svgText,
+    isLoading: mapLoading,
+    error: mapError,
+  } = useNetworkData();
+
+  // 메인 데이터 fetch
   useEffect(() => {
-    const fetchMainData = async () => {
+    async function fetchMain() {
       try {
         setLoading(true);
         setError(null);
 
-        // 1. SVG 파일 로드
-        const svgResponse = await fetch("/subway_link 1.svg");
-        const svgData = await svgResponse.text();
-        setSvgText(svgData);
+        const cardResp = await MainService.getCardStatsFromApi();
+        if (cardResp.success) setCardStats(cardResp.data || []);
 
-        // 2. 네트워크 노드/링크 데이터 로드
-        const [nodesResponse, linksResponse] = await Promise.all([
-          MainService.getNetworkNodes(),
-          MainService.getNetworkLinks(),
-        ]);
-
-        if (nodesResponse.success) {
-          setNodes(nodesResponse.data || []);
-        } else {
-          console.error("네트워크 노드 로딩 실패:", nodesResponse.error);
-        }
-
-        if (linksResponse.success) {
-          setLinks(linksResponse.data || []);
-        } else {
-          console.error("네트워크 링크 로딩 실패:", linksResponse.error);
-        }
-
-        // 3. 권종별 통행수 데이터
-        const cardStatsResponse = await MainService.getCardStatsFromApi();
-        if (cardStatsResponse.success) {
-          console.log("권종별 통행수 데이터:", cardStatsResponse.data);
-          setCardStats(cardStatsResponse.data || []);
-        } else {
-          console.error("권종별 통행수 로딩 실패:", cardStatsResponse.error);
-        }
-
-        // 4. OD Pair 통계 데이터
-        const odPairResponse = await MainService.getODPairStatsFromApi();
-        if (odPairResponse.success) {
-          console.log("OD Pair 통계 데이터:", odPairResponse.data);
-          setOdPairStats(odPairResponse.data || []);
-        } else {
-          console.error("OD Pair 통계 로딩 실패:", odPairResponse.error);
-        }
-      } catch (err) {
-        console.error("메인 데이터 로딩 실패:", err);
+        const odResp = await MainService.getODPairStatsFromApi();
+        if (odResp.success) setOdPairStats(odResp.data || []);
+      } catch (e) {
+        console.error(e);
         setError("데이터를 불러오는 중 오류가 발생했습니다.");
       } finally {
         setLoading(false);
       }
-    };
-
-    fetchMainData();
+    }
+    fetchMain();
   }, []);
 
-  const handleNodeClick = (node: Node) => {
-    console.log("노드 클릭:", node);
-  };
+  // 메모이제이션된 값들
+  const mapConfig = useMemo(() => NETWORK_MAP_CONFIGS.main, []);
+  const noHighlights = useMemo(() => [], []);
+  const memoizedCardStats = useMemo(() => cardStats, [cardStats]);
+  const memoizedOdPairStats = useMemo(() => odPairStats, [odPairStats]);
 
   if (loading) {
     return (
@@ -85,7 +59,6 @@ export default function Home() {
       </div>
     );
   }
-
   if (error) {
     return (
       <div className="flex items-center justify-center h-screen">
@@ -93,20 +66,34 @@ export default function Home() {
       </div>
     );
   }
+  if (mapError) {
+    return (
+      <div className="p-6">
+        <div className="bg-red-50 border border-red-200 rounded-md p-4">
+          <p className="text-red-600">네트워크 데이터 로드 실패: {mapError}</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="h-[calc(100vh-280px)] flex flex-col p-2 gap-4  ">
-      {/* 상단: 네트워크 맵 */}
+    <div className="h-[calc(100vh-280px)] flex flex-col p-2 gap-4">
+      {/* 네트워크 맵 */}
       <div className="h-[400px] bg-white rounded-lg shadow-md p-4">
         <h2 className="text-lg font-semibold mb-4">네트워크 맵</h2>
-        <NetworkMap
-          nodes={nodes}
-          links={links}
-          svgText={svgText}
-          onNodeClick={handleNodeClick}
-          width="100%"
-          height={300}
-        />
+        {mapLoading ? (
+          <div className="flex items-center justify-center h-64 text-gray-500">
+            노선도를 불러오는 중...
+          </div>
+        ) : (
+          <NetworkMap
+            nodes={nodes}
+            links={links}
+            svgText={svgText}
+            config={mapConfig}
+            highlights={noHighlights}
+          />
+        )}
       </div>
 
       {/* 하단: 좌우 분할 */}
@@ -115,8 +102,8 @@ export default function Home() {
         <div className="flex-1 bg-white rounded-lg shadow-md p-4">
           <h2 className="text-lg font-semibold mb-4">권종별 통행수</h2>
           <div className="h-full">
-            {cardStats.length > 0 ? (
-              <PieChart data={cardStats} />
+            {memoizedCardStats.length > 0 ? (
+              <PieChart data={memoizedCardStats} />
             ) : (
               <div className="flex items-center justify-center h-full text-gray-500">
                 데이터를 불러오는 중...
@@ -132,8 +119,8 @@ export default function Home() {
             <span className="text-sm text-gray-500">(단위: 데이터 건수)</span>
           </div>
           <div className="h-full">
-            {odPairStats.length > 0 ? (
-              <ODPairChart data={odPairStats} />
+            {memoizedOdPairStats.length > 0 ? (
+              <ODPairChart data={memoizedOdPairStats} />
             ) : (
               <div className="flex items-center justify-center h-full text-gray-500">
                 데이터를 불러오는 중...

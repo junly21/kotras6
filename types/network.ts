@@ -134,3 +134,54 @@ export function convertToLink(networkLink: NetworkLink): Link {
     oper: networkLink.oper,
   };
 }
+
+// NetworkMap 관련 타입들
+export interface NetworkMapConfig {
+  width?: number | string;
+  height?: number | string;
+  showZoomControls?: boolean;
+  showTooltips?: boolean;
+  defaultZoom?: number;
+  defaultPan?: { x: number; y: number };
+}
+
+export interface NetworkMapHighlight {
+  type: "line" | "path" | "nodes";
+  value: string | string[];
+}
+
+export interface NetworkMapTooltip {
+  node?: (node: Node) => React.ReactNode;
+  link?: (link: Link) => React.ReactNode;
+}
+
+export interface NetworkMapProps {
+  nodes: Node[];
+  links: Link[];
+  svgText: string;
+  config?: NetworkMapConfig;
+  highlights?: NetworkMapHighlight[];
+  tooltips?: NetworkMapTooltip;
+  onNodeClick?: (node: Node) => void;
+  onLinkClick?: (link: Link) => void;
+}
+
+// 노드/링크 매칭 관련 타입
+export interface NodeMatcher {
+  byId: (id: string) => Node | undefined;
+  byName: (name: string) => Node | undefined;
+  byLine: (line: string) => Node[];
+}
+
+export interface LinkMatcher {
+  byNodes: (sourceId: string, targetId: string) => Link | undefined;
+  byLine: (line: string) => Link[];
+  byNode: (nodeId: string) => Link[];
+}
+
+export interface NetworkData {
+  nodes: Node[];
+  links: Link[];
+  nodeMatcher: NodeMatcher;
+  linkMatcher: LinkMatcher;
+}

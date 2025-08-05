@@ -1,5 +1,6 @@
 "use client";
 
+import React, { useMemo } from "react";
 import {
   BarChart,
   Bar,
@@ -40,39 +41,44 @@ const BAR_COLORS = [
 ];
 
 export function ODPairChart({ data }: Props) {
-  console.log("ODPairChart 원본 데이터:", data);
+  // 상위 10개 데이터 메모이제이션
+  const topData = useMemo(() => {
+    console.log("ODPairChart 원본 데이터:", data);
+    const sorted = data
+      .sort((a, b) => b.cnt - a.cnt)
+      .slice(0, 10)
+      .map((item, index) => ({
+        ...item,
+        순위: index + 1,
+        출발도착: `${item.ride_nm} → ${item.algh_nm}`,
+      }));
+    console.log("ODPairChart 상위 10개 데이터:", sorted);
+    return sorted;
+  }, [data]);
 
-  // 상위 10개만 표시
-  const topData = data
-    .sort((a, b) => b.cnt - a.cnt)
-    .slice(0, 10)
-    .map((item, index) => ({
-      ...item,
-      순위: index + 1,
-      출발도착: `${item.ride_nm} → ${item.algh_nm}`,
-    }));
+  const formatValue = useMemo(
+    () => (value: number) => {
+      return value.toLocaleString();
+    },
+    []
+  );
 
-  console.log("ODPairChart 상위 10개 데이터:", topData);
-
-  const formatValue = (value: number) => {
-    return value.toLocaleString();
-  };
-
-  // 커스텀 툴팁
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const CustomTooltip = ({ active, payload, label }: any) => {
-    if (active && payload && payload.length) {
-      return (
-        <div className="bg-white border border-gray-200 rounded-lg shadow-lg p-3">
-          <p className="text-gray-900 font-medium mb-1">{label}</p>
-          <p className="text-blue-600 font-semibold">
-            통행수: {formatValue(payload[0].value)}
-          </p>
-        </div>
-      );
-    }
-    return null;
-  };
+  // 커스텀 툴팁 메모이제이션
+  const CustomTooltip = useMemo(() => {
+    return ({ active, payload, label }: any) => {
+      if (active && payload && payload.length) {
+        return (
+          <div className="bg-white border border-gray-200 rounded-lg shadow-lg p-3">
+            <p className="text-gray-900 font-medium mb-1">{label}</p>
+            <p className="text-blue-600 font-semibold">
+              통행수: {formatValue(payload[0].value)}
+            </p>
+          </div>
+        );
+      }
+      return null;
+    };
+  }, [formatValue]);
 
   // 데이터가 없거나 빈 배열인 경우 처리
   if (!data || data.length === 0) {

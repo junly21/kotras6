@@ -52,6 +52,7 @@ export default function SettlementByOdPage() {
     null
   );
   const [isDetailLoading, setIsDetailLoading] = useState(false);
+  const [selectedPathIds, setSelectedPathIds] = useState<string[]>([]);
 
   // 네트워크 데이터 로드
   const {
@@ -70,46 +71,17 @@ export default function SettlementByOdPage() {
   // 경로 하이라이트 계산
   const pathHighlights = useMemo((): NetworkMapHighlight[] => {
     console.log("경로 하이라이트 계산 시작:", {
-      detailDataLength: detailData.length,
+      selectedPathIdsLength: selectedPathIds.length,
       nodesLength: nodes.length,
     });
 
-    if (detailData.length === 0 || nodes.length === 0) {
-      console.log("경로 하이라이트: 데이터 없음");
+    if (selectedPathIds.length === 0 || nodes.length === 0) {
+      console.log("경로 하이라이트: 선택된 경로 없음");
       return [];
     }
 
-    // 임시 stn_id 데이터 (실제 API에서 받을 예정)
-    const tempStnIds = [
-      226, 227, 228, 229, 230, 231, 232, 233, 234, 235, 236, 2524, 2525, 2526,
-      2527, 4115, 4116, 4117, 4118, 4119, 4120, 431, 432,
-    ];
-
-    // 총계 행을 제외하고 역명 순서대로 노드 ID 찾기 (기존 로직)
-    const stationNames = detailData
-      .filter((detail) => detail.stn_nm !== "-")
-      .map((detail) => detail.stn_nm);
-
-    console.log("역명 목록:", stationNames);
-
-    // 각 역명에 대해 모든 가능한 노드 ID 수집
-    const allNodeIds: string[] = [];
-    stationNames.forEach((stationName) => {
-      const nodeIds = findNodeIdsByStationName(stationName);
-      console.log(`역명 "${stationName}" -> 노드 ID들:`, nodeIds);
-      allNodeIds.push(...nodeIds);
-    });
-
-    // 중복 제거
-    const uniqueNodeIds = [...new Set(allNodeIds)];
-    console.log("역명 기반 노드 ID들:", uniqueNodeIds);
-
-    // 임시 stn_id 기반 노드 ID들 (문자열로 변환)
-    const tempNodeIds = tempStnIds.map((id) => id.toString());
-    console.log("임시 stn_id 기반 노드 ID들:", tempNodeIds);
-
     // 실제 존재하는 노드 ID들만 필터링
-    const validNodeIds = tempNodeIds.filter((id) =>
+    const validNodeIds = selectedPathIds.filter((id) =>
       nodes.some((node) => node.id === id)
     );
     console.log("유효한 노드 ID들:", validNodeIds);
@@ -129,7 +101,7 @@ export default function SettlementByOdPage() {
 
     console.log("최종 하이라이트 설정:", result);
     return result;
-  }, [detailData, nodes, findNodeIdsByStationName]);
+  }, [selectedPathIds, nodes]);
 
   // 정산 데이터를 노드별로 매핑
   const settlementDataMap = useMemo(() => {
@@ -197,9 +169,23 @@ export default function SettlementByOdPage() {
   const handleRowClick = useCallback(
     (rowData: SettlementByOdData) => {
       setSelectedRow(rowData);
-      // 소계 행이 아닌 경우에만 상세정보 조회
+      // 소계 행이 아닌 경우에만 상세정보 조회 및 경로 ID 설정
       if (rowData.path_detail !== "-") {
         fetchDetailData(rowData.path_key, rowData.path_id);
+
+        // path_id_list 파싱하여 경로 ID 설정
+        if (rowData.path_id_list && rowData.path_id_list !== "-") {
+          const pathIds = rowData.path_id_list
+            .split(",")
+            .map((id: string) => id.trim())
+            .filter((id: string) => id.length > 0);
+          setSelectedPathIds(pathIds);
+          console.log("선택된 경로 ID들:", pathIds);
+        } else {
+          setSelectedPathIds([]);
+        }
+      } else {
+        setSelectedPathIds([]);
       }
     },
     [fetchDetailData]
@@ -225,6 +211,21 @@ export default function SettlementByOdPage() {
           if (firstValidRow) {
             setSelectedRow(firstValidRow);
             fetchDetailData(firstValidRow.path_key, firstValidRow.path_id);
+
+            // 첫 번째 행의 path_id_list 설정
+            if (
+              firstValidRow.path_id_list &&
+              firstValidRow.path_id_list !== "-"
+            ) {
+              const pathIds = firstValidRow.path_id_list
+                .split(",")
+                .map((id: string) => id.trim())
+                .filter((id: string) => id.length > 0);
+              setSelectedPathIds(pathIds);
+              console.log("첫 번째 행 경로 ID들:", pathIds);
+            } else {
+              setSelectedPathIds([]);
+            }
           }
         } else {
           setError(response.error || "데이터 조회에 실패했습니다.");

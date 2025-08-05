@@ -9,6 +9,7 @@ export interface SettlementByOdData {
   path_id: string; // 경로 ID
   amt: number; // 배분금
   rn: number; // 순위
+  path_id_list: string; // 경로 ID 목록 (쉼표로 구분)
   path_key: string; // 경로 키
   confirmed_path: string; // 확정경로 포함 여부 (O/X/계)
 }

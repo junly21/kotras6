@@ -5,16 +5,12 @@ import React, {
   useMemo,
   useCallback,
 } from "react";
-import { parseSvg, toCamelCaseAttrs } from "./utils";
-import { DefaultNodeTooltip, DefaultLinkTooltip } from "./DefaultTooltips";
-import type { Node, Link, NetworkMapProps } from "@/types/network";
-import {
-  Tooltip,
-  TooltipTrigger,
-  TooltipContent as RadixTooltipContent,
-} from "../ui/tooltip";
+import { parseSvg } from "./utils";
+import type { NetworkMapProps } from "@/types/network";
 import { Button } from "../ui/button";
-import type { INode } from "svgson";
+
+import { calculateHighlightState } from "./highlightUtils";
+import { renderSvgNode } from "./svgRenderer";
 
 export function NetworkMap({
   nodes,
@@ -43,80 +39,12 @@ export function NetworkMap({
   const svgRef = useRef<SVGSVGElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // 하이라이트 상태 계산 - 메모이제이션
+  // 하이라이트 상태 계산
   const highlightState = useMemo(() => {
-    console.log("NetworkMap 하이라이트 상태 계산:", {
-      highlights,
-      nodesLength: nodes.length,
-      linksLength: links.length,
-    });
-
-    const highlightedNodes = new Set<string>();
-    const highlightedLinks = new Set<string>();
-    const activeLines = new Set<string>();
-
-    highlights.forEach((highlight) => {
-      console.log("하이라이트 처리:", highlight);
-
-      if (highlight.type === "line") {
-        const line = highlight.value as string;
-        activeLines.add(line);
-        // 해당 노선의 모든 노드와 링크 하이라이트
-        nodes.forEach((node) => {
-          if (node.line === line) {
-            highlightedNodes.add(node.id);
-          }
-        });
-        links.forEach((link) => {
-          if (link.line === line) {
-            highlightedLinks.add(`${link.source}-${link.target}`);
-            highlightedLinks.add(`${link.target}-${link.source}`);
-          }
-        });
-      } else if (highlight.type === "nodes") {
-        const nodeIds = Array.isArray(highlight.value)
-          ? highlight.value
-          : [highlight.value];
-        console.log("nodes 타입 하이라이트 - 노드 ID들:", nodeIds);
-        nodeIds.forEach((id) => highlightedNodes.add(id));
-        // nodes 타입의 경우 선택된 노드들만 표시하고 나머지는 투명하게 처리
-        // activeLines를 사용하여 선택되지 않은 노드들을 투명하게 처리
-        activeLines.add("__nodes_highlight__");
-      } else if (highlight.type === "path") {
-        const nodeIds = Array.isArray(highlight.value)
-          ? highlight.value
-          : [highlight.value];
-        console.log("path 타입 하이라이트 - 노드 ID들:", nodeIds);
-        nodeIds.forEach((id) => highlightedNodes.add(id));
-        // 경로의 연속된 노드들 사이의 링크도 하이라이트
-        for (let i = 0; i < nodeIds.length - 1; i++) {
-          const linkId1 = `${nodeIds[i]}-${nodeIds[i + 1]}`;
-          const linkId2 = `${nodeIds[i + 1]}-${nodeIds[i]}`;
-          highlightedLinks.add(linkId1);
-          highlightedLinks.add(linkId2);
-          console.log(`링크 추가: ${linkId1}, ${linkId2}`);
-        }
-        // path 타입의 경우 선택된 노드들만 표시하고 나머지는 투명하게 처리
-        activeLines.add("__nodes_highlight__");
-      }
-    });
-
-    const result = {
-      highlightedNodes,
-      highlightedLinks,
-      activeLines,
-    };
-
-    console.log("하이라이트 상태 결과:", {
-      highlightedNodesSize: highlightedNodes.size,
-      highlightedLinksSize: highlightedLinks.size,
-      activeLines: Array.from(activeLines),
-    });
-
-    return result;
+    return calculateHighlightState(highlights, nodes, links);
   }, [highlights, nodes, links]);
 
-  // SVG 파싱 및 렌더링 - 메모이제이션
+  // SVG 파싱 및 렌더링
   useEffect(() => {
     if (!svgText || !nodes.length || !links.length) return;
 
@@ -158,7 +86,7 @@ export function NetworkMap({
     tooltips,
   ]);
 
-  // 이벤트 핸들러 메모이제이션
+  // 이벤트 핸들러들
   const handleMouseDown = useCallback(
     (e: React.MouseEvent) => {
       if (e.button === 0) {
@@ -181,7 +109,7 @@ export function NetworkMap({
   const handleMouseUp = useCallback(() => setIsDragging(false), []);
   const handleMouseLeave = useCallback(() => setIsDragging(false), []);
 
-  // 화면 중앙 기준 확대/축소
+  // 확대/축소 핸들러
   const handleZoom = useCallback(
     (delta: number) => {
       if (!containerRef.current) return;
@@ -194,7 +122,6 @@ export function NetworkMap({
       const newScale = Math.max(0.5, Math.min(2.0, scale + delta * 0.1));
       const scaleRatio = newScale / scale;
 
-      // 화면 중앙을 기준으로 pan 조정
       const newPanX = centerX - (centerX - pan.x) * scaleRatio;
       const newPanY = centerY - (centerY - pan.y) * scaleRatio;
 
@@ -209,7 +136,7 @@ export function NetworkMap({
     setPan(defaultPan);
   }, [defaultZoom, defaultPan]);
 
-  // wheel 이벤트 리스너 추가 (passive 문제 해결)
+  // wheel 이벤트 리스너
   useEffect(() => {
     const container = containerRef.current;
     if (!container) return;
@@ -224,10 +151,8 @@ export function NetworkMap({
           const rect = container.getBoundingClientRect();
           const centerX = rect.width / 2;
           const centerY = rect.height / 2;
-
           const scaleRatio = newScale / scale;
 
-          // 화면 중앙을 기준으로 pan 조정
           const newPanX = centerX - (centerX - pan.x) * scaleRatio;
           const newPanY = centerY - (centerY - pan.y) * scaleRatio;
 
@@ -294,248 +219,5 @@ export function NetworkMap({
         </svg>
       </div>
     </div>
-  );
-}
-
-// matrix parsing & application (unchanged)
-function parseMatrix(transform: string): number[] | null {
-  const match = transform.match(/matrix\(([^)]+)\)/);
-  if (!match) return null;
-  return match[1]
-    .replace(/,/g, " ")
-    .split(/\s+/)
-    .map(Number)
-    .filter((n) => !isNaN(n));
-}
-
-function applyMatrixToPoint(cx: number, cy: number, m: number[]) {
-  const [a, b, c, d, e, f] = m;
-  return { x: a * cx + c * cy + e, y: b * cx + d * cy + f };
-}
-
-// **핵심: 모든 <path>를 순회하면서 id 패턴에 따라 node / link 분기**
-function renderSvgNode(
-  node: INode,
-  nodesData: Node[],
-  linksData: Link[],
-  onNodeClick?: (node: Node) => void,
-  onLinkClick?: (link: Link) => void,
-  key?: string,
-  highlightState?: {
-    highlightedNodes: Set<string>;
-    highlightedLinks: Set<string>;
-    activeLines: Set<string>;
-  },
-  showTooltips = true,
-  tooltips?: {
-    node?: (node: Node) => React.ReactNode;
-    link?: (link: Link) => React.ReactNode;
-  }
-): React.ReactNode {
-  // 1) **Node**: id 가 숫자만
-  if (node.name === "path" && /^\d+$/.test(node.attributes.id)) {
-    const id = node.attributes.id;
-    const nodeData = nodesData.find((n) => n.id === id);
-
-    if (!nodeData) return null;
-
-    // 활성 노선 확인
-    const isActiveLine =
-      !highlightState?.activeLines.size ||
-      highlightState.activeLines.has(nodeData.line);
-
-    // nodes/path 하이라이트 타입 처리
-    const isNodesHighlight = highlightState?.activeLines.has(
-      "__nodes_highlight__"
-    );
-    const isHighlightedNode = highlightState?.highlightedNodes.has(id) || false;
-
-    // opacity 계산
-    let opacity = 1;
-    if (highlightState?.activeLines.has("__nodes_highlight__")) {
-      // path 타입 전용
-      opacity = isHighlightedNode ? 1 : 0.1;
-    } else if (highlightState?.activeLines.size && !isActiveLine) {
-      opacity = 0.2;
-    }
-
-    // nodes/path 하이라이트 타입의 경우 선택되지 않은 노드는 투명하게 처리
-    if (isNodesHighlight && !isHighlightedNode) {
-      opacity = 0.1;
-    }
-
-    // 디버깅: 하이라이트 상태 로그
-    if (isNodesHighlight) {
-      console.log(
-        `노드 ${id} (${nodeData.name}): isHighlighted=${isHighlightedNode}, opacity=${opacity}`
-      );
-    }
-
-    // 텍스트 위치: d 첫 번째 M 좌표를 찍어서 offset
-    let textPos = { x: 0, y: 0 };
-    const d = node.attributes.d || "";
-    const m = d.match(/M\s*([-\d.]+)[ ,]?([-\d.]+)/);
-    if (m) {
-      let [x, y] = [parseFloat(m[1]), parseFloat(m[2])];
-      if (node.attributes.transform?.includes("matrix")) {
-        const mat = parseMatrix(node.attributes.transform);
-        if (mat) {
-          const pt = applyMatrixToPoint(x, y, mat);
-          x = pt.x;
-          y = pt.y;
-        }
-      }
-      textPos = { x: x + 40, y: y + 5 };
-    }
-
-    const nodeElement = (
-      <path
-        {...toCamelCaseAttrs(node.attributes)}
-        onClick={onNodeClick ? () => onNodeClick(nodeData) : undefined}
-        style={{
-          cursor: onNodeClick ? "pointer" : undefined,
-        }}
-      />
-    );
-
-    const textElement = (
-      <text
-        x={textPos.x}
-        y={textPos.y}
-        fontSize={24}
-        fontFamily="Arial, sans-serif"
-        fill="#374151"
-        pointerEvents="none">
-        {(() => {
-          const raw = nodeData.name.split("_")[1] || nodeData.name;
-          const idx = raw.indexOf("(");
-          return idx > -1 ? raw.slice(0, idx) : raw;
-        })()}
-      </text>
-    );
-
-    if (showTooltips && tooltips?.node) {
-      return (
-        <g key={key || id} style={{ opacity }}>
-          <Tooltip>
-            <TooltipTrigger asChild>{nodeElement}</TooltipTrigger>
-            <RadixTooltipContent>{tooltips.node(nodeData)}</RadixTooltipContent>
-          </Tooltip>
-          {textElement}
-        </g>
-      );
-    } else if (showTooltips) {
-      return (
-        <g key={key || id} style={{ opacity }}>
-          <Tooltip>
-            <TooltipTrigger asChild>{nodeElement}</TooltipTrigger>
-            <RadixTooltipContent>
-              <DefaultNodeTooltip node={nodeData} />
-            </RadixTooltipContent>
-          </Tooltip>
-          {textElement}
-        </g>
-      );
-    } else {
-      return (
-        <g key={key || id} style={{ opacity }}>
-          {nodeElement}
-          {textElement}
-        </g>
-      );
-    }
-  }
-
-  // 2) **Link**: id 가 "숫자-숫자"
-  if (node.name === "path" && /^\d+-\d+$/.test(node.attributes.id)) {
-    const id = node.attributes.id;
-    const [src, dst] = id.split("-");
-    const link = linksData.find(
-      (l) =>
-        (l.source === src && l.target === dst) ||
-        (l.source === dst && l.target === src)
-    );
-
-    if (!link) {
-      console.log("linksData에 없는 링크:", id, "source:", src, "target:", dst);
-      return null;
-    }
-
-    // 활성 노선 확인
-    const isActiveLine =
-      !highlightState?.activeLines.size ||
-      highlightState.activeLines.has(link.line);
-
-    // nodes/path 하이라이트 타입 처리
-    const isNodesHighlight = highlightState?.activeLines.has(
-      "__nodes_highlight__"
-    );
-    const isHighlightedLink = highlightState?.highlightedLinks.has(id) || false;
-    // opacity 계산 (path 타입 전용 모드 먼저 체크)
-    let opacity: number;
-    if (highlightState?.activeLines.has("__nodes_highlight__")) {
-      // path 하이라이트 모드: 실제 하이라이트된 링크만 1, 나머지는 0.1
-      opacity = isHighlightedLink ? 1 : 0.1;
-    } else if (highlightState?.activeLines.size && !isActiveLine) {
-      // 일반적인 line 하이라이트 모드: 선택 외엔 0.2
-      opacity = 0.2;
-    } else {
-      // 필터 없을 때
-      opacity = 1;
-    }
-
-    // 디버깅: 하이라이트 상태 로그
-    if (isNodesHighlight) {
-      console.log(
-        `링크 ${id}: isHighlighted=${isHighlightedLink}, opacity=${opacity}`
-      );
-    }
-
-    const linkElement = (
-      <path
-        {...toCamelCaseAttrs(node.attributes)}
-        style={{ opacity, cursor: onLinkClick ? "pointer" : undefined }}
-        onClick={onLinkClick ? () => onLinkClick(link) : undefined}
-      />
-    );
-
-    if (showTooltips && tooltips?.link) {
-      return (
-        <Tooltip key={key || id}>
-          <TooltipTrigger asChild>{linkElement}</TooltipTrigger>
-          <RadixTooltipContent>{tooltips.link(link)}</RadixTooltipContent>
-        </Tooltip>
-      );
-    } else if (showTooltips) {
-      return (
-        <Tooltip key={key || id}>
-          <TooltipTrigger asChild>{linkElement}</TooltipTrigger>
-          <RadixTooltipContent>
-            <DefaultLinkTooltip link={link} />
-          </RadixTooltipContent>
-        </Tooltip>
-      );
-    } else {
-      return <g key={key || id}>{linkElement}</g>;
-    }
-  }
-
-  // 3) 나머지 원소(예: <g>, <rect> 등)는 그대로 재귀
-  return React.createElement(
-    node.name,
-    { ...toCamelCaseAttrs(node.attributes), key: key || node.attributes.id },
-    node.children?.map((child: INode, i: number) =>
-      renderSvgNode(
-        child,
-        nodesData,
-        linksData,
-        onNodeClick,
-        onLinkClick,
-        `${node.name}-${i}`,
-        highlightState,
-        showTooltips,
-        tooltips
-      )
-    )
   );
 }

@@ -60,7 +60,7 @@ export default function SettlementByOdPage() {
     svgText,
     isLoading: isMapLoading,
     error: mapError,
-    findNodeIdsByStationNames,
+    findNodeIdsByStationName,
   } = useNetworkData();
 
   // AG Grid refs
@@ -69,31 +69,67 @@ export default function SettlementByOdPage() {
 
   // 경로 하이라이트 계산
   const pathHighlights = useMemo((): NetworkMapHighlight[] => {
+    console.log("경로 하이라이트 계산 시작:", {
+      detailDataLength: detailData.length,
+      nodesLength: nodes.length,
+    });
+
     if (detailData.length === 0 || nodes.length === 0) {
+      console.log("경로 하이라이트: 데이터 없음");
       return [];
     }
 
-    // 총계 행을 제외하고 역명 순서대로 노드 ID 찾기
+    // 임시 stn_id 데이터 (실제 API에서 받을 예정)
+    const tempStnIds = [
+      226, 227, 228, 229, 230, 231, 232, 233, 234, 235, 236, 2524, 2525, 2526,
+      2527, 4115, 4116, 4117, 4118, 4119, 4120, 431, 432,
+    ];
+
+    // 총계 행을 제외하고 역명 순서대로 노드 ID 찾기 (기존 로직)
     const stationNames = detailData
       .filter((detail) => detail.stn_nm !== "-")
       .map((detail) => detail.stn_nm);
 
-    const nodeIds = findNodeIdsByStationNames(stationNames);
+    console.log("역명 목록:", stationNames);
 
-    if (nodeIds.length === 0) {
+    // 각 역명에 대해 모든 가능한 노드 ID 수집
+    const allNodeIds: string[] = [];
+    stationNames.forEach((stationName) => {
+      const nodeIds = findNodeIdsByStationName(stationName);
+      console.log(`역명 "${stationName}" -> 노드 ID들:`, nodeIds);
+      allNodeIds.push(...nodeIds);
+    });
+
+    // 중복 제거
+    const uniqueNodeIds = [...new Set(allNodeIds)];
+    console.log("역명 기반 노드 ID들:", uniqueNodeIds);
+
+    // 임시 stn_id 기반 노드 ID들 (문자열로 변환)
+    const tempNodeIds = tempStnIds.map((id) => id.toString());
+    console.log("임시 stn_id 기반 노드 ID들:", tempNodeIds);
+
+    // 실제 존재하는 노드 ID들만 필터링
+    const validNodeIds = tempNodeIds.filter((id) =>
+      nodes.some((node) => node.id === id)
+    );
+    console.log("유효한 노드 ID들:", validNodeIds);
+
+    if (validNodeIds.length === 0) {
+      console.log("경로 하이라이트: 매칭되는 노드 없음");
       return [];
     }
 
     // 경로 하이라이트의 경우 선택된 노드들만 표시
-    return [
+    const result = [
       {
-        type: "nodes",
-        value: nodeIds,
-        color: "#ff0000",
-        opacity: 1,
+        type: "path" as const,
+        value: validNodeIds,
       },
     ];
-  }, [detailData, nodes, findNodeIdsByStationNames]);
+
+    console.log("최종 하이라이트 설정:", result);
+    return result;
+  }, [detailData, nodes, findNodeIdsByStationName]);
 
   // 정산 데이터를 노드별로 매핑
   const settlementDataMap = useMemo(() => {
@@ -104,19 +140,19 @@ export default function SettlementByOdPage() {
 
     detailData.forEach((detail) => {
       if (detail.stn_nm !== "-") {
-        const nodeId = findNodeIdsByStationNames([detail.stn_nm])[0];
-        if (nodeId) {
+        const nodeIds = findNodeIdsByStationName(detail.stn_nm);
+        nodeIds.forEach((nodeId) => {
           map.set(nodeId, {
             base_amt: detail.base_amt,
             ubrw_amt: detail.ubrw_amt,
             km: detail.km,
           });
-        }
+        });
       }
     });
 
     return map;
-  }, [detailData, findNodeIdsByStationNames]);
+  }, [detailData, findNodeIdsByStationName]);
 
   // 컬럼 정의
   const columnDefs = useMemo(() => {

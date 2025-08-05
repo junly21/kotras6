@@ -138,12 +138,28 @@ export function useNetworkData(options: UseNetworkDataOptions = {}) {
       .filter((id): id is string => id !== undefined);
   };
 
+  // 역명으로 노드 ID 찾기 (여러 개 가능)
+  const findNodeIdsByStationName = (stationName: string): string[] => {
+    const normalizedName = normalizeStationName(stationName);
+    return nodes
+      .filter((node) => {
+        const nodeName = node.name.split("_")[1] || node.name;
+        const normalizedNodeName = normalizeStationName(nodeName);
+        return (
+          normalizedNodeName === normalizedName ||
+          normalizedNodeName.includes(normalizedName) ||
+          normalizedName.includes(normalizedNodeName)
+        );
+      })
+      .map((node) => node.id);
+  };
+
   // 노선별 하이라이트를 위한 노드 ID 찾기
   const findNodeIdsByLine = (line: string): string[] => {
     return nodeMatcher.byLine(line).map((node) => node.id);
   };
 
-  // 경로 하이라이트를 위한 링크 찾기
+  // 경로의 연속된 노드들 사이의 링크 찾기
   const findLinksByNodeIds = (nodeIds: string[]): Link[] => {
     const result: Link[] = [];
     for (let i = 0; i < nodeIds.length - 1; i++) {
@@ -187,6 +203,7 @@ export function useNetworkData(options: UseNetworkDataOptions = {}) {
 
     // 유틸리티 함수들
     findNodeIdsByStationNames,
+    findNodeIdsByStationName,
     findNodeIdsByLine,
     findLinksByNodeIds,
     normalizeStationName,

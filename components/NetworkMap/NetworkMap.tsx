@@ -45,11 +45,19 @@ export function NetworkMap({
 
   // 하이라이트 상태 계산 - 메모이제이션
   const highlightState = useMemo(() => {
+    console.log("NetworkMap 하이라이트 상태 계산:", {
+      highlights,
+      nodesLength: nodes.length,
+      linksLength: links.length,
+    });
+
     const highlightedNodes = new Set<string>();
     const highlightedLinks = new Set<string>();
     const activeLines = new Set<string>();
 
     highlights.forEach((highlight) => {
+      console.log("하이라이트 처리:", highlight);
+
       if (highlight.type === "line") {
         const line = highlight.value as string;
         activeLines.add(line);
@@ -69,6 +77,7 @@ export function NetworkMap({
         const nodeIds = Array.isArray(highlight.value)
           ? highlight.value
           : [highlight.value];
+        console.log("nodes 타입 하이라이트 - 노드 ID들:", nodeIds);
         nodeIds.forEach((id) => highlightedNodes.add(id));
         // nodes 타입의 경우 선택된 노드들만 표시하고 나머지는 투명하게 처리
         // activeLines를 사용하여 선택되지 않은 노드들을 투명하게 처리
@@ -77,20 +86,34 @@ export function NetworkMap({
         const nodeIds = Array.isArray(highlight.value)
           ? highlight.value
           : [highlight.value];
+        console.log("path 타입 하이라이트 - 노드 ID들:", nodeIds);
         nodeIds.forEach((id) => highlightedNodes.add(id));
         // 경로의 연속된 노드들 사이의 링크도 하이라이트
         for (let i = 0; i < nodeIds.length - 1; i++) {
-          highlightedLinks.add(`${nodeIds[i]}-${nodeIds[i + 1]}`);
-          highlightedLinks.add(`${nodeIds[i + 1]}-${nodeIds[i]}`);
+          const linkId1 = `${nodeIds[i]}-${nodeIds[i + 1]}`;
+          const linkId2 = `${nodeIds[i + 1]}-${nodeIds[i]}`;
+          highlightedLinks.add(linkId1);
+          highlightedLinks.add(linkId2);
+          console.log(`링크 추가: ${linkId1}, ${linkId2}`);
         }
+        // path 타입의 경우 선택된 노드들만 표시하고 나머지는 투명하게 처리
+        activeLines.add("__nodes_highlight__");
       }
     });
 
-    return {
+    const result = {
       highlightedNodes,
       highlightedLinks,
       activeLines,
     };
+
+    console.log("하이라이트 상태 결과:", {
+      highlightedNodesSize: highlightedNodes.size,
+      highlightedLinksSize: highlightedLinks.size,
+      activeLines: Array.from(activeLines),
+    });
+
+    return result;
   }, [highlights, nodes, links]);
 
   // SVG 파싱 및 렌더링 - 메모이제이션
@@ -321,21 +344,31 @@ function renderSvgNode(
       !highlightState?.activeLines.size ||
       highlightState.activeLines.has(nodeData.line);
 
-    // nodes 하이라이트 타입 처리
+    // nodes/path 하이라이트 타입 처리
     const isNodesHighlight = highlightState?.activeLines.has(
       "__nodes_highlight__"
     );
     const isHighlightedNode = highlightState?.highlightedNodes.has(id) || false;
 
-    // opacity 계산 - 기존 로직으로 롤백
+    // opacity 계산
     let opacity = 1;
-    if (highlightState?.activeLines.size && !isActiveLine) {
+    if (highlightState?.activeLines.has("__nodes_highlight__")) {
+      // path 타입 전용
+      opacity = isHighlightedNode ? 1 : 0.1;
+    } else if (highlightState?.activeLines.size && !isActiveLine) {
       opacity = 0.2;
     }
 
-    // nodes 하이라이트 타입의 경우 선택되지 않은 노드는 투명하게 처리
+    // nodes/path 하이라이트 타입의 경우 선택되지 않은 노드는 투명하게 처리
     if (isNodesHighlight && !isHighlightedNode) {
       opacity = 0.1;
+    }
+
+    // 디버깅: 하이라이트 상태 로그
+    if (isNodesHighlight) {
+      console.log(
+        `노드 ${id} (${nodeData.name}): isHighlighted=${isHighlightedNode}, opacity=${opacity}`
+      );
     }
 
     // 텍스트 위치: d 첫 번째 M 좌표를 찍어서 offset
@@ -433,21 +466,29 @@ function renderSvgNode(
       !highlightState?.activeLines.size ||
       highlightState.activeLines.has(link.line);
 
-    // nodes 하이라이트 타입 처리
+    // nodes/path 하이라이트 타입 처리
     const isNodesHighlight = highlightState?.activeLines.has(
       "__nodes_highlight__"
     );
     const isHighlightedLink = highlightState?.highlightedLinks.has(id) || false;
-
-    // opacity 계산 - 기존 로직으로 롤백
-    let opacity = 1;
-    if (highlightState?.activeLines.size && !isActiveLine) {
+    // opacity 계산 (path 타입 전용 모드 먼저 체크)
+    let opacity: number;
+    if (highlightState?.activeLines.has("__nodes_highlight__")) {
+      // path 하이라이트 모드: 실제 하이라이트된 링크만 1, 나머지는 0.1
+      opacity = isHighlightedLink ? 1 : 0.1;
+    } else if (highlightState?.activeLines.size && !isActiveLine) {
+      // 일반적인 line 하이라이트 모드: 선택 외엔 0.2
       opacity = 0.2;
+    } else {
+      // 필터 없을 때
+      opacity = 1;
     }
 
-    // nodes 하이라이트 타입의 경우 선택되지 않은 링크는 투명하게 처리
-    if (isNodesHighlight && !isHighlightedLink) {
-      opacity = 0.1;
+    // 디버깅: 하이라이트 상태 로그
+    if (isNodesHighlight) {
+      console.log(
+        `링크 ${id}: isHighlighted=${isHighlightedLink}, opacity=${opacity}`
+      );
     }
 
     const linkElement = (

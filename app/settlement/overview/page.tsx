@@ -35,10 +35,7 @@ export default function TestGridPage() {
   });
 
   // apiCall 함수를 메모이제이션
-  const apiCall = useCallback(
-    () => PayRecvService.getOperList({ limit: 13 }),
-    []
-  );
+  const apiCall = useCallback(() => PayRecvService.getOperList(), []);
 
   // 콜백 함수들도 메모이제이션
   const onSuccess = useCallback((data: PayRecvOperData[]) => {

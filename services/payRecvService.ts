@@ -24,20 +24,9 @@ export interface PayRecvOperData {
 }
 
 export class PayRecvService {
-  static async getOperList(
-    params: PayRecvOperParams
-  ): Promise<ApiResponse<PayRecvOperData[]>> {
-    // POST 요청으로 변경하고 body 안에 params 객체로 limit 포함
-    const requestBody = {
-      params: {
-        limit: params.limit,
-      },
-    };
-    console.log("requestBody", requestBody);
-    return ApiClient.post<PayRecvOperData[]>(
-      "/pay-recv/oper-list",
-      requestBody
-    );
+  static async getOperList(): Promise<ApiResponse<PayRecvOperData[]>> {
+    // 빈 body로 POST 요청
+    return ApiClient.post<PayRecvOperData[]>("/pay-recv/oper-list", {});
   }
 
   static async createOper(

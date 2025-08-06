@@ -96,6 +96,7 @@ export default function SettlementByOdPage() {
       {
         type: "path" as const,
         value: validNodeIds,
+        priority: 1, // 선택된 경로는 우선순위 1로 설정
       },
     ];
 

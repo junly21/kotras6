@@ -148,6 +148,9 @@ export interface NetworkMapConfig {
 export interface NetworkMapHighlight {
   type: "line" | "path" | "nodes";
   value: string | string[];
+  priority?: number; // 우선순위 (높을수록 우선, 선택된 경로는 1, 다른 경로는 0)
+  rgb?: string; // RGB 색상 값
+  pathId?: string; // 경로 ID (체크박스 해제 시 식별용)
 }
 
 export interface NetworkMapTooltip {

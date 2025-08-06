@@ -42,6 +42,20 @@ function renderNodeElement(
   const id = node.attributes.id;
   const opacity = calculateOpacity(id, highlightState, true, nodeData.line);
 
+  // 색상 결정: RGB 기반 색상 적용 (RGB가 설정된 경우에만)
+  let strokeColor = node.attributes.stroke;
+  if (highlightState.nodeColors.has(id)) {
+    // RGB 색상이 설정된 경우에만 색상 변경
+    strokeColor = highlightState.nodeColors.get(id)!;
+  } else if (
+    highlightState.otherNodes.has(id) &&
+    !highlightState.selectedNodes.has(id) &&
+    highlightState.nodeColors.size > 0 // RGB 색상이 설정된 경로가 있는 경우에만 회색 처리
+  ) {
+    strokeColor = "#6B7280"; // 다른 경로만 회색 (선택된 경로 제외)
+  }
+  // RGB 색상이 설정되지 않은 경우 원본 stroke 색상 유지
+
   // 텍스트 위치 계산
   let textPos = { x: 0, y: 0 };
   const d = node.attributes.d || "";
@@ -62,6 +76,7 @@ function renderNodeElement(
   const nodeElement = (
     <path
       {...toCamelCaseAttrs(node.attributes)}
+      stroke={strokeColor}
       onClick={onNodeClick ? () => onNodeClick(nodeData) : undefined}
       style={{
         cursor: onNodeClick ? "pointer" : undefined,
@@ -133,9 +148,24 @@ function renderLinkElement(
   const id = node.attributes.id;
   const opacity = calculateOpacity(id, highlightState, false, link.line);
 
+  // 색상 결정: RGB 기반 색상 적용 (RGB가 설정된 경우에만)
+  let strokeColor = node.attributes.stroke;
+  if (highlightState.linkColors.has(id)) {
+    // RGB 색상이 설정된 경우에만 색상 변경
+    strokeColor = highlightState.linkColors.get(id)!;
+  } else if (
+    highlightState.otherLinks.has(id) &&
+    !highlightState.selectedLinks.has(id) &&
+    highlightState.linkColors.size > 0 // RGB 색상이 설정된 경로가 있는 경우에만 회색 처리
+  ) {
+    strokeColor = "#6B7280"; // 다른 경로만 회색 (선택된 경로 제외)
+  }
+  // RGB 색상이 설정되지 않은 경우 원본 stroke 색상 유지
+
   const linkElement = (
     <path
       {...toCamelCaseAttrs(node.attributes)}
+      stroke={strokeColor}
       style={{ opacity, cursor: onLinkClick ? "pointer" : undefined }}
       onClick={onLinkClick ? () => onLinkClick(link) : undefined}
     />

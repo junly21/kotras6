@@ -20,7 +20,15 @@ export class NetworkService {
   // 네트워크 목록 조회 (공통)
   static async getNetworkList(): Promise<ApiResponse<OptionItem[]>> {
     try {
-      const response = await fetch("/api/network/list");
+      const response = await fetch("/api/selectNetWorkList", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          NET_DT: "LATEST",
+        }),
+      });
       if (!response.ok)
         throw new Error(`HTTP error! status: ${response.status}`);
       const data = await response.json();
@@ -28,8 +36,8 @@ export class NetworkService {
       // 응답 데이터 검증 및 변환
       if (data.options && Array.isArray(data.options)) {
         const options = data.options.map((item: RawNetworkItem) => ({
-          value: String(item.value || item.net_dt || ""),
-          label: String(item.label || item.net_nm || ""),
+          value: String(item.value || ""),
+          label: String(item.label || ""),
         }));
         return { success: true, data: options };
       }

@@ -7,7 +7,7 @@ export const routeSearchFilterConfig: FieldConfig[] = [
     type: "combobox",
     placeholder: "출발역을 선택하세요",
     required: true,
-    optionsEndpoint: "/api/route-search/stations",
+    optionsEndpoint: "/api/selectNetWorkNodeList",
   },
   {
     name: "ALGH_STN_ID",
@@ -15,6 +15,6 @@ export const routeSearchFilterConfig: FieldConfig[] = [
     type: "combobox",
     placeholder: "도착역을 선택하세요",
     required: true,
-    optionsEndpoint: "/api/route-search/stations",
+    optionsEndpoint: "/api/selectNetWorkNodeList",
   },
 ];

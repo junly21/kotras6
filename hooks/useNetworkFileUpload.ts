@@ -214,7 +214,7 @@ export const useNetworkFileUpload = () => {
           const newFilters = { network: firstOption.value };
           setFilters(newFilters);
 
-          // 자동 조회 실행
+          // 자동 조회 실행 (네트워크 파일 목록 조회)
           await handleSearch(newFilters);
         }
       } else {

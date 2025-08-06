@@ -179,13 +179,13 @@ export function NetworkFileUploadModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="max-w-2xl">
-        <DialogHeader>
+      <DialogContent className="w-[600px] max-h-[80vh] overflow-y-auto flex flex-col">
+        <DialogHeader className="pb-4">
           <DialogTitle>신규 네트워크 등록</DialogTitle>
         </DialogHeader>
 
-        <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-md">
-          <p className="text-sm text-blue-800">
+        <div className="mb-4 p-2 bg-blue-50 border border-blue-200 rounded-md">
+          <p className="text-xs text-blue-800">
             노드, 링크, 플랫폼 (.csv) 파일을 모두 등록하셔야 합니다.
           </p>
         </div>
@@ -199,119 +199,135 @@ export function NetworkFileUploadModal({
         <Form {...form}>
           <form
             onSubmit={form.handleSubmit(handleSubmit)}
-            className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
-              <FormField
-                control={form.control}
-                name="networkName"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>네트워크명 *</FormLabel>
-                    <FormControl>
-                      <Input {...field} placeholder="네트워크명을 입력하세요" />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="date"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>날짜 *</FormLabel>
-                    <FormControl>
-                      <Input
-                        {...field}
-                        type="date"
-                        placeholder="날짜를 선택하세요"
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+            className="flex flex-col space-y-6 flex-1">
+            {/* 기본 정보 섹션 */}
+            <div className="space-y-4">
+              <h3 className="text-sm font-medium text-gray-700 border-b pb-2">
+                기본 정보
+              </h3>
+              <div className="grid grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="networkName"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-sm">네트워크명 *</FormLabel>
+                      <FormControl>
+                        <Input
+                          {...field}
+                          placeholder="네트워크명을 입력하세요"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="date"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-sm">날짜 *</FormLabel>
+                      <FormControl>
+                        <Input
+                          {...field}
+                          type="date"
+                          placeholder="날짜를 선택하세요"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
             </div>
 
-            <FormField
-              control={form.control}
-              name="nodeFile"
-              render={() => (
-                <FormItem>
-                  <FormLabel>노드 *</FormLabel>
-                  <FormControl>
-                    <div className="flex items-center gap-2">
-                      <Input
-                        type="file"
-                        accept=".csv"
-                        onChange={(e) => handleFileChange("nodeFile", e)}
-                        className="flex-1"
-                      />
-                      {nodeFileName && (
-                        <span className="text-sm text-gray-600 min-w-0 truncate">
-                          {nodeFileName}
-                        </span>
-                      )}
-                    </div>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            {/* 파일 업로드 섹션 */}
+            <div className="space-y-4">
+              <h3 className="text-sm font-medium text-gray-700 border-b pb-2">
+                파일 업로드
+              </h3>
+              <div className="space-y-4">
+                <FormField
+                  control={form.control}
+                  name="nodeFile"
+                  render={() => (
+                    <FormItem>
+                      <FormLabel className="text-sm">노드 파일 *</FormLabel>
+                      <FormControl>
+                        <div className="space-y-2">
+                          <Input
+                            type="file"
+                            accept=".csv"
+                            onChange={(e) => handleFileChange("nodeFile", e)}
+                          />
+                          {nodeFileName && (
+                            <div className="text-xs text-green-600 bg-green-50 p-2 rounded border">
+                              ✓ {nodeFileName}
+                            </div>
+                          )}
+                        </div>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
-            <FormField
-              control={form.control}
-              name="linkFile"
-              render={() => (
-                <FormItem>
-                  <FormLabel>링크 *</FormLabel>
-                  <FormControl>
-                    <div className="flex items-center gap-2">
-                      <Input
-                        type="file"
-                        accept=".csv"
-                        onChange={(e) => handleFileChange("linkFile", e)}
-                        className="flex-1"
-                      />
-                      {linkFileName && (
-                        <span className="text-sm text-gray-600 min-w-0 truncate">
-                          {linkFileName}
-                        </span>
-                      )}
-                    </div>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+                <FormField
+                  control={form.control}
+                  name="linkFile"
+                  render={() => (
+                    <FormItem>
+                      <FormLabel className="text-sm">링크 파일 *</FormLabel>
+                      <FormControl>
+                        <div className="space-y-2">
+                          <Input
+                            type="file"
+                            accept=".csv"
+                            onChange={(e) => handleFileChange("linkFile", e)}
+                          />
+                          {linkFileName && (
+                            <div className="text-xs text-green-600 bg-green-50 p-2 rounded border">
+                              ✓ {linkFileName}
+                            </div>
+                          )}
+                        </div>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
-            <FormField
-              control={form.control}
-              name="platformFile"
-              render={() => (
-                <FormItem>
-                  <FormLabel>플랫폼 *</FormLabel>
-                  <FormControl>
-                    <div className="flex items-center gap-2">
-                      <Input
-                        type="file"
-                        accept=".csv"
-                        onChange={(e) => handleFileChange("platformFile", e)}
-                        className="flex-1"
-                      />
-                      {platformFileName && (
-                        <span className="text-sm text-gray-600 min-w-0 truncate">
-                          {platformFileName}
-                        </span>
-                      )}
-                    </div>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+                <FormField
+                  control={form.control}
+                  name="platformFile"
+                  render={() => (
+                    <FormItem>
+                      <FormLabel className="text-sm">플랫폼 파일 *</FormLabel>
+                      <FormControl>
+                        <div className="space-y-2">
+                          <Input
+                            type="file"
+                            accept=".csv"
+                            onChange={(e) =>
+                              handleFileChange("platformFile", e)
+                            }
+                          />
+                          {platformFileName && (
+                            <div className="text-xs text-green-600 bg-green-50 p-2 rounded border">
+                              ✓ {platformFileName}
+                            </div>
+                          )}
+                        </div>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+            </div>
 
-            <div className="flex justify-end gap-2 pt-4">
+            <div className="flex justify-end gap-3 pt-6 border-t mt-auto">
               <Button type="button" variant="outline" onClick={handleClose}>
                 취소
               </Button>

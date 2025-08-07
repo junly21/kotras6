@@ -1,6 +1,9 @@
 export const EXTERNAL_BASE_URL = "http://192.168.111.152:8080/kotras6";
 // const EXTERNAL_BASE_URL = "http://192.168.110.21:28480/kotras6";
 
+export const OPTIMAL_ROUTE_BASE_URL = "http://192.168.111.152:5001";
+// const OPTIMAL_ROUTE_BASE_URL = "http://192.168.110.21:28482";
+
 export interface ExternalApiConfig {
   method?: "GET" | "POST" | "PUT" | "DELETE";
   headers?: Record<string, string>;
@@ -8,6 +11,13 @@ export interface ExternalApiConfig {
   params?: Record<string, string | number | boolean>;
 }
 
+export interface ApiResponse<T = unknown> {
+  success: boolean;
+  data?: T;
+  error?: string;
+}
+
+// 기존 API 호출 함수 (개선된 버전)
 export async function callExternalApi(
   endpoint: string,
   config: ExternalApiConfig = {}
@@ -80,6 +90,55 @@ export async function callExternalApi(
   }
 
   return { data, contentType };
+}
+
+// 최적경로 API 호출 함수
+export async function callOptimalRouteApi(
+  endpoint: string,
+  config: ExternalApiConfig = {}
+): Promise<ApiResponse> {
+  try {
+    const url = `${OPTIMAL_ROUTE_BASE_URL}/${endpoint}`;
+    const method = config.method || "GET";
+
+    console.log("최적경로 API 호출 URL:", url);
+    console.log("최적경로 API HTTP 메서드:", method);
+    console.log("최적경로 API 요청 데이터:", config.body);
+
+    const response = await fetch(url, {
+      method,
+      headers: {
+        "Content-Type": "application/json",
+        ...config.headers,
+      },
+      body: config.body ? JSON.stringify(config.body) : undefined,
+    });
+
+    console.log("최적경로 API 응답 상태:", response.status);
+    console.log(
+      "최적경로 API 응답 헤더:",
+      Object.fromEntries(response.headers.entries())
+    );
+
+    if (!response.ok) {
+      // 에러 응답의 내용도 확인
+      const errorText = await response.text();
+      console.log("최적경로 API 에러 응답 내용:", errorText);
+      throw new Error(
+        `HTTP error! status: ${response.status}, body: ${errorText}`
+      );
+    }
+
+    const data = await response.json();
+    console.log("최적경로 API 응답 데이터:", data);
+    return { success: true, data };
+  } catch (error) {
+    console.error(`최적경로 API 호출 실패 (${endpoint}):`, error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : String(error),
+    };
+  }
 }
 
 export function createCorsHeaders() {

@@ -16,10 +16,8 @@ export async function GET() {
     const options = Array.isArray(data) ? data : [];
 
     // "전체" 옵션을 맨 위에 추가
-    const optionsWithAll = [{ label: "전체", value: "ALL" }, ...options];
-
     return NextResponse.json(
-      { options: optionsWithAll },
+      { options: options },
       { headers: createCorsHeaders() }
     );
   } catch (error) {

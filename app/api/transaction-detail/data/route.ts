@@ -10,13 +10,26 @@ export async function POST(request: NextRequest) {
     // body 안의 params 객체에서 필터 추출
     const tradeDate = body.params?.tradeDate || "";
     const cardType = body.params?.cardType || "";
-    console.log("Selected filters:", { tradeDate, cardType });
+    const agency = body.params?.agency || "";
+    const line = body.params?.line || "";
+    const stations = body.params?.stations || [];
+
+    console.log("Selected filters:", {
+      tradeDate,
+      cardType,
+      agency,
+      line,
+      stations,
+    });
 
     const { data } = await callExternalApi("selectODConvList.do", {
       method: "POST",
       body: {
         RIDE_OPRN_DT: tradeDate,
         CARD_DIV: cardType,
+        OPER_NM: agency,
+        LINE_NM: line,
+        STN_ID_LIST: stations,
       },
     });
 

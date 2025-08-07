@@ -2,21 +2,17 @@
 import TestGrid from "@/components/TestGrid";
 import Spinner from "@/components/Spinner";
 import CsvExportButton from "@/components/CsvExportButton";
-import { FilterForm } from "@/components/ui/FilterForm";
+import { TransactionDetailFilterForm } from "@/components/transactionDetail/TransactionDetailFilterForm";
 import { Toast } from "@/components/ui/Toast";
 import { AllCommunityModule, ModuleRegistry } from "ag-grid-community";
 import { useApi } from "@/hooks/useApi";
 import { TransactionDetailService } from "@/services/transactionDetailService";
-import { useCallback, useRef, useState, useEffect } from "react";
+import { useCallback, useRef, useState } from "react";
 import { AgGridReact } from "ag-grid-react";
 import {
   TransactionDetailFilters,
   TransactionDetailData,
 } from "@/types/transactionDetail";
-import {
-  transactionDetailFields,
-  transactionDetailSchema,
-} from "@/features/transactionDetail/filterConfig";
 
 // Register all Community features
 ModuleRegistry.registerModules([AllCommunityModule]);
@@ -26,6 +22,9 @@ export default function TransactionDetailPage() {
   const [filters, setFilters] = useState<TransactionDetailFilters>({
     tradeDate: "",
     cardType: "",
+    agency: "",
+    line: "",
+    stations: [],
   });
 
   // ✅ 검색 수행 여부 상태 추가
@@ -65,26 +64,33 @@ export default function TransactionDetailPage() {
     });
   }, []);
 
-  const {
-    data: apiData,
-    loading,
-    refetch,
-  } = useApi<TransactionDetailData[]>(apiCall, {
+  const { data: apiData, loading } = useApi<TransactionDetailData[]>(apiCall, {
     autoFetch: false,
     onSuccess,
     onError,
   });
 
-  useEffect(() => {
-    if (hasSearched) {
-      refetch();
-    }
-  }, [filters, refetch, hasSearched]);
+  const handleSearch = useCallback(
+    (values: TransactionDetailFilters) => {
+      console.log("handleSearch 호출됨:", values);
+      setHasSearched(true); // ✅ 검색 시작
+      setFilters(values);
 
-  const handleSearch = useCallback((values: TransactionDetailFilters) => {
-    setHasSearched(true); // ✅ 검색 시작
-    setFilters(values);
-  }, []);
+      // 직접 API 호출
+      TransactionDetailService.getDetailData(values)
+        .then((result) => {
+          if (result.success) {
+            onSuccess(result.data || []);
+          } else {
+            onError(result.error || "데이터 로드 실패");
+          }
+        })
+        .catch((error) => {
+          onError(String(error));
+        });
+    },
+    [onSuccess, onError]
+  );
 
   // 컬럼 정의
   const colDefs = [
@@ -159,10 +165,14 @@ export default function TransactionDetailPage() {
     <div className="p-6 space-y-6">
       <h1 className="text-2xl font-bold">상세조회</h1>
 
-      <FilterForm<TransactionDetailFilters>
-        fields={transactionDetailFields}
-        defaultValues={{ tradeDate: "", cardType: "" }}
-        schema={transactionDetailSchema}
+      <TransactionDetailFilterForm
+        defaultValues={{
+          tradeDate: "",
+          cardType: "",
+          agency: "",
+          line: "",
+          stations: [],
+        }}
         onSearch={handleSearch}
       />
 

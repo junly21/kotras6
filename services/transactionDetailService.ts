@@ -13,8 +13,13 @@ export class TransactionDetailService {
       params: {
         tradeDate: filters.tradeDate,
         cardType: filters.cardType,
+        agency: filters.agency,
+        line: filters.line,
+        stations: filters.stations,
       },
     };
+
+    console.log("TransactionDetailService requestBody:", requestBody);
 
     return ApiClient.post<TransactionDetailData[]>(
       "/transaction-detail/data",

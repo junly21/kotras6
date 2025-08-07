@@ -12,6 +12,7 @@ export async function POST(request: NextRequest) {
     const cardType = body.params?.cardType || "";
     const agency = body.params?.agency || "";
     const line = body.params?.line || "";
+    const stationDiv = body.params?.stationDiv || "";
     const stations = body.params?.stations || [];
 
     console.log("Selected filters:", {
@@ -19,6 +20,7 @@ export async function POST(request: NextRequest) {
       cardType,
       agency,
       line,
+      stationDiv,
       stations,
     });
 
@@ -29,6 +31,7 @@ export async function POST(request: NextRequest) {
         CARD_DIV: cardType,
         OPER_NM: agency,
         LINE_NM: line,
+        STN_DIV: stationDiv,
         STN_ID_LIST: stations,
       },
     });

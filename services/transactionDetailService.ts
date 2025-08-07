@@ -15,6 +15,7 @@ export class TransactionDetailService {
         cardType: filters.cardType,
         agency: filters.agency,
         line: filters.line,
+        stationDiv: filters.stationDiv,
         stations: filters.stations,
       },
     };

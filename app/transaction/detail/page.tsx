@@ -5,7 +5,7 @@ import CsvExportButton from "@/components/CsvExportButton";
 import { TransactionDetailFilterForm } from "@/components/transactionDetail/TransactionDetailFilterForm";
 import { Toast } from "@/components/ui/Toast";
 import { AllCommunityModule, ModuleRegistry } from "ag-grid-community";
-import { useApi } from "@/hooks/useApi";
+
 import { TransactionDetailService } from "@/services/transactionDetailService";
 import { useCallback, useRef, useState } from "react";
 import { AgGridReact } from "ag-grid-react";
@@ -19,13 +19,6 @@ ModuleRegistry.registerModules([AllCommunityModule]);
 
 export default function TransactionDetailPage() {
   const gridRef = useRef<AgGridReact>(null);
-  const [filters, setFilters] = useState<TransactionDetailFilters>({
-    tradeDate: "",
-    cardType: "",
-    agency: "",
-    line: "",
-    stations: [],
-  });
 
   // ✅ 검색 수행 여부 상태 추가
   const [hasSearched, setHasSearched] = useState(false);
@@ -40,11 +33,6 @@ export default function TransactionDetailPage() {
     message: "",
     type: "info",
   });
-
-  const apiCall = useCallback(
-    () => TransactionDetailService.getDetailData(filters),
-    [filters]
-  );
 
   const onSuccess = useCallback((data: TransactionDetailData[]) => {
     console.log("상세조회 데이터 로드 성공:", data);
@@ -64,29 +52,32 @@ export default function TransactionDetailPage() {
     });
   }, []);
 
-  const { data: apiData, loading } = useApi<TransactionDetailData[]>(apiCall, {
-    autoFetch: false,
-    onSuccess,
-    onError,
-  });
+  const [apiData, setApiData] = useState<TransactionDetailData[]>([]);
+  const [loading, setLoading] = useState(false);
 
   const handleSearch = useCallback(
     (values: TransactionDetailFilters) => {
       console.log("handleSearch 호출됨:", values);
       setHasSearched(true); // ✅ 검색 시작
-      setFilters(values);
+      setLoading(true);
 
       // 직접 API 호출
       TransactionDetailService.getDetailData(values)
         .then((result) => {
           if (result.success) {
+            setApiData(result.data || []);
             onSuccess(result.data || []);
           } else {
+            setApiData([]);
             onError(result.error || "데이터 로드 실패");
           }
         })
         .catch((error) => {
+          setApiData([]);
           onError(String(error));
+        })
+        .finally(() => {
+          setLoading(false);
         });
     },
     [onSuccess, onError]
@@ -171,6 +162,7 @@ export default function TransactionDetailPage() {
           cardType: "",
           agency: "",
           line: "",
+          stationDiv: "",
           stations: [],
         }}
         onSearch={handleSearch}

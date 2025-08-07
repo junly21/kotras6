@@ -6,6 +6,7 @@ export interface TransactionDetailFilters {
   cardType: string; // 카드구분
   agency: string; // 기관명
   line: string; // 노선명
+  stationDiv: string; // 승하차구분
   stations: string[]; // 역선택 (복수선택)
 }
 
@@ -15,6 +16,7 @@ export const transactionDetailSchema = z.object({
   cardType: z.string().min(1, "카드구분을 선택해주세요"),
   agency: z.string().min(1, "기관명을 선택해주세요"),
   line: z.string().min(1, "노선명을 선택해주세요"),
+  stationDiv: z.string().min(1, "승하차구분을 선택해주세요"),
   stations: z.array(z.string()).min(1, "역을 하나 이상 선택해주세요"),
 });
 

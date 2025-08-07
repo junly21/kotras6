@@ -165,6 +165,7 @@ export function TransactionDetailFilterForm({
       ...values,
       agency: selectedAgency?.label || values.agency,
       line: selectedLine?.label || values.line,
+      // stationDiv는 이미 RIDE/ALGH 값이므로 그대로 사용
     };
 
     console.log("변환된 필터 값:", convertedValues);
@@ -176,184 +177,215 @@ export function TransactionDetailFilterForm({
       <form
         onSubmit={form.handleSubmit(handleSubmit)}
         className={cn(
-          "flex flex-wrap gap-4 items-center bg-[#E9E9E9] border border-[#D9D9D9] p-4 rounded-xl",
+          "bg-[#E9E9E9] border border-[#D9D9D9] p-4 rounded-xl flex items-center",
           className
         )}>
-        {/* 거래일자 */}
-        <FormField
-          control={form.control}
-          name="tradeDate"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>
-                거래일자
-                <span className="text-red-500">*</span>
-              </FormLabel>
-              <FormControl>
-                <Select onValueChange={field.onChange} value={field.value}>
-                  <SelectTrigger className="w-36 bg-white border border-[#d9d9d9]">
-                    <SelectValue placeholder="거래일자를 선택하세요" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {(dynamicOptions.tradeDate || []).map((opt, index) => (
-                      <SelectItem
-                        key={opt.value || `tradeDate-${index}`}
-                        value={String(opt.value)}>
-                        {opt.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        {/* 카드구분 */}
-        <FormField
-          control={form.control}
-          name="cardType"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>
-                카드구분
-                <span className="text-red-500">*</span>
-              </FormLabel>
-              <FormControl>
-                <Select onValueChange={field.onChange} value={field.value}>
-                  <SelectTrigger className="w-36 bg-white border border-[#d9d9d9]">
-                    <SelectValue placeholder="카드구분을 선택하세요" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {(dynamicOptions.cardType || []).map((opt, index) => (
-                      <SelectItem
-                        key={opt.value || `cardType-${index}`}
-                        value={String(opt.value)}>
-                        {opt.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        {/* 기관명 */}
-        <FormField
-          control={form.control}
-          name="agency"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>
-                기관명
-                <span className="text-red-500">*</span>
-              </FormLabel>
-              <FormControl>
-                <Select onValueChange={field.onChange} value={field.value}>
-                  <SelectTrigger className="w-36 bg-white border border-[#d9d9d9]">
-                    <SelectValue placeholder="기관명을 선택하세요" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {(dynamicOptions.agency || []).map((opt, index) => (
-                      <SelectItem
-                        key={opt.value || `agency-${index}`}
-                        value={String(opt.value)}>
-                        {opt.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        {/* 노선명 */}
-        <FormField
-          control={form.control}
-          name="line"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>
-                노선명
-                <span className="text-red-500">*</span>
-              </FormLabel>
-              <FormControl>
-                <Select
-                  onValueChange={field.onChange}
-                  value={field.value}
-                  disabled={!form.watch("agency")}>
-                  <SelectTrigger className="w-36 bg-white border border-[#d9d9d9]">
-                    <SelectValue placeholder="노선명을 선택하세요" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {(dynamicOptions.line || []).map((opt, index) => (
-                      <SelectItem
-                        key={opt.value || `line-${index}`}
-                        value={String(opt.value)}>
-                        {opt.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        {/* 역선택 */}
-        <FormField
-          control={form.control}
-          name="stations"
-          render={({ field }) => {
-            const selectedStations = field.value || [];
-            const selectedLabels = (dynamicOptions.stations || [])
-              .filter((opt) => selectedStations.includes(String(opt.value)))
-              .map((opt) => opt.label)
-              .join(", ");
-
-            return (
+        <div className="flex flex-wrap gap-4 items-center">
+          {/* 거래일자 */}
+          <FormField
+            control={form.control}
+            name="tradeDate"
+            render={({ field }) => (
               <FormItem>
                 <FormLabel>
-                  역선택
+                  거래일자
                   <span className="text-red-500">*</span>
                 </FormLabel>
                 <FormControl>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => setIsStationModalOpen(true)}
-                    disabled={!form.watch("line")}
-                    className="w-48 justify-between bg-white border border-[#d9d9d9]">
-                    <span className="truncate">
-                      {selectedLabels || "역을 선택하세요"}
-                    </span>
-                    <span className="text-xs text-gray-500 ml-2">
-                      ({selectedStations.length}개)
-                    </span>
-                  </Button>
+                  <Select onValueChange={field.onChange} value={field.value}>
+                    <SelectTrigger className="w-48 bg-white border border-[#d9d9d9]">
+                      <SelectValue placeholder="거래일자를 선택하세요" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {(dynamicOptions.tradeDate || []).map((opt, index) => (
+                        <SelectItem
+                          key={opt.value || `tradeDate-${index}`}
+                          value={String(opt.value)}>
+                          {opt.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </FormControl>
                 <FormMessage />
               </FormItem>
-            );
-          }}
-        />
+            )}
+          />
 
-        <Button type="submit" className="rounded-lg">
-          조회
-        </Button>
-        <Button
-          type="button"
-          className="rounded-lg"
-          variant="outline"
-          onClick={() => form.reset()}>
-          초기화
-        </Button>
+          {/* 카드구분 */}
+          <FormField
+            control={form.control}
+            name="cardType"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>
+                  카드구분
+                  <span className="text-red-500">*</span>
+                </FormLabel>
+                <FormControl>
+                  <Select onValueChange={field.onChange} value={field.value}>
+                    <SelectTrigger className="w-48 bg-white border border-[#d9d9d9]">
+                      <SelectValue placeholder="카드구분을 선택하세요" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {(dynamicOptions.cardType || []).map((opt, index) => (
+                        <SelectItem
+                          key={opt.value || `cardType-${index}`}
+                          value={String(opt.value)}>
+                          {opt.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          {/* 기관명 */}
+          <FormField
+            control={form.control}
+            name="agency"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>
+                  기관명
+                  <span className="text-red-500">*</span>
+                </FormLabel>
+                <FormControl>
+                  <Select onValueChange={field.onChange} value={field.value}>
+                    <SelectTrigger className="w-48 bg-white border border-[#d9d9d9]">
+                      <SelectValue placeholder="기관명을 선택하세요" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {(dynamicOptions.agency || []).map((opt, index) => (
+                        <SelectItem
+                          key={opt.value || `agency-${index}`}
+                          value={String(opt.value)}>
+                          {opt.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          {/* 노선명 */}
+          <FormField
+            control={form.control}
+            name="line"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>
+                  노선명
+                  <span className="text-red-500">*</span>
+                </FormLabel>
+                <FormControl>
+                  <Select
+                    onValueChange={field.onChange}
+                    value={field.value}
+                    disabled={!form.watch("agency")}>
+                    <SelectTrigger className="w-48 bg-white border border-[#d9d9d9]">
+                      <SelectValue placeholder="노선명을 선택하세요" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {(dynamicOptions.line || []).map((opt, index) => (
+                        <SelectItem
+                          key={opt.value || `line-${index}`}
+                          value={String(opt.value)}>
+                          {opt.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          {/* 승하차구분 */}
+          <FormField
+            control={form.control}
+            name="stationDiv"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>
+                  승하차구분
+                  <span className="text-red-500">*</span>
+                </FormLabel>
+                <FormControl>
+                  <Select onValueChange={field.onChange} value={field.value}>
+                    <SelectTrigger className="w-48 bg-white border border-[#d9d9d9]">
+                      <SelectValue placeholder="승하차구분을 선택하세요" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="RIDE">승차</SelectItem>
+                      <SelectItem value="ALGH">하차</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          {/* 역선택 */}
+          <FormField
+            control={form.control}
+            name="stations"
+            render={({ field }) => {
+              const selectedStations = field.value || [];
+              const selectedLabels = (dynamicOptions.stations || [])
+                .filter((opt) => selectedStations.includes(String(opt.value)))
+                .map((opt) => opt.label)
+                .join(", ");
+
+              return (
+                <FormItem>
+                  <FormLabel>
+                    역선택
+                    <span className="text-red-500">*</span>
+                  </FormLabel>
+                  <FormControl>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => setIsStationModalOpen(true)}
+                      disabled={!form.watch("line")}
+                      className="w-48 justify-between bg-white border border-[#d9d9d9]">
+                      <span className="truncate">
+                        {selectedLabels || "역을 선택하세요"}
+                      </span>
+                      <span className="text-xs text-gray-500 ml-2">
+                        ({selectedStations.length}개)
+                      </span>
+                    </Button>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              );
+            }}
+          />
+        </div>
+
+        {/* 버튼 영역 - 항상 오른쪽 정렬 */}
+        <div className="flex justify-end gap-2 mt-4">
+          <Button type="submit" className="rounded-lg">
+            조회
+          </Button>
+          <Button
+            type="button"
+            className="rounded-lg"
+            variant="outline"
+            onClick={() => form.reset()}>
+            초기화
+          </Button>
+        </div>
       </form>
 
       {/* 역선택 모달 */}

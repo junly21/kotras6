@@ -4,6 +4,8 @@ import { useState, useMemo, useRef } from "react";
 import { z } from "zod";
 import { FilterForm } from "@/components/ui/FilterForm";
 import { routeSearchFilterConfig } from "@/features/routeSearch/filterConfig";
+import { createRouteSearchColDefs } from "@/features/routeSearch/gridConfig";
+import { processRouteSearchResults } from "@/features/routeSearch/dataProcessor";
 import { useRouteSearch } from "@/hooks/useRouteSearch";
 import { RouteSearchFilter, RouteSearchResult } from "@/types/routeSearch";
 import Spinner from "@/components/Spinner";
@@ -13,12 +15,7 @@ import { AllCommunityModule, ModuleRegistry } from "ag-grid-community";
 import { NetworkMap } from "@/components/NetworkMap/NetworkMap";
 import { useNetworkData } from "@/hooks/useNetworkData";
 import type { NetworkMapHighlight } from "@/types/network";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { RouteDetailDialog } from "@/components/routeSearch/RouteDetailDialog";
 
 // Register all Community features
 ModuleRegistry.registerModules([AllCommunityModule]);
@@ -62,11 +59,16 @@ export default function RouteSearchResultPage() {
     setFilters(values);
   };
 
+  // 검색 수행 여부 상태 추가
+  const [hasSearched, setHasSearched] = useState(false);
+
   // 검색 핸들러
   const handleSearchSubmit = (values: RouteSearchFilter) => {
     handleSearch(values);
     // 검색 시 선택된 경로 초기화
     setSelectedPaths([]);
+    // 검색 수행 상태 설정
+    setHasSearched(true);
   };
 
   // 체크박스 변경 핸들러
@@ -81,7 +83,7 @@ export default function RouteSearchResultPage() {
   };
 
   // 상세 정보 Dialog 열기
-  const handleRowClick = (route: RouteSearchResult) => {
+  const handleDetailClick = (route: RouteSearchResult) => {
     setSelectedRouteForDetail(route);
     setDetailDialogOpen(true);
   };
@@ -135,212 +137,13 @@ export default function RouteSearchResultPage() {
 
   // 경로탐색 결과 데이터 가공
   const processedResults = useMemo(() => {
-    if (!searchResults || searchResults.length === 0) return [];
-
-    return searchResults.map((result, index) => {
-      // transfer_list 파싱 (JSON 문자열을 배열로 변환)
-      let transferStations: string[] = [];
-      try {
-        if (result.transfer_list && result.transfer_list !== "[]") {
-          transferStations = JSON.parse(result.transfer_list);
-        }
-      } catch {
-        console.warn("transfer_list 파싱 실패:", result.transfer_list);
-      }
-
-      // 경로 구성: 출발역 + 환승역 + 도착역
-      const pathComponents = [];
-
-      // 출발역
-      if (result.start_node) {
-        const startStation = result.start_node.match(
-          /\([^)]+\)[^_]*_([^(]+)\([^)]+\)/
-        );
-        if (startStation) {
-          pathComponents.push(startStation[1]);
-        }
-      }
-
-      // 환승역들
-      transferStations.forEach((transfer) => {
-        const transferStation = transfer.match(
-          /\([^)]+\)[^_]*_([^(]+)\([^)]+\)/
-        );
-        if (transferStation) {
-          pathComponents.push(transferStation[1]);
-        }
-      });
-
-      // 도착역
-      if (result.end_node) {
-        const endStation = result.end_node.match(
-          /\([^)]+\)[^_]*_([^(]+)\([^)]+\)/
-        );
-        if (endStation) {
-          pathComponents.push(endStation[1]);
-        }
-      }
-
-      return {
-        id: result.id || index,
-        rank: result.rn || index + 1,
-        startStation: result.start_node
-          ? result.start_node.match(/\([^)]+\)[^_]*_([^(]+)\([^)]+\)/)?.[1] ||
-            ""
-          : "",
-        endStation: result.end_node
-          ? result.end_node.match(/\([^)]+\)[^_]*_([^(]+)\([^)]+\)/)?.[1] || ""
-          : "",
-        path: pathComponents.join(" → "),
-        transferCount: result.transfer_cnt || 0,
-        isSelected: selectedPaths.some((path) => path.id === result.id),
-        // 상세 정보는 원본 데이터에 저장
-        originalData: result,
-      };
-    });
+    return processRouteSearchResults(searchResults, selectedPaths);
   }, [searchResults, selectedPaths]);
 
-  // 그리드 컬럼 정의 (체크박스 추가)
-  const colDefs = [
-    {
-      headerName: "선택",
-      field: "isSelected",
-      width: 100,
-      sortable: false,
-      cellRenderer: (params: {
-        value: boolean;
-        data: { originalData: RouteSearchResult };
-      }) => {
-        return (
-          <input
-            type="checkbox"
-            checked={params.value}
-            onChange={(e) =>
-              handleCheckboxChange(params.data.originalData, e.target.checked)
-            }
-            onClick={(e) => e.stopPropagation()}
-            className="w-4 h-4"
-          />
-        );
-      },
-      cellStyle: {
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        height: "100%",
-      },
-    },
-    {
-      headerName: "순번",
-      field: "rank",
-      width: 100,
-      sortable: true,
-      cellStyle: {
-        fontWeight: "bold",
-        display: "flex",
-        alignItems: "center",
-        height: "100%",
-      },
-    },
-    {
-      headerName: "출발역",
-      field: "startStation",
-      width: 150,
-      sortable: true,
-      cellStyle: {
-        display: "flex",
-        alignItems: "center",
-        height: "100%",
-      },
-    },
-    {
-      headerName: "도착역",
-      field: "endStation",
-      width: 150,
-      sortable: true,
-      cellStyle: {
-        display: "flex",
-        alignItems: "center",
-        height: "100%",
-      },
-    },
-    {
-      headerName: "경로",
-      field: "path",
-      width: 400,
-      sortable: true,
-      cellStyle: {
-        display: "flex",
-        alignItems: "center",
-        height: "100%",
-      },
-      cellRenderer: (params: { value: string }) => {
-        const pathParts = params.value.split(" → ");
-        return (
-          <div className="flex items-center gap-1">
-            {pathParts.map((part: string, index: number) => (
-              <span key={index} className="text-sm">
-                {part}
-                {index < pathParts.length - 1 && (
-                  <span className="mx-2 text-gray-400">→</span>
-                )}
-              </span>
-            ))}
-          </div>
-        );
-      },
-    },
-    {
-      headerName: "환승",
-      field: "transferCount",
-      width: 200,
-      sortable: true,
-      cellStyle: {
-        display: "flex",
-        alignItems: "center",
-        height: "100%",
-      },
-      cellRenderer: (params: { value: number }) => {
-        const count = params.value;
-        return (
-          <span
-            className={`px-2 py-1 rounded text-xs font-medium ${
-              count === 0
-                ? "bg-green-100 text-green-800"
-                : count <= 2
-                ? "bg-yellow-100 text-yellow-800"
-                : "bg-red-100 text-red-800"
-            }`}>
-            {count}회
-          </span>
-        );
-      },
-    },
-    {
-      headerName: "상세정보",
-      field: "detail",
-      width: 150,
-      sortable: false,
-      cellRenderer: (params: { data: { originalData: RouteSearchResult } }) => {
-        return (
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              handleRowClick(params.data.originalData);
-            }}
-            className="px-3 py-1 bg-blue-500 text-white text-sm rounded hover:bg-blue-600 transition-colors">
-            보기
-          </button>
-        );
-      },
-      cellStyle: {
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        height: "100%",
-      },
-    },
-  ];
+  // 그리드 컬럼 정의
+  const colDefs = useMemo(() => {
+    return createRouteSearchColDefs(handleCheckboxChange, handleDetailClick);
+  }, [handleCheckboxChange, handleDetailClick]);
 
   // 행 클릭 핸들러 제거 (상세정보 버튼으로 대체)
   const onRowClicked = (event: {
@@ -349,6 +152,20 @@ export default function RouteSearchResultPage() {
     // 행 클릭 시 아무 동작 안함 (상세정보 버튼으로 대체)
     console.log("행 클릭 이벤트 (비활성화):", event);
   };
+
+  // 그리드 높이 동적 계산
+  const gridHeight = useMemo(() => {
+    if (!processedResults || processedResults.length === 0) return 200;
+    const rowHeight = 48; // AG Grid 기본 행 높이
+    const headerHeight = 48; // 헤더 높이
+    const minHeight = 200;
+    const maxHeight = 480; // 최대 10행
+    const calculatedHeight = Math.min(
+      Math.max(processedResults.length * rowHeight + headerHeight, minHeight),
+      maxHeight
+    );
+    return calculatedHeight;
+  }, [processedResults]);
 
   return (
     <div className="p-6 space-y-6">
@@ -389,26 +206,76 @@ export default function RouteSearchResultPage() {
       />
 
       {/* 결과 그리드 */}
-      {processedResults.length > 0 && (
-        <div className="space-y-4">
-          <h2 className="text-xl font-semibold">
-            탐색 결과 ({processedResults.length}개)
-          </h2>
-          <TestGrid
-            rowData={processedResults}
-            columnDefs={colDefs}
-            gridRef={gridRef}
-            height={400}
-            gridOptions={{
-              onRowClicked: onRowClicked,
-              rowSelection: "none", // 체크박스 사용하므로 단일 선택 비활성화
-            }}
-          />
-        </div>
-      )}
+      <div className="space-y-4">
+        {!hasSearched ? (
+          // 조회 전 안내 메시지
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-8 text-center">
+            <div className="text-blue-600 mb-2">
+              <svg
+                className="w-12 h-12 mx-auto mb-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24">
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                />
+              </svg>
+            </div>
+            <h2 className="text-xl font-semibold text-blue-800 mb-2">
+              경로 탐색
+            </h2>
+            <p className="text-blue-600">
+              출발역과 도착역을 선택한 후 &quot;조회&quot; 버튼을 클릭하여
+              경로를 탐색해주세요.
+            </p>
+          </div>
+        ) : processedResults.length > 0 ? (
+          // 검색 결과가 있는 경우
+          <>
+            <h2 className="text-xl font-semibold">
+              탐색 결과 ({processedResults.length}개)
+            </h2>
+            <TestGrid
+              rowData={processedResults}
+              columnDefs={colDefs}
+              gridRef={gridRef}
+              height={gridHeight}
+              gridOptions={{
+                onRowClicked: onRowClicked,
+                rowSelection: "none", // 체크박스 사용하므로 단일 선택 비활성화
+              }}
+            />
+          </>
+        ) : (
+          // 검색 결과가 없는 경우
+          <div className="bg-gray-50 border border-gray-200 rounded-lg p-8 text-center">
+            <div className="text-gray-400 mb-2">
+              <svg
+                className="w-12 h-12 mx-auto mb-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24">
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M9.172 16.172a4 4 0 015.656 0M9 12h6m-6-4h6m2 5.291A7.962 7.962 0 0112 15c-2.34 0-4.47-.881-6.08-2.33"
+                />
+              </svg>
+            </div>
+            <h2 className="text-xl font-semibold text-gray-600 mb-2">
+              검색 결과 없음
+            </h2>
+            <p className="text-gray-500">해당 경로에 대한 결과가 없습니다.</p>
+          </div>
+        )}
+      </div>
 
       {/* 네트워크 맵 */}
-      {processedResults.length > 0 && (
+      {hasSearched && processedResults.length > 0 && (
         <div className="space-y-4">
           <h2 className="text-xl font-semibold">지하철 노선도</h2>
           <div className="bg-white border rounded-lg p-4">
@@ -463,114 +330,11 @@ export default function RouteSearchResultPage() {
       )}
 
       {/* 상세 정보 Dialog */}
-      <Dialog open={detailDialogOpen} onOpenChange={setDetailDialogOpen}>
-        <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>상세 경로 정보</DialogTitle>
-          </DialogHeader>
-          {selectedRouteForDetail && (
-            <div className="space-y-6">
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-6">
-                <div>
-                  <h3 className="text-sm font-medium text-gray-500 mb-1">
-                    거리
-                  </h3>
-                  <p className="text-lg font-semibold">
-                    {selectedRouteForDetail.km?.toFixed(1)}km
-                  </p>
-                </div>
-                <div>
-                  <h3 className="text-sm font-medium text-gray-500 mb-1">
-                    소요시간
-                  </h3>
-                  <p className="text-lg font-semibold">
-                    {Math.round(
-                      (selectedRouteForDetail.sta_pass_sec || 0) / 60
-                    )}
-                    분
-                  </p>
-                </div>
-                <div>
-                  <h3 className="text-sm font-medium text-gray-500 mb-1">
-                    요금
-                  </h3>
-                  <p className="text-lg font-semibold">
-                    {selectedRouteForDetail.cost?.toLocaleString()}원
-                  </p>
-                </div>
-                <div>
-                  <h3 className="text-sm font-medium text-gray-500 mb-1">
-                    환승
-                  </h3>
-                  <p className="text-lg font-semibold">
-                    {selectedRouteForDetail.transfer_cnt || 0}회
-                  </p>
-                </div>
-              </div>
-
-              <div className="mb-6">
-                <h3 className="text-sm font-medium text-gray-500 mb-2">
-                  운영사
-                </h3>
-                <p className="text-base">
-                  {selectedRouteForDetail.oper_list || "-"}
-                </p>
-              </div>
-
-              <div className="mb-6">
-                <h3 className="text-sm font-medium text-gray-500 mb-2">
-                  전체 경로
-                </h3>
-                <div className="bg-gray-50 p-4 rounded-lg">
-                  <p className="text-sm leading-relaxed">
-                    {selectedRouteForDetail.path_nm || "-"}
-                  </p>
-                </div>
-              </div>
-
-              <div className="mb-6">
-                <h3 className="text-sm font-medium text-gray-500 mb-2">
-                  환승역
-                </h3>
-                <div className="bg-gray-50 p-4 rounded-lg">
-                  {selectedRouteForDetail.transfer_list &&
-                  selectedRouteForDetail.transfer_list !== "[]" ? (
-                    <div className="flex flex-wrap gap-2">
-                      {JSON.parse(selectedRouteForDetail.transfer_list).map(
-                        (transfer: string, index: number) => {
-                          const stationName = transfer.match(
-                            /\([^)]+\)[^_]*_([^(]+)\([^)]+\)/
-                          )?.[1];
-                          return (
-                            <span
-                              key={index}
-                              className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm">
-                              {stationName || transfer}
-                            </span>
-                          );
-                        }
-                      )}
-                    </div>
-                  ) : (
-                    <p className="text-sm text-gray-500">환승역 없음</p>
-                  )}
-                </div>
-              </div>
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
-
-      {/* 결과가 없을 때 */}
-      {!isLoading &&
-        !hasError &&
-        processedResults.length === 0 &&
-        filters.RIDE_STN_ID &&
-        filters.ALGH_STN_ID && (
-          <div className="text-center py-8">
-            <p className="text-gray-500">해당 경로에 대한 결과가 없습니다.</p>
-          </div>
-        )}
+      <RouteDetailDialog
+        open={detailDialogOpen}
+        onOpenChange={setDetailDialogOpen}
+        route={selectedRouteForDetail}
+      />
     </div>
   );
 }

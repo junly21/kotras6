@@ -143,6 +143,9 @@ export interface NetworkMapConfig {
   showTooltips?: boolean;
   defaultZoom?: number;
   defaultPan?: { x: number; y: number };
+  minZoom?: number;
+  maxZoom?: number;
+  zoomSensitivity?: number;
 }
 
 export interface NetworkMapHighlight {

@@ -29,6 +29,9 @@ export function NetworkMap({
     showTooltips = true,
     defaultZoom = 1,
     defaultPan = { x: -2400, y: -2500 },
+    minZoom = 0.1,
+    maxZoom = 5.0,
+    zoomSensitivity = 0.3,
   } = config;
 
   const [svgReactTree, setSvgReactTree] = useState<React.ReactNode>(null);
@@ -100,7 +103,10 @@ export function NetworkMap({
   const handleMouseMove = useCallback(
     (e: React.MouseEvent) => {
       if (isDragging) {
-        setPan({ x: e.clientX - dragStart.x, y: e.clientY - dragStart.y });
+        // 팬 감도 향상: 더 즉시적인 반응
+        const newPanX = e.clientX - dragStart.x;
+        const newPanY = e.clientY - dragStart.y;
+        setPan({ x: newPanX, y: newPanY });
       }
     },
     [isDragging, dragStart]
@@ -119,7 +125,10 @@ export function NetworkMap({
       const centerX = rect.width / 2;
       const centerY = rect.height / 2;
 
-      const newScale = Math.max(0.5, Math.min(2.0, scale + delta * 0.1));
+      const newScale = Math.max(
+        minZoom,
+        Math.min(maxZoom, scale + delta * zoomSensitivity)
+      );
       const scaleRatio = newScale / scale;
 
       const newPanX = centerX - (centerX - pan.x) * scaleRatio;
@@ -128,7 +137,7 @@ export function NetworkMap({
       setScale(newScale);
       setPan({ x: newPanX, y: newPanY });
     },
-    [scale, pan]
+    [scale, pan, minZoom, maxZoom, zoomSensitivity]
   );
 
   const handleReset = useCallback(() => {
@@ -142,10 +151,18 @@ export function NetworkMap({
     if (!container) return;
 
     const handleWheelEvent = (e: WheelEvent) => {
+      // 줌 (Ctrl + 휠 또는 트랙패드 줌)
       if (e.ctrlKey || Math.abs(e.deltaY) > Math.abs(e.deltaX)) {
         e.preventDefault();
+
+        // 트랙패드 감도 향상: deltaY 값을 더 민감하게 처리
         const delta = e.deltaY > 0 ? -1 : 1;
-        const newScale = Math.max(0.5, Math.min(2.0, scale + delta * 0.1));
+        const sensitivity =
+          Math.abs(e.deltaY) > 50 ? zoomSensitivity * 2 : zoomSensitivity;
+        const newScale = Math.max(
+          minZoom,
+          Math.min(maxZoom, scale + delta * sensitivity)
+        );
 
         if (newScale !== scale) {
           const rect = container.getBoundingClientRect();
@@ -159,6 +176,17 @@ export function NetworkMap({
           setScale(newScale);
           setPan({ x: newPanX, y: newPanY });
         }
+      }
+      // 팬 (트랙패드 드래그)
+      else if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) {
+        e.preventDefault();
+
+        // 트랙패드 팬 감도 향상 (맥 전용)
+        const panSensitivity = 4.0; // 1.5 → 3.0으로 증가
+        const newPanX = pan.x - e.deltaX * panSensitivity;
+        const newPanY = pan.y - e.deltaY * panSensitivity;
+
+        setPan({ x: newPanX, y: newPanY });
       }
     };
 

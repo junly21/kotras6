@@ -12,10 +12,11 @@ import {
   Cell,
 } from "recharts";
 import { SettlementByInstitutionData } from "@/types/settlementByInstitution";
+import { MockSettlementByInstitutionData } from "@/types/mockSettlementByInstitution";
 import { Unit } from "@/components/ui/UnitRadioGroup";
 
 interface Props {
-  data: SettlementByInstitutionData[];
+  data: SettlementByInstitutionData[] | MockSettlementByInstitutionData[];
   unit: Unit;
 }
 

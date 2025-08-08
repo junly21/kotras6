@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { callExternalApi, createCorsHeaders } from "../../utils/externalApi";
+import { MockSettlementRegisterFormData } from "@/types/mockSettlementRegister";
 
 export async function POST(request: NextRequest) {
   try {
@@ -7,6 +8,58 @@ export async function POST(request: NextRequest) {
     console.log("모의정산 등록 API 호출됨");
     console.log("Body:", body);
 
+    // 등록 요청인지 조회 요청인지 구분
+    if (body?.action === "register") {
+      const formData: MockSettlementRegisterFormData = body.data;
+
+      // 수송기여도 매핑
+      const contributionMapping: Record<string, string> = {
+        한국철도공사: "OPER_1_POINT",
+        서울교통공사: "OPER_2_POINT",
+        인천교통공사: "OPER_3_POINT",
+        공항철도: "OPER_4_POINT",
+        서울시메트로9호선: "OPER_5_POINT",
+        신분당선: "OPER_6_POINT",
+        의정부경전철: "OPER_7_POINT",
+        용인경전철: "OPER_8_POINT",
+        경기철도: "OPER_9_POINT",
+        우이신설경전철: "OPER_10_POINT",
+        김포시청: "OPER_11_POINT",
+        신림선: "OPER_12_POINT",
+        새서울철도: "OPER_13_POINT",
+      };
+
+      const requestBody: Record<string, string | number> = {
+        STMT_NM: formData.settlementName,
+        CARD_DT: formData.tradeDate,
+        TAG_OPER_PROP: formData.tagAgencyRatio,
+        START_OPER_PROP: formData.initialLineRatio,
+        EQUAL_PROP: formData.lineSectionRatio,
+        KM_PROP: formData.distanceKmRatio,
+        KM_UNG_WGHT: formData.undergroundWeight,
+        KM_ELEV_WGHT: formData.elevatedWeight,
+        U_KM_UNG_WGHT: formData.subwayUndergroundWeight,
+        U_KM_ELEV_WGHT: formData.subwayElevatedWeight,
+      };
+
+      // 수송기여도 추가
+      Object.entries(formData.contribution).forEach(([agency, value]) => {
+        const fieldName = contributionMapping[agency];
+        if (fieldName) {
+          requestBody[fieldName] = value;
+        }
+      });
+
+      const { data } = await callExternalApi("insertSimPayRecvInfo.do", {
+        method: "POST",
+        body: requestBody,
+      });
+
+      console.log("외부 API 모의정산 등록 결과:", data);
+      return NextResponse.json(data, { headers: createCorsHeaders() });
+    }
+
+    // 기존 조회 로직
     const stmtNm = (body?.settlementName || "").toString();
     const cardDt = (body?.transactionDate || "ALL").toString() || "ALL";
 
@@ -69,7 +122,6 @@ export async function POST(request: NextRequest) {
           ? item.km_wght
           : String(item?.km_wght ?? ""),
       registrationDate: item?.to_char ?? "-",
-      status: item?.status === "완료" ? "완료" : "대기",
     }));
 
     return NextResponse.json(normalized, { headers: createCorsHeaders() });

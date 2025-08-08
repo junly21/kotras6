@@ -91,19 +91,16 @@ const CONTRIBUTION_AGENCIES = [
   "한국철도공사",
   "서울교통공사",
   "인천교통공사",
-  "부산교통공사",
-  "대구교통공사",
-  "광주교통공사",
-  "대전교통공사",
-  "울산교통공사",
-  "경기교통공사",
-  "인천도시철도",
-  "부산도시철도",
-  "대구도시철도",
-  "광주도시철도",
-  "대전도시철도",
+  "공항철도",
+  "서울시메트로9호선",
+  "신분당선",
+  "의정부경전철",
+  "용인경전철",
+  "경기철도",
   "우이신설경전철",
-  "김포골드라인",
+  "김포시청",
+  "신림선",
+  "새서울철도",
 ];
 
 export function MockSettlementModal({
@@ -169,13 +166,14 @@ export function MockSettlementModal({
   };
 
   const handleClose = () => {
+    if (loading) return; // 로딩 중에는 닫기 방지
     form.reset();
     setRatioError("");
     onClose();
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={handleClose}>
+    <Dialog open={isOpen} onOpenChange={loading ? undefined : handleClose}>
       <DialogContent className="overflow-y-auto">
         <DialogHeader>
           <DialogTitle>모의정산 등록</DialogTitle>
@@ -184,7 +182,12 @@ export function MockSettlementModal({
         <Form {...form}>
           <form
             onSubmit={form.handleSubmit(handleSubmit)}
-            className="space-y-6">
+            className="space-y-6"
+            onKeyDown={(e) => {
+              if (loading && (e.key === "Escape" || e.key === "Enter")) {
+                e.preventDefault();
+              }
+            }}>
             {/* 기본 정보 */}
             <div className="space-y-4">
               <h3 className="text-lg font-semibold border-b pb-2">기본 정보</h3>
@@ -467,7 +470,11 @@ export function MockSettlementModal({
             </div>
 
             <div className="flex justify-end gap-2 pt-4 border-t">
-              <Button type="button" variant="outline" onClick={handleClose}>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={handleClose}
+                disabled={loading}>
                 취소
               </Button>
               <Button type="submit" disabled={loading}>

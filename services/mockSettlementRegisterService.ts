@@ -2,6 +2,7 @@ import { ApiResponse } from "./apiClient";
 import {
   MockSettlementRegisterFilters,
   MockSettlementRegisterData,
+  MockSettlementRegisterFormData,
 } from "@/types/mockSettlementRegister";
 
 export class MockSettlementRegisterService {
@@ -81,6 +82,37 @@ export class MockSettlementRegisterService {
       return { success: true, data: data.options || [] };
     } catch (error) {
       console.error("거래일자 목록 조회 에러:", error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : String(error),
+      };
+    }
+  }
+
+  // 모의정산 등록
+  static async registerMockSettlement(
+    formData: MockSettlementRegisterFormData
+  ): Promise<ApiResponse> {
+    try {
+      const response = await fetch("/api/mock-settlement/register", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          action: "register",
+          data: formData,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      return { success: true, data };
+    } catch (error) {
+      console.error("모의정산 등록 에러:", error);
       return {
         success: false,
         error: error instanceof Error ? error.message : String(error),

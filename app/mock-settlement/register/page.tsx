@@ -128,16 +128,40 @@ export default function MockSettlementRegisterPage() {
 
   // 모의정산 등록 모달 제출 핸들러
   const handleMockSettlementSubmit = useCallback(
-    (data: MockSettlementRegisterFormData) => {
+    async (data: MockSettlementRegisterFormData) => {
       console.log("모의정산 등록 데이터:", data);
 
-      // 모의정산 등록 모달 닫기
+      // 모의정산 등록 모달 닫기 (처리 중임을 표시)
       setIsMockSettlementModalOpen(false);
 
-      // 시뮬레이션 모달 열기
-      setIsSimulateModalOpen(true);
+      // 로딩 상태 시작 (13분간 유지)
+      setIsLoading(true);
+      setError(null);
+
+      try {
+        const response =
+          await MockSettlementRegisterService.registerMockSettlement(data);
+
+        if (response.success) {
+          console.log("모의정산 등록 성공:", response.data);
+          // 등록 후 목록 새로고침
+          handleSearchSubmit(filters);
+        } else {
+          console.error("모의정산 등록 실패:", response.error);
+          setError(response.error || "모의정산 등록에 실패했습니다.");
+        }
+      } catch (error) {
+        console.error("모의정산 등록 중 오류:", error);
+        setError(
+          error instanceof Error
+            ? error.message
+            : "알 수 없는 오류가 발생했습니다."
+        );
+      } finally {
+        setIsLoading(false);
+      }
     },
-    []
+    [filters, handleSearchSubmit]
   );
 
   // 시뮬레이션 모달 닫기 핸들러
@@ -199,25 +223,6 @@ export default function MockSettlementRegisterPage() {
       width: 120,
       resizable: true,
     },
-    {
-      headerName: "상태",
-      field: "status",
-      width: 100,
-      resizable: true,
-      cellRenderer: (params: { value: string }) => {
-        const isCompleted = params.value === "완료";
-        return (
-          <span
-            className={`px-2 py-1 rounded text-sm font-medium ${
-              isCompleted
-                ? "bg-green-100 text-green-800"
-                : "bg-yellow-100 text-yellow-800"
-            }`}>
-            {params.value}
-          </span>
-        );
-      },
-    },
   ];
 
   return (
@@ -231,8 +236,9 @@ export default function MockSettlementRegisterPage() {
         <div className="absolute inset-0 flex items-center justify-center bg-white/80 z-50">
           <div className="text-center">
             <Spinner />
-            <p className="mt-4 text-gray-600">
-              모의정산 데이터를 조회하는 중...
+            <p className="mt-4 text-gray-600">모의정산 등록 처리 중입니다...</p>
+            <p className="mt-2 text-sm text-gray-500">
+              최대 13분 정도 소요될 수 있습니다.
             </p>
           </div>
         </div>
@@ -317,10 +323,10 @@ export default function MockSettlementRegisterPage() {
       {/* 모의정산 등록 모달 */}
       <MockSettlementModal
         isOpen={isMockSettlementModalOpen}
-        onClose={() => setIsMockSettlementModalOpen(false)}
+        onClose={() => !isLoading && setIsMockSettlementModalOpen(false)}
         onSubmit={handleMockSettlementSubmit}
         tradeDates={tradeDates}
-        loading={false}
+        loading={isLoading}
       />
 
       {/* 시뮬레이션 모달 */}

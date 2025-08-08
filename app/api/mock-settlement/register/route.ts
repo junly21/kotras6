@@ -1,117 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
 import { callExternalApi, createCorsHeaders } from "../../utils/externalApi";
-import { MockSettlementRegisterFilters } from "@/types/mockSettlementRegister";
-
-// Mock 데이터 생성 함수
-function generateMockSettlementData(filters: MockSettlementRegisterFilters) {
-  const mockData = [
-    {
-      settlementName: "2024년 1월 정산",
-      transactionDate: "2024-01-15",
-      tagAgency: "서울교통공사",
-      initialLine: "1호선",
-      lineSection: "서울역~종각",
-      distanceKm: 1250,
-      weightRatio: "60:30:10",
-      registrationDate: "2024-01-20",
-      status: "완료" as const,
-    },
-    {
-      settlementName: "2024년 1월 정산",
-      transactionDate: "2024-01-15",
-      tagAgency: "서울교통공사",
-      initialLine: "2호선",
-      lineSection: "강남~역삼",
-      distanceKm: 890,
-      weightRatio: "45:40:15",
-      registrationDate: "2024-01-20",
-      status: "완료" as const,
-    },
-    {
-      settlementName: "2024년 2월 정산",
-      transactionDate: "2024-02-15",
-      tagAgency: "서울교통공사",
-      initialLine: "3호선",
-      lineSection: "고속터미널~교대",
-      distanceKm: 1560,
-      weightRatio: "50:35:15",
-      registrationDate: "2024-02-20",
-      status: "대기" as const,
-    },
-    {
-      settlementName: "2024년 2월 정산",
-      transactionDate: "2024-02-15",
-      tagAgency: "서울교통공사",
-      initialLine: "4호선",
-      lineSection: "사당~남태령",
-      distanceKm: 1120,
-      weightRatio: "70:20:10",
-      registrationDate: "2024-02-20",
-      status: "대기" as const,
-    },
-    {
-      settlementName: "2024년 3월 정산",
-      transactionDate: "2024-03-15",
-      tagAgency: "서울교통공사",
-      initialLine: "5호선",
-      lineSection: "강동~천호",
-      distanceKm: 980,
-      weightRatio: "55:30:15",
-      registrationDate: "2024-03-20",
-      status: "대기" as const,
-    },
-    {
-      settlementName: "2024년 3월 정산",
-      transactionDate: "2024-03-15",
-      tagAgency: "서울교통공사",
-      initialLine: "6호선",
-      lineSection: "봉화산~화랑대",
-      distanceKm: 1340,
-      weightRatio: "40:45:15",
-      registrationDate: "2024-03-20",
-      status: "대기" as const,
-    },
-    {
-      settlementName: "2024년 4월 정산",
-      transactionDate: "2024-04-15",
-      tagAgency: "서울교통공사",
-      initialLine: "7호선",
-      lineSection: "장암~도봉산",
-      distanceKm: 1670,
-      weightRatio: "65:25:10",
-      registrationDate: "2024-04-20",
-      status: "대기" as const,
-    },
-    {
-      settlementName: "2024년 4월 정산",
-      transactionDate: "2024-04-15",
-      tagAgency: "서울교통공사",
-      initialLine: "8호선",
-      lineSection: "암사~천호",
-      distanceKm: 890,
-      weightRatio: "50:35:15",
-      registrationDate: "2024-04-20",
-      status: "대기" as const,
-    },
-  ];
-
-  // 필터 적용
-  let filteredData = mockData;
-  
-  if (filters.settlementName) {
-    filteredData = filteredData.filter(item => 
-      item.settlementName === filters.settlementName
-    );
-  }
-  
-  if (filters.transactionDate) {
-    filteredData = filteredData.filter(item => 
-      item.transactionDate === filters.transactionDate
-    );
-  }
-
-  return filteredData;
-}
 
 export async function POST(request: NextRequest) {
   try {
@@ -119,29 +7,72 @@ export async function POST(request: NextRequest) {
     console.log("모의정산 등록 API 호출됨");
     console.log("Body:", body);
 
-    const filters: MockSettlementRegisterFilters = {
-      settlementName: body.settlementName || "",
-      transactionDate: body.transactionDate || "",
-    };
+    const stmtNm = (body?.settlementName || "").toString();
+    const cardDt = (body?.transactionDate || "ALL").toString() || "ALL";
 
-    // Mock 데이터 사용 (실제 백엔드가 없을 때)
-    const mockData = generateMockSettlementData(filters);
-    
-    console.log("Mock API 모의정산 등록 결과:", mockData);
-
-    return NextResponse.json(mockData, { headers: createCorsHeaders() });
-    
-    // 실제 백엔드가 있을 때는 아래 코드 사용
-    /*
-    const { data } = await callExternalApi("selectMockSettlementRegister.do", {
+    const { data } = await callExternalApi("selectSimPayRecvInfo.do", {
       method: "POST",
-      body: filters,
+      body: {
+        STMT_NM: stmtNm,
+        CARD_DT: cardDt || "ALL",
+      },
     });
 
     console.log("외부 API 모의정산 등록 결과:", data);
 
-    return NextResponse.json(data, { headers: createCorsHeaders() });
-    */
+    // 그리드 스키마에 맞게 응답 데이터 매핑
+    type ExternalItem = {
+      equal_prop?: number;
+      stmt_nm?: string;
+      km_wght?: string;
+      start_oper_prop?: number;
+      km_prop?: number | string;
+      row_number?: number;
+      card_dt?: number | string;
+      u_km_wght?: string;
+      to_char?: string;
+      sim_stmt_grp_id?: string;
+      tag_oper_prop?: number;
+      status?: string;
+    };
+
+    const arrayData: ExternalItem[] = Array.isArray(data)
+      ? (data as ExternalItem[])
+      : [];
+    const formatDate = (ts: number | string | undefined): string => {
+      if (ts === undefined || ts === null) return "";
+      const num = typeof ts === "string" ? Number(ts) : ts;
+      if (!Number.isFinite(num as number)) return "";
+      const d = new Date(num as number);
+      if (Number.isNaN(d.getTime())) return "";
+      const yyyy = d.getFullYear();
+      const mm = String(d.getMonth() + 1).padStart(2, "0");
+      const dd = String(d.getDate()).padStart(2, "0");
+      return `${yyyy}-${mm}-${dd}`;
+    };
+
+    const normalized = arrayData.map((item) => ({
+      settlementName: item?.stmt_nm ?? "-",
+      transactionDate:
+        item?.card_dt !== undefined && item?.card_dt !== null
+          ? formatDate(item.card_dt)
+          : item?.to_char ?? "-",
+      tagAgency: String(item?.tag_oper_prop ?? 0),
+      initialLine: String(item?.start_oper_prop ?? 0),
+      lineSection: String(item?.equal_prop ?? 0),
+      distanceKm:
+        typeof item?.km_prop === "number"
+          ? item.km_prop
+          : Number(item?.km_prop ?? 0),
+      weightRatio:
+        typeof item?.km_wght === "string"
+          ? item.km_wght
+          : String(item?.km_wght ?? ""),
+      registrationDate: item?.to_char ?? "-",
+      status: item?.status === "완료" ? "완료" : "대기",
+    }));
+
+    return NextResponse.json(normalized, { headers: createCorsHeaders() });
   } catch (error) {
     console.error("모의정산 등록 API 처리 중 오류 발생:", error);
     return NextResponse.json(

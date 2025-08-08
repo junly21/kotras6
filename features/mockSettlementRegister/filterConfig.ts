@@ -12,10 +12,9 @@ export const mockSettlementRegisterFilterConfig: FieldConfig[] = [
   {
     name: "settlementName",
     label: "정산명",
-    type: "select",
-    placeholder: "정산명을 선택하세요",
+    type: "text",
+    placeholder: "정산명을 입력하세요",
     required: false,
-    optionsEndpoint: "/api/mock-settlement/settlement-names",
   },
   {
     name: "transactionDate",
@@ -23,6 +22,6 @@ export const mockSettlementRegisterFilterConfig: FieldConfig[] = [
     type: "select",
     placeholder: "거래일자를 선택하세요",
     required: false,
-    optionsEndpoint: "/api/mock-settlement/transaction-dates",
+    optionsEndpoint: "/api/transaction-detail/dates",
   },
 ];

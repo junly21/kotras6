@@ -66,12 +66,11 @@ export class MockSettlementRegisterService {
     ApiResponse<{ label: string; value: string }[]>
   > {
     try {
-      const response = await fetch("/api/mock-settlement/transaction-dates", {
-        method: "POST",
+      const response = await fetch("/api/transaction-detail/dates", {
+        method: "GET",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({}),
       });
 
       if (!response.ok) {

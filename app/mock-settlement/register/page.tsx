@@ -66,6 +66,34 @@ export default function MockSettlementRegisterPage() {
     loadTradeDates();
   }, [loadTradeDates]);
 
+  // 초기 진입 시 기본 조회 (정산명 공백, 거래일자 ALL)
+  useEffect(() => {
+    const fetchInitial = async () => {
+      setHasSearched(true);
+      setIsLoading(true);
+      setError(null);
+      try {
+        const response =
+          await MockSettlementRegisterService.getMockSettlementData({
+            settlementName: "",
+            transactionDate: "ALL",
+          });
+        if (response.success && response.data) {
+          setSearchResults(response.data);
+        } else {
+          setError(response.error || "데이터 조회에 실패했습니다.");
+        }
+      } catch (err) {
+        setError(
+          err instanceof Error ? err.message : "알 수 없는 오류가 발생했습니다."
+        );
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchInitial();
+  }, []);
+
   // 필터 변경 핸들러
   const handleFilterChange = (values: MockSettlementRegisterFilters) => {
     setFilters(values);

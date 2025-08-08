@@ -55,6 +55,34 @@ export default function TransactionDetailPage() {
   const [apiData, setApiData] = useState<TransactionDetailData[]>([]);
   const [loading, setLoading] = useState(false);
 
+  // 총계 계산 함수
+  const calculateTotals = useCallback((data: TransactionDetailData[]) => {
+    const totals = data.reduce(
+      (acc, item) => ({
+        fnl_dist_amt: acc.fnl_dist_amt + (item.fnl_dist_amt || 0),
+        base_dist_amt: acc.base_dist_amt + (item.base_dist_amt || 0),
+        ubrw_adtn_use_amt:
+          acc.ubrw_adtn_use_amt + (item.ubrw_adtn_use_amt || 0),
+      }),
+      {
+        fnl_dist_amt: 0,
+        base_dist_amt: 0,
+        ubrw_adtn_use_amt: 0,
+      }
+    );
+
+    return {
+      trcr_no: "총계",
+      ride_dtm: "",
+      algh_dtm: "",
+      ride_nm: "",
+      algh_nm: "",
+      fnl_dist_amt: totals.fnl_dist_amt,
+      base_dist_amt: totals.base_dist_amt,
+      ubrw_adtn_use_amt: totals.ubrw_adtn_use_amt,
+    };
+  }, []);
+
   const handleSearch = useCallback(
     (values: TransactionDetailFilters) => {
       console.log("handleSearch 호출됨:", values);
@@ -65,8 +93,9 @@ export default function TransactionDetailPage() {
       TransactionDetailService.getDetailData(values)
         .then((result) => {
           if (result.success) {
-            setApiData(result.data || []);
-            onSuccess(result.data || []);
+            const data = result.data || [];
+            setApiData(data);
+            onSuccess(data);
           } else {
             setApiData([]);
             onError(result.error || "데이터 로드 실패");
@@ -90,6 +119,16 @@ export default function TransactionDetailPage() {
       field: "trcr_no",
       width: 180,
       resizable: false,
+      cellStyle: (params: any) => {
+        if (params.node.rowPinned === "bottom") {
+          return {
+            fontWeight: "bold",
+            backgroundColor: "#f8f9fa",
+            borderTop: "2px solid #dee2e6",
+          };
+        }
+        return {};
+      },
     },
     {
       headerName: "승차시간",
@@ -98,6 +137,16 @@ export default function TransactionDetailPage() {
       valueFormatter: (params: { value: number | null | undefined }) => {
         if (!params.value) return "";
         return new Date(params.value).toLocaleString();
+      },
+      cellStyle: (params: any) => {
+        if (params.node.rowPinned === "bottom") {
+          return {
+            fontWeight: "bold",
+            backgroundColor: "#f8f9fa",
+            borderTop: "2px solid #dee2e6",
+          };
+        }
+        return {};
       },
       resizable: false,
     },
@@ -109,18 +158,48 @@ export default function TransactionDetailPage() {
         if (!params.value) return "";
         return new Date(params.value).toLocaleString();
       },
+      cellStyle: (params: any) => {
+        if (params.node.rowPinned === "bottom") {
+          return {
+            fontWeight: "bold",
+            backgroundColor: "#f8f9fa",
+            borderTop: "2px solid #dee2e6",
+          };
+        }
+        return {};
+      },
       resizable: false,
     },
     {
       headerName: "최초승차역",
       field: "ride_nm",
       width: 150,
+      cellStyle: (params: any) => {
+        if (params.node.rowPinned === "bottom") {
+          return {
+            fontWeight: "bold",
+            backgroundColor: "#f8f9fa",
+            borderTop: "2px solid #dee2e6",
+          };
+        }
+        return {};
+      },
       resizable: false,
     },
     {
       headerName: "최종하차역",
       field: "algh_nm",
       width: 150,
+      cellStyle: (params: any) => {
+        if (params.node.rowPinned === "bottom") {
+          return {
+            fontWeight: "bold",
+            backgroundColor: "#f8f9fa",
+            borderTop: "2px solid #dee2e6",
+          };
+        }
+        return {};
+      },
       resizable: false,
     },
     {
@@ -129,7 +208,18 @@ export default function TransactionDetailPage() {
       width: 150,
       valueFormatter: (params: { value: number | null | undefined }) =>
         (params.value || 0).toLocaleString() + "원",
-      cellStyle: { textAlign: "right" },
+      cellStyle: (params: any) => {
+        const baseStyle = { textAlign: "right" };
+        if (params.node.rowPinned === "bottom") {
+          return {
+            ...baseStyle,
+            fontWeight: "bold",
+            backgroundColor: "#f8f9fa",
+            borderTop: "2px solid #dee2e6",
+          };
+        }
+        return baseStyle;
+      },
       resizable: false,
     },
     {
@@ -138,7 +228,18 @@ export default function TransactionDetailPage() {
       width: 150,
       valueFormatter: (params: { value: number | null | undefined }) =>
         (params.value || 0).toLocaleString() + "원",
-      cellStyle: { textAlign: "right" },
+      cellStyle: (params: any) => {
+        const baseStyle = { textAlign: "right" };
+        if (params.node.rowPinned === "bottom") {
+          return {
+            ...baseStyle,
+            fontWeight: "bold",
+            backgroundColor: "#f8f9fa",
+            borderTop: "2px solid #dee2e6",
+          };
+        }
+        return baseStyle;
+      },
       resizable: false,
     },
     {
@@ -147,7 +248,18 @@ export default function TransactionDetailPage() {
       width: 200,
       valueFormatter: (params: { value: number | null | undefined }) =>
         (params.value || 0).toLocaleString() + "원",
-      cellStyle: { textAlign: "right" },
+      cellStyle: (params: any) => {
+        const baseStyle = { textAlign: "right" };
+        if (params.node.rowPinned === "bottom") {
+          return {
+            ...baseStyle,
+            fontWeight: "bold",
+            backgroundColor: "#f8f9fa",
+            borderTop: "2px solid #dee2e6",
+          };
+        }
+        return baseStyle;
+      },
       resizable: false,
     },
   ];
@@ -189,6 +301,9 @@ export default function TransactionDetailPage() {
           columnDefs={colDefs}
           gridRef={gridRef}
           height={600}
+          pinnedBottomRowData={
+            hasSearched && apiData.length > 0 ? [calculateTotals(apiData)] : []
+          }
           gridOptions={{
             suppressColumnResize: true,
             suppressRowClickSelection: true,

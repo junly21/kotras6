@@ -18,10 +18,6 @@ import { AllCommunityModule, ModuleRegistry } from "ag-grid-community";
 ModuleRegistry.registerModules([AllCommunityModule]);
 
 export default function SettlementByRoutePage() {
-  const [filters, setFilters] = useState<SettlementByRouteFilters>({
-    agency: "",
-  });
-
   // 검색 수행 여부 상태
   const [hasSearched, setHasSearched] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -49,7 +45,6 @@ export default function SettlementByRoutePage() {
   const handleSearch = useCallback(async (values: SettlementByRouteFilters) => {
     console.log("노선별 조회 검색:", values);
     setHasSearched(true);
-    setFilters(values);
     setLoading(true);
 
     try {

@@ -6,7 +6,6 @@ import { FilterForm } from "@/components/ui/FilterForm";
 import { Toast } from "@/components/ui/Toast";
 import TestGrid from "@/components/TestGrid";
 import Spinner from "@/components/Spinner";
-import CsvExportButton from "@/components/CsvExportButton";
 import { MockSettlementByStationService } from "@/services/mockSettlementByStationService";
 import { MockSettlementResultService } from "@/services/mockSettlementResultService";
 import { mockSettlementByStationFilterConfig } from "@/features/mockSettlementByStation/filterConfig";
@@ -285,11 +284,48 @@ export default function MockSettlementByStationPage() {
         <div className="flex justify-between items-center">
           <h3 className="text-lg font-semibold">역사별 조회 결과</h3>
           <div className="flex items-center gap-4">
-            <CsvExportButton
-              gridRef={byStationGridRef}
-              fileName="mock_settlement_by_station_data.csv"
-              className="shadow-lg bg-accent-500"
-            />
+            <button
+              onClick={async () => {
+                try {
+                  const response = await fetch(
+                    "/api/mock-settlement/by-station/download",
+                    {
+                      method: "POST",
+                      headers: {
+                        "Content-Type": "application/json",
+                      },
+                      body: JSON.stringify({
+                        settlementName:
+                          mockSettlementData[0]?.settlementName || "",
+                        STN_ID1: mockSettlementData[0]?.STN_ID1 || "",
+                        STN_ID2: mockSettlementData[0]?.STN_ID2 || "",
+                        STN_ID3: mockSettlementData[0]?.STN_ID3 || "",
+                        STN_ID4: mockSettlementData[0]?.STN_ID4 || "",
+                        STN_ID5: mockSettlementData[0]?.STN_ID5 || "",
+                      }),
+                    }
+                  );
+
+                  if (response.ok) {
+                    const blob = await response.blob();
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement("a");
+                    a.href = url;
+                    a.download = "mock_settlement_by_station_data.csv";
+                    document.body.appendChild(a);
+                    a.click();
+                    window.URL.revokeObjectURL(url);
+                    document.body.removeChild(a);
+                  } else {
+                    console.error("CSV 다운로드 실패");
+                  }
+                } catch (error) {
+                  console.error("CSV 다운로드 중 오류:", error);
+                }
+              }}
+              className="shadow-lg bg-accent-500 text-white px-4 py-2 rounded-md">
+              CSV 다운로드
+            </button>
           </div>
         </div>
 

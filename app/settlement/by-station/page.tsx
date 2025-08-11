@@ -11,7 +11,6 @@ import {
 import { SettlementByStationService } from "@/services/settlementByStationService";
 import { createSettlementByStationColDefs } from "@/features/settlementByStation/gridConfig";
 import TestGrid from "@/components/TestGrid";
-import CsvExportButton from "@/components/CsvExportButton";
 import Spinner from "@/components/Spinner";
 import { AllCommunityModule, ModuleRegistry } from "ag-grid-community";
 
@@ -143,11 +142,40 @@ export default function SettlementByStationPage() {
       {/* CSV Export 버튼 */}
       {hasSearched && searchResults.length > 0 && (
         <div className="flex justify-end">
-          <CsvExportButton
-            gridRef={gridRef}
-            fileName="역사별_정산결과.csv"
-            className="bg-blue-600 hover:bg-blue-700"
-          />
+          <button
+            onClick={async () => {
+              try {
+                const response = await fetch(
+                  "/api/settlement/by-station/download",
+                  {
+                    method: "POST",
+                    headers: {
+                      "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify(filters),
+                  }
+                );
+
+                if (response.ok) {
+                  const blob = await response.blob();
+                  const url = window.URL.createObjectURL(blob);
+                  const a = document.createElement("a");
+                  a.href = url;
+                  a.download = "역사별_정산결과.csv";
+                  document.body.appendChild(a);
+                  a.click();
+                  window.URL.revokeObjectURL(url);
+                  document.body.removeChild(a);
+                } else {
+                  console.error("CSV 다운로드 실패");
+                }
+              } catch (error) {
+                console.error("CSV 다운로드 중 오류:", error);
+              }
+            }}
+            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md shadow-lg">
+            CSV 다운로드
+          </button>
         </div>
       )}
 

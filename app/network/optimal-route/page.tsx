@@ -76,10 +76,10 @@ export default function NetworkOptimalRoutePage() {
       });
   }, []);
 
-  // 역 목록 로드
+  // 네트워크가 변경될 때 역 목록 로드
   useEffect(() => {
     if (filters.network) {
-      fetch("/api/selectNetWorkNodeList", {
+      fetch("/api/selectNetWorkNodeSelectBox", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -90,16 +90,11 @@ export default function NetworkOptimalRoutePage() {
       })
         .then((res) => res.json())
         .then((data) => {
-          const options: StationOption[] = Array.isArray(data)
-            ? data.map(
-                (option: {
-                  sta_num?: string | number;
-                  sta_nm?: string;
-                  value?: string | number;
-                  label?: string;
-                }) => ({
-                  value: String(option.sta_num || option.value || ""),
-                  label: String(option.sta_nm || option.label || ""),
+          const options = Array.isArray(data.options)
+            ? data.options.map(
+                (option: { value: string | number; label: string }) => ({
+                  value: String(option.value),
+                  label: String(option.label),
                 })
               )
             : [];
@@ -119,40 +114,57 @@ export default function NetworkOptimalRoutePage() {
   }, [filters.network]);
 
   // 최적경로 조회
-  const handleSearch = useCallback(async (values: OptimalRouteFilters) => {
-    setHasSearched(true);
-    setFilters(values);
-    setIsLoading(true);
+  const handleSearch = useCallback(
+    async (values: OptimalRouteFilters) => {
+      setHasSearched(true);
+      setFilters(values);
+      setIsLoading(true);
 
-    try {
-      const result = await OptimalRouteService.getOptimalRoute(values);
+      try {
+        // 선택된 역의 label(역 이름)을 찾아서 전달
+        const startStationOption = stationOptions.find(
+          (option) => option.value === values.startStation
+        );
+        const endStationOption = stationOptions.find(
+          (option) => option.value === values.endStation
+        );
 
-      if (result.success && result.data) {
-        setRouteData(result.data);
-        setToast({
-          isVisible: true,
-          message: "최적경로를 성공적으로 조회했습니다.",
-          type: "success",
-        });
-      } else {
+        const searchValues = {
+          ...values,
+          startStation: startStationOption?.label || values.startStation,
+          endStation: endStationOption?.label || values.endStation,
+        };
+
+        const result = await OptimalRouteService.getOptimalRoute(searchValues);
+
+        if (result.success && result.data) {
+          setRouteData(result.data);
+          setToast({
+            isVisible: true,
+            message: "최적경로를 성공적으로 조회했습니다.",
+            type: "success",
+          });
+        } else {
+          setRouteData(null);
+          setToast({
+            isVisible: true,
+            message: result.error || "최적경로 조회 실패",
+            type: "error",
+          });
+        }
+      } catch (error) {
         setRouteData(null);
         setToast({
           isVisible: true,
-          message: result.error || "최적경로 조회 실패",
+          message: String(error),
           type: "error",
         });
+      } finally {
+        setIsLoading(false);
       }
-    } catch (error) {
-      setRouteData(null);
-      setToast({
-        isVisible: true,
-        message: String(error),
-        type: "error",
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
+    },
+    [stationOptions]
+  );
 
   // 최고 순위 경로 가져오기
   const bestRoute = routeData?.data?.find((route) => route.rank === 1);

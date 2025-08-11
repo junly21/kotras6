@@ -24,8 +24,7 @@ export const optimalRouteFields: FieldConfig[] = [
     type: "combobox",
     required: true,
     placeholder: "출발역을 선택하세요",
-    optionsEndpoint: "/api/selectNetWorkNodeList",
-    disabled: (values) => !values.network,
+    optionsEndpoint: "/api/selectNetWorkNodeSelectBox",
   },
   {
     name: "endStation",
@@ -33,7 +32,6 @@ export const optimalRouteFields: FieldConfig[] = [
     type: "combobox",
     required: true,
     placeholder: "도착역을 선택하세요",
-    optionsEndpoint: "/api/selectNetWorkNodeList",
-    disabled: (values) => !values.network,
+    optionsEndpoint: "/api/selectNetWorkNodeSelectBox",
   },
 ];

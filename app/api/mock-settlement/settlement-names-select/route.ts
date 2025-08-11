@@ -14,10 +14,12 @@ export async function GET() {
 
     // 응답 데이터를 selectBox 형식으로 변환
     const options = Array.isArray(data)
-      ? data.map((item: any) => ({
-          label: item?.stmt_nm || item?.label || "",
-          value: item?.stmt_nm || item?.value || "",
-        }))
+      ? data.map(
+          (item: { stmt_nm?: string; label?: string; value?: string }) => ({
+            label: item?.stmt_nm || item?.label || "",
+            value: item?.stmt_nm || item?.value || "",
+          })
+        )
       : [];
 
     return NextResponse.json({ options }, { headers: createCorsHeaders() });
@@ -46,10 +48,12 @@ export async function POST() {
 
     // 응답 데이터를 selectBox 형식으로 변환
     const options = Array.isArray(data)
-      ? data.map((item: any) => ({
-          label: item?.stmt_nm || item?.label || "",
-          value: item?.stmt_nm || item?.value || "",
-        }))
+      ? data.map(
+          (item: { stmt_nm?: string; label?: string; value?: string }) => ({
+            label: item?.stmt_nm || item?.label || "",
+            value: item?.stmt_nm || item?.value || "",
+          })
+        )
       : [];
 
     return NextResponse.json({ options }, { headers: createCorsHeaders() });

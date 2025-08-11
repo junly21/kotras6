@@ -46,8 +46,8 @@ export default function NetworkOptimalRoutePage() {
       .then((res) => {
         if (res.success) {
           const options = (res.data || []).map((option) => ({
-            value: String(option.value),
-            label: String(option.label),
+            value: String(option.value), // NET_DT 값
+            label: String(option.label), // net_nm 값
           }));
           setNetworkOptions(options);
           // 네트워크 옵션 받아오면 첫 번째 값 자동 설정
@@ -79,14 +79,29 @@ export default function NetworkOptimalRoutePage() {
   // 역 목록 로드
   useEffect(() => {
     if (filters.network) {
-      fetch("/api/selectNetWorkNodeList")
+      fetch("/api/selectNetWorkNodeList", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          NET_DT: filters.network,
+        }),
+      })
         .then((res) => res.json())
         .then((data) => {
-          const options: StationOption[] = Array.isArray(data.options)
-            ? data.options.map((option: StationOption) => ({
-                value: String(option.value),
-                label: String(option.label),
-              }))
+          const options: StationOption[] = Array.isArray(data)
+            ? data.map(
+                (option: {
+                  sta_num?: string | number;
+                  sta_nm?: string;
+                  value?: string | number;
+                  label?: string;
+                }) => ({
+                  value: String(option.sta_num || option.value || ""),
+                  label: String(option.sta_nm || option.label || ""),
+                })
+              )
             : [];
           setStationOptions(options);
         })

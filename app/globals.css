@@ -145,6 +145,12 @@
   padding: 1.25em;
 }
 
+/*  */
+.text-destructive {
+  position: absolute;
+  top: 2.5em;
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;

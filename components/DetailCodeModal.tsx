@@ -113,7 +113,7 @@ export function DetailCodeModal({
                 name="DETAIL_CODE"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>상세코드 *</FormLabel>
+                    <FormLabel className="min-w-[85px]">상세코드 *</FormLabel>
                     <FormControl>
                       <Input
                         {...field}
@@ -130,7 +130,7 @@ export function DetailCodeModal({
                 name="COMMON_CODE"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>공통코드 *</FormLabel>
+                    <FormLabel className="min-w-[85px]">공통코드 <span className="text-red-500">*</span></FormLabel>
                     <FormControl>
                       <Input
                         {...field}
@@ -143,13 +143,13 @@ export function DetailCodeModal({
                 )}
               />
             </div>
-            <div className="grid grid-cols-3 gap-4">
+            <div className="grid grid-cols-2 gap-4">
               <FormField
                 control={form.control}
                 name="VALUE_1"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>값1</FormLabel>
+                    <FormLabel className="min-w-[85px]">값1</FormLabel>
                     <FormControl>
                       <Input {...field} placeholder="값1을 입력하세요" />
                     </FormControl>
@@ -162,7 +162,7 @@ export function DetailCodeModal({
                 name="VALUE_2"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>값2</FormLabel>
+                    <FormLabel className="min-w-[85px]">값2</FormLabel>
                     <FormControl>
                       <Input {...field} placeholder="값2를 입력하세요" />
                     </FormControl>
@@ -170,78 +170,82 @@ export function DetailCodeModal({
                   </FormItem>
                 )}
               />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <FormField
+                  control={form.control}
+                  name="VALUE_3"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="min-w-[85px]">값3</FormLabel>
+                      <FormControl>
+                        <Input {...field} placeholder="값3을 입력하세요" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
               <FormField
                 control={form.control}
-                name="VALUE_3"
+                name="REMARK"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>값3</FormLabel>
+                    <FormLabel className="min-w-[85px]">비고</FormLabel>
                     <FormControl>
-                      <Input {...field} placeholder="값3을 입력하세요" />
+                      <Input {...field} placeholder="비고를 입력하세요" />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
             </div>
-            <FormField
-              control={form.control}
-              name="REMARK"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>비고</FormLabel>
-                  <FormControl>
-                    <Input {...field} placeholder="비고를 입력하세요" />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="USE_YN"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>사용여부</FormLabel>
-                  <Select onValueChange={field.onChange} value={field.value}>
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="사용여부를 선택하세요" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      <SelectItem value="Y">예</SelectItem>
-                      <SelectItem value="N">아니오</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="SYSCD_YN"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>시스템코드유무</FormLabel>
-                  <Select
-                    onValueChange={field.onChange}
-                    value={field.value}
-                    disabled={true}>
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="시스템코드유무를 선택하세요" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      <SelectItem value="Y">예</SelectItem>
-                      <SelectItem value="N">아니오</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            <div className="grid grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="USE_YN"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="min-w-[85px]">사용여부</FormLabel>
+                    <Select onValueChange={field.onChange} value={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="사용여부를 선택하세요" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="Y">예</SelectItem>
+                        <SelectItem value="N">아니오</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="SYSCD_YN"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="min-w-[85px]">시스템코드유무</FormLabel>
+                    <Select
+                      onValueChange={field.onChange}
+                      value={field.value}
+                      disabled={true}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="시스템코드유무를 선택하세요" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="Y">예</SelectItem>
+                        <SelectItem value="N">아니오</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
             <div className="flex justify-end gap-2 pt-4">
               <Button type="button" variant="outline" onClick={onClose}>
                 취소

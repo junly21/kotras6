@@ -211,7 +211,7 @@ export function NetworkFileUploadModal({
                   name="networkName"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-sm">네트워크명 *</FormLabel>
+                      <FormLabel className="min-w-[85px]">네트워크명 <span className="text-red-500">*</span></FormLabel>
                       <FormControl>
                         <Input
                           {...field}
@@ -227,7 +227,7 @@ export function NetworkFileUploadModal({
                   name="date"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-sm">날짜 *</FormLabel>
+                      <FormLabel className="min-w-[85px] text-sm">날짜 <span className="text-red-500">*</span></FormLabel>
                       <FormControl>
                         <Input
                           {...field}
@@ -241,7 +241,7 @@ export function NetworkFileUploadModal({
                 />
               </div>
             </div>
-
+            
             {/* 파일 업로드 섹션 */}
             <div className="space-y-4">
               <h3 className="text-sm font-medium text-gray-700 border-b pb-2">
@@ -253,9 +253,9 @@ export function NetworkFileUploadModal({
                   name="nodeFile"
                   render={() => (
                     <FormItem>
-                      <FormLabel className="text-sm">노드 파일 *</FormLabel>
+                      <FormLabel className="min-w-[85px]">노드 파일 <span className="text-red-500">*</span></FormLabel>
                       <FormControl>
-                        <div className="space-y-2">
+                        <div className="space-y-2 flex-1">
                           <Input
                             type="file"
                             accept=".csv"
@@ -272,15 +272,14 @@ export function NetworkFileUploadModal({
                     </FormItem>
                   )}
                 />
-
                 <FormField
                   control={form.control}
                   name="linkFile"
                   render={() => (
                     <FormItem>
-                      <FormLabel className="text-sm">링크 파일 *</FormLabel>
+                      <FormLabel className="min-w-[85px]">링크 파일 <span className="text-red-500">*</span></FormLabel>
                       <FormControl>
-                        <div className="space-y-2">
+                        <div className="space-y-2 flex-1">
                           <Input
                             type="file"
                             accept=".csv"
@@ -303,9 +302,9 @@ export function NetworkFileUploadModal({
                   name="platformFile"
                   render={() => (
                     <FormItem>
-                      <FormLabel className="text-sm">플랫폼 파일 *</FormLabel>
+                      <FormLabel className="min-w-[85px]">플랫폼 파일 <span className="text-red-500">*</span></FormLabel>
                       <FormControl>
-                        <div className="space-y-2">
+                        <div className="space-y-2 flex-1">
                           <Input
                             type="file"
                             accept=".csv"

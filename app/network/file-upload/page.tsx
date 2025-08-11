@@ -228,7 +228,7 @@ export default function NetworkFileUploadPage() {
         {showDetailGrid && (
           <div className="space-y-4">
             <h2 className="text-lg font-semibold">{detailTitle}</h2>
-            <div className="border rounded-lg overflow-hidden">
+            <div className="rounded-lg overflow-hidden">
               <TestGrid
                 rowData={detailData}
                 columnDefs={getDetailColDefs()}

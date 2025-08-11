@@ -8,7 +8,6 @@ import Spinner from "@/components/Spinner";
 import { Button } from "@/components/ui/button";
 import { Toast } from "@/components/ui/Toast";
 import { useApi } from "@/hooks/useApi";
-import { CommonCodeService } from "@/services/commonCodeService";
 import { DetailCodeService } from "@/services/detailCodeService";
 import { CommonCodeData } from "@/types/commonCode";
 import { DetailCodeData, DetailCodeFormData } from "@/types/detailCode";
@@ -47,7 +46,7 @@ export default function SettingsDetailCodesPage() {
   });
 
   // 공통코드 목록 API 호출
-  const apiCall = useCallback(() => CommonCodeService.getCommonCodeList(), []);
+  const apiCall = useCallback(() => DetailCodeService.getCommonCodeList(), []);
 
   const onSuccess = useCallback((data: CommonCodeData[]) => {
     console.log("공통코드 목록 로드 성공:", data);

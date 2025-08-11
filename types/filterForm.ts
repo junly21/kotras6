@@ -20,4 +20,5 @@ export interface FieldConfig {
   placeholder?: string;
   required?: boolean;
   disabled?: boolean;
+  dependsOn?: string; // 다른 필드에 의존하는 경우 해당 필드명
 }

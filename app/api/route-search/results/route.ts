@@ -1,11 +1,12 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { callExternalApi, createCorsHeaders } from "../../utils/externalApi";
 import { RouteSearchFilter } from "@/types/routeSearch";
 
-export async function POST(request: NextRequest) {
+export async function POST(request: Request) {
   try {
-    const body = await request.json();
     console.log("경로탐색 결과 API 호출됨");
+
+    const body = await request.json();
     console.log("Body:", body);
 
     const filter: RouteSearchFilter = {
@@ -13,7 +14,7 @@ export async function POST(request: NextRequest) {
       ALGH_STN_ID: body.ALGH_STN_ID,
     };
 
-    // 외부 API에서 경로탐색 결과 조회
+    // 외부 API에서 경로탐색 결과 조회 (원래 API 사용)
     const { data } = await callExternalApi("selectPathResult.do", {
       method: "POST",
       body: filter,

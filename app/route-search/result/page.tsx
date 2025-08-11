@@ -1,13 +1,17 @@
 "use client";
 
-import { useState, useMemo, useRef } from "react";
+import { useState, useMemo, useRef, useCallback } from "react";
 import { z } from "zod";
 import { FilterForm } from "@/components/ui/FilterForm";
 import { routeSearchFilterConfig } from "@/features/routeSearch/filterConfig";
 import { createRouteSearchColDefs } from "@/features/routeSearch/gridConfig";
 import { processRouteSearchResults } from "@/features/routeSearch/dataProcessor";
 import { useRouteSearch } from "@/hooks/useRouteSearch";
-import { RouteSearchFilter, RouteSearchResult } from "@/types/routeSearch";
+import {
+  RouteSearchFilter,
+  RouteSearchResult,
+  StationOption,
+} from "@/types/routeSearch";
 import Spinner from "@/components/Spinner";
 import TestGrid from "@/components/TestGrid";
 import { AgGridReact } from "ag-grid-react";
@@ -35,64 +39,93 @@ const defaultValues: RouteSearchFilter = {
 export default function RouteSearchResultPage() {
   const gridRef = useRef<AgGridReact>(null);
 
-  const {
-    searchResults,
-    stationLoading,
-    searchLoading,
-    stationError,
-    searchError,
-    handleSearch,
-  } = useRouteSearch();
+  const { searchResults, searchLoading, searchError, handleSearch } =
+    useRouteSearch();
 
   const [filters, setFilters] = useState<RouteSearchFilter>(defaultValues);
-
-  // 체크박스 선택된 경로들 (스택 순서 유지)
   const [selectedPaths, setSelectedPaths] = useState<RouteSearchResult[]>([]);
-
-  // 상세 정보 Dialog 상태
   const [detailDialogOpen, setDetailDialogOpen] = useState(false);
   const [selectedRouteForDetail, setSelectedRouteForDetail] =
     useState<RouteSearchResult | null>(null);
-
-  // 필터 변경 핸들러
-  const handleFilterChange = (values: RouteSearchFilter) => {
-    setFilters(values);
-  };
-
-  // 검색 수행 여부 상태 추가
+  const [arrivalStationOptions, setArrivalStationOptions] = useState<
+    StationOption[]
+  >([]);
   const [hasSearched, setHasSearched] = useState(false);
 
-  // 검색 핸들러
-  const handleSearchSubmit = (values: RouteSearchFilter) => {
-    handleSearch(values);
-    // 검색 시 선택된 경로 초기화
-    setSelectedPaths([]);
-    // 검색 수행 상태 설정
-    setHasSearched(true);
-  };
+  // 필터 변경 핸들러 - useCallback으로 최적화
+  const handleFilterChange = useCallback(
+    (values: RouteSearchFilter) => {
+      setFilters(values);
 
-  // 체크박스 변경 핸들러
-  const handleCheckboxChange = (route: RouteSearchResult, checked: boolean) => {
-    if (checked) {
-      // 체크박스 선택: 스택에 추가
-      setSelectedPaths((prev) => [...prev, route]);
-    } else {
-      // 체크박스 해제: 스택에서 제거
-      setSelectedPaths((prev) => prev.filter((path) => path.id !== route.id));
-    }
-  };
+      // 출발역이 선택되면 도착역 옵션 로드
+      if (values.RIDE_STN_ID && values.RIDE_STN_ID !== filters.RIDE_STN_ID) {
+        console.log(
+          "출발역 선택됨, 도착역 옵션 로드 시작:",
+          values.RIDE_STN_ID
+        );
 
-  // 상세 정보 Dialog 열기
-  const handleDetailClick = (route: RouteSearchResult) => {
+        // 도착역 옵션 API 호출
+        fetch("/api/route-search/stations", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ RIDE_STN_ID: values.RIDE_STN_ID }),
+        })
+          .then((res) => res.json())
+          .then((data: { options: StationOption[] }) => {
+            console.log(
+              "도착역 옵션 로드 완료:",
+              data.options?.length || 0,
+              "개"
+            );
+            setArrivalStationOptions(data.options || []);
+            // 도착역 값 초기화
+            setFilters((prev) => ({ ...prev, ALGH_STN_ID: "" }));
+          })
+          .catch((error) => {
+            console.error("도착역 옵션 로드 실패:", error);
+          });
+      }
+    },
+    [filters.RIDE_STN_ID]
+  );
+
+  // 검색 핸들러 - useCallback으로 최적화
+  const handleSearchSubmit = useCallback(
+    (values: RouteSearchFilter) => {
+      handleSearch(values);
+      setSelectedPaths([]);
+      setHasSearched(true);
+    },
+    [handleSearch]
+  );
+
+  // 체크박스 변경 핸들러 - useCallback으로 최적화
+  const handleCheckboxChange = useCallback(
+    (route: RouteSearchResult, checked: boolean) => {
+      if (checked) {
+        setSelectedPaths((prev) => [...prev, route]);
+      } else {
+        setSelectedPaths((prev) => prev.filter((path) => path.id !== route.id));
+      }
+    },
+    []
+  );
+
+  // 상세 정보 Dialog 열기 - useCallback으로 최적화
+  const handleDetailClick = useCallback((route: RouteSearchResult) => {
     setSelectedRouteForDetail(route);
     setDetailDialogOpen(true);
-  };
+  }, []);
 
-  // 전체 로딩 상태
-  const isLoading = stationLoading || searchLoading;
-
-  // 에러 상태
-  const hasError = stationError || searchError;
+  // 행 클릭 핸들러 - useCallback으로 최적화
+  const onRowClicked = useCallback(
+    (event: { data: { originalData: RouteSearchResult } }) => {
+      console.log("행 클릭 이벤트 (비활성화):", event);
+    },
+    []
+  );
 
   // 네트워크 데이터 로드
   const {
@@ -103,15 +136,9 @@ export default function RouteSearchResultPage() {
     error: mapError,
   } = useNetworkData();
 
-  // 체크된 경로들의 하이라이트 계산 (스택 순서대로)
+  // 체크된 경로들의 하이라이트 계산 - useMemo로 최적화
   const routeHighlights = useMemo((): NetworkMapHighlight[] => {
-    console.log("경로탐색 하이라이트 계산:", {
-      selectedPathsCount: selectedPaths.length,
-      totalResults: searchResults.length,
-    });
-
     if (!selectedPaths || selectedPaths.length === 0) {
-      console.log("경로탐색 하이라이트: 선택된 경로 없음");
       return [];
     }
 
@@ -127,45 +154,57 @@ export default function RouteSearchResultPage() {
         return {
           type: "path" as const,
           value: nodeIds,
-          priority: 1, // 모든 체크된 경로는 우선순위 1
-          rgb: route.rgb || "#3B82F6", // RGB 값 사용, 없으면 기본 파란색
-          pathId: route.id.toString(), // 경로 ID
+          priority: 1,
+          rgb: route.rgb || "#3B82F6",
+          pathId: route.id.toString(),
         };
       })
       .filter(Boolean) as NetworkMapHighlight[];
-  }, [selectedPaths, searchResults]);
+  }, [selectedPaths]);
 
-  // 경로탐색 결과 데이터 가공
+  // 경로탐색 결과 데이터 가공 - useMemo로 최적화
   const processedResults = useMemo(() => {
     return processRouteSearchResults(searchResults, selectedPaths);
   }, [searchResults, selectedPaths]);
 
-  // 그리드 컬럼 정의
+  // 그리드 컬럼 정의 - useMemo로 최적화
   const colDefs = useMemo(() => {
     return createRouteSearchColDefs(handleCheckboxChange, handleDetailClick);
   }, [handleCheckboxChange, handleDetailClick]);
 
-  // 행 클릭 핸들러 제거 (상세정보 버튼으로 대체)
-  const onRowClicked = (event: {
-    data: { originalData: RouteSearchResult };
-  }) => {
-    // 행 클릭 시 아무 동작 안함 (상세정보 버튼으로 대체)
-    console.log("행 클릭 이벤트 (비활성화):", event);
-  };
-
-  // 그리드 높이 동적 계산
+  // 그리드 높이 동적 계산 - useMemo로 최적화
   const gridHeight = useMemo(() => {
     if (!processedResults || processedResults.length === 0) return 200;
-    const rowHeight = 48; // AG Grid 기본 행 높이
-    const headerHeight = 48; // 헤더 높이
+    const rowHeight = 48;
+    const headerHeight = 48;
     const minHeight = 200;
-    const maxHeight = 480; // 최대 10행
+    const maxHeight = 480;
     const calculatedHeight = Math.min(
       Math.max(processedResults.length * rowHeight + headerHeight, minHeight),
       maxHeight
     );
     return calculatedHeight;
   }, [processedResults]);
+
+  // 동적 필터 설정 생성 - useMemo로 최적화
+  const dynamicFilterConfig = useMemo(() => {
+    return routeSearchFilterConfig.map((field) => {
+      if (field.name === "ALGH_STN_ID") {
+        return {
+          ...field,
+          options: arrivalStationOptions,
+          disabled: !filters.RIDE_STN_ID,
+        };
+      }
+      return field;
+    });
+  }, [arrivalStationOptions, filters.RIDE_STN_ID]);
+
+  // 전체 로딩 상태
+  const isLoading = searchLoading;
+
+  // 에러 상태
+  const hasError = searchError;
 
   return (
     <div className="p-6 space-y-6">
@@ -178,11 +217,7 @@ export default function RouteSearchResultPage() {
         <div className="absolute inset-0 flex items-center justify-center bg-white/80 z-50">
           <div className="text-center">
             <Spinner />
-            <p className="mt-4 text-gray-600">
-              {stationLoading
-                ? "역 목록을 불러오는 중..."
-                : "경로를 탐색하는 중..."}
-            </p>
+            <p className="mt-4 text-gray-600">경로를 탐색하는 중...</p>
           </div>
         </div>
       )}
@@ -190,13 +225,13 @@ export default function RouteSearchResultPage() {
       {/* 에러 메시지 */}
       {hasError && (
         <div className="bg-red-50 border border-red-200 rounded-md p-4">
-          <p className="text-red-600">{stationError || searchError}</p>
+          <p className="text-red-600">{searchError}</p>
         </div>
       )}
 
       {/* 필터 폼 */}
       <FilterForm
-        fields={routeSearchFilterConfig}
+        fields={dynamicFilterConfig}
         defaultValues={defaultValues}
         schema={routeSearchSchema}
         values={filters}

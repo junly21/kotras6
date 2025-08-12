@@ -1,17 +1,22 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { callExternalApi, createCorsHeaders } from "../utils/externalApi";
 import { NetworkNode } from "@/types/network";
 import { StationOption } from "@/types/routeSearch";
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
     console.log("selectNetWorkNodeList API 호출됨 (GET)");
-
+    const extSid = request.cookies.get("ext_sid")?.value;
+    console.log("쿠키에서 가져온 ext_sid:", extSid);
+    if (!extSid) {
+      console.warn("ext_sid 쿠키가 없습니다. 세션을 먼저 생성해주세요.");
+    }
     const { data } = await callExternalApi("selectNetWorkNodeList.do", {
       method: "POST",
       body: {
         NET_DT: "LATEST",
       },
+      sessionId: extSid, // 세션 ID 전달
     });
 
     console.log("외부 API 응답:", data);

@@ -6,6 +6,14 @@ import {
 
 export async function POST(request: NextRequest) {
   try {
+    // ext_sid 쿠키 확인 (로깅용)
+    const extSid = request.cookies.get("ext_sid")?.value;
+    console.log("쿠키에서 가져온 ext_sid:", extSid);
+
+    if (!extSid) {
+      console.warn("ext_sid 쿠키가 없습니다. 세션을 먼저 생성해주세요.");
+    }
+
     const { network, networkLabel, lineLabel } = await request.json();
 
     // 외부 API에 POST 요청
@@ -16,6 +24,7 @@ export async function POST(request: NextRequest) {
         OPER_NM: networkLabel,
         SUBWAY: lineLabel,
       },
+      sessionId: extSid, // 세션 ID 전달
     });
 
     return NextResponse.json({ data }, { headers: createCorsHeaders() });

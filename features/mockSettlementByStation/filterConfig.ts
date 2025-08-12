@@ -15,7 +15,7 @@ export const mockSettlementByStationFilterConfig: FieldConfig[] = [
     type: "combobox",
     placeholder: "역을 선택하세요",
     required: false,
-    optionsEndpoint: "/api/selectNetWorkNodeList",
+    optionsEndpoint: "/api/selectNetWorkNodeSelectBoxSession",
   },
   {
     name: "STN_ID2",
@@ -23,7 +23,7 @@ export const mockSettlementByStationFilterConfig: FieldConfig[] = [
     type: "combobox",
     placeholder: "역을 선택하세요",
     required: false,
-    optionsEndpoint: "/api/selectNetWorkNodeList",
+    optionsEndpoint: "/api/selectNetWorkNodeSelectBoxSession",
   },
   {
     name: "STN_ID3",
@@ -31,7 +31,7 @@ export const mockSettlementByStationFilterConfig: FieldConfig[] = [
     type: "combobox",
     placeholder: "역을 선택하세요",
     required: false,
-    optionsEndpoint: "/api/selectNetWorkNodeList",
+    optionsEndpoint: "/api/selectNetWorkNodeSelectBoxSession",
   },
   {
     name: "STN_ID4",
@@ -39,7 +39,7 @@ export const mockSettlementByStationFilterConfig: FieldConfig[] = [
     type: "combobox",
     placeholder: "역을 선택하세요",
     required: false,
-    optionsEndpoint: "/api/selectNetWorkNodeList",
+    optionsEndpoint: "/api/selectNetWorkNodeSelectBoxSession",
   },
   {
     name: "STN_ID5",
@@ -47,6 +47,6 @@ export const mockSettlementByStationFilterConfig: FieldConfig[] = [
     type: "combobox",
     placeholder: "역을 선택하세요",
     required: false,
-    optionsEndpoint: "/api/selectNetWorkNodeList",
+    optionsEndpoint: "/api/selectNetWorkNodeSelectBoxSession",
   },
 ];

@@ -12,10 +12,9 @@ export type SettlementByRouteFilters = z.infer<typeof settlementByRouteSchema>;
 export const settlementByRouteFields: FieldConfig[] = [
   {
     name: "agency",
-    label: "보관기관",
+    label: "기관명",
     type: "select",
-    placeholder: "보관기관을 선택하세요",
-    required: true,
-    optionsEndpoint: "/api/common/agencies?includeAll=false",
+    optionsEndpoint: "/api/common/agencies",
+    placeholder: "기관명을 선택하세요",
   },
 ];

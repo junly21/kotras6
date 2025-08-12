@@ -101,7 +101,7 @@ export default function NetworkMapPage() {
   useEffect(() => {
     // 네트워크가 선택된 경우에만 기관명 목록 요청
     if (filters.network) {
-      fetch("/api/common/agencies?includeAll=true")
+      fetch("/api/common/agencies")
         .then((res) => res.json())
         .then((data) => {
           const options: { value: string; label: string }[] = Array.isArray(

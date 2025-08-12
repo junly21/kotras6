@@ -72,7 +72,7 @@ export function TransactionDetailFilterForm({
       });
 
     // 기관명 옵션 로드
-    fetch("/api/common/agencies?includeAll=true")
+    fetch("/api/common/agencies")
       .then((res) => res.json())
       .then((data: { options: FieldOption[] }) => {
         setDynamicOptions((prev) => ({

@@ -34,7 +34,7 @@ export const transactionDetailFields: FieldConfig[] = [
     type: "select",
     required: true,
     placeholder: "기관명을 선택하세요",
-    optionsEndpoint: "/api/common/agencies?includeAll=true",
+    optionsEndpoint: "/api/common/agencies",
     // 상세조회에서는 기관명 label을 사용
     useLabel: true,
   },

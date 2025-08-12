@@ -23,6 +23,6 @@ export const mockSettlementByInstitutionFilterConfig: FieldConfig[] = [
     type: "select",
     placeholder: "기관명을 선택하세요",
     required: false,
-    optionsEndpoint: "/api/common/agencies?includeAll=false",
+    optionsEndpoint: "/api/common/agencies",
   },
 ];

@@ -16,11 +16,10 @@ export const mockSettlementByRouteFilterConfig = [
   },
   {
     name: "agency",
-    label: "보관기관",
-    type: "select" as const,
-    placeholder: "보관기관을 선택하세요",
-    optionsEndpoint: "/api/common/agencies?includeAll=false",
-    required: true,
+    label: "기관명",
+    type: "select",
+    optionsEndpoint: "/api/common/agencies",
+    placeholder: "기관명을 선택하세요",
   },
 ];
 

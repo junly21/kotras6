@@ -7,7 +7,7 @@ export const settlementByInstitutionFields: FieldConfig[] = [
     label: "기관명",
     type: "select",
     required: true,
-    placeholder: "기관을 선택하세요",
-    optionsEndpoint: "/api/common/agencies?includeAll=false",
+    placeholder: "기관명을 선택하세요",
+    optionsEndpoint: "/api/common/agencies",
   },
 ];

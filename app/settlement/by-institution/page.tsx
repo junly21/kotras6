@@ -6,6 +6,7 @@ import { FilterForm } from "@/components/ui/FilterForm";
 import { Toast } from "@/components/ui/Toast";
 import { AllCommunityModule, ModuleRegistry } from "ag-grid-community";
 import { useApi } from "@/hooks/useApi";
+import { useSettlementFilters } from "@/hooks/useFilterOptions";
 import { SettlementByInstitutionService } from "@/services/settlementByInstitutionService";
 import { useCallback, useRef, useState, useEffect } from "react";
 import { AgGridReact } from "ag-grid-react";
@@ -32,6 +33,31 @@ export default function SettlementByInstitutionPage() {
 
   // ✅ 검색 수행 여부 상태 추가
   const [hasSearched, setHasSearched] = useState(false);
+
+  // ✅ 정산 필터 옵션 훅 사용
+  const handleFilterChange = useCallback((key: string, value: string) => {
+    setFilters((prev) => ({ ...prev, [key]: value }));
+  }, []);
+
+  const { isLoading: isFilterLoading, isAllOptionsLoaded: isFilterLoaded } =
+    useSettlementFilters(handleFilterChange);
+
+  // ✅ 모든 필터 옵션이 로드되고 첫 번째 기관이 선택되면 자동 조회
+  useEffect(() => {
+    console.log("자동 조회 체크:", { isFilterLoaded, filters, hasSearched }); // 디버깅 로그
+    if (isFilterLoaded && filters.agency && !hasSearched) {
+      console.log("자동 조회 실행:", filters.agency);
+      setHasSearched(true);
+    }
+  }, [isFilterLoaded, filters.agency, hasSearched]);
+
+  // ✅ 기관이 변경되면 자동으로 조회 실행
+  useEffect(() => {
+    if (filters.agency && !hasSearched) {
+      console.log("기관 변경으로 인한 자동 조회:", filters.agency);
+      setHasSearched(true);
+    }
+  }, [filters.agency, hasSearched]);
 
   // 원단위 상태 추가
   const [unit, setUnit] = useState<Unit>("원");
@@ -149,12 +175,21 @@ export default function SettlementByInstitutionPage() {
     <div className="p-6 space-y-6">
       <h1 className="text-2xl font-bold">정산결과 기관별 조회</h1>
 
-      <FilterForm<SettlementByInstitutionFilters>
-        fields={settlementByInstitutionFields}
-        defaultValues={{ agency: "" }}
-        schema={settlementByInstitutionSchema}
-        onSearch={handleSearch}
-      />
+      {/* ✅ 필터 폼 로딩 상태 표시 */}
+      <div className="relative">
+        {isFilterLoading && (
+          <div className="absolute inset-0 flex items-center justify-center bg-white/80 z-10 rounded-xl">
+            <Spinner />
+          </div>
+        )}
+        <FilterForm<SettlementByInstitutionFilters>
+          fields={settlementByInstitutionFields}
+          defaultValues={filters}
+          values={filters}
+          schema={settlementByInstitutionSchema}
+          onSearch={handleSearch}
+        />
+      </div>
 
       {/* 원단위 변경 및 CSV 내보내기 버튼 */}
       <div className="flex justify-end gap-4">

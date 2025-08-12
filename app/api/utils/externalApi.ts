@@ -9,6 +9,7 @@ export interface ExternalApiConfig {
   headers?: Record<string, string>;
   body?: unknown;
   params?: Record<string, string | number | boolean>;
+  sessionId?: string; // 세션 ID를 매개변수로 받음
 }
 
 export interface ApiResponse<T = unknown> {
@@ -22,7 +23,14 @@ export async function callExternalApi(
   endpoint: string,
   config: ExternalApiConfig = {}
 ): Promise<{ data: unknown; contentType: string | null }> {
-  const { method = "GET", headers = {}, body, params = {} } = config;
+  const { method = "GET", headers = {}, body, params = {}, sessionId } = config;
+
+  // 세션 쿠키 설정 (매개변수로 받은 sessionId 사용)
+  let sessionCookie = "";
+  if (sessionId) {
+    sessionCookie = `JSESSIONID=${sessionId}`;
+    console.log("세션 쿠키 설정:", sessionCookie);
+  }
 
   // URL 파라미터 처리
   const urlParams = new URLSearchParams();
@@ -37,14 +45,23 @@ export async function callExternalApi(
     queryString ? `?${queryString}` : ""
   }`;
 
-  console.log("외부 API 호출:", { method, url: externalUrl, headers, body });
+  // 세션 쿠키가 있으면 헤더에 추가
+  const finalHeaders = {
+    "Content-Type": "application/json",
+    ...(sessionCookie && { Cookie: sessionCookie }),
+    ...headers,
+  };
+
+  console.log("외부 API 호출:", {
+    method,
+    url: externalUrl,
+    headers: finalHeaders,
+    body,
+  });
 
   const requestConfig: RequestInit = {
     method,
-    headers: {
-      "Content-Type": "application/json",
-      ...headers,
-    },
+    headers: finalHeaders,
   };
 
   // GET이 아닌 경우에만 body 추가

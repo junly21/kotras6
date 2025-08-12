@@ -24,24 +24,13 @@ export async function GET(request: NextRequest) {
     // data가 배열인지 확인하고, 아니면 빈 배열 반환
     const options = Array.isArray(data) ? data : [];
 
-    // 항상 "전체" 옵션 추가
-    const finalOptions = [{ label: "전체", value: "ALL" }, ...options];
-
     return NextResponse.json(
-      { options: finalOptions },
+      { options: options },
       { headers: createCorsHeaders() }
     );
   } catch (error) {
     console.error("공통 기관 목록 API 처리 중 오류 발생:", error);
 
-    // 에러 발생 시에도 "전체" 옵션 포함
-    const errorOptions = [{ label: "전체", value: "ALL" }];
-
-    return NextResponse.json(
-      {
-        options: errorOptions,
-      },
-      { headers: createCorsHeaders() }
-    );
+    return NextResponse.json({ headers: createCorsHeaders() });
   }
 }

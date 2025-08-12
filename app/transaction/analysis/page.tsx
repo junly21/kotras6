@@ -5,6 +5,7 @@ import { FilterForm } from "@/components/ui/FilterForm";
 import { Toast } from "@/components/ui/Toast";
 import { AllCommunityModule, ModuleRegistry } from "ag-grid-community";
 import { useApi } from "@/hooks/useApi";
+import { useAgencyOptions } from "@/hooks/useFilterOptions";
 import { TransactionAnalysisService } from "@/services/transactionAnalysisService";
 import { useCallback, useRef, useState, useEffect } from "react";
 import { AgGridReact } from "ag-grid-react";
@@ -29,6 +30,38 @@ export default function TransactionAnalysisPage() {
   // ✅ 검색 수행 여부 상태 추가
   const [hasSearched, setHasSearched] = useState(false);
 
+  // ✅ 기관 옵션 훅 사용
+  const handleAgencyChange = useCallback((value: string) => {
+    setFilters((prev) => ({ ...prev, agency: value }));
+  }, []);
+
+  const {
+    options: agencyOptions,
+    isLoading: isAgencyLoading,
+    isAllOptionsLoaded: isAgencyLoaded,
+  } = useAgencyOptions(handleAgencyChange);
+
+  // ✅ 첫 번째 기관이 로드되면 자동으로 선택 (백업 로직)
+  const hasInitialized = useRef(false);
+  useEffect(() => {
+    if (
+      agencyOptions.agency &&
+      agencyOptions.agency.length > 0 &&
+      !hasInitialized.current
+    ) {
+      hasInitialized.current = true;
+      const firstAgency = agencyOptions.agency[0].value;
+      setFilters((prev) => ({ ...prev, agency: firstAgency }));
+    }
+  }, [agencyOptions.agency]); // filters.agency 의존성 제거
+
+  // ✅ 모든 기관 옵션이 로드되고 첫 번째 기관이 선택되면 자동 조회
+  useEffect(() => {
+    if (isAgencyLoaded && filters.agency && !hasSearched) {
+      setHasSearched(true);
+    }
+  }, [isAgencyLoaded, filters.agency, hasSearched]);
+
   // 토스트 상태
   const [toast, setToast] = useState<{
     isVisible: boolean;
@@ -45,8 +78,7 @@ export default function TransactionAnalysisPage() {
     [filters]
   );
 
-  const onSuccess = useCallback((data: TransactionAnalysisData[]) => {
-    console.log("거래내역 분석 데이터 로드 성공:", data);
+  const onSuccess = useCallback(() => {
     setToast({
       isVisible: true,
       message: "거래내역 분석 데이터를 성공적으로 받았습니다.",
@@ -55,7 +87,6 @@ export default function TransactionAnalysisPage() {
   }, []);
 
   const onError = useCallback((error: string) => {
-    console.error("거래내역 분석 데이터 로드 실패:", error);
     setToast({
       isVisible: true,
       message: `데이터 로드 실패: ${error}`,
@@ -117,12 +148,21 @@ export default function TransactionAnalysisPage() {
     <div className="space-y-6">
       <h1 className="text-2xl font-bold">거래내역 분석</h1>
 
-      <FilterForm<TransactionAnalysisFilters>
-        fields={transactionAnalysisFields}
-        defaultValues={{ agency: "" }}
-        schema={transactionAnalysisSchema}
-        onSearch={handleSearch}
-      />
+      {/* ✅ 필터 폼 로딩 상태 표시 */}
+      <div className="relative">
+        {isAgencyLoading && (
+          <div className="absolute inset-0 flex items-center justify-center bg-white/80 z-10 rounded-xl">
+            <Spinner />
+          </div>
+        )}
+        <FilterForm<TransactionAnalysisFilters>
+          fields={transactionAnalysisFields}
+          defaultValues={filters}
+          values={filters}
+          schema={transactionAnalysisSchema}
+          onSearch={handleSearch}
+        />
+      </div>
 
       {/* 그리드 */}
       <div className="relative h-[600px] overflow-y-auto">

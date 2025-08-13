@@ -74,8 +74,6 @@ export default function NetworkMapPage() {
             setFilters((prev) => ({
               ...prev,
               network: options[0].value,
-              agency: "ALL", // 기관명을 "전체"로 자동 설정
-              line: "ALL", // 노선을 "전체"로 자동 설정
             }));
           }
         } else {
@@ -113,6 +111,14 @@ export default function NetworkMapPage() {
               }))
             : [];
           setAgencyOptions(options);
+          // 기관명 옵션이 로드되면 첫 번째 값으로 자동 설정
+          if (options.length > 0) {
+            setFilters((prev) => ({
+              ...prev,
+              agency: options[0].value,
+              line: "ALL",
+            }));
+          }
         })
         .catch(() => setAgencyOptions([]));
     } else {
@@ -141,6 +147,11 @@ export default function NetworkMapPage() {
               })),
             ];
             setLineOptions(options);
+            // 노선 목록이 로드되면 "전체"를 자동으로 선택
+            setFilters((prev) => ({
+              ...prev,
+              line: "ALL",
+            }));
           } else {
             setLineOptions([]);
             setToast({
@@ -340,7 +351,7 @@ export default function NetworkMapPage() {
             disabled: !filters.network || !filters.agency,
           },
         ]}
-        defaultValues={{ network: "", agency: "ALL", line: "ALL" }}
+        defaultValues={{ network: "", agency: "", line: "" }}
         values={filters}
         onChange={setFilters}
         onSearch={handleSearch}

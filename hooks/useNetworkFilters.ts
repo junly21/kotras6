@@ -3,7 +3,7 @@ import { NetworkService } from "@/services/networkService";
 import { NetworkMapService } from "@/services/networkMapService";
 import { NetworkMapFilters } from "@/types/networkMap";
 
-export const useNetworkFilters = () => {
+export const useNetworkFilters = (autoSearch?: boolean) => {
   const [filters, setFilters] = useState<NetworkMapFilters>({
     network: "",
     agency: "",
@@ -114,7 +114,7 @@ export const useNetworkFilters = () => {
     } else {
       setLineOptions([]);
     }
-  }, [filters.network, filters.agency, agencyOptions]);
+  }, [filters.network, filters.agency, agencyOptions, autoSearch]);
 
   // 필터 변경 핸들러
   const handleFilterChange = useCallback((values: NetworkMapFilters) => {

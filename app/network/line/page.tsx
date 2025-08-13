@@ -11,6 +11,7 @@ import type { NetworkMapHighlight } from "@/types/network";
 import { useNetworkFilters } from "@/hooks/useNetworkFilters";
 import { NetworkMapFilters } from "@/types/networkMap";
 import type { NodeData, LineData } from "@/types/networkMap";
+import Spinner from "@/components/Spinner";
 
 export default function NetworkLinePage() {
   // 공통 네트워크 필터 훅 사용
@@ -32,9 +33,13 @@ export default function NetworkLinePage() {
     nodes: defaultNodes,
     links: defaultLinks,
     svgText,
-    isLoading,
+    isLoading: isDataLoading,
     error,
   } = useNetworkData();
+
+  // 전체 로딩 상태: 기본 데이터 로딩 중이거나 하이라이트가 아직 적용되지 않음
+  const isLoading =
+    isDataLoading || !hasSearched || (hasSearched && !activeLine);
 
   // 조회버튼 클릭 시 API 요청용 (map/page.tsx와 동일)
   const apiCall = useCallback(() => {
@@ -109,6 +114,13 @@ export default function NetworkLinePage() {
       refetch();
     }
   }, [filters, refetch, hasSearched]);
+
+  // 모든 필터가 설정되면 자동으로 조회 실행
+  useEffect(() => {
+    if (filters.network && filters.agency && filters.line && !hasSearched) {
+      setHasSearched(true);
+    }
+  }, [filters.network, filters.agency, filters.line, hasSearched]);
 
   const handleFilterChangeWithLine = useCallback(
     (values: NetworkMapFilters) => {
@@ -190,8 +202,9 @@ export default function NetworkLinePage() {
       <div className="flex gap-6">
         <div className="flex-1 h-[920px] border rounded-lg p-4 bg-white">
           {isLoading ? (
-            <div className="flex items-center justify-center h-64 text-gray-500">
-              노선도를 불러오는 중...
+            <div className="flex flex-col items-center justify-center h-64 text-gray-500 space-y-4">
+              <Spinner size="lg" />
+              <p>노선도를 불러오는 중...</p>
             </div>
           ) : (
             <NetworkMap

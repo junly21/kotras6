@@ -144,8 +144,8 @@ export default function NetworkFileUploadPage() {
       console.log("네트워크 파일 등록 시작:", data);
 
       const response = await NetworkFileUploadService.uploadNetworkFiles(data);
-
-      if (response.success) {
+      console.log(response);
+      if (response.success === true) {
         alert("네트워크 파일 등록이 완료되었습니다.");
         setIsModalOpen(false);
         // 등록 후 목록 새로고침
@@ -153,11 +153,16 @@ export default function NetworkFileUploadPage() {
           handleSearch(filters);
         }
       } else {
-        alert(`등록 실패: ${response.error}`);
+        // 외부 API에서 message 필드로 에러 메시지를 보내므로 message 사용
+        const errorMessage =
+          (response as { message?: string }).message ||
+          response.error ||
+          "등록에 실패했습니다.";
+        alert(`등록 실패: ${errorMessage}`);
       }
     } catch (error) {
       console.error("네트워크 파일 등록 실패:", error);
-      alert("등록 중 오류가 발생했습니다.");
+      alert(`등록 중 오류가 발생했습니다., ${error}`);
     } finally {
       setModalLoading(false);
     }

@@ -84,7 +84,7 @@ export async function POST() {
       name: "ext_sid",
       value: jsessionId,
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production", // 개발환경에서는 false
+      secure: false, // HTTP 환경이므로 false로 설정
       sameSite: "lax",
       path: "/",
       maxAge: 60 * 30, // 30분 (외부 세션 TTL에 맞춰 조정)

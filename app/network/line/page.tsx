@@ -1,13 +1,16 @@
 "use client";
 
-import React, { useState, useMemo, useCallback } from "react";
+import React, { useState, useMemo, useCallback, useEffect } from "react";
 import { NetworkMap } from "@/components/NetworkMap/NetworkMap";
 import { FilterForm } from "@/components/ui/FilterForm";
 import { useNetworkData } from "@/hooks/useNetworkData";
+import { useApi } from "@/hooks/useApi";
+import { NetworkMapService } from "@/services/networkMapService";
 import { NETWORK_MAP_CONFIGS } from "@/constants/networkMapConfigs";
 import type { NetworkMapHighlight } from "@/types/network";
 import { useNetworkFilters } from "@/hooks/useNetworkFilters";
 import { NetworkMapFilters } from "@/types/networkMap";
+import type { NodeData, LineData } from "@/types/networkMap";
 
 export default function NetworkLinePage() {
   // 공통 네트워크 필터 훅 사용
@@ -22,34 +25,119 @@ export default function NetworkLinePage() {
   } = useNetworkFilters();
 
   const [activeLine, setActiveLine] = useState<string | null>(null);
+  const [hasSearched, setHasSearched] = useState(false);
 
-  // 네트워크 데이터 로드
-  const { nodes, links, svgText, isLoading, error } = useNetworkData();
+  // 최초 노선도 렌더링용 데이터 (useNetworkData 사용)
+  const {
+    nodes: defaultNodes,
+    links: defaultLinks,
+    svgText,
+    isLoading,
+    error,
+  } = useNetworkData();
 
-  // 필터 변경 핸들러
+  // 조회버튼 클릭 시 API 요청용 (map/page.tsx와 동일)
+  const apiCall = useCallback(() => {
+    if (!filters.network || !filters.agency || !filters.line) {
+      return Promise.resolve({
+        success: true,
+        data: { nodeData: [], lineData: [] },
+      });
+    }
+
+    const agencyLabelRaw =
+      agencyOptions.find((a) => a.value === filters.agency)?.label || "";
+    const agencyLabel = agencyLabelRaw === "전체" ? "ALL" : agencyLabelRaw;
+
+    console.log("노선도 데이터 요청:", {
+      network: filters.network,
+      agency: filters.agency,
+      line: filters.line,
+      networkLabel: agencyLabel,
+    });
+
+    return NetworkMapService.getMapData({
+      network: filters.network,
+      agency: filters.agency,
+      line: filters.line,
+      networkLabel: agencyLabel,
+    });
+  }, [filters, agencyOptions]);
+
+  // API 요청 성공 시 하이라이트 처리
+  const onSuccess = useCallback(
+    (data: { nodeData: NodeData[]; lineData: LineData[] }) => {
+      // 받은 데이터를 기반으로 하이라이트 설정
+      if (filters.line === "ALL") {
+        // 전체 선택 시: 받은 데이터의 모든 노선을 하이라이트
+        const apiLineNames = data.lineData
+          .map((line) => line.subway || line.seq)
+          .filter(Boolean);
+
+        // 중복 제거하고 고유한 노선명만 추출
+        const uniqueLineNames = [...new Set(apiLineNames)];
+
+        const matchedLineNames = uniqueLineNames.filter((lineName) =>
+          defaultLinks.some((link) => link.line === lineName)
+        );
+
+        const finalActiveLine =
+          matchedLineNames.length > 0 ? matchedLineNames.join(",") : null;
+        setActiveLine(finalActiveLine);
+      } else {
+        // 특정 노선 선택 시: 해당 노선만 하이라이트
+        setActiveLine(filters.line);
+      }
+    },
+    [filters.line, defaultLinks]
+  );
+
+  const onError = useCallback((error: string) => {
+    console.error("노선도 데이터 로드 실패:", error);
+    setActiveLine(null); // 에러 시 하이라이트 제거
+  }, []);
+
+  const { refetch } = useApi(apiCall, {
+    autoFetch: false,
+    onSuccess,
+    onError,
+  });
+
+  // 조회버튼 클릭 시에만 API 요청
+  useEffect(() => {
+    if (hasSearched) {
+      refetch();
+    }
+  }, [filters, refetch, hasSearched]);
+
   const handleFilterChangeWithLine = useCallback(
     (values: NetworkMapFilters) => {
       handleFilterChange(values);
-      setActiveLine(values.line === "ALL" ? null : values.line);
+      if (values.line !== "ALL") {
+        setActiveLine(values.line);
+      }
     },
     [handleFilterChange]
   );
 
-  // 검색 핸들러
   const handleSearchWithLine = useCallback(
     (values: NetworkMapFilters) => {
       handleSearch(values);
-      setActiveLine(values.line === "ALL" ? null : values.line);
+      setHasSearched(true);
     },
     [handleSearch]
   );
 
-  // 하이라이트 설정 - 메모이제이션
   const highlights = useMemo((): NetworkMapHighlight[] => {
-    return activeLine ? [{ type: "line", value: activeLine }] : [];
+    if (!activeLine) return [];
+
+    const lineNames = activeLine.split(",");
+    return lineNames.map((lineName) => ({
+      type: "line" as const,
+      value: lineName.trim(),
+    }));
   }, [activeLine]);
 
-  // NetworkMap 설정 - 메모이제이션
   const mapConfig = useMemo(() => NETWORK_MAP_CONFIGS.line, []);
 
   if (error) {
@@ -107,8 +195,8 @@ export default function NetworkLinePage() {
             </div>
           ) : (
             <NetworkMap
-              nodes={nodes}
-              links={links}
+              nodes={defaultNodes}
+              links={defaultLinks}
               svgText={svgText}
               config={mapConfig}
               highlights={highlights}

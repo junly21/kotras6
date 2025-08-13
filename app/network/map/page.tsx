@@ -53,18 +53,10 @@ export default function NetworkMapPage() {
   const vectorSourceRef = useRef<VectorSource | null>(null);
   const vectorLayerRef = useRef<VectorLayer | null>(null);
 
-  // 지도 데이터 요청 useCallback
   const apiCall = useCallback(() => {
-    // agencyOptions에서 현재 선택된 agency의 label을 찾음
     const agencyLabelRaw =
       agencyOptions.find((a) => a.value === filters.agency)?.label || "";
     const agencyLabel = agencyLabelRaw === "전체" ? "ALL" : agencyLabelRaw;
-    console.log("지도 데이터 요청", {
-      network: filters.network,
-      agency: filters.agency,
-      line: filters.line,
-      networkLabel: agencyLabel,
-    });
     return NetworkMapService.getMapData({
       network: filters.network,
       agency: filters.agency,

@@ -1,34 +1,48 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useCallback } from "react";
 import { NetworkMap } from "@/components/NetworkMap/NetworkMap";
 import { FilterForm } from "@/components/ui/FilterForm";
 import { useNetworkData } from "@/hooks/useNetworkData";
-import { LINE_OPTIONS } from "@/constants/subwayLines";
 import { NETWORK_MAP_CONFIGS } from "@/constants/networkMapConfigs";
 import type { NetworkMapHighlight } from "@/types/network";
-
-interface LineFilters {
-  line: string;
-}
+import { useNetworkFilters } from "@/hooks/useNetworkFilters";
+import { NetworkMapFilters } from "@/types/networkMap";
 
 export default function NetworkLinePage() {
-  const [filters, setFilters] = useState<LineFilters>({ line: "" });
+  // 공통 네트워크 필터 훅 사용
+  const {
+    filters,
+    networkOptions,
+    agencyOptions,
+    lineOptions,
+    isAllAgency,
+    handleFilterChange,
+    handleSearch,
+  } = useNetworkFilters();
+
   const [activeLine, setActiveLine] = useState<string | null>(null);
 
   // 네트워크 데이터 로드
   const { nodes, links, svgText, isLoading, error } = useNetworkData();
 
   // 필터 변경 핸들러
-  const handleFilterChange = (values: LineFilters) => {
-    setFilters(values);
-    setActiveLine(values.line === "전체" ? null : values.line);
-  };
+  const handleFilterChangeWithLine = useCallback(
+    (values: NetworkMapFilters) => {
+      handleFilterChange(values);
+      setActiveLine(values.line === "ALL" ? null : values.line);
+    },
+    [handleFilterChange]
+  );
 
   // 검색 핸들러
-  const handleSearch = (values: LineFilters) => {
-    setActiveLine(values.line === "전체" ? null : values.line);
-  };
+  const handleSearchWithLine = useCallback(
+    (values: NetworkMapFilters) => {
+      handleSearch(values);
+      setActiveLine(values.line === "ALL" ? null : values.line);
+    },
+    [handleSearch]
+  );
 
   // 하이라이트 설정 - 메모이제이션
   const highlights = useMemo((): NetworkMapHighlight[] => {
@@ -53,20 +67,36 @@ export default function NetworkLinePage() {
       <h1 className="text-2xl font-bold">노선도 조회</h1>
 
       {/* FilterForm 적용 */}
-      <FilterForm<LineFilters>
+      <FilterForm<NetworkMapFilters>
         fields={[
+          {
+            name: "network",
+            label: "네트워크명",
+            type: "select",
+            options: networkOptions,
+            required: true,
+          },
+          {
+            name: "agency",
+            label: "기관명",
+            type: "select",
+            options: agencyOptions,
+            required: true,
+            disabled: !filters.network,
+          },
           {
             name: "line",
             label: "노선",
-            type: "combobox",
-            options: LINE_OPTIONS,
-            required: false,
+            type: isAllAgency ? "combobox" : "select",
+            options: lineOptions,
+            required: true,
+            disabled: !filters.network || !filters.agency,
           },
         ]}
-        defaultValues={{ line: "전체" }}
+        defaultValues={{ network: "", agency: "", line: "" }}
         values={filters}
-        onChange={handleFilterChange}
-        onSearch={handleSearch}
+        onChange={handleFilterChangeWithLine}
+        onSearch={handleSearchWithLine}
       />
 
       <div className="flex gap-6">

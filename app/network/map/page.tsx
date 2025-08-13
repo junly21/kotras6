@@ -9,11 +9,11 @@ import { defaults } from "ol/control";
 import { fromLonLat } from "ol/proj";
 import { Toast } from "@/components/ui/Toast";
 import { useApi } from "@/hooks/useApi";
-import { NetworkService } from "@/services/networkService";
 import { NetworkMapService } from "@/services/networkMapService";
 import { NetworkMapFilters } from "@/types/networkMap";
 import type { NodeData, LineData } from "@/types/networkMap";
 import { FilterForm } from "@/components/ui/FilterForm";
+import { useNetworkFilters } from "@/hooks/useNetworkFilters";
 // OpenLayers 벡터 관련 추가 import
 import { Vector as VectorLayer } from "ol/layer";
 import { Vector as VectorSource } from "ol/source";
@@ -23,11 +23,16 @@ import LineString from "ol/geom/LineString";
 import { Style, Stroke, Circle as CircleStyle, Fill } from "ol/style";
 
 export default function NetworkMapPage() {
-  const [filters, setFilters] = useState<NetworkMapFilters>({
-    network: "",
-    agency: "ALL",
-    line: "ALL",
-  });
+  // 공통 네트워크 필터 훅 사용
+  const {
+    filters,
+    networkOptions,
+    agencyOptions,
+    lineOptions,
+    isAllAgency,
+    handleFilterChange,
+    handleSearch,
+  } = useNetworkFilters();
 
   // 검색 수행 여부 상태
   const [hasSearched, setHasSearched] = useState(false);
@@ -43,136 +48,10 @@ export default function NetworkMapPage() {
     type: "info",
   });
 
-  // 네트워크/노선/기관 옵션 상태
-  const [networkOptions, setNetworkOptions] = useState<
-    Array<{ value: string; label: string }>
-  >([]);
-  const [agencyOptions, setAgencyOptions] = useState<
-    Array<{ value: string; label: string }>
-  >([]);
-  const [lineOptions, setLineOptions] = useState<
-    Array<{ value: string; label: string }>
-  >([]);
-
   // 지도, 벡터 레이어 ref
   const mapRef = useRef<Map | null>(null);
   const vectorSourceRef = useRef<VectorSource | null>(null);
   const vectorLayerRef = useRef<VectorLayer | null>(null);
-
-  // 네트워크 목록 로드
-  useEffect(() => {
-    NetworkService.getNetworkList()
-      .then((res) => {
-        if (res.success) {
-          const options = (res.data || []).map((option) => ({
-            value: String(option.value),
-            label: String(option.label),
-          }));
-          setNetworkOptions(options);
-          // 네트워크 옵션 받아오면 첫 번째 값 자동 설정
-          if (options.length > 0) {
-            setFilters((prev) => ({
-              ...prev,
-              network: options[0].value,
-            }));
-          }
-        } else {
-          setNetworkOptions([]);
-          setToast({
-            isVisible: true,
-            message: res.error || "네트워크 목록 로드 실패",
-            type: "error",
-          });
-        }
-      })
-      .catch((error) => {
-        setNetworkOptions([]);
-        setToast({
-          isVisible: true,
-          message: String(error),
-          type: "error",
-        });
-      });
-  }, []);
-
-  // 기관명(agency) 목록 로드
-  useEffect(() => {
-    // 네트워크가 선택된 경우에만 기관명 목록 요청
-    if (filters.network) {
-      fetch("/api/common/agencies")
-        .then((res) => res.json())
-        .then((data) => {
-          const options: { value: string; label: string }[] = Array.isArray(
-            data.options
-          )
-            ? data.options.map((option: { value: string; label: string }) => ({
-                value: String(option.value),
-                label: String(option.label),
-              }))
-            : [];
-          setAgencyOptions(options);
-          // 기관명 옵션이 로드되면 첫 번째 값으로 자동 설정
-          if (options.length > 0) {
-            setFilters((prev) => ({
-              ...prev,
-              agency: options[0].value,
-              line: "ALL",
-            }));
-          }
-        })
-        .catch(() => setAgencyOptions([]));
-    } else {
-      setAgencyOptions([]);
-    }
-  }, [filters.network]);
-
-  // 네트워크 선택 시 노선 목록 로드 (의존성 분리)
-  useEffect(() => {
-    // 네트워크, 기관명 모두 선택된 경우에만 노선 목록 요청
-    if (filters.network && filters.agency) {
-      const agencyLabelRaw =
-        agencyOptions.find((a) => a.value === filters.agency)?.label || "";
-      const agencyLabel = agencyLabelRaw === "전체" ? "ALL" : agencyLabelRaw;
-      NetworkMapService.getLineList({
-        network: filters.network,
-        networkLabel: agencyLabel,
-      })
-        .then((res) => {
-          if (res.success) {
-            const options = [
-              { label: "전체", value: "ALL" },
-              ...(res.data || []).map((option) => ({
-                value: String(option.value),
-                label: String(option.label),
-              })),
-            ];
-            setLineOptions(options);
-            // 노선 목록이 로드되면 "전체"를 자동으로 선택
-            setFilters((prev) => ({
-              ...prev,
-              line: "ALL",
-            }));
-          } else {
-            setLineOptions([]);
-            setToast({
-              isVisible: true,
-              message: res.error || "노선 목록 로드 실패",
-              type: "error",
-            });
-          }
-        })
-        .catch((error) => {
-          setLineOptions([]);
-          setToast({
-            isVisible: true,
-            message: String(error),
-            type: "error",
-          });
-        });
-    } else {
-      setLineOptions([]);
-    }
-  }, [filters.network, filters.agency, agencyOptions]);
 
   // 지도 데이터 요청 useCallback
   const apiCall = useCallback(() => {
@@ -272,10 +151,13 @@ export default function NetworkMapPage() {
   }, [filters, refetch, hasSearched]);
 
   // 필터폼 검색 핸들러
-  const handleSearch = useCallback((values: NetworkMapFilters) => {
-    setHasSearched(true);
-    setFilters(values);
-  }, []);
+  const handleSearchWithToast = useCallback(
+    (values: NetworkMapFilters) => {
+      setHasSearched(true);
+      handleSearch(values);
+    },
+    [handleSearch]
+  );
 
   // 지도 초기화 및 벡터 레이어 준비
   useEffect(() => {
@@ -316,10 +198,6 @@ export default function NetworkMapPage() {
     };
   }, []);
 
-  // 기관명이 전체인지 여부
-  const isAllAgency =
-    agencyOptions.find((a) => a.value === filters.agency)?.label === "전체";
-
   return (
     <div className="p-6 space-y-6">
       <h1 className="text-2xl font-bold">지도 조회</h1>
@@ -353,8 +231,10 @@ export default function NetworkMapPage() {
         ]}
         defaultValues={{ network: "", agency: "", line: "" }}
         values={filters}
-        onChange={setFilters}
-        onSearch={handleSearch}
+        onChange={(values) => {
+          handleFilterChange(values);
+        }}
+        onSearch={handleSearchWithToast}
       />
 
       {/* 지도 영역 */}

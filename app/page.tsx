@@ -8,7 +8,8 @@ import Spinner from "@/components/Spinner";
 import { useNetworkData } from "@/hooks/useNetworkData";
 import { MainService, CardStats, ODPairStats } from "@/services/mainService";
 import { NETWORK_MAP_CONFIGS } from "@/constants/networkMapConfigs";
-import type { NetworkMapHighlight } from "@/types/network";
+import { useSessionContext } from "@/contexts/SessionContext";
+import { NetworkMapService } from "@/services/networkMapService";
 
 export default function Home() {
   const [cardStats, setCardStats] = useState<CardStats[]>([]);
@@ -18,9 +19,10 @@ export default function Home() {
 
   // 노선도 하이라이트 관련 상태
   const [activeLine, setActiveLine] = useState<string | null>(null);
-  const [agencyOptions, setAgencyOptions] = useState<
-    Array<{ value: string; label: string }>
-  >([]);
+  const [isNetworkDataLoading, setIsNetworkDataLoading] = useState(true);
+
+  // 세션 상태 확인
+  const { isInitialized, isLoading: isSessionLoading } = useSessionContext();
 
   // 네트워크 데이터
   const {
@@ -53,87 +55,139 @@ export default function Home() {
     fetchMain();
   }, []);
 
-  // 기관 목록 로드 및 노선도 하이라이트 데이터 fetch
+  // 기관 목록 로드 및 노선도 하이라이트 데이터 fetch (line/page.tsx와 동일한 로직)
   useEffect(() => {
+    // 세션이 초기화되지 않았거나 로딩 중이면 API 요청하지 않음
+    if (!isInitialized || isSessionLoading) {
+      console.log("메인페이지 - 세션 초기화 대기 중:", {
+        isInitialized,
+        isSessionLoading,
+      });
+      return;
+    }
+
     async function fetchNetworkData() {
       try {
+        console.log("메인페이지 - 세션 초기화 완료, 노선도 API 요청 시작");
+
         // 1. 기관 목록 로드
         const agencyRes = await fetch("/api/common/agencies");
         if (!agencyRes.ok) throw new Error("기관 목록을 불러올 수 없습니다.");
 
         const agencyData = await agencyRes.json();
         const agencies = agencyData.options || [];
-        setAgencyOptions(agencies);
 
         if (agencies.length === 0) {
           alert("기관 목록을 불러올 수 없습니다.");
           return;
         }
 
-        // 2. 첫 번째 기관으로 노선도 데이터 요청
+        // 2. 첫 번째 기관으로 노선도 데이터 요청 (NetworkMapService 사용)
         const firstAgency = agencies[0];
         const agencyLabel =
           firstAgency.label === "전체" ? "ALL" : firstAgency.label;
 
-        const networkResp = await fetch("/api/network/map/data", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            network: "LATEST",
-            agency: firstAgency.value,
-            line: "ALL",
-            networkLabel: agencyLabel,
-          }),
+        console.log("메인페이지 - 노선도 API 요청 시작:", {
+          network: "LATEST",
+          agency: firstAgency.value,
+          line: "ALL",
+          networkLabel: agencyLabel,
         });
 
-        if (!networkResp.ok)
-          throw new Error("노선도 데이터를 불러올 수 없습니다.");
+        // line/page.tsx와 동일한 방식으로 NetworkMapService 사용
+        const response = await NetworkMapService.getMapData({
+          network: "LATEST",
+          agency: firstAgency.value,
+          line: "ALL",
+          networkLabel: agencyLabel,
+        });
 
-        const networkData = await networkResp.json();
-
-        if (networkData.success && networkData.data) {
-          // 3. 하이라이트 처리 (노선도 페이지와 동일한 로직)
-          const { lineData } = networkData.data;
+        if (response.success && response.data) {
+          // 3. 하이라이트 처리 (line/page.tsx와 동일한 로직)
+          const { lineData } = response.data;
+          console.log("메인페이지 - lineData:", lineData);
 
           if (lineData && Array.isArray(lineData)) {
+            console.log("메인페이지 - lineData 배열 확인:", lineData.length);
+
             const apiLineNames = lineData
-              .map((line: any) => line.subway || line.seq)
+              .map(
+                (line: { subway?: string; seq?: string }) =>
+                  line.subway || line.seq
+              )
               .filter(Boolean);
+            console.log("메인페이지 - 추출된 노선명:", apiLineNames);
 
             const uniqueLineNames = [...new Set(apiLineNames)];
+            console.log("메인페이지 - 중복 제거된 노선명:", uniqueLineNames);
+
             const finalActiveLine =
               uniqueLineNames.length > 0 ? uniqueLineNames.join(",") : null;
+            console.log("메인페이지 - 최종 activeLine:", finalActiveLine);
+
             setActiveLine(finalActiveLine);
+          } else {
+            console.log("메인페이지 - lineData 조건문 실패:", {
+              lineDataExists: !!lineData,
+              isArray: Array.isArray(lineData),
+              lineDataType: typeof lineData,
+              lineDataValue: lineData,
+            });
           }
+        } else {
+          console.log("메인페이지 - API 응답 실패:", response);
         }
+
+        // API 호출 완료 (성공/실패 상관없이)
+        setIsNetworkDataLoading(false);
       } catch (error) {
         console.error("노선도 데이터 로드 실패:", error);
         alert("노선도 데이터를 불러올 수 없습니다.");
+        setIsNetworkDataLoading(false);
       }
     }
 
     fetchNetworkData();
-  }, []);
+  }, [isInitialized, isSessionLoading]);
 
   // 메모이제이션된 값들
   const mapConfig = useMemo(() => NETWORK_MAP_CONFIGS.main, []);
 
-  // 하이라이트 설정 (노선도 페이지와 동일한 로직)
+  // 하이라이트 설정 (line/page.tsx와 동일한 로직)
   const highlights = useMemo(() => {
-    if (!activeLine) return [];
+    console.log(
+      "메인페이지 - highlights 메모이제이션 실행, activeLine:",
+      activeLine
+    );
+
+    if (!activeLine) {
+      console.log("메인페이지 - activeLine이 없어서 빈 배열 반환");
+      return [];
+    }
 
     const lineNames = activeLine.split(",");
-    return lineNames.map((lineName) => ({
+    console.log("메인페이지 - 분리된 노선명:", lineNames);
+
+    const result = lineNames.map((lineName) => ({
       type: "line" as const,
       value: lineName.trim(),
     }));
+
+    console.log("메인페이지 - 최종 highlights:", result);
+    return result;
   }, [activeLine]);
 
   const memoizedCardStats = useMemo(() => cardStats, [cardStats]);
   const memoizedOdPairStats = useMemo(() => odPairStats, [odPairStats]);
 
-  // 전체 로딩 상태: 메인 데이터 로딩 중이거나 노선도 하이라이트가 아직 적용되지 않음
-  const isLoading = loading || !activeLine;
+  // 전체 로딩 상태: 메인 데이터 로딩 중이거나 노선도 API 호출이 아직 진행 중
+  const isLoading = loading || isNetworkDataLoading;
+
+  // 디버깅용 로그 - highlights와 activeLine 변화 추적
+  useEffect(() => {
+    console.log("메인페이지 - NetworkMap 렌더링 - highlights:", highlights);
+    console.log("메인페이지 - NetworkMap 렌더링 - activeLine:", activeLine);
+  }, [highlights, activeLine]);
 
   if (isLoading) {
     return (

@@ -10,6 +10,7 @@ import type { NetworkOption, StationOption } from "@/types/optimalRoute";
 import { RouteSummary } from "@/components/optimalRoute/RouteSummary";
 import { RouteDetail } from "@/components/optimalRoute/RouteDetail";
 import { OptimalRouteMap } from "@/components/optimalRoute/OptimalRouteMap";
+import { optimalRouteSchema } from "@/features/optimalRoute/filterConfig";
 
 export default function NetworkOptimalRoutePage() {
   const [filters, setFilters] = useState<OptimalRouteFilters>({
@@ -202,6 +203,7 @@ export default function NetworkOptimalRoutePage() {
         ]}
         defaultValues={{ network: "", startStation: "", endStation: "" }}
         values={filters}
+        schema={optimalRouteSchema}
         onChange={setFilters}
         onSearch={handleSearch}
       />

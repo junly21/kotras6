@@ -30,11 +30,16 @@ import { AllCommunityModule, ModuleRegistry } from "ag-grid-community";
 ModuleRegistry.registerModules([AllCommunityModule]);
 
 // 검증 스키마
-const mockSettlementByOdSchema = z.object({
-  settlementName: z.string().min(1, "정산명을 선택해주세요"),
-  STN_ID1: z.string().min(1, "출발역을 선택해주세요"),
-  STN_ID2: z.string().min(1, "도착역을 선택해주세요"),
-});
+const mockSettlementByOdSchema = z
+  .object({
+    settlementName: z.string().min(1, "정산명을 선택해주세요"),
+    STN_ID1: z.string().min(1, "출발역을 선택해주세요"),
+    STN_ID2: z.string().min(1, "도착역을 선택해주세요"),
+  })
+  .refine((data) => data.STN_ID1 !== data.STN_ID2, {
+    message: "출발역과 도착역은 같을 수 없습니다.",
+    path: ["STN_ID2"], // 에러를 도착역 필드에 표시
+  });
 
 // 기본값
 const defaultValues: MockSettlementByOdFilters = {

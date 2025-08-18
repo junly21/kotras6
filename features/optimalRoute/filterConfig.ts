@@ -2,11 +2,16 @@ import { z } from "zod";
 import type { FieldConfig } from "@/types/filterForm";
 
 // 필터 스키마
-export const optimalRouteSchema = z.object({
-  network: z.string().min(1, "네트워크를 선택해주세요"),
-  startStation: z.string().min(1, "출발역을 선택해주세요"),
-  endStation: z.string().min(1, "도착역을 선택해주세요"),
-});
+export const optimalRouteSchema = z
+  .object({
+    network: z.string().min(1, "네트워크를 선택해주세요"),
+    startStation: z.string().min(1, "출발역을 선택해주세요"),
+    endStation: z.string().min(1, "도착역을 선택해주세요"),
+  })
+  .refine((data) => data.startStation !== data.endStation, {
+    message: "출발역과 도착역은 같을 수 없습니다.",
+    path: ["endStation"], // 에러를 도착역 필드에 표시
+  });
 
 // 필터 필드 설정
 export const optimalRouteFields: FieldConfig[] = [

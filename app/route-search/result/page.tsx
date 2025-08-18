@@ -25,10 +25,15 @@ import { RouteDetailDialog } from "@/components/routeSearch/RouteDetailDialog";
 ModuleRegistry.registerModules([AllCommunityModule]);
 
 // 검증 스키마
-const routeSearchSchema = z.object({
-  RIDE_STN_ID: z.string().min(1, "출발역을 선택해주세요"),
-  ALGH_STN_ID: z.string().min(1, "도착역을 선택해주세요"),
-});
+const routeSearchSchema = z
+  .object({
+    RIDE_STN_ID: z.string().min(1, "출발역을 선택해주세요"),
+    ALGH_STN_ID: z.string().min(1, "도착역을 선택해주세요"),
+  })
+  .refine((data) => data.RIDE_STN_ID !== data.ALGH_STN_ID, {
+    message: "출발역과 도착역은 같을 수 없습니다.",
+    path: ["ALGH_STN_ID"], // 에러를 도착역 필드에 표시
+  });
 
 // 기본값
 const defaultValues: RouteSearchFilter = {

@@ -56,3 +56,43 @@ export function validateDetailCodeDeletion(detailCode: DetailCodeData): {
     canDelete: true,
   };
 }
+
+/**
+ * 출발역과 도착역이 같은지 검증하는 함수
+ * @param startStation 출발역 값
+ * @param endStation 도착역 값
+ * @returns 검증 결과와 에러 메시지
+ */
+export function validateDifferentStations(
+  startStation: string,
+  endStation: string
+): { isValid: boolean; errorMessage?: string } {
+  if (startStation && endStation && startStation === endStation) {
+    return {
+      isValid: false,
+      errorMessage: "출발역과 도착역은 같을 수 없습니다.",
+    };
+  }
+  return { isValid: true };
+}
+
+/**
+ * 출발역과 도착역이 같은지 검증하는 Zod 스키마 헬퍼
+ * @param startStationField 출발역 필드명
+ * @param endStationField 도착역 필드명
+ * @returns Zod 스키마에 추가할 수 있는 검증 로직
+ */
+export function createDifferentStationsValidator(
+  startStationField: string,
+  endStationField: string
+) {
+  return (data: any) => {
+    const startStation = data[startStationField];
+    const endStation = data[endStationField];
+
+    if (startStation && endStation && startStation === endStation) {
+      return false;
+    }
+    return true;
+  };
+}

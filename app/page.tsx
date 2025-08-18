@@ -8,12 +8,19 @@ import Spinner from "@/components/Spinner";
 import { useNetworkData } from "@/hooks/useNetworkData";
 import { MainService, CardStats, ODPairStats } from "@/services/mainService";
 import { NETWORK_MAP_CONFIGS } from "@/constants/networkMapConfigs";
+import type { NetworkMapHighlight } from "@/types/network";
 
 export default function Home() {
   const [cardStats, setCardStats] = useState<CardStats[]>([]);
   const [odPairStats, setOdPairStats] = useState<ODPairStats[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  // 노선도 하이라이트 관련 상태
+  const [activeLine, setActiveLine] = useState<string | null>(null);
+  const [agencyOptions, setAgencyOptions] = useState<
+    Array<{ value: string; label: string }>
+  >([]);
 
   // 네트워크 데이터
   const {
@@ -46,13 +53,89 @@ export default function Home() {
     fetchMain();
   }, []);
 
+  // 기관 목록 로드 및 노선도 하이라이트 데이터 fetch
+  useEffect(() => {
+    async function fetchNetworkData() {
+      try {
+        // 1. 기관 목록 로드
+        const agencyRes = await fetch("/api/common/agencies");
+        if (!agencyRes.ok) throw new Error("기관 목록을 불러올 수 없습니다.");
+
+        const agencyData = await agencyRes.json();
+        const agencies = agencyData.options || [];
+        setAgencyOptions(agencies);
+
+        if (agencies.length === 0) {
+          alert("기관 목록을 불러올 수 없습니다.");
+          return;
+        }
+
+        // 2. 첫 번째 기관으로 노선도 데이터 요청
+        const firstAgency = agencies[0];
+        const agencyLabel =
+          firstAgency.label === "전체" ? "ALL" : firstAgency.label;
+
+        const networkResp = await fetch("/api/network/map/data", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            network: "LATEST",
+            agency: firstAgency.value,
+            line: "ALL",
+            networkLabel: agencyLabel,
+          }),
+        });
+
+        if (!networkResp.ok)
+          throw new Error("노선도 데이터를 불러올 수 없습니다.");
+
+        const networkData = await networkResp.json();
+
+        if (networkData.success && networkData.data) {
+          // 3. 하이라이트 처리 (노선도 페이지와 동일한 로직)
+          const { lineData } = networkData.data;
+
+          if (lineData && Array.isArray(lineData)) {
+            const apiLineNames = lineData
+              .map((line: any) => line.subway || line.seq)
+              .filter(Boolean);
+
+            const uniqueLineNames = [...new Set(apiLineNames)];
+            const finalActiveLine =
+              uniqueLineNames.length > 0 ? uniqueLineNames.join(",") : null;
+            setActiveLine(finalActiveLine);
+          }
+        }
+      } catch (error) {
+        console.error("노선도 데이터 로드 실패:", error);
+        alert("노선도 데이터를 불러올 수 없습니다.");
+      }
+    }
+
+    fetchNetworkData();
+  }, []);
+
   // 메모이제이션된 값들
   const mapConfig = useMemo(() => NETWORK_MAP_CONFIGS.main, []);
-  const noHighlights = useMemo(() => [], []);
+
+  // 하이라이트 설정 (노선도 페이지와 동일한 로직)
+  const highlights = useMemo(() => {
+    if (!activeLine) return [];
+
+    const lineNames = activeLine.split(",");
+    return lineNames.map((lineName) => ({
+      type: "line" as const,
+      value: lineName.trim(),
+    }));
+  }, [activeLine]);
+
   const memoizedCardStats = useMemo(() => cardStats, [cardStats]);
   const memoizedOdPairStats = useMemo(() => odPairStats, [odPairStats]);
 
-  if (loading) {
+  // 전체 로딩 상태: 메인 데이터 로딩 중이거나 노선도 하이라이트가 아직 적용되지 않음
+  const isLoading = loading || !activeLine;
+
+  if (isLoading) {
     return (
       <div className="flex items-center justify-center h-screen">
         <Spinner />
@@ -91,7 +174,7 @@ export default function Home() {
             links={links}
             svgText={svgText}
             config={mapConfig}
-            highlights={noHighlights}
+            highlights={highlights}
           />
         )}
       </div>

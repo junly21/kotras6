@@ -1,6 +1,7 @@
 "use client";
 import TestGrid from "@/components/TestGrid";
 import Spinner from "@/components/Spinner";
+import CsvExportButton from "@/components/CsvExportButton";
 import { FilterForm } from "@/components/ui/FilterForm";
 import { Toast } from "@/components/ui/Toast";
 import { AllCommunityModule, ModuleRegistry } from "ag-grid-community";
@@ -163,6 +164,17 @@ export default function TransactionAnalysisPage() {
           onSearch={handleSearch}
         />
       </div>
+
+      {/* CSV 내보내기 버튼 */}
+      {hasSearched && apiData && apiData.length > 0 && (
+        <div className="flex justify-end">
+          <CsvExportButton
+            gridRef={gridRef}
+            fileName="거래내역_분석_데이터.csv"
+            className="shadow-lg bg-accent-500"
+          />
+        </div>
+      )}
 
       {/* 그리드 */}
       <div className="relative h-[600px] overflow-y-auto">

@@ -29,17 +29,25 @@ import {
 } from "@/components/ui/select";
 import { CommonCodeFormData } from "@/types/commonCode";
 
-// 폼 스키마
-const commonCodeSchema = z.object({
-  COMMON_CODE: z.string().min(1, "공통코드는 필수입니다"),
-  COMMON_CODE_NAME: z.string(),
-  VALUE_1: z.string(),
-  VALUE_2: z.string(),
-  VALUE_3: z.string(),
-  REMARK: z.string(),
-  USE_YN: z.string(),
-  SYSCD_YN: z.string(),
-});
+// 중복 검증을 위한 스키마 생성 함수
+const createCommonCodeSchema = (existingCodes: string[] = []) => {
+  return z.object({
+    COMMON_CODE: z
+      .string()
+      .min(1, "공통코드는 필수입니다")
+      .refine(
+        (code) => !existingCodes.includes(code),
+        "이미 등록된 공통코드입니다"
+      ),
+    COMMON_CODE_NAME: z.string(),
+    VALUE_1: z.string(),
+    VALUE_2: z.string(),
+    VALUE_3: z.string(),
+    REMARK: z.string(),
+    USE_YN: z.string(),
+    SYSCD_YN: z.string(),
+  });
+};
 
 interface CommonCodeModalProps {
   isOpen: boolean;
@@ -48,6 +56,7 @@ interface CommonCodeModalProps {
   initialData?: CommonCodeFormData;
   mode: "add" | "edit";
   loading?: boolean;
+  existingCodes?: string[]; // 기존 공통코드 목록 추가
 }
 
 export function CommonCodeModal({
@@ -57,9 +66,13 @@ export function CommonCodeModal({
   initialData,
   mode,
   loading = false,
+  existingCodes = [],
 }: CommonCodeModalProps) {
+  // 동적으로 스키마 생성 (중복 검증 포함)
+  const dynamicSchema = createCommonCodeSchema(existingCodes);
+
   const form = useForm<CommonCodeFormData>({
-    resolver: zodResolver(commonCodeSchema),
+    resolver: zodResolver(dynamicSchema),
     defaultValues: {
       COMMON_CODE: "",
       COMMON_CODE_NAME: "",
@@ -111,7 +124,9 @@ export function CommonCodeModal({
                 name="COMMON_CODE"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="min-w-[85px]">공통코드 <span className="text-red-500">*</span></FormLabel>
+                    <FormLabel className="min-w-[85px]">
+                      공통코드 <span className="text-red-500">*</span>
+                    </FormLabel>
                     <FormControl>
                       <Input
                         {...field}
@@ -220,7 +235,9 @@ export function CommonCodeModal({
                 name="SYSCD_YN"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="min-w-[85px]">시스템코드유무</FormLabel>
+                    <FormLabel className="min-w-[85px]">
+                      시스템코드유무
+                    </FormLabel>
                     <Select
                       onValueChange={field.onChange}
                       value={field.value}

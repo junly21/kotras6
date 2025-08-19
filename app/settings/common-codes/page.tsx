@@ -306,6 +306,7 @@ export default function SettingsCommonCodesPage() {
         initialData={editingData}
         mode={modalMode}
         loading={modalLoading}
+        existingCodes={apiData?.map((code) => code.common_code) || []}
       />
 
       {/* 토스트 알림 */}

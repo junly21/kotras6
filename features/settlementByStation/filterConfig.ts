@@ -6,7 +6,7 @@ export const settlementByStationFilterConfig: FieldConfig[] = [
     label: "선택역1",
     type: "combobox",
     placeholder: "역을 선택하세요",
-    required: false,
+    required: true,
     optionsEndpoint: "/api/selectNetWorkNodeSelectBoxSession",
   },
   {
@@ -16,6 +16,7 @@ export const settlementByStationFilterConfig: FieldConfig[] = [
     placeholder: "역을 선택하세요",
     required: false,
     optionsEndpoint: "/api/selectNetWorkNodeSelectBoxSession",
+    dependsOn: "STN_ID1", // STN_ID1이 선택되어야 활성화
   },
   {
     name: "STN_ID3",
@@ -24,6 +25,7 @@ export const settlementByStationFilterConfig: FieldConfig[] = [
     placeholder: "역을 선택하세요",
     required: false,
     optionsEndpoint: "/api/selectNetWorkNodeSelectBoxSession",
+    dependsOn: "STN_ID2", // STN_ID2가 선택되어야 활성화
   },
   {
     name: "STN_ID4",
@@ -32,6 +34,7 @@ export const settlementByStationFilterConfig: FieldConfig[] = [
     placeholder: "역을 선택하세요",
     required: false,
     optionsEndpoint: "/api/selectNetWorkNodeSelectBoxSession",
+    dependsOn: "STN_ID3", // STN_ID3이 선택되어야 활성화
   },
   {
     name: "STN_ID5",
@@ -40,5 +43,6 @@ export const settlementByStationFilterConfig: FieldConfig[] = [
     placeholder: "역을 선택하세요",
     required: false,
     optionsEndpoint: "/api/selectNetWorkNodeSelectBoxSession",
+    dependsOn: "STN_ID4", // STN_ID4가 선택되어야 활성화
   },
 ];

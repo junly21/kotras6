@@ -17,14 +17,40 @@ import { AllCommunityModule, ModuleRegistry } from "ag-grid-community";
 // Register all Community features
 ModuleRegistry.registerModules([AllCommunityModule]);
 
-// 검증 스키마 (모든 필드가 선택사항)
-const settlementByStationSchema = z.object({
-  STN_ID1: z.string().optional(),
-  STN_ID2: z.string().optional(),
-  STN_ID3: z.string().optional(),
-  STN_ID4: z.string().optional(),
-  STN_ID5: z.string().optional(),
-});
+// 검증 스키마 (첫 번째 역은 필수, 나머지 역은 선택사항)
+const settlementByStationSchema = z
+  .object({
+    STN_ID1: z.string().min(1, "첫 번째 역을 선택해주세요"),
+    STN_ID2: z.string().optional(),
+    STN_ID3: z.string().optional(),
+    STN_ID4: z.string().optional(),
+    STN_ID5: z.string().optional(),
+  })
+  .refine(
+    (data) => {
+      // 선택된 역들을 배열로 수집 (빈 문자열 제외)
+      const selectedStations = [
+        data.STN_ID1,
+        data.STN_ID2,
+        data.STN_ID3,
+        data.STN_ID4,
+        data.STN_ID5,
+      ].filter((station) => station && station.trim() !== "");
+
+      // 중복 제거 후 길이 비교
+      const uniqueStations = [...new Set(selectedStations)];
+
+      // 선택된 역이 있고, 중복이 있으면 false 반환
+      return (
+        selectedStations.length === 0 ||
+        selectedStations.length === uniqueStations.length
+      );
+    },
+    {
+      message: "같은 역을 중복으로 선택할 수 없습니다.",
+      path: ["STN_ID5"], // 에러를 마지막 역 필드에 표시
+    }
+  );
 
 // 기본값
 const defaultValues: SettlementByStationFilters = {

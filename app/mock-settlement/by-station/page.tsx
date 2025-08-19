@@ -21,15 +21,41 @@ import { AgGridReact } from "ag-grid-react";
 // Register all Community features
 ModuleRegistry.registerModules([AllCommunityModule]);
 
-// 검증 스키마 (정산명은 필수, 역 선택은 선택사항)
-const mockSettlementByStationSchema = z.object({
-  settlementName: z.string().min(1, "정산명을 선택해주세요"),
-  STN_ID1: z.string().optional(),
-  STN_ID2: z.string().optional(),
-  STN_ID3: z.string().optional(),
-  STN_ID4: z.string().optional(),
-  STN_ID5: z.string().optional(),
-});
+// 검증 스키마 (정산명과 첫 번째 역은 필수, 나머지 역은 선택사항)
+const mockSettlementByStationSchema = z
+  .object({
+    settlementName: z.string().min(1, "정산명을 선택해주세요"),
+    STN_ID1: z.string().min(1, "첫 번째 역을 선택해주세요"),
+    STN_ID2: z.string().optional(),
+    STN_ID3: z.string().optional(),
+    STN_ID4: z.string().optional(),
+    STN_ID5: z.string().optional(),
+  })
+  .refine(
+    (data) => {
+      // 선택된 역들을 배열로 수집 (빈 문자열 제외)
+      const selectedStations = [
+        data.STN_ID1,
+        data.STN_ID2,
+        data.STN_ID3,
+        data.STN_ID4,
+        data.STN_ID5,
+      ].filter((station) => station && station.trim() !== "");
+
+      // 중복 제거 후 길이 비교
+      const uniqueStations = [...new Set(selectedStations)];
+
+      // 선택된 역이 있고, 중복이 있으면 false 반환
+      return (
+        selectedStations.length === 0 ||
+        selectedStations.length === uniqueStations.length
+      );
+    },
+    {
+      message: "같은 역을 중복으로 선택할 수 없습니다.",
+      path: ["STN_ID5"], // 에러를 마지막 역 필드에 표시
+    }
+  );
 
 export default function MockSettlementByStationPage() {
   const mockSettlementGridRef = useRef<AgGridReact>(null);
@@ -39,6 +65,14 @@ export default function MockSettlementByStationPage() {
   const [hasSearched, setHasSearched] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [filters, setFilters] = useState<MockSettlementByStationFilters>({
+    settlementName: "",
+    STN_ID1: "",
+    STN_ID2: "",
+    STN_ID3: "",
+    STN_ID4: "",
+    STN_ID5: "",
+  });
   const [mockSettlementData, setMockSettlementData] = useState<
     MockSettlementResultData[]
   >([]);
@@ -60,6 +94,7 @@ export default function MockSettlementByStationPage() {
   const handleSearch = useCallback(
     async (values: MockSettlementByStationFilters) => {
       setHasSearched(true);
+      setFilters(values); // filters 상태 업데이트 추가
       setIsLoading(true);
       setError(null);
 
@@ -295,13 +330,12 @@ export default function MockSettlementByStationPage() {
                         "Content-Type": "application/json",
                       },
                       body: JSON.stringify({
-                        settlementName:
-                          mockSettlementData[0]?.settlementName || "",
-                        STN_ID1: mockSettlementData[0]?.STN_ID1 || "",
-                        STN_ID2: mockSettlementData[0]?.STN_ID2 || "",
-                        STN_ID3: mockSettlementData[0]?.STN_ID3 || "",
-                        STN_ID4: mockSettlementData[0]?.STN_ID4 || "",
-                        STN_ID5: mockSettlementData[0]?.STN_ID5 || "",
+                        settlementName: filters.settlementName || "",
+                        STN_ID1: filters.STN_ID1 || "",
+                        STN_ID2: filters.STN_ID2 || "",
+                        STN_ID3: filters.STN_ID3 || "",
+                        STN_ID4: filters.STN_ID4 || "",
+                        STN_ID5: filters.STN_ID5 || "",
                       }),
                     }
                   );

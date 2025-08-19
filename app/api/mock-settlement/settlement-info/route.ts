@@ -46,10 +46,9 @@ export async function POST(request: NextRequest) {
             ? `${firstItem.start_oper_prop}%`
             : "-",
           lineSection: firstItem.km_prop ? `${firstItem.km_prop}%` : "-",
-          distanceKm:
-            typeof firstItem.km_wght === "string"
-              ? parseFloat(firstItem.km_wght) || 0
-              : 0,
+          distanceKm: firstItem.km_prop || 0,
+          weightRatio: firstItem.km_wght || "-",
+          registrationDate: firstItem.to_char || "-",
         },
       ];
 

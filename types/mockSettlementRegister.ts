@@ -6,6 +6,7 @@ export interface MockSettlementRegisterFilters {
 
 // 모의정산 등록 데이터 타입
 export interface MockSettlementRegisterData {
+  simStmtGrpId: string; // 정산그룹ID
   settlementName: string; // 정산명
   transactionDate: string; // 거래일자
   tagAgency: string; // 태그기관

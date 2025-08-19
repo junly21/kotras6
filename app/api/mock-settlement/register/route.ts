@@ -105,6 +105,7 @@ export async function POST(request: NextRequest) {
     };
 
     const normalized = arrayData.map((item) => ({
+      simStmtGrpId: item?.sim_stmt_grp_id ?? "",
       settlementName: item?.stmt_nm ?? "-",
       transactionDate:
         item?.card_dt !== undefined && item?.card_dt !== null

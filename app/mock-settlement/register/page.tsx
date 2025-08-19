@@ -15,6 +15,7 @@ import { MockSettlementRegisterService } from "@/services/mockSettlementRegister
 import TestGrid from "@/components/TestGrid";
 import Spinner from "@/components/Spinner";
 import { MockSettlementModal } from "@/components/MockSettlementModal";
+import { MockSettlementDetailModal } from "@/components/MockSettlementDetailModal";
 import { SimulateModal } from "@/components/SimulateModal";
 import { Button } from "@/components/ui/button";
 import { AllCommunityModule, ModuleRegistry } from "ag-grid-community";
@@ -43,6 +44,10 @@ export default function MockSettlementRegisterPage() {
   // 모달 상태
   const [isMockSettlementModalOpen, setIsMockSettlementModalOpen] =
     useState(false);
+  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+  const [selectedSettlement, setSelectedSettlement] = useState<{
+    simStmtGrpId: string;
+  } | null>(null);
   const [isSimulateModalOpen, setIsSimulateModalOpen] = useState(false);
 
   // AG Grid ref
@@ -80,6 +85,7 @@ export default function MockSettlementRegisterPage() {
             transactionDate: "ALL",
           });
         if (response.success && response.data) {
+          console.log("초기 조회된 데이터:", response.data);
           setSearchResults(response.data);
         } else {
           setError(response.error || "데이터 조회에 실패했습니다.");
@@ -112,6 +118,7 @@ export default function MockSettlementRegisterPage() {
         const response =
           await MockSettlementRegisterService.getMockSettlementData(values);
         if (response.success && response.data) {
+          console.log("검색 조회된 데이터:", response.data);
           setSearchResults(response.data);
         } else {
           setError(response.error || "데이터 조회에 실패했습니다.");
@@ -168,6 +175,30 @@ export default function MockSettlementRegisterPage() {
   // 시뮬레이션 모달 닫기 핸들러
   const handleSimulateModalClose = useCallback(() => {
     setIsSimulateModalOpen(false);
+  }, []);
+
+  // 행 더블클릭 핸들러
+  const handleRowDoubleClick = useCallback(
+    (event: { data: MockSettlementRegisterData }) => {
+      console.log("행 더블클릭 이벤트 발생:", event);
+      const { data } = event;
+      if (data && data.simStmtGrpId) {
+        console.log("선택된 데이터:", data);
+        setSelectedSettlement({
+          simStmtGrpId: data.simStmtGrpId,
+        });
+        setIsDetailModalOpen(true);
+      } else {
+        console.log("simStmtGrpId가 없습니다:", data);
+      }
+    },
+    []
+  );
+
+  // 상세 모달 닫기 핸들러
+  const handleDetailModalClose = useCallback(() => {
+    setIsDetailModalOpen(false);
+    setSelectedSettlement(null);
   }, []);
 
   // 컬럼 정의
@@ -320,6 +351,7 @@ export default function MockSettlementRegisterPage() {
                       resizable: true,
                       suppressMovable: true,
                     },
+                    onRowDoubleClicked: handleRowDoubleClick,
                   }}
                 />
               </div>
@@ -342,6 +374,15 @@ export default function MockSettlementRegisterPage() {
         tradeDates={tradeDates}
         loading={isRegistering}
       />
+
+      {/* 모의정산 상세 모달 */}
+      {selectedSettlement && (
+        <MockSettlementDetailModal
+          isOpen={isDetailModalOpen}
+          onClose={handleDetailModalClose}
+          simStmtGrpId={selectedSettlement.simStmtGrpId}
+        />
+      )}
 
       {/* 시뮬레이션 모달 */}
       <SimulateModal

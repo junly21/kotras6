@@ -22,6 +22,6 @@ export const mockSettlementRegisterFilterConfig: FieldConfig[] = [
     type: "select",
     placeholder: "거래일자를 선택하세요",
     required: false,
-    optionsEndpoint: "/api/transaction-detail/dates",
+    optionsEndpoint: "/api/mock-settlement/transaction-dates",
   },
 ];

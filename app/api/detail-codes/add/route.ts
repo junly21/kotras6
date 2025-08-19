@@ -8,7 +8,7 @@ export async function POST(request: Request) {
     const body = await request.json();
     console.log("상세코드 등록 요청 데이터:", body);
 
-    await callExternalApi("addDetailCode.do", {
+    await callExternalApi("insertDetailCode.do", {
       method: "POST",
       body,
     });

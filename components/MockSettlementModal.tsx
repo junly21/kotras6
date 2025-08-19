@@ -1,6 +1,5 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -110,8 +109,6 @@ export function MockSettlementModal({
   tradeDates,
   loading = false,
 }: MockSettlementModalProps) {
-  const [ratioError, setRatioError] = useState<string>("");
-
   const form = useForm<MockSettlementRegisterFormData>({
     resolver: zodResolver(mockSettlementSchema),
     defaultValues: {
@@ -132,43 +129,13 @@ export function MockSettlementModal({
     },
   });
 
-  // 배분 비율 합계 검증
-  const watchRatios = form.watch([
-    "tagAgencyRatio",
-    "initialLineRatio",
-    "lineSectionRatio",
-    "distanceKmRatio",
-  ]);
-
-  useEffect(() => {
-    const totalRatio = watchRatios.reduce(
-      (sum, ratio) => sum + (ratio || 0),
-      0
-    );
-    if (totalRatio !== 100) {
-      setRatioError("배분 비율의 합이 100%가 아닙니다.");
-    } else {
-      setRatioError("");
-    }
-  }, [watchRatios]);
-
   const handleSubmit = (data: MockSettlementRegisterFormData) => {
-    const totalRatio =
-      data.tagAgencyRatio +
-      data.initialLineRatio +
-      data.lineSectionRatio +
-      data.distanceKmRatio;
-    if (totalRatio !== 100) {
-      setRatioError("배분 비율의 합이 100%가 아닙니다.");
-      return;
-    }
     onSubmit(data);
   };
 
   const handleClose = () => {
     if (loading) return; // 로딩 중에는 닫기 방지
     form.reset();
-    setRatioError("");
     onClose();
   };
 
@@ -325,11 +292,6 @@ export function MockSettlementModal({
                   )}
                 />
               </div>
-              {ratioError && (
-                <div className="text-red-600 text-sm font-medium">
-                  {ratioError}
-                </div>
-              )}
             </div>
 
             {/* 기본운임 인·km 가중치 */}

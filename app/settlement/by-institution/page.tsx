@@ -244,7 +244,7 @@ export default function SettlementByInstitutionPage() {
               </div>
             ) : hasSearched && apiData && apiData.length > 0 ? (
               <div className="h-full w-full">
-                <InstitutionChart data={apiData} unit={unit} />
+                <InstitutionChart key={unit} data={rowData} unit={unit} />
               </div>
             ) : (
               <div className="h-full flex items-center justify-center bg-gray-50 border-2 border-dashed border-gray-300 rounded">

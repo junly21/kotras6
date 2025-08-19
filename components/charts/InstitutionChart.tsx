@@ -1,5 +1,6 @@
 "use client";
 
+import { useMemo, useEffect } from "react";
 import {
   BarChart,
   Bar,
@@ -22,27 +23,31 @@ interface Props {
 
 export function InstitutionChart({ data, unit }: Props) {
   // 차액만 표시: 지급 > 수급이면 음수, 수급 > 지급이면 양수
-  const chartData = data.map((item) => {
-    const payment = Number(item.지급액);
-    const receipt = Number(item.수급액);
-    let value = 0;
-    let type: "지급" | "수급" = "지급";
-    if (receipt > payment) {
-      value = receipt - payment; // 오른쪽(양수)
-      type = "수급";
-    } else if (payment > receipt) {
-      value = -(payment - receipt); // 왼쪽(음수)
-      type = "지급";
-    }
-    return {
-      name: item.대상기관,
-      value,
-      type,
-    };
-  });
+  const chartData = useMemo(() => {
+    return data.map((item) => {
+      const payment = Number(item.지급액);
+      const receipt = Number(item.수급액);
+      let value = 0;
+      let type: "지급" | "수급" = "지급";
+      if (receipt > payment) {
+        value = receipt - payment; // 오른쪽(양수)
+        type = "수급";
+      } else if (payment > receipt) {
+        value = -(payment - receipt); // 왼쪽(음수)
+        type = "지급";
+      }
+      return {
+        name: item.대상기관,
+        value,
+        type,
+      };
+    });
+  }, [data, unit]); // unit 변경 시에도 재계산
 
   // 최대 절대값 계산 (0이면 1로 방어)
-  const maxAbs = Math.max(1, ...chartData.map((item) => Math.abs(item.value)));
+  const maxAbs = useMemo(() => {
+    return Math.max(1, ...chartData.map((item) => Math.abs(item.value)));
+  }, [chartData]);
 
   const formatValue = (value: number) => {
     if (unit === "원") return value.toLocaleString() + "원";
@@ -75,7 +80,12 @@ export function InstitutionChart({ data, unit }: Props) {
           ) => [formatValue(Math.abs(v)), p?.payload?.type ?? ""]}
           labelFormatter={(label) => `기관: ${label}`}
         />
-        <Legend />
+        <Legend
+          formatter={(value) => {
+            if (value === "정산 차액") return "수급 > 지급 (수급 초과)";
+            return value;
+          }}
+        />
         <Bar
           dataKey="value"
           name="정산 차액"

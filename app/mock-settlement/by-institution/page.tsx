@@ -358,7 +358,11 @@ export default function MockSettlementByInstitutionPage() {
                 byInstitutionData &&
                 byInstitutionData.length > 0 ? (
                 <div className="h-full w-full">
-                  <InstitutionChart data={byInstitutionData} unit={unit} />
+                  <InstitutionChart
+                    key={unit}
+                    data={byInstitutionRowData}
+                    unit={unit}
+                  />
                 </div>
               ) : (
                 <div className="h-full flex items-center justify-center bg-gray-50 border-2 border-dashed border-gray-300 rounded">

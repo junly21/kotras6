@@ -89,7 +89,11 @@ export default function TestGridPage() {
   const rowData = useUnitConversion(apiData, unit);
 
   return (
-    <div>
+    <div className="p-6 space-y-6">
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-bold">정산결과</h1>
+      </div>
+
       {/* CSV 내보내기 버튼을 그리드 우상단에 배치 */}
 
       <div className="mb-2 flex justify-between gap-4">

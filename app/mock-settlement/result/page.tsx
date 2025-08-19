@@ -130,37 +130,37 @@ export default function MockSettlementResultPage() {
     {
       headerName: "정산명",
       field: "settlementName",
-      width: 150,
+      width: 200,
       resizable: true,
     },
     {
       headerName: "거래일자",
       field: "transactionDate",
-      width: 120,
+      width: 180,
       resizable: true,
     },
     {
       headerName: "태그기관",
       field: "tagAgency",
-      width: 120,
+      width: 180,
       resizable: true,
     },
     {
       headerName: "초승노선",
       field: "initialLine",
-      width: 120,
+      width: 180,
       resizable: true,
     },
     {
       headerName: "노선동등",
       field: "lineSection",
-      width: 120,
+      width: 180,
       resizable: true,
     },
     {
       headerName: "인.km",
       field: "distanceKm",
-      width: 100,
+      width: 180,
       resizable: true,
       valueFormatter: (params: { value: number }) => {
         return params.value.toLocaleString();
@@ -200,7 +200,7 @@ export default function MockSettlementResultPage() {
   return (
     <div className="p-6 space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">모의정산 결과</h1>
+        <h1 className="text-2xl font-bold">모의정산 정산결과</h1>
       </div>
 
       {/* 전체 페이지 로딩 스피너 */}
@@ -247,8 +247,8 @@ export default function MockSettlementResultPage() {
         <div className="space-y-4">
           {!isLoading && mockSettlementResults.length > 0 && (
             <div className="bg-white border border-gray-200 rounded-lg p-4">
-              <h3 className="text-lg font-semibold mb-4">모의정산 결과</h3>
-              <div className="h-96">
+              <h3 className="text-lg font-semibold mb-4">모의정산 정보</h3>
+              <div className="h-36">
                 <TestGrid
                   rowData={mockSettlementResults}
                   columnDefs={mockSettlementColumnDefs}

@@ -199,16 +199,9 @@ export default function NetworkFileUploadPage() {
           onSearch={handleSearch}
         />
 
-        {/* 등록 및 다운로드 버튼 */}
-        <div className="flex justify-end gap-2">
+        {/* 등록 버튼 */}
+        <div className="flex justify-end">
           <Button onClick={handleAddClick}>등록</Button>
-          {showDetailGrid && (
-            <CsvExportButton
-              gridRef={detailGridRef}
-              fileName={getDownloadFileName()}
-              className="bg-green-500 hover:bg-green-600"
-            />
-          )}
         </div>
 
         <div className="space-y-4">
@@ -235,6 +228,17 @@ export default function NetworkFileUploadPage() {
             </div>
           )}
         </div>
+
+        {/* CSV Export 버튼을 상단 그리드와 하단 그리드 사이에 배치 */}
+        {showDetailGrid && (
+          <div className="flex justify-end">
+            <CsvExportButton
+              gridRef={detailGridRef}
+              fileName={getDownloadFileName()}
+              className="bg-green-500 hover:bg-green-600"
+            />
+          </div>
+        )}
 
         {/* 상세 그리드 영역 */}
         {showDetailGrid && (

@@ -178,7 +178,7 @@ export default function SettlementByStationPage() {
                     headers: {
                       "Content-Type": "application/json",
                     },
-                    body: JSON.stringify(filters),
+                    body: JSON.stringify({}), // 빈 객체 전송
                   }
                 );
 

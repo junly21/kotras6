@@ -8,7 +8,6 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     console.log("역사별 정산 CSV 다운로드 API 호출됨");
-    console.log("Body:", body);
 
     // 외부 API에서 CSV 다운로드 요청 - 직접 fetch 사용
     const externalUrl = `${EXTERNAL_BASE_URL}/downLoadPayRecvNode.do`;
@@ -20,7 +19,6 @@ export async function POST(request: NextRequest) {
       },
       body: JSON.stringify(body),
     });
-
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }

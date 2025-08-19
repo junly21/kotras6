@@ -91,6 +91,9 @@ export default function MockSettlementByStationPage() {
     type: "info",
   });
 
+  // CSV 다운로드 상태 추가
+  const [isDownloading, setIsDownloading] = useState(false);
+
   const handleSearch = useCallback(
     async (values: MockSettlementByStationFilters) => {
       setHasSearched(true);
@@ -321,6 +324,7 @@ export default function MockSettlementByStationPage() {
           <div className="flex items-center gap-4">
             <button
               onClick={async () => {
+                setIsDownloading(true); // 다운로드 시작
                 try {
                   const response = await fetch(
                     "/api/mock-settlement/by-station/download",
@@ -355,10 +359,20 @@ export default function MockSettlementByStationPage() {
                   }
                 } catch (error) {
                   console.error("CSV 다운로드 중 오류:", error);
+                } finally {
+                  setIsDownloading(false); // 다운로드 완료
                 }
               }}
-              className="shadow-lg bg-accent-500 text-white px-4 py-2 rounded-md">
-              CSV 다운로드
+              disabled={isDownloading} // 다운로드 중일 때 버튼 비활성화
+              className="shadow-lg bg-gray-500 text-white px-4 py-2 rounded-md disabled:opacity-50 disabled:cursor-not-allowed">
+              {isDownloading ? (
+                <div className="flex items-center gap-2">
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                  다운로드 중...
+                </div>
+              ) : (
+                "CSV 다운로드"
+              )}
             </button>
           </div>
         </div>

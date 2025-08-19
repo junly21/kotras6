@@ -31,7 +31,10 @@ import { MockSettlementRegisterFormData } from "@/types/mockSettlementRegister";
 // 폼 스키마
 const mockSettlementSchema = z
   .object({
-    settlementName: z.string().min(1, "정산명은 필수입니다"),
+    settlementName: z
+      .string()
+      .min(1, "정산명은 필수입니다")
+      .max(50, "정산명은 50자 이하여야 합니다"),
     tradeDate: z.string().min(1, "거래일자는 필수입니다"),
     // 기본운임 배분 비율
     tagAgencyRatio: z

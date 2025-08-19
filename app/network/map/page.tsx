@@ -14,6 +14,10 @@ import { NetworkMapFilters } from "@/types/networkMap";
 import type { NodeData, LineData } from "@/types/networkMap";
 import { FilterForm } from "@/components/ui/FilterForm";
 import { useNetworkFilters } from "@/hooks/useNetworkFilters";
+import {
+  networkMapSchema,
+  networkMapFilterConfig,
+} from "@/features/networkMap/filterConfig";
 // OpenLayers 벡터 관련 추가 import
 import { Vector as VectorLayer } from "ol/layer";
 import { Vector as VectorSource } from "ol/source";
@@ -137,7 +141,7 @@ export default function NetworkMapPage() {
   });
 
   useEffect(() => {
-    if (hasSearched) {
+    if (hasSearched && filters.network && filters.agency && filters.line) {
       refetch();
     }
   }, [filters, refetch, hasSearched]);
@@ -145,6 +149,16 @@ export default function NetworkMapPage() {
   // 필터폼 검색 핸들러
   const handleSearchWithToast = useCallback(
     (values: NetworkMapFilters) => {
+      // 필수 필드 검증
+      if (!values.network || !values.agency || !values.line) {
+        setToast({
+          isVisible: true,
+          message: "모든 필수 필드를 선택해주세요.",
+          type: "error",
+        });
+        return;
+      }
+
       setHasSearched(true);
       handleSearch(values);
     },
@@ -196,32 +210,24 @@ export default function NetworkMapPage() {
 
       {/* 공통 FilterForm 적용 */}
       <FilterForm<NetworkMapFilters>
-        fields={[
-          {
-            name: "network",
-            label: "네트워크명",
-            type: "select",
-            options: networkOptions,
-            required: true,
-          },
-          {
-            name: "agency",
-            label: "기관명",
-            type: "select",
-            options: agencyOptions,
-            required: true,
-            disabled: !filters.network,
-          },
-          {
-            name: "line",
-            label: "노선",
-            type: isAllAgency ? "combobox" : "select",
-            options: lineOptions,
-            required: true,
-            disabled: !filters.network || !filters.agency,
-          },
-        ]}
+        fields={networkMapFilterConfig.map((field, index) => ({
+          ...field,
+          options:
+            index === 0
+              ? networkOptions
+              : index === 1
+              ? agencyOptions
+              : lineOptions,
+          disabled:
+            index === 1
+              ? !filters.network
+              : index === 2
+              ? !filters.network || !filters.agency
+              : false,
+          type: index === 2 && isAllAgency ? "combobox" : field.type,
+        }))}
         defaultValues={{ network: "", agency: "", line: "" }}
+        schema={networkMapSchema}
         values={filters}
         onChange={(values) => {
           handleFilterChange(values);

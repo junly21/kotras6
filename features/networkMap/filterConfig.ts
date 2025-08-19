@@ -1,28 +1,31 @@
+import { FieldConfig } from "@/types/filterForm";
 import { z } from "zod";
-import type { FieldConfig } from "@/types/filterForm";
 
-// 필터 스키마
+// 검증 스키마
 export const networkMapSchema = z.object({
-  network: z.string().min(1, "네트워크를 선택해주세요"),
-  line: z.string().optional(),
+  network: z.string().min(1, "네트워크명은 필수입니다"),
+  agency: z.string().min(1, "기관명은 필수입니다"),
+  line: z.string().min(1, "노선은 필수입니다"),
 });
 
 // 필터 필드 설정
-export const networkMapFields: FieldConfig[] = [
+export const networkMapFilterConfig: FieldConfig[] = [
   {
     name: "network",
     label: "네트워크명",
     type: "select",
     required: true,
-    placeholder: "네트워크를 선택하세요",
-    optionsEndpoint: "/api/network/list",
+  },
+  {
+    name: "agency",
+    label: "기관명",
+    type: "select",
+    required: true,
   },
   {
     name: "line",
     label: "노선",
     type: "select",
-    required: false,
-    placeholder: "노선을 선택하세요",
-    optionsEndpoint: "/api/network/lines",
+    required: true,
   },
 ];

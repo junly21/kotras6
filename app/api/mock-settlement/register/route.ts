@@ -123,6 +123,7 @@ export async function POST(request: NextRequest) {
           ? item.km_wght
           : String(item?.km_wght ?? ""),
       registrationDate: item?.to_char ?? "-",
+      status: item?.status ?? "-",
     }));
 
     return NextResponse.json(normalized, { headers: createCorsHeaders() });

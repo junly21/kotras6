@@ -51,15 +51,15 @@ const mockSettlementSchema = z
       .min(0, "0 이상이어야 합니다")
       .max(100, "100 이하여야 합니다"),
     // 기본운임 인·km 가중치
-    undergroundWeight: z.number().min(0, "0 이상이어야 합니다"),
-    elevatedWeight: z.number().min(0, "0 이상이어야 합니다"),
+    undergroundWeight: z.number().min(1, "1 이상이어야 합니다"),
+    elevatedWeight: z.number().min(1, "1 이상이어야 합니다"),
     // 도시철도부가사용금 인·km 가중치
-    subwayUndergroundWeight: z.number().min(0, "0 이상이어야 합니다"),
-    subwayElevatedWeight: z.number().min(0, "0 이상이어야 합니다"),
+    subwayUndergroundWeight: z.number().min(1, "1 이상이어야 합니다"),
+    subwayElevatedWeight: z.number().min(1, "1 이상이어야 합니다"),
     // 수송기여도
     contribution: z.record(
       z.string(),
-      z.number().min(0, "0 이상이어야 합니다")
+      z.number().min(0.1, "0.1 이상이어야 합니다")
     ),
   })
   .refine(
@@ -118,10 +118,10 @@ export function MockSettlementModal({
       initialLineRatio: 0,
       lineSectionRatio: 0,
       distanceKmRatio: 0,
-      undergroundWeight: 0,
-      elevatedWeight: 0,
-      subwayUndergroundWeight: 0,
-      subwayElevatedWeight: 0,
+      undergroundWeight: 1,
+      elevatedWeight: 1,
+      subwayUndergroundWeight: 1,
+      subwayElevatedWeight: 1,
       contribution: CONTRIBUTION_AGENCIES.reduce((acc, agency) => {
         acc[agency] = 0;
         return acc;

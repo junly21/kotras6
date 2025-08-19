@@ -255,6 +255,22 @@ export default function MockSettlementRegisterPage() {
       width: 120,
       resizable: true,
     },
+    {
+      headerName: "상태",
+      field: "status",
+      width: 100,
+      resizable: true,
+      cellStyle: (params: { value: string }) => {
+        if (params.value === "완료") {
+          return { color: "#059669", fontWeight: "bold" }; // 초록색
+        } else if (params.value === "진행") {
+          return { color: "#D97706", fontWeight: "bold" }; // 주황색
+        } else if (params.value === "대기") {
+          return { color: "#6B7280", fontWeight: "bold" }; // 회색
+        }
+        return {};
+      },
+    },
   ];
 
   return (

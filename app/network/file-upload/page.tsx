@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState, useMemo } from "react";
 import { FilterForm } from "@/components/ui/FilterForm";
 import { Toast } from "@/components/ui/Toast";
 import { Button } from "@/components/ui/button";
@@ -88,6 +88,13 @@ export default function NetworkFileUploadPage() {
 
     return `${type}_${currentDate}.csv`;
   };
+
+  // 기존 날짜 목록 추출 (중복 제거)
+  const existingDates = useMemo(() => {
+    if (!rowData || rowData.length === 0) return [];
+    const dates = rowData.map((item) => item.net_dt).filter(Boolean);
+    return [...new Set(dates)]; // 중복 제거
+  }, [rowData]);
 
   // 네트워크 옵션이 로드되면 필터 필드 업데이트
   const updatedFields = networkFileUploadFields.map((field) => {
@@ -250,6 +257,7 @@ export default function NetworkFileUploadPage() {
           onClose={handleModalClose}
           onSubmit={handleModalSubmit}
           loading={modalLoading}
+          existingDates={existingDates}
         />
 
         {/* 토스트 알림 */}

@@ -21,22 +21,36 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 
-// 폼 스키마
-const networkFileUploadSchema = z.object({
-  networkName: z.string().min(1, "네트워크명은 필수입니다"),
-  date: z.string().min(1, "날짜는 필수입니다"),
-  nodeFile: z.instanceof(File, { message: "노드 파일을 선택해주세요" }),
-  linkFile: z.instanceof(File, { message: "링크 파일을 선택해주세요" }),
-  platformFile: z.instanceof(File, { message: "플랫폼 파일을 선택해주세요" }),
-});
+// 중복 검증을 위한 스키마 생성 함수
+const createNetworkFileUploadSchema = (existingDates: string[] = []) => {
+  return z.object({
+    networkName: z
+      .string()
+      .min(1, "네트워크명은 필수입니다")
+      .max(100, "네트워크명은 100자 이하여야 합니다"),
+    date: z
+      .string()
+      .min(1, "날짜는 필수입니다")
+      .refine(
+        (date) => !existingDates.includes(date),
+        "이미 등록된 날짜입니다"
+      ),
+    nodeFile: z.instanceof(File, { message: "노드 파일을 선택해주세요" }),
+    linkFile: z.instanceof(File, { message: "링크 파일을 선택해주세요" }),
+    platformFile: z.instanceof(File, { message: "플랫폼 파일을 선택해주세요" }),
+  });
+};
 
-type NetworkFileUploadFormData = z.infer<typeof networkFileUploadSchema>;
+type NetworkFileUploadFormData = z.infer<
+  ReturnType<typeof createNetworkFileUploadSchema>
+>;
 
 interface NetworkFileUploadModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSubmit: (data: NetworkFileUploadFormData) => void;
   loading?: boolean;
+  existingDates?: string[]; // 기존에 등록된 날짜 목록
 }
 
 export function NetworkFileUploadModal({
@@ -44,14 +58,18 @@ export function NetworkFileUploadModal({
   onClose,
   onSubmit,
   loading = false,
+  existingDates = [],
 }: NetworkFileUploadModalProps) {
   const [nodeFileName, setNodeFileName] = useState<string>("");
   const [linkFileName, setLinkFileName] = useState<string>("");
   const [platformFileName, setPlatformFileName] = useState<string>("");
   const [validationError, setValidationError] = useState<string>("");
 
+  // 동적으로 스키마 생성 (중복 검증 포함)
+  const dynamicSchema = createNetworkFileUploadSchema(existingDates);
+
   const form = useForm<NetworkFileUploadFormData>({
-    resolver: zodResolver(networkFileUploadSchema),
+    resolver: zodResolver(dynamicSchema),
     defaultValues: {
       networkName: "",
       date: "",
@@ -211,7 +229,9 @@ export function NetworkFileUploadModal({
                   name="networkName"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="min-w-[85px]">네트워크명 <span className="text-red-500">*</span></FormLabel>
+                      <FormLabel className="min-w-[85px]">
+                        네트워크명 <span className="text-red-500">*</span>
+                      </FormLabel>
                       <FormControl>
                         <Input
                           {...field}
@@ -227,7 +247,9 @@ export function NetworkFileUploadModal({
                   name="date"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="min-w-[85px] text-sm">날짜 <span className="text-red-500">*</span></FormLabel>
+                      <FormLabel className="min-w-[85px] text-sm">
+                        날짜 <span className="text-red-500">*</span>
+                      </FormLabel>
                       <FormControl>
                         <Input
                           {...field}
@@ -241,7 +263,7 @@ export function NetworkFileUploadModal({
                 />
               </div>
             </div>
-            
+
             {/* 파일 업로드 섹션 */}
             <div className="space-y-4">
               <h3 className="text-sm font-medium text-gray-700 border-b pb-2">
@@ -253,7 +275,9 @@ export function NetworkFileUploadModal({
                   name="nodeFile"
                   render={() => (
                     <FormItem>
-                      <FormLabel className="min-w-[85px]">노드 파일 <span className="text-red-500">*</span></FormLabel>
+                      <FormLabel className="min-w-[85px]">
+                        노드 파일 <span className="text-red-500">*</span>
+                      </FormLabel>
                       <FormControl>
                         <div className="space-y-2 flex-1">
                           <Input
@@ -277,7 +301,9 @@ export function NetworkFileUploadModal({
                   name="linkFile"
                   render={() => (
                     <FormItem>
-                      <FormLabel className="min-w-[85px]">링크 파일 <span className="text-red-500">*</span></FormLabel>
+                      <FormLabel className="min-w-[85px]">
+                        링크 파일 <span className="text-red-500">*</span>
+                      </FormLabel>
                       <FormControl>
                         <div className="space-y-2 flex-1">
                           <Input
@@ -302,7 +328,9 @@ export function NetworkFileUploadModal({
                   name="platformFile"
                   render={() => (
                     <FormItem>
-                      <FormLabel className="min-w-[85px]">플랫폼 파일 <span className="text-red-500">*</span></FormLabel>
+                      <FormLabel className="min-w-[85px]">
+                        플랫폼 파일 <span className="text-red-500">*</span>
+                      </FormLabel>
                       <FormControl>
                         <div className="space-y-2 flex-1">
                           <Input

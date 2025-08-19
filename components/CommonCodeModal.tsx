@@ -35,15 +35,16 @@ const createCommonCodeSchema = (existingCodes: string[] = []) => {
     COMMON_CODE: z
       .string()
       .min(1, "공통코드는 필수입니다")
+      .max(20, "공통코드는 20자 이하여야 합니다")
       .refine(
         (code) => !existingCodes.includes(code),
         "이미 등록된 공통코드입니다"
       ),
-    COMMON_CODE_NAME: z.string(),
-    VALUE_1: z.string(),
-    VALUE_2: z.string(),
-    VALUE_3: z.string(),
-    REMARK: z.string(),
+    COMMON_CODE_NAME: z.string().max(50, "공통코드명은 50자 이하여야 합니다"),
+    VALUE_1: z.string().max(100, "값1은 100자 이하여야 합니다"),
+    VALUE_2: z.string().max(100, "값2는 100자 이하여야 합니다"),
+    VALUE_3: z.string().max(100, "값3은 100자 이하여야 합니다"),
+    REMARK: z.string().max(100, "비고는 100자 이하여야 합니다"),
     USE_YN: z.string(),
     SYSCD_YN: z.string(),
   });

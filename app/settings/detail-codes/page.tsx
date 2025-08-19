@@ -408,6 +408,7 @@ export default function SettingsDetailCodesPage() {
         mode={modalMode}
         loading={modalLoading}
         selectedCommonCode={selectedCommonCode?.common_code}
+        existingCodes={detailCodeData.map((code) => code.detail_code)}
       />
 
       {/* 토스트 알림 */}

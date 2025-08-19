@@ -187,11 +187,13 @@ export function MockSettlementModal({
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          {tradeDates.map((date) => (
-                            <SelectItem key={date} value={date}>
-                              {date}
-                            </SelectItem>
-                          ))}
+                          {tradeDates
+                            .filter((date) => date !== "ALL") // ALL 옵션 제외
+                            .map((date) => (
+                              <SelectItem key={date} value={date}>
+                                {date}
+                              </SelectItem>
+                            ))}
                         </SelectContent>
                       </Select>
                       <FormMessage />
@@ -417,7 +419,7 @@ export function MockSettlementModal({
                             {...field}
                             type="number"
                             min="0"
-                            step="0.1"
+                            step="any"
                             onChange={(e) =>
                               field.onChange(Number(e.target.value))
                             }

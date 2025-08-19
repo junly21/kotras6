@@ -4,6 +4,7 @@ import { useState, useCallback, useMemo, useRef } from "react";
 import { FilterForm } from "@/components/ui/FilterForm";
 import { Toast } from "@/components/ui/Toast";
 import TestGrid from "@/components/TestGrid";
+import CsvExportButton from "@/components/CsvExportButton";
 import { SettlementByRouteService } from "@/services/settlementByRouteService";
 import {
   settlementByRouteFields,
@@ -102,6 +103,17 @@ export default function SettlementByRoutePage() {
               보관기관을 선택하고 조회 버튼을 누르면 결과가 표시됩니다.
             </p>
           </div>
+        </div>
+      )}
+
+      {/* CSV Export 버튼을 그리드 상단에 배치 */}
+      {hasSearched && data.length > 0 && (
+        <div className="flex justify-end mb-2">
+          <CsvExportButton
+            gridRef={gridRef}
+            fileName="settlement_by_route_data.csv"
+            className="shadow-lg bg-accent-500"
+          />
         </div>
       )}
 

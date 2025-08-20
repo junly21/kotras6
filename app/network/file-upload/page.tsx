@@ -5,7 +5,7 @@ import { FilterForm } from "@/components/ui/FilterForm";
 import { Toast } from "@/components/ui/Toast";
 import { Button } from "@/components/ui/button";
 import Spinner from "@/components/Spinner";
-import CsvExportButton from "@/components/CsvExportButton";
+import RawDataCsvExportButton from "@/components/RawDataCsvExportButton";
 import {
   networkFileUploadFields,
   networkFileUploadSchema,
@@ -45,6 +45,7 @@ export default function NetworkFileUploadPage() {
     networkOptions,
     rowData,
     detailData,
+    rawDetailData, // 원본 API 데이터 추가
     detailTitle,
     showDetailGrid,
     loading,
@@ -87,6 +88,99 @@ export default function NetworkFileUploadPage() {
       : "data";
 
     return `${type}_${currentDate}.csv`;
+  };
+
+  // 각 목록별 칼럼 순서 정의 (CSV 내보내기용 - 모든 필드 포함)
+  const getColumnOrder = () => {
+    if (detailTitle === "노드 목록") {
+      return [
+        "seq",
+        "sta_nm",
+        "sta_num",
+        "x",
+        "y",
+        "kscc",
+        "subway",
+        "transfer",
+        "transfer_cd",
+        "open_date",
+        "gate_chk",
+        "oper",
+        "remarks",
+        "consign_oper",
+        "avg_stay",
+        "avg_stay_new",
+      ];
+    } else if (detailTitle === "링크 목록") {
+      return [
+        "seq",
+        "from_sta_nm",
+        "from_sta_num",
+        "to_sta_nm",
+        "to_sta_num",
+        "link_cd",
+        "sta_pass_sec",
+        "trans_mv_sec",
+        "trans_sty_sec",
+        "cost",
+        "km",
+        "subway",
+        "open_date",
+        "start_x",
+        "start_y",
+        "end_x",
+        "end_y",
+        "km_g",
+        "km_ung",
+        "start_oper",
+        "end_oper",
+        "geom",
+        "direction",
+        "oper",
+        "oper_line",
+        "consign_oper",
+        "elev_tot",
+        "elev_ung",
+        "elev",
+        "elev_g",
+      ];
+    } else if (detailTitle === "플랫폼 목록") {
+      return [
+        "seq",
+        "link_seq",
+        "link_cd",
+        "from_sta_nm",
+        "from_dic",
+        "from_dic_sub",
+        "from_sta_num",
+        "to_sta_nm",
+        "to_dic",
+        "to_dic_sub",
+        "to_sta_num",
+        "tot_mv_m",
+        "tot_mv_sec",
+        "flat_mv_m",
+        "tot_step_up",
+        "tot_step_down",
+        "only_step_up",
+        "only_step_up_m",
+        "only_step_down",
+        "only_step_down_m",
+        "step_esc_up_step",
+        "step_esc_up_yn",
+        "step_esc_up_m",
+        "step_esc_down_step",
+        "step_esc_down_yn",
+        "step_esc_down_m",
+        "only_esc_up_yn",
+        "only_esc_up_m",
+        "only_esc_down_yn",
+        "only_esc_down_m",
+        "tot_sty_sec",
+        "trans_cnt",
+      ];
+    }
+    return [];
   };
 
   // 기존 날짜 목록 추출 (중복 제거)
@@ -232,10 +326,11 @@ export default function NetworkFileUploadPage() {
         {/* CSV Export 버튼을 상단 그리드와 하단 그리드 사이에 배치 */}
         {showDetailGrid && (
           <div className="flex justify-end">
-            <CsvExportButton
-              gridRef={detailGridRef}
+            <RawDataCsvExportButton
               fileName={getDownloadFileName()}
               className="bg-green-500 hover:bg-green-600"
+              columnOrder={getColumnOrder()}
+              rawData={rawDetailData}
             />
           </div>
         )}

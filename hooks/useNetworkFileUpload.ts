@@ -26,6 +26,9 @@ export const useNetworkFileUpload = () => {
   const [detailData, setDetailData] = useState<
     NodeData[] | LinkData[] | PlatformData[]
   >([]);
+  const [rawDetailData, setRawDetailData] = useState<Record<string, unknown>[]>(
+    []
+  ); // 원본 API 데이터 저장
   const [detailTitle, setDetailTitle] = useState<string>("");
   const [showDetailGrid, setShowDetailGrid] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -97,11 +100,12 @@ export const useNetworkFileUpload = () => {
     try {
       console.log("노드 조회 시작:", netDt);
       const response = await NetworkFileUploadService.getNetworkNodeList(netDt);
-      console.log("노드 조회 결과:", response.data);
+      // console.log("노드 조회 결과:", response.data);
 
       if (response.success) {
         const nodeData = Array.isArray(response.data) ? response.data : [];
         setDetailData(nodeData as NodeData[]);
+        setRawDetailData(response.data as Record<string, unknown>[]); // 원본 데이터 저장
         setDetailTitle("노드 목록");
         setShowDetailGrid(true);
         setToast({
@@ -136,6 +140,7 @@ export const useNetworkFileUpload = () => {
       if (response.success) {
         const linkData = Array.isArray(response.data) ? response.data : [];
         setDetailData(linkData as LinkData[]);
+        setRawDetailData(response.data as Record<string, unknown>[]); // 원본 데이터 저장
         setDetailTitle("링크 목록");
         setShowDetailGrid(true);
         setToast({
@@ -172,6 +177,7 @@ export const useNetworkFileUpload = () => {
       if (response.success) {
         const platformData = Array.isArray(response.data) ? response.data : [];
         setDetailData(platformData as PlatformData[]);
+        setRawDetailData(response.data as Record<string, unknown>[]); // 원본 데이터 저장
         setDetailTitle("플랫폼 목록");
         setShowDetailGrid(true);
         setToast({
@@ -254,6 +260,7 @@ export const useNetworkFileUpload = () => {
     networkOptions,
     rowData,
     detailData,
+    rawDetailData, // 원본 API 데이터 추가
     detailTitle,
     showDetailGrid,
     loading,

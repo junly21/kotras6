@@ -242,7 +242,7 @@ export function CommonCodeModal({
                     <Select
                       onValueChange={field.onChange}
                       value={field.value}
-                      disabled={true}>
+                      disabled={mode === "edit"}>
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder="시스템코드유무를 선택하세요" />

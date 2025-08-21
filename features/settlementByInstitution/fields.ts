@@ -9,5 +9,6 @@ export const settlementByInstitutionFields: FieldConfig[] = [
     required: true,
     placeholder: "기관명을 선택하세요",
     optionsEndpoint: "/api/common/agencies",
+    filterOptions: (options) => options.filter((opt) => opt.label !== "전체"),
   },
 ];

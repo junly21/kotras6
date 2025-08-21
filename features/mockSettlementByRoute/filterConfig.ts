@@ -20,6 +20,7 @@ export const mockSettlementByRouteFilterConfig = [
     type: "select",
     optionsEndpoint: "/api/common/agencies",
     placeholder: "기관명을 선택하세요",
+    filterOptions: (options) => options.filter((opt) => opt.label !== "전체"),
   },
 ];
 

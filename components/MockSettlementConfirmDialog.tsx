@@ -17,8 +17,12 @@ export function MockSettlementConfirmDialog({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-100">
-      <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+    <div
+      className="fixed inset-0 bg-black/30 flex items-center justify-center"
+      style={{ zIndex: 9999, pointerEvents: "auto" }}>
+      <div
+        className="bg-white rounded-lg p-6 max-w-md w-full mx-4"
+        style={{ pointerEvents: "auto" }}>
         <div className="text-center">
           <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-yellow-100 mb-4">
             <svg

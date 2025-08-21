@@ -35,7 +35,6 @@ export default function MockSettlementRegisterPage() {
   const [filters, setFilters] =
     useState<MockSettlementRegisterFilters>(defaultValues);
   const [isLoading, setIsLoading] = useState(false);
-  const [isRegistering, setIsRegistering] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [searchResults, setSearchResults] = useState<
     MockSettlementRegisterData[]
@@ -148,8 +147,6 @@ export default function MockSettlementRegisterPage() {
       // 모의정산 등록 모달 닫기 (처리 중임을 표시)
       setIsMockSettlementModalOpen(false);
 
-      // 모의정산 등록 처리 로딩 상태 시작
-      setIsRegistering(true);
       setError(null);
 
       try {
@@ -171,8 +168,6 @@ export default function MockSettlementRegisterPage() {
             ? error.message
             : "알 수 없는 오류가 발생했습니다."
         );
-      } finally {
-        setIsRegistering(false);
       }
     },
     [filters, handleSearchSubmit]
@@ -184,8 +179,8 @@ export default function MockSettlementRegisterPage() {
       // 모의정산 실행여부 체크
       const isRunningResponse =
         await MockSettlementControlService.checkIsRunning();
-      // && isRunningResponse.data === true
-      if (isRunningResponse.success) {
+
+      if (isRunningResponse.success && isRunningResponse.data === true) {
         // 모의정산이 실행 중인 경우 확인 다이얼로그 표시
         setPendingAction(() => () => executeMockSettlementRegistration(data));
         setIsConfirmDialogOpen(true);
@@ -326,22 +321,6 @@ export default function MockSettlementRegisterPage() {
         <h1 className="text-2xl font-bold">모의정산 등록</h1>
       </div>
 
-      {/* 모의정산 등록 처리 중 스피너 */}
-      {isRegistering && (
-        <div className="absolute inset-0 flex items-center justify-center bg-white/80 z-50">
-          <div className="text-center">
-            <Spinner />
-            <p className="mt-4 text-gray-600">모의정산 등록 처리 중입니다...</p>
-            <p className="mt-2 text-sm text-gray-500">
-              최대 20분 정도 소요될 수 있습니다.
-            </p>
-            <p className="mt-1 text-xs text-gray-400">
-              백엔드에서 데이터베이스 등록 작업을 진행 중입니다.
-            </p>
-          </div>
-        </div>
-      )}
-
       {/* 일반 데이터 로딩 스피너 */}
       {isLoading && (
         <div className="absolute inset-0 flex items-center justify-center bg-white/80 z-50">
@@ -432,10 +411,10 @@ export default function MockSettlementRegisterPage() {
       {/* 모의정산 등록 모달 */}
       <MockSettlementModal
         isOpen={isMockSettlementModalOpen}
-        onClose={() => !isRegistering && setIsMockSettlementModalOpen(false)}
+        onClose={() => setIsMockSettlementModalOpen(false)}
         onSubmit={handleMockSettlementSubmit}
         tradeDates={tradeDates}
-        loading={isRegistering}
+        loading={false}
       />
 
       {/* 모의정산 상세 모달 */}

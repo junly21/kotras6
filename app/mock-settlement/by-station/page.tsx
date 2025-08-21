@@ -164,7 +164,7 @@ export default function MockSettlementByStationPage() {
       // 모의정산 실행여부 체크
       const isRunningResponse =
         await MockSettlementControlService.checkIsRunning();
-      //
+
       if (isRunningResponse.success && isRunningResponse.data === true) {
         // 모의정산이 실행 중인 경우 확인 다이얼로그 표시
         setPendingAction(() => () => executeSearch(values));

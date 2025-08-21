@@ -22,6 +22,7 @@ import { MockSettlementConfirmDialog } from "@/components/MockSettlementConfirmD
 import { Button } from "@/components/ui/button";
 import { Toast } from "@/components/ui/Toast";
 import { AllCommunityModule, ModuleRegistry } from "ag-grid-community";
+import ProtectedRoute from "@/components/ProtectedRoute";
 
 // Register all Community features
 ModuleRegistry.registerModules([AllCommunityModule]);
@@ -354,155 +355,166 @@ export default function MockSettlementRegisterPage() {
   ];
 
   return (
-    <div className="p-6 space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">모의정산 등록</h1>
-      </div>
-
-      {/* 일반 데이터 로딩 스피너 */}
-      {isLoading && (
-        <div className="absolute inset-0 flex items-center justify-center bg-white/80 z-50">
-          <div className="text-center">
-            <Spinner />
-            <p className="mt-4 text-gray-600">데이터를 불러오는 중입니다...</p>
-          </div>
+    <ProtectedRoute requiredPermission="mockSettlement">
+      <div className="p-6 space-y-6">
+        <div className="flex items-center justify-between">
+          <h1 className="text-2xl font-bold">모의정산 등록</h1>
         </div>
-      )}
 
-      {/* 에러 메시지 */}
-      {error && (
-        <div className="bg-red-50 border border-red-200 rounded-md p-4">
-          <p className="text-red-600">{error}</p>
-        </div>
-      )}
-
-      {/* 필터 폼 */}
-      <FilterForm
-        fields={mockSettlementRegisterFilterConfig}
-        defaultValues={defaultValues}
-        schema={mockSettlementRegisterSchema}
-        values={filters}
-        onChange={handleFilterChange}
-        onSearch={handleSearchSubmit}
-        className="bg-gray-50"
-      />
-
-      {/* 등록 버튼 */}
-      <div className="flex justify-end">
-        <Button
-          onClick={async () => {
-            // 모의정산 실행여부 체크
-            const isRunningResponse =
-              await MockSettlementControlService.checkIsRunning();
-
-            if (isRunningResponse.success && isRunningResponse.data === true) {
-              // 모의정산이 실행 중인 경우 확인 다이얼로그 표시
-              setPendingAction(() => () => setIsMockSettlementModalOpen(true));
-              setIsConfirmDialogOpen(true);
-              return;
-            }
-
-            // 모의정산이 실행 중이 아닌 경우 모달 열기
-            setIsMockSettlementModalOpen(true);
-          }}
-          className="bg-blue-600 hover:bg-blue-700">
-          등록
-        </Button>
-      </div>
-
-      {/* 결과 영역 */}
-      {!hasSearched && (
-        <div className="bg-gray-50 border-2 border-dashed border-gray-300 rounded-lg p-16">
-          <div className="text-center text-gray-500">
-            <p className="text-lg font-medium">조회 결과</p>
-            <p className="text-sm">
-              정산명과 거래일자를 선택하고 조회 버튼을 누르면 결과가 표시됩니다.
-            </p>
-          </div>
-        </div>
-      )}
-
-      {hasSearched && (
-        <div className="space-y-4">
-          {!isLoading && searchResults.length > 0 && (
-            <>
-              <h3 className="text-lg font-semibold mb-4">모의정산 등록 목록</h3>
-              <div className="bg-white border border-gray-200 rounded-[24px] p-4">
-                <div className="h-96">
-                  <TestGrid
-                    rowData={searchResults}
-                    columnDefs={columnDefs}
-                    gridRef={gridRef}
-                    gridOptions={{
-                      suppressCellFocus: true,
-                      suppressMovableColumns: true,
-                      suppressMenuHide: true,
-                      rowSelection: {
-                        enableClickSelection: false,
-                      },
-                      defaultColDef: {
-                        sortable: false,
-                        filter: false,
-                        resizable: true,
-                        suppressMovable: true,
-                      },
-                      onRowDoubleClicked: handleRowDoubleClick,
-                    }}
-                  />
-                </div>
-              </div>
-            </>
-            
-          )}
-
-          {!isLoading && searchResults.length === 0 && (
-            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-              <p className="text-yellow-800">조회된 데이터가 없습니다.</p>
+        {/* 일반 데이터 로딩 스피너 */}
+        {isLoading && (
+          <div className="absolute inset-0 flex items-center justify-center bg-white/80 z-50">
+            <div className="text-center">
+              <Spinner />
+              <p className="mt-4 text-gray-600">
+                데이터를 불러오는 중입니다...
+              </p>
             </div>
-          )}
-        </div>
-      )}
+          </div>
+        )}
 
-      {/* 모의정산 등록 모달 */}
-      <MockSettlementModal
-        isOpen={isMockSettlementModalOpen}
-        onClose={() => setIsMockSettlementModalOpen(false)}
-        onSubmit={handleMockSettlementSubmit}
-        tradeDates={tradeDates}
-        loading={false}
-      />
+        {/* 에러 메시지 */}
+        {error && (
+          <div className="bg-red-50 border border-red-200 rounded-md p-4">
+            <p className="text-red-600">{error}</p>
+          </div>
+        )}
 
-      {/* 모의정산 상세 모달 */}
-      {selectedSettlement && (
-        <MockSettlementDetailModal
-          isOpen={isDetailModalOpen}
-          onClose={handleDetailModalClose}
-          simStmtGrpId={selectedSettlement.simStmtGrpId}
+        {/* 필터 폼 */}
+        <FilterForm
+          fields={mockSettlementRegisterFilterConfig}
+          defaultValues={defaultValues}
+          schema={mockSettlementRegisterSchema}
+          values={filters}
+          onChange={handleFilterChange}
+          onSearch={handleSearchSubmit}
+          className="bg-gray-50"
         />
-      )}
 
-      {/* 시뮬레이션 모달 */}
-      <SimulateModal
-        isOpen={isSimulateModalOpen}
-        onClose={handleSimulateModalClose}
-      />
+        {/* 등록 버튼 */}
+        <div className="flex justify-end">
+          <Button
+            onClick={async () => {
+              // 모의정산 실행여부 체크
+              const isRunningResponse =
+                await MockSettlementControlService.checkIsRunning();
 
-      {/* 모의정산 실행중 확인 다이얼로그 */}
-      <MockSettlementConfirmDialog
-        isOpen={isConfirmDialogOpen}
-        onClose={handleConfirmDialogClose}
-        onConfirm={handleConfirmDialogConfirm}
-        actionType="모달 열기"
-      />
+              if (
+                isRunningResponse.success &&
+                isRunningResponse.data === true
+              ) {
+                // 모의정산이 실행 중인 경우 확인 다이얼로그 표시
+                setPendingAction(
+                  () => () => setIsMockSettlementModalOpen(true)
+                );
+                setIsConfirmDialogOpen(true);
+                return;
+              }
 
-      {/* 토스트 메시지 */}
-      <Toast
-        message={toast.message}
-        type={toast.type}
-        isVisible={toast.isVisible}
-        onClose={() => setToast((prev) => ({ ...prev, isVisible: false }))}
-        duration={toast.type === "info" ? 3000 : 5000} // info는 3초 후 자동 닫기, 나머지는 5초 후 자동 닫기
-      />
-    </div>
+              // 모의정산이 실행 중이 아닌 경우 모달 열기
+              setIsMockSettlementModalOpen(true);
+            }}
+            className="bg-blue-600 hover:bg-blue-700">
+            등록
+          </Button>
+        </div>
+
+        {/* 결과 영역 */}
+        {!hasSearched && (
+          <div className="bg-gray-50 border-2 border-dashed border-gray-300 rounded-lg p-16">
+            <div className="text-center text-gray-500">
+              <p className="text-lg font-medium">조회 결과</p>
+              <p className="text-sm">
+                정산명과 거래일자를 선택하고 조회 버튼을 누르면 결과가
+                표시됩니다.
+              </p>
+            </div>
+          </div>
+        )}
+
+        {hasSearched && (
+          <div className="space-y-4">
+            {!isLoading && searchResults.length > 0 && (
+              <>
+                <h3 className="text-lg font-semibold mb-4">
+                  모의정산 등록 목록
+                </h3>
+                <div className="bg-white border border-gray-200 rounded-[24px] p-4">
+                  <div className="h-96">
+                    <TestGrid
+                      rowData={searchResults}
+                      columnDefs={columnDefs}
+                      gridRef={gridRef}
+                      gridOptions={{
+                        suppressCellFocus: true,
+                        suppressMovableColumns: true,
+                        suppressMenuHide: true,
+                        rowSelection: {
+                          enableClickSelection: false,
+                        },
+                        defaultColDef: {
+                          sortable: false,
+                          filter: false,
+                          resizable: true,
+                          suppressMovable: true,
+                        },
+                        onRowDoubleClicked: handleRowDoubleClick,
+                      }}
+                    />
+                  </div>
+                </div>
+              </>
+            )}
+
+            {!isLoading && searchResults.length === 0 && (
+              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                <p className="text-yellow-800">조회된 데이터가 없습니다.</p>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* 모의정산 등록 모달 */}
+        <MockSettlementModal
+          isOpen={isMockSettlementModalOpen}
+          onClose={() => setIsMockSettlementModalOpen(false)}
+          onSubmit={handleMockSettlementSubmit}
+          tradeDates={tradeDates}
+          loading={false}
+        />
+
+        {/* 모의정산 상세 모달 */}
+        {selectedSettlement && (
+          <MockSettlementDetailModal
+            isOpen={isDetailModalOpen}
+            onClose={handleDetailModalClose}
+            simStmtGrpId={selectedSettlement.simStmtGrpId}
+          />
+        )}
+
+        {/* 시뮬레이션 모달 */}
+        <SimulateModal
+          isOpen={isSimulateModalOpen}
+          onClose={handleSimulateModalClose}
+        />
+
+        {/* 모의정산 실행중 확인 다이얼로그 */}
+        <MockSettlementConfirmDialog
+          isOpen={isConfirmDialogOpen}
+          onClose={handleConfirmDialogClose}
+          onConfirm={handleConfirmDialogConfirm}
+          actionType="모달 열기"
+        />
+
+        {/* 토스트 메시지 */}
+        <Toast
+          message={toast.message}
+          type={toast.type}
+          isVisible={toast.isVisible}
+          onClose={() => setToast((prev) => ({ ...prev, isVisible: false }))}
+          duration={toast.type === "info" ? 3000 : 5000} // info는 3초 후 자동 닫기, 나머지는 5초 후 자동 닫기
+        />
+      </div>
+    </ProtectedRoute>
   );
 }

@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { useSessionContext } from "@/contexts/SessionContext";
 
 export default function Header() {
-  const { session } = useSessionContext();
+  const { getDisplayName } = useSessionContext();
 
   return (
     <header className="flex justify-between bg-[#363636] text-white px-6 py-4 shadow-md">
@@ -16,9 +16,7 @@ export default function Header() {
       <div className="flex items-center gap-4">
         <div className="flex items-center gap-2">
           <img className="size-7" src="/icon-user.svg"></img>
-          {session.agencyName === "ALL"
-            ? "대도시광역교통위원회"
-            : session.agencyName || "정보를 불러오는중.."}
+          {getDisplayName()}
         </div>
         <Button className="border border-white font-bold bg-[#363636]">
           메뉴얼

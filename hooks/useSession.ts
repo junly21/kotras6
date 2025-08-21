@@ -1,9 +1,19 @@
 import { useState, useEffect, useCallback, useRef } from "react";
+import { AgencyInfo, FeaturePermissions } from "../types/agency";
+import {
+  hasPermission,
+  getFeaturePermissions,
+  getAgencyInfo,
+  getAgencyDisplayName,
+} from "../utils/agencyPermissions";
 
 interface SessionData {
   sessionId: string | null;
   agencyInfo: string | null;
-  agencyName: string | null; // 기관명 추가
+  agencyName: string | null;
+  agencyCode: string | null; // OPER_CODE_NM_DECR 값
+  agency: AgencyInfo | null; // 기관 정보
+  permissions: FeaturePermissions | null; // 권한 정보
   isActive: boolean;
   lastActivity: number;
 }
@@ -15,6 +25,10 @@ interface UseSessionReturn {
   error: string | null;
   refreshSession: () => Promise<void>;
   clearSession: () => void;
+  // 권한 체크 함수들
+  canAccess: (feature: keyof FeaturePermissions) => boolean;
+  getDisplayName: () => string;
+  getAgencyLevel: () => string | null;
 }
 
 const SESSION_TIMEOUT = 30 * 60 * 1000; // 30분 (밀리초)
@@ -24,7 +38,10 @@ export function useSession(): UseSessionReturn {
   const [session, setSession] = useState<SessionData>({
     sessionId: null,
     agencyInfo: null,
-    agencyName: null, // 기관명 초기값 추가
+    agencyName: null,
+    agencyCode: null, // 기관 코드 초기값 추가
+    agency: null, // 기관 정보 초기값 추가
+    permissions: null, // 권한 정보 초기값 추가
     isActive: false,
     lastActivity: 0,
   });
@@ -36,6 +53,27 @@ export function useSession(): UseSessionReturn {
   const activityTimerRef = useRef<NodeJS.Timeout | null>(null);
   const isInitializingRef = useRef(false); // 초기화 중복 방지
   const hasInitializedRef = useRef(false); // 한 번만 초기화
+
+  // 권한 체크 함수
+  const canAccess = useCallback(
+    (feature: keyof FeaturePermissions): boolean => {
+      if (!session.agencyCode) return false;
+      return hasPermission(session.agencyCode, feature);
+    },
+    [session.agencyCode]
+  );
+
+  // 기관명 표시 함수
+  const getDisplayName = useCallback((): string => {
+    if (!session.agencyCode) return "정보를 불러오는중..";
+    return getAgencyDisplayName(session.agencyCode);
+  }, [session.agencyCode]);
+
+  // 기관 레벨 반환 함수
+  const getAgencyLevel = useCallback((): string | null => {
+    if (!session.agency) return null;
+    return session.agency.level;
+  }, [session.agency]);
 
   // 세션 초기화 (initSession)
   const initializeSession = useCallback(async () => {
@@ -69,9 +107,18 @@ export function useSession(): UseSessionReturn {
 
         // 세션 초기화 시에도 기관명 파싱
         let agencyName = null;
+        let agencyCode = null;
+        let agency: AgencyInfo | null = null;
+        let permissions: FeaturePermissions | null = null;
+
         try {
           if (data.data?.sessionData?.OPER_CODE_NM_DECR) {
+            agencyCode = data.data.sessionData.OPER_CODE_NM_DECR;
             agencyName = data.data.sessionData.OPER_CODE_NM_DECR;
+
+            // 기관 정보와 권한 설정
+            agency = getAgencyInfo(agencyCode);
+            permissions = getFeaturePermissions(agency.level);
           }
         } catch (parseError) {
           console.warn("세션 초기화 시 기관명 파싱 실패:", parseError);
@@ -80,12 +127,22 @@ export function useSession(): UseSessionReturn {
         setSession({
           sessionId: data.data?.sessionId || "unknown",
           agencyInfo: data.data?.agencyInfo || null,
-          agencyName: agencyName, // 초기화 시에도 기관명 설정
+          agencyName: agencyName,
+          agencyCode: agencyCode, // 기관 코드 설정
+          agency: agency, // 기관 정보 설정
+          permissions: permissions, // 권한 정보 설정
           isActive: true,
           lastActivity: now,
         });
 
-        console.log("세션 초기화 성공:", data.data, "기관명:", agencyName);
+        console.log(
+          "세션 초기화 성공:",
+          data.data,
+          "기관:",
+          agency,
+          "권한:",
+          permissions
+        );
 
         // 세션 갱신 타이머 설정
         scheduleSessionRefresh(now);
@@ -146,13 +203,28 @@ export function useSession(): UseSessionReturn {
 
         // 외부 API 응답에서 기관명 파싱
         let agencyName = null;
+        let agencyCode = null;
+        let agency: AgencyInfo | null = null;
+        let permissions: FeaturePermissions | null = null;
+
         try {
           if (data.data?.externalData?.OPER_CODE_NM_DECR) {
+            agencyCode = data.data.externalData.OPER_CODE_NM_DECR;
             agencyName = data.data.externalData.OPER_CODE_NM_DECR;
+
+            // 기관 정보와 권한 설정
+            agency = getAgencyInfo(agencyCode);
+            permissions = getFeaturePermissions(agency.level);
           } else if (data.data?.message) {
             // fallback: message에서 직접 파싱
             const externalData = JSON.parse(data.data.message);
+            agencyCode = externalData.OPER_CODE_NM_DECR || null;
             agencyName = externalData.OPER_CODE_NM_DECR || null;
+
+            if (agencyCode) {
+              agency = getAgencyInfo(agencyCode);
+              permissions = getFeaturePermissions(agency.level);
+            }
           }
         } catch (parseError) {
           console.warn("외부 API 응답 파싱 실패:", parseError);
@@ -162,11 +234,21 @@ export function useSession(): UseSessionReturn {
           ...prev,
           sessionId: data.data?.sessionId || prev.sessionId,
           agencyInfo: data.data?.agencyInfo || prev.agencyInfo,
-          agencyName: agencyName || prev.agencyName, // 기관명 설정
+          agencyName: agencyName || prev.agencyName,
+          agencyCode: agencyCode || prev.agencyCode, // 기관 코드 설정
+          agency: agency || prev.agency, // 기관 정보 설정
+          permissions: permissions || prev.permissions, // 권한 정보 설정
           lastActivity: now,
         }));
 
-        console.log("세션 갱신 성공:", data.data, "기관명:", agencyName);
+        console.log(
+          "세션 갱신 성공:",
+          data.data,
+          "기관:",
+          agency,
+          "권한:",
+          permissions
+        );
 
         // 세션 갱신 타이머 재설정
         scheduleSessionRefresh(now);
@@ -257,7 +339,10 @@ export function useSession(): UseSessionReturn {
     setSession({
       sessionId: null,
       agencyInfo: null,
-      agencyName: null, // 기관명 초기화 추가
+      agencyName: null,
+      agencyCode: null, // 기관 코드 초기화 추가
+      agency: null, // 기관 정보 초기화 추가
+      permissions: null, // 권한 정보 초기화 추가
       isActive: false,
       lastActivity: 0,
     });
@@ -317,5 +402,8 @@ export function useSession(): UseSessionReturn {
     error,
     refreshSession,
     clearSession,
+    canAccess, // 권한 체크 함수 추가
+    getDisplayName, // 기관명 표시 함수 추가
+    getAgencyLevel, // 기관 레벨 반환 함수 추가
   };
 }

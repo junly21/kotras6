@@ -82,25 +82,29 @@ export default function SettingsLogsPage() {
     {
       headerName: "프로세스구분",
       field: "process_div",
-      width: 150,
+      flex: 1,
+      minWidth: 150,
       resizable: true,
     },
     {
       headerName: "상세구분",
       field: "detail_div",
-      width: 200,
+      flex: 1,
+      minWidth: 200,
       resizable: true,
     },
     {
       headerName: "작업유형",
       field: "action_type",
-      width: 150,
+      flex: 1,
+      minWidth: 150,
       resizable: true,
     },
     {
       headerName: "작업일시",
       field: "process_dtm",
-      width: 200,
+      flex: 1,
+      minWidth: 200,
       resizable: true,
       valueFormatter: (params: { value: number }) => {
         if (!params.value) return "";
@@ -110,13 +114,15 @@ export default function SettingsLogsPage() {
     {
       headerName: "작업구분",
       field: "action_div",
-      width: 150,
+      flex: 1,
+      minWidth: 150,
       resizable: true,
     },
     {
       headerName: "처리건수",
       field: "process_cnt",
-      width: 120,
+      flex: 1,
+      minWidth: 120,
       resizable: true,
       valueFormatter: (params: { value: number }) => {
         if (!params.value) return "0";

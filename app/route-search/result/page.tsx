@@ -249,7 +249,7 @@ export default function RouteSearchResultPage() {
       <div className="space-y-4">
         {!hasSearched ? (
           // 조회 전 안내 메시지
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-8 text-center">
+          <div className="bg-blue-50 border border-blue-200 rounded-[24px] p-8 text-center">
             <div className="text-blue-600 mb-2">
               <svg
                 className="w-12 h-12 mx-auto mb-4"
@@ -291,7 +291,7 @@ export default function RouteSearchResultPage() {
           </>
         ) : (
           // 검색 결과가 없는 경우
-          <div className="bg-gray-50 border border-gray-200 rounded-lg p-8 text-center">
+          <div className="bg-gray-50 border border-gray-200 rounded-[24px] p-8 text-center">
             <div className="text-gray-400 mb-2">
               <svg
                 className="w-12 h-12 mx-auto mb-4"
@@ -318,7 +318,7 @@ export default function RouteSearchResultPage() {
       {hasSearched && processedResults.length > 0 && (
         <div className="space-y-4">
           <h2 className="text-xl font-semibold">지하철 노선도</h2>
-          <div className="bg-white border rounded-lg p-4">
+          <div className="bg-white rounded-[24px] p-4">
             {isMapLoading ? (
               <div className="flex items-center justify-center h-64">
                 <Spinner />

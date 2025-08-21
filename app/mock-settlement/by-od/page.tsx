@@ -417,88 +417,14 @@ export default function MockSettlementByOdPage() {
         <div className="space-y-4">
           {/* 모의정산 정보 그리드 */}
           {settlementInfo.length > 0 && (
-            <div className="bg-white border border-gray-200 rounded-lg p-4">
+            <>
               <h3 className="text-lg font-semibold mb-4">모의정산 정보</h3>
-              <div className="h-96">
-                <TestGrid
-                  rowData={settlementInfo}
-                  columnDefs={infoColumnDefs}
-                  gridRef={infoGridRef}
-                  gridOptions={{
-                    headerHeight: 40,
-                    suppressCellFocus: true,
-                    suppressMovableColumns: true,
-                    suppressMenuHide: true,
-                    rowSelection: {
-                      enableClickSelection: false,
-                    },
-                    defaultColDef: {
-                      sortable: false,
-                      filter: false,
-                      resizable: true,
-                      suppressMovable: true,
-                    },
-                  }}
-                />
-              </div>
-            </div>
-          )}
-
-          {!isLoading && searchResults.length > 0 && (
-            <div className="bg-white border border-gray-200 rounded-lg p-4">
-              <h3 className="text-lg font-semibold mb-4">OD별 정산결과</h3>
-              <div className="h-96">
-                <TestGrid
-                  rowData={searchResults}
-                  columnDefs={columnDefs}
-                  gridRef={gridRef}
-                  gridOptions={{
-                    headerHeight: 40,
-                    suppressCellFocus: true,
-                    suppressMovableColumns: true,
-                    suppressMenuHide: true,
-                    rowSelection: {
-                      enableClickSelection: false,
-                    },
-                    defaultColDef: {
-                      sortable: false,
-                      filter: false,
-                      resizable: true,
-                      suppressMovable: true,
-                    },
-                    onRowClicked: (event: { data: MockSettlementByOdData }) => {
-                      handleRowClick(event.data);
-                    },
-                  }}
-                />
-              </div>
-            </div>
-          )}
-
-          {!isLoading && searchResults.length === 0 && (
-            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-              <p className="text-yellow-800">조회된 데이터가 없습니다.</p>
-            </div>
-          )}
-
-          {/* 경유지 상세정보 영역 */}
-          {selectedRow && selectedRow.path_detail !== "-" && (
-            <div className="bg-white border border-gray-200 rounded-lg p-4">
-              <h3 className="text-lg font-semibold mb-4">경유지 상세정보</h3>
-
-              {isDetailLoading ? (
-                <div className="flex items-center justify-center h-32">
-                  <Spinner />
-                  <p className="ml-2 text-gray-600">
-                    상세정보를 조회하는 중...
-                  </p>
-                </div>
-              ) : (
+              <div className="bg-white border border-gray-200 rounded-[24px] p-4">
                 <div className="h-96">
                   <TestGrid
-                    rowData={detailData}
-                    columnDefs={detailColumnDefs}
-                    gridRef={detailGridRef}
+                    rowData={settlementInfo}
+                    columnDefs={infoColumnDefs}
+                    gridRef={infoGridRef}
                     gridOptions={{
                       headerHeight: 40,
                       suppressCellFocus: true,
@@ -516,42 +442,122 @@ export default function MockSettlementByOdPage() {
                     }}
                   />
                 </div>
-              )}
+              </div>
+            </>
+          )}
+
+          {!isLoading && searchResults.length > 0 && (
+            <>
+              <h3 className="text-lg font-semibold mb-4">OD별 정산결과</h3>
+              <div className="bg-white border border-gray-200 rounded-[24px] p-4">
+                <div className="h-96">
+                  <TestGrid
+                    rowData={searchResults}
+                    columnDefs={columnDefs}
+                    gridRef={gridRef}
+                    gridOptions={{
+                      headerHeight: 40,
+                      suppressCellFocus: true,
+                      suppressMovableColumns: true,
+                      suppressMenuHide: true,
+                      rowSelection: {
+                        enableClickSelection: false,
+                      },
+                      defaultColDef: {
+                        sortable: false,
+                        filter: false,
+                        resizable: true,
+                        suppressMovable: true,
+                      },
+                      onRowClicked: (event: { data: MockSettlementByOdData }) => {
+                        handleRowClick(event.data);
+                      },
+                    }}
+                  />
+                </div>
+              </div>
+            </>
+          )}
+
+          {!isLoading && searchResults.length === 0 && (
+            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+              <p className="text-yellow-800">조회된 데이터가 없습니다.</p>
             </div>
+          )}
+
+          {/* 경유지 상세정보 영역 */}
+          {selectedRow && selectedRow.path_detail !== "-" && (
+            <>
+              <h3 className="text-lg font-semibold mb-4">경유지 상세정보</h3>
+              <div className="bg-white border border-gray-200 rounded-[24px] p-4">
+                {isDetailLoading ? (
+                  <div className="flex items-center justify-center h-32">
+                    <Spinner />
+                    <p className="ml-2 text-gray-600">
+                      상세정보를 조회하는 중...
+                    </p>
+                  </div>
+                ) : (
+                  <div className="h-96">
+                    <TestGrid
+                      rowData={detailData}
+                      columnDefs={detailColumnDefs}
+                      gridRef={detailGridRef}
+                      gridOptions={{
+                        headerHeight: 40,
+                        suppressCellFocus: true,
+                        suppressMovableColumns: true,
+                        suppressMenuHide: true,
+                        rowSelection: {
+                          enableClickSelection: false,
+                        },
+                        defaultColDef: {
+                          sortable: false,
+                          filter: false,
+                          resizable: true,
+                          suppressMovable: true,
+                        },
+                      }}
+                    />
+                  </div>
+                )}
+              </div>
+            </>
           )}
 
           {/* 네트워크 맵 영역 */}
           {selectedRow &&
             selectedRow.path_detail !== "-" &&
             !isDetailLoading && (
-              <div className="bg-white border border-gray-200 rounded-lg p-4">
+              <>
                 <h3 className="text-lg font-semibold mb-4">경로 시각화</h3>
-
-                {isMapLoading ? (
-                  <div className="flex items-center justify-center h-64">
-                    <Spinner />
-                    <p className="ml-2 text-gray-600">
-                      노선도를 불러오는 중...
-                    </p>
-                  </div>
-                ) : (
-                  <div className="h-[600px]">
-                    <NetworkMap
-                      nodes={nodes}
-                      links={links}
-                      svgText={svgText}
-                      config={{
-                        width: "100%",
-                        height: 600,
-                        showZoomControls: true,
-                        showTooltips: true,
-                      }}
-                      highlights={pathHighlights}
-                      tooltips={customTooltips}
-                    />
-                  </div>
-                )}
-              </div>
+                <div className="bg-white border border-gray-200 rounded-[24px] p-4">
+                  {isMapLoading ? (
+                    <div className="flex items-center justify-center h-64">
+                      <Spinner />
+                      <p className="ml-2 text-gray-600">
+                        노선도를 불러오는 중...
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="h-[600px]">
+                      <NetworkMap
+                        nodes={nodes}
+                        links={links}
+                        svgText={svgText}
+                        config={{
+                          width: "100%",
+                          height: 600,
+                          showZoomControls: true,
+                          showTooltips: true,
+                        }}
+                        highlights={pathHighlights}
+                        tooltips={customTooltips}
+                      />
+                    </div>
+                  )}
+                </div>
+              </>
             )}
         </div>
       )}

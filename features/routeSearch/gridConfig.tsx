@@ -58,7 +58,8 @@ export function createRouteSearchColDefs(
     {
       headerName: "출발역",
       field: "startStation",
-      width: 150,
+      minWidth: 150,
+      flex: 1,
       sortable: true,
       cellStyle: {
         display: "flex",
@@ -69,7 +70,8 @@ export function createRouteSearchColDefs(
     {
       headerName: "도착역",
       field: "endStation",
-      width: 150,
+      minWidth: 150,
+      flex: 1,
       sortable: true,
       cellStyle: {
         display: "flex",
@@ -80,7 +82,8 @@ export function createRouteSearchColDefs(
     {
       headerName: "경로",
       field: "path",
-      width: 400,
+      minWidth: 400,
+      flex: 2,
       sortable: true,
       cellStyle: {
         display: "flex",
@@ -113,7 +116,8 @@ export function createRouteSearchColDefs(
     {
       headerName: "환승",
       field: "transferCount",
-      width: 200,
+      minWidth: 200,
+      flex: 1,
       sortable: true,
       cellStyle: {
         display: "flex",
@@ -135,7 +139,8 @@ export function createRouteSearchColDefs(
     {
       headerName: "상세정보",
       field: "detail",
-      width: 150,
+      minWidth: 150,
+      flex: 1,
       sortable: false,
       cellRenderer: (params: { data: { originalData: RouteSearchResult } }) => {
         return React.createElement(

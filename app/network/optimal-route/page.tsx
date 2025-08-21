@@ -216,7 +216,7 @@ export default function NetworkOptimalRoutePage() {
           <div className="space-y-6 opacity-50">
             {/* 상단: 경로 요약 + 상세 경로 미리보기 */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+              <div className="bg-blue-50 border border-blue-200 rounded-[24px] p-4">
                 <h3 className="text-lg font-semibold text-blue-800 mb-3">
                   경로 요약
                 </h3>
@@ -254,7 +254,7 @@ export default function NetworkOptimalRoutePage() {
                 </div>
               </div>
 
-              <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
+              <div className="bg-gray-50 border border-gray-200 rounded-[24px] p-4">
                 <h3 className="text-lg font-semibold text-gray-800 mb-3">
                   상세 경로
                 </h3>
@@ -267,10 +267,8 @@ export default function NetworkOptimalRoutePage() {
             </div>
 
             {/* 하단: 노선도 미리보기 */}
-            <div className="bg-white border border-gray-200 rounded-lg p-4">
-              <h3 className="text-lg font-semibold text-gray-800 mb-3">
-                노선도
-              </h3>
+            <h3 className="text-lg font-semibold text-gray-800 mb-3">노선도</h3>
+            <div className="bg-white border border-gray-200 rounded-[24px] p-4">
               <div className="h-96 bg-gray-50 border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center">
                 <div className="text-center text-gray-400">
                   <svg

@@ -124,13 +124,15 @@ export default function SettlementByInstitutionPage() {
     {
       headerName: "기관명",
       field: "대상기관",
-      width: 200,
+      minWidth: 200,
+      flex: 1,
       resizable: true,
     },
     {
       headerName: "지급",
       field: "지급액",
-      width: 200,
+      minWidth: 200,
+      flex: 1,
       resizable: true,
       valueFormatter: (params: { value: number }) => {
         if (unit === "원") {
@@ -144,7 +146,8 @@ export default function SettlementByInstitutionPage() {
     {
       headerName: "수급",
       field: "수급액",
-      width: 200,
+      minWidth: 200,
+      flex: 1,
       resizable: true,
       valueFormatter: (params: { value: number }) => {
         if (unit === "원") {
@@ -158,7 +161,8 @@ export default function SettlementByInstitutionPage() {
     {
       headerName: "계",
       field: "차액",
-      width: 200,
+      minWidth: 200,
+      flex: 1,
       resizable: true,
       valueFormatter: (params: { value: number }) => {
         if (unit === "원") {

@@ -49,7 +49,7 @@ export function ComboBox({
           variant="outline"
           role="combobox"
           aria-expanded={open}
-          className="w-36 justify-between"
+          className="min-w-36 justify-between"
           disabled={disabled}>
           {value ? options.find((o) => o.value === value)?.label : placeholder}
         </Button>

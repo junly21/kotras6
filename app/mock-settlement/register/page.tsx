@@ -20,6 +20,7 @@ import { MockSettlementDetailModal } from "@/components/MockSettlementDetailModa
 import { SimulateModal } from "@/components/SimulateModal";
 import { MockSettlementConfirmDialog } from "@/components/MockSettlementConfirmDialog";
 import { Button } from "@/components/ui/button";
+import { Toast } from "@/components/ui/Toast";
 import { AllCommunityModule, ModuleRegistry } from "ag-grid-community";
 
 // Register all Community features
@@ -54,6 +55,17 @@ export default function MockSettlementRegisterPage() {
   // 모의정산 실행여부 체크 관련 상태
   const [isConfirmDialogOpen, setIsConfirmDialogOpen] = useState(false);
   const [pendingAction, setPendingAction] = useState<(() => void) | null>(null);
+
+  // 토스트 상태
+  const [toast, setToast] = useState<{
+    message: string;
+    type: "success" | "error" | "info";
+    isVisible: boolean;
+  }>({
+    message: "",
+    type: "info",
+    isVisible: false,
+  });
 
   // AG Grid ref
   const gridRef = useRef(null);
@@ -149,20 +161,48 @@ export default function MockSettlementRegisterPage() {
 
       setError(null);
 
+      // 등록 요청 시작 토스트 표시
+      setToast({
+        message: "모의정산 등록 요청이 시작되었습니다.",
+        type: "info",
+        isVisible: true,
+      });
+
       try {
         const response =
           await MockSettlementRegisterService.registerMockSettlement(data);
 
         if (response.success) {
           console.log("모의정산 등록 성공:", response.data);
+          // 성공 토스트 표시
+          setToast({
+            message: "모의정산 등록이 완료되었습니다.",
+            type: "success",
+            isVisible: true,
+          });
           // 등록 후 목록 새로고침
           handleSearchSubmit(filters);
         } else {
           console.error("모의정산 등록 실패:", response.error);
+          // 실패 토스트 표시
+          setToast({
+            message: response.error || "모의정산 등록에 실패했습니다.",
+            type: "error",
+            isVisible: true,
+          });
           setError(response.error || "모의정산 등록에 실패했습니다.");
         }
       } catch (error) {
         console.error("모의정산 등록 중 오류:", error);
+        // 에러 토스트 표시
+        setToast({
+          message:
+            error instanceof Error
+              ? error.message
+              : "알 수 없는 오류가 발생했습니다.",
+          type: "error",
+          isVisible: true,
+        });
         setError(
           error instanceof Error
             ? error.message
@@ -176,17 +216,6 @@ export default function MockSettlementRegisterPage() {
   // 모의정산 등록 모달 제출 핸들러
   const handleMockSettlementSubmit = useCallback(
     async (data: MockSettlementRegisterFormData) => {
-      // 모의정산 실행여부 체크
-      const isRunningResponse =
-        await MockSettlementControlService.checkIsRunning();
-
-      if (isRunningResponse.success && isRunningResponse.data === true) {
-        // 모의정산이 실행 중인 경우 확인 다이얼로그 표시
-        setPendingAction(() => () => executeMockSettlementRegistration(data));
-        setIsConfirmDialogOpen(true);
-        return;
-      }
-
       // 모의정산이 실행 중이 아닌 경우 바로 등록 진행
       executeMockSettlementRegistration(data);
     },
@@ -352,7 +381,21 @@ export default function MockSettlementRegisterPage() {
       {/* 등록 버튼 */}
       <div className="flex justify-end">
         <Button
-          onClick={() => setIsMockSettlementModalOpen(true)}
+          onClick={async () => {
+            // 모의정산 실행여부 체크
+            const isRunningResponse =
+              await MockSettlementControlService.checkIsRunning();
+
+            if (isRunningResponse.success && isRunningResponse.data === true) {
+              // 모의정산이 실행 중인 경우 확인 다이얼로그 표시
+              setPendingAction(() => () => setIsMockSettlementModalOpen(true));
+              setIsConfirmDialogOpen(true);
+              return;
+            }
+
+            // 모의정산이 실행 중이 아닌 경우 모달 열기
+            setIsMockSettlementModalOpen(true);
+          }}
           className="bg-blue-600 hover:bg-blue-700">
           등록
         </Button>
@@ -437,7 +480,16 @@ export default function MockSettlementRegisterPage() {
         isOpen={isConfirmDialogOpen}
         onClose={handleConfirmDialogClose}
         onConfirm={handleConfirmDialogConfirm}
-        actionType="등록"
+        actionType="모달 열기"
+      />
+
+      {/* 토스트 메시지 */}
+      <Toast
+        message={toast.message}
+        type={toast.type}
+        isVisible={toast.isVisible}
+        onClose={() => setToast((prev) => ({ ...prev, isVisible: false }))}
+        duration={toast.type === "info" ? 3000 : 5000} // info는 3초 후 자동 닫기, 나머지는 5초 후 자동 닫기
       />
     </div>
   );

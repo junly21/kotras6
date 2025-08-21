@@ -5,7 +5,7 @@ interface MockSettlementConfirmDialogProps {
   isOpen: boolean;
   onClose: () => void;
   onConfirm: () => void;
-  actionType: "등록" | "조회";
+  actionType: "등록" | "조회" | "모달 열기";
 }
 
 export function MockSettlementConfirmDialog({
@@ -48,7 +48,9 @@ export function MockSettlementConfirmDialog({
             {actionType}을 진행하려면 실행 중인 모의정산을 종료해야 합니다.
             <br />
             <br />
-            실행 중인 모의정산을 종료하고 {actionType}을 진행하시겠습니까?
+            실행 중인 모의정산을 종료하고{" "}
+            {actionType === "모달 열기" ? "등록 모달을 열" : actionType}을
+            진행하시겠습니까?
           </p>
 
           <div className="flex gap-3 justify-center">
@@ -58,7 +60,8 @@ export function MockSettlementConfirmDialog({
             <Button
               onClick={onConfirm}
               className="px-4 py-2 bg-red-600 hover:bg-red-700">
-              예, 종료하고 {actionType}
+              예, 종료하고{" "}
+              {actionType === "모달 열기" ? "모달 열기" : actionType}
             </Button>
           </div>
         </div>

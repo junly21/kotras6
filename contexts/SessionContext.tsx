@@ -7,6 +7,7 @@ interface SessionContextType {
   session: {
     sessionId: string | null;
     agencyInfo: string | null;
+    agencyName: string | null; // 기관명 추가
     isActive: boolean;
     lastActivity: number;
   };

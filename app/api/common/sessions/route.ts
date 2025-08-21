@@ -63,6 +63,32 @@ export async function POST() {
     const bodyText = await externalRes.text();
     console.log("외부 응답 바디:", bodyText);
 
+    // 세션 생성 후 바로 세션 정보 조회하여 기관명 가져오기
+    let sessionData = null;
+    try {
+      const sessionRes = await fetch(`${EXTERNAL_BASE_URL}/getSession.do`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Cookie: `JSESSIONID=${jsessionId}`,
+        },
+        body: JSON.stringify({}),
+      });
+
+      if (sessionRes.ok) {
+        const sessionBodyText = await sessionRes.text();
+        console.log("세션 생성 후 조회 응답:", sessionBodyText);
+
+        try {
+          sessionData = JSON.parse(sessionBodyText);
+        } catch (parseError) {
+          console.warn("세션 정보 JSON 파싱 실패:", parseError);
+        }
+      }
+    } catch (error) {
+      console.warn("세션 생성 후 조회 실패:", error);
+    }
+
     // 성공 응답 생성
     const response = NextResponse.json(
       {
@@ -70,6 +96,8 @@ export async function POST() {
         data: {
           message: bodyText,
           sessionCreated: true,
+          sessionId: jsessionId,
+          sessionData: sessionData, // 세션 정보 포함
         },
         message: "세션이 성공적으로 생성되었습니다.",
       },
@@ -162,6 +190,14 @@ export async function GET(request: NextRequest) {
       );
     }
 
+    // 외부 API 응답 파싱
+    let externalData = null;
+    try {
+      externalData = JSON.parse(bodyText);
+    } catch (parseError) {
+      console.warn("외부 API 응답 JSON 파싱 실패:", parseError);
+    }
+
     // 성공 응답
     return NextResponse.json(
       {
@@ -169,6 +205,7 @@ export async function GET(request: NextRequest) {
         data: {
           message: bodyText,
           sessionId: extSid,
+          externalData: externalData, // 파싱된 외부 데이터 포함
         },
         message: "세션 정보를 성공적으로 조회했습니다.",
       },

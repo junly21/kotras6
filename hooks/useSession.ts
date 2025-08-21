@@ -3,6 +3,7 @@ import { useState, useEffect, useCallback, useRef } from "react";
 interface SessionData {
   sessionId: string | null;
   agencyInfo: string | null;
+  agencyName: string | null; // 기관명 추가
   isActive: boolean;
   lastActivity: number;
 }
@@ -23,6 +24,7 @@ export function useSession(): UseSessionReturn {
   const [session, setSession] = useState<SessionData>({
     sessionId: null,
     agencyInfo: null,
+    agencyName: null, // 기관명 초기값 추가
     isActive: false,
     lastActivity: 0,
   });
@@ -64,14 +66,26 @@ export function useSession(): UseSessionReturn {
 
       if (data.success) {
         const now = Date.now();
+
+        // 세션 초기화 시에도 기관명 파싱
+        let agencyName = null;
+        try {
+          if (data.data?.sessionData?.OPER_CODE_NM_DECR) {
+            agencyName = data.data.sessionData.OPER_CODE_NM_DECR;
+          }
+        } catch (parseError) {
+          console.warn("세션 초기화 시 기관명 파싱 실패:", parseError);
+        }
+
         setSession({
           sessionId: data.data?.sessionId || "unknown",
           agencyInfo: data.data?.agencyInfo || null,
+          agencyName: agencyName, // 초기화 시에도 기관명 설정
           isActive: true,
           lastActivity: now,
         });
 
-        console.log("세션 초기화 성공:", data.data);
+        console.log("세션 초기화 성공:", data.data, "기관명:", agencyName);
 
         // 세션 갱신 타이머 설정
         scheduleSessionRefresh(now);
@@ -129,14 +143,30 @@ export function useSession(): UseSessionReturn {
 
       if (data.success) {
         const now = Date.now();
+
+        // 외부 API 응답에서 기관명 파싱
+        let agencyName = null;
+        try {
+          if (data.data?.externalData?.OPER_CODE_NM_DECR) {
+            agencyName = data.data.externalData.OPER_CODE_NM_DECR;
+          } else if (data.data?.message) {
+            // fallback: message에서 직접 파싱
+            const externalData = JSON.parse(data.data.message);
+            agencyName = externalData.OPER_CODE_NM_DECR || null;
+          }
+        } catch (parseError) {
+          console.warn("외부 API 응답 파싱 실패:", parseError);
+        }
+
         setSession((prev) => ({
           ...prev,
           sessionId: data.data?.sessionId || prev.sessionId,
           agencyInfo: data.data?.agencyInfo || prev.agencyInfo,
+          agencyName: agencyName || prev.agencyName, // 기관명 설정
           lastActivity: now,
         }));
 
-        console.log("세션 갱신 성공:", data.data);
+        console.log("세션 갱신 성공:", data.data, "기관명:", agencyName);
 
         // 세션 갱신 타이머 재설정
         scheduleSessionRefresh(now);
@@ -227,6 +257,7 @@ export function useSession(): UseSessionReturn {
     setSession({
       sessionId: null,
       agencyInfo: null,
+      agencyName: null, // 기관명 초기화 추가
       isActive: false,
       lastActivity: 0,
     });

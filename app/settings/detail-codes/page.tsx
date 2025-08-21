@@ -77,13 +77,15 @@ export default function SettingsDetailCodesPage() {
     {
       headerName: "공통코드",
       field: "common_code",
-      width: 150,
+      minWidth: 150,
+      flex: 1,
       resizable: true,
     },
     {
       headerName: "공통코드명",
       field: "common_code_name",
-      width: 200,
+      minWidth: 200,
+      flex: 1,
       resizable: true,
     },
   ];
@@ -93,37 +95,43 @@ export default function SettingsDetailCodesPage() {
     {
       headerName: "상세코드",
       field: "detail_code",
-      width: 120,
+      minWidth: 120,
+      flex: 1,
       resizable: true,
     },
     {
       headerName: "값1",
       field: "value_1",
-      width: 120,
+      minWidth: 120,
+      flex: 1,
       resizable: true,
     },
     {
       headerName: "값2",
       field: "value_2",
-      width: 200,
+      minWidth: 200,
+      flex: 1,
       resizable: true,
     },
     {
       headerName: "값3",
       field: "value_3",
-      width: 120,
+      minWidth: 120,
+      flex: 1,
       resizable: true,
     },
     {
       headerName: "비고",
       field: "remark",
-      width: 200,
+      minWidth: 200,
+      flex: 1,
       resizable: true,
     },
     {
       headerName: "사용여부",
       field: "use_yn",
-      width: 120,
+      minWidth: 120,
+      flex: 1,
       resizable: true,
       valueFormatter: (params: { value: string }) => {
         return params.value || "N";
@@ -132,7 +140,8 @@ export default function SettingsDetailCodesPage() {
     {
       headerName: "시스템코드유무",
       field: "syscd_yn",
-      width: 150,
+      minWidth: 150,
+      flex: 1,
       resizable: true,
       valueFormatter: (params: { value: string }) => {
         return params.value || "N";

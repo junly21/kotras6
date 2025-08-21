@@ -120,25 +120,29 @@ export default function TransactionAnalysisPage() {
     {
       headerName: "승차기관명",
       field: "oper_nm",
-      width: 220,
+      minWidth: 220,
+      flex: 1,
       resizable: false,
     },
     {
       headerName: "승차역",
       field: "ride_nm",
-      width: 220,
+      minWidth: 220,
+      flex: 1,
       resizable: false,
     },
     {
       headerName: "하차역",
       field: "algh_nm",
-      width: 220,
+      minWidth: 220,
+      flex: 1,
       resizable: false,
     },
     {
       headerName: "데이터 건수",
       field: "cnt",
-      width: 220,
+      minWidth: 220,
+      flex: 1,
       valueFormatter: (params: { value: number }) =>
         params.value.toLocaleString(),
       resizable: false,

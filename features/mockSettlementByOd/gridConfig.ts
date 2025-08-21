@@ -49,7 +49,8 @@ export function createMockSettlementByOdColDefs(): ColDef<MockSettlementByOdData
     {
       headerName: "경로",
       field: "path_detail",
-      width: 600,
+      flex: 1,
+      minWidth: 600,
       sortable: false,
       filter: false,
       cellRenderer: (params: any) => {
@@ -70,7 +71,8 @@ export function createMockSettlementByOdColDefs(): ColDef<MockSettlementByOdData
     {
       headerName: "경로 선택 확률",
       field: "path_prob",
-      width: 150,
+      flex: 1,
+      minWidth: 150,
       sortable: false,
       filter: false,
       valueFormatter: (params) => {
@@ -90,7 +92,8 @@ export function createMockSettlementByOdColDefs(): ColDef<MockSettlementByOdData
     {
       headerName: "배분금",
       field: "amt",
-      width: 150,
+      flex: 1,
+      minWidth: 150,
       sortable: false,
       filter: false,
       valueFormatter: (params) => {

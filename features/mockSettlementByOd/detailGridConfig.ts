@@ -13,7 +13,8 @@ export function createMockSettlementByOdDetailColDefs(): ColDef<MockSettlementBy
     {
       headerName: "기본금",
       field: "base_amt",
-      width: 150,
+      flex: 1,
+      minWidth: 150,
       sortable: false,
       filter: false,
       valueFormatter: (params) => {
@@ -26,7 +27,8 @@ export function createMockSettlementByOdDetailColDefs(): ColDef<MockSettlementBy
     {
       headerName: "UBRW 금액",
       field: "ubrw_amt",
-      width: 150,
+      flex: 1,
+      minWidth: 150,
       sortable: false,
       filter: false,
       valueFormatter: (params) => {
@@ -39,7 +41,8 @@ export function createMockSettlementByOdDetailColDefs(): ColDef<MockSettlementBy
     {
       headerName: "거리(km)",
       field: "km",
-      width: 120,
+      flex: 1,
+      minWidth: 120,
       sortable: false,
       filter: false,
       valueFormatter: (params) => {

@@ -117,7 +117,8 @@ export default function TransactionDetailPage() {
     {
       headerName: "카드번호",
       field: "trcr_no",
-      width: 180,
+      flex: 1,
+      minWidth: 180,
       resizable: false,
       cellStyle: (params: any) => {
         if (params.node.rowPinned === "bottom") {
@@ -133,7 +134,8 @@ export default function TransactionDetailPage() {
     {
       headerName: "승차시간",
       field: "ride_dtm",
-      width: 180,
+      minWidth: 180,
+      flex: 1,
       valueFormatter: (params: { value: number | null | undefined }) => {
         if (!params.value) return "";
         return new Date(params.value).toLocaleString();
@@ -153,7 +155,8 @@ export default function TransactionDetailPage() {
     {
       headerName: "하차시간",
       field: "algh_dtm",
-      width: 180,
+      minWidth: 180,
+      flex: 1,
       valueFormatter: (params: { value: number | null | undefined }) => {
         if (!params.value) return "";
         return new Date(params.value).toLocaleString();
@@ -173,7 +176,8 @@ export default function TransactionDetailPage() {
     {
       headerName: "최초승차역",
       field: "ride_nm",
-      width: 150,
+      minWidth: 150,
+      flex: 1,
       cellStyle: (params: any) => {
         if (params.node.rowPinned === "bottom") {
           return {
@@ -189,7 +193,8 @@ export default function TransactionDetailPage() {
     {
       headerName: "최종하차역",
       field: "algh_nm",
-      width: 150,
+      minWidth: 150,
+      flex: 1,
       cellStyle: (params: any) => {
         if (params.node.rowPinned === "bottom") {
           return {
@@ -205,7 +210,8 @@ export default function TransactionDetailPage() {
     {
       headerName: "총배분금",
       field: "fnl_dist_amt",
-      width: 150,
+      minWidth: 150,
+      flex: 1,
       valueFormatter: (params: { value: number | null | undefined }) =>
         (params.value || 0).toLocaleString() + "원",
       cellStyle: (params: any) => {
@@ -225,7 +231,8 @@ export default function TransactionDetailPage() {
     {
       headerName: "기본배분금",
       field: "base_dist_amt",
-      width: 150,
+      minWidth: 150,
+      flex: 1,
       valueFormatter: (params: { value: number | null | undefined }) =>
         (params.value || 0).toLocaleString() + "원",
       cellStyle: (params: any) => {
@@ -245,7 +252,8 @@ export default function TransactionDetailPage() {
     {
       headerName: "도시철도부가사용금",
       field: "ubrw_adtn_use_amt",
-      width: 200,
+      minWidth: 200,
+      flex: 1,
       valueFormatter: (params: { value: number | null | undefined }) =>
         (params.value || 0).toLocaleString() + "원",
       cellStyle: (params: any) => {

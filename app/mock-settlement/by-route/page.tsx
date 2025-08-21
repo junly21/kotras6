@@ -138,37 +138,43 @@ export default function MockSettlementByRoutePage() {
     {
       headerName: "정산명",
       field: "settlementName",
-      width: 150,
+      flex: 1,
+      minWidth: 150,
       resizable: true,
     },
     {
       headerName: "거래일자",
       field: "transactionDate",
-      width: 120,
+      flex: 1,
+      minWidth: 120,
       resizable: true,
     },
     {
       headerName: "태그기관",
       field: "tagAgency",
-      width: 120,
+      flex: 1,
+      minWidth: 120,
       resizable: true,
     },
     {
       headerName: "초승노선",
       field: "initialLine",
-      width: 120,
+      flex: 1,
+      minWidth: 120,
       resizable: true,
     },
     {
       headerName: "노선동등",
       field: "lineSection",
-      width: 120,
+      flex: 1,
+      minWidth: 120,
       resizable: true,
     },
     {
       headerName: "인.km",
       field: "distanceKm",
-      width: 100,
+      flex: 1,
+      minWidth: 100,
       resizable: true,
       valueFormatter: (params: { value: number }) => {
         return params.value.toLocaleString();
@@ -228,34 +234,36 @@ export default function MockSettlementByRoutePage() {
       {hasSearched && (
         <div className="space-y-4">
           {!isLoading && mockSettlementData.length > 0 && (
-            <div className="bg-white border border-gray-200 rounded-lg p-4">
+            <>
               <h3 className="text-lg font-semibold mb-4">모의정산 정보</h3>
-              <div className="h-96">
-                <TestGrid
-                  rowData={mockSettlementData}
-                  columnDefs={mockSettlementColumnDefs}
-                  gridRef={mockSettlementGridRef}
-                  gridOptions={{
-                    suppressCellFocus: true,
-                    suppressMovableColumns: true,
-                    suppressMenuHide: true,
-                    rowSelection: {
-                      enableClickSelection: false,
-                    },
-                    defaultColDef: {
-                      sortable: false,
-                      filter: false,
-                      resizable: true,
-                      suppressMovable: true,
-                    },
-                  }}
-                />
+              <div className="bg-white border border-gray-200 rounded-[24px] p-4">
+                <div className="h-96">
+                  <TestGrid
+                    rowData={mockSettlementData}
+                    columnDefs={mockSettlementColumnDefs}
+                    gridRef={mockSettlementGridRef}
+                    gridOptions={{
+                      suppressCellFocus: true,
+                      suppressMovableColumns: true,
+                      suppressMenuHide: true,
+                      rowSelection: {
+                        enableClickSelection: false,
+                      },
+                      defaultColDef: {
+                        sortable: false,
+                        filter: false,
+                        resizable: true,
+                        suppressMovable: true,
+                      },
+                    }}
+                  />
+                </div>
               </div>
-            </div>
+            </>
           )}
 
           {!isLoading && mockSettlementData.length === 0 && (
-            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+            <div className="bg-yellow-50 border border-yellow-200 rounded-[24px] p-4">
               <p className="text-yellow-800">
                 조회된 모의정산 정보가 없습니다.
               </p>
@@ -278,7 +286,7 @@ export default function MockSettlementByRoutePage() {
           </div>
         </div>
 
-        <div className="bg-white border border-gray-200 rounded-lg p-4">
+        <div className="bg-white border border-gray-200 rounded-[24px] p-4">
           <div className="h-96">
             <TestGrid
               rowData={byRouteRowData}

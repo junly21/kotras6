@@ -64,7 +64,8 @@ export function createMockSettlementByStationColDefs(
       group.columns.push({
         headerName: type,
         field: key,
-        width: 120,
+        flex: 1,
+        minWidth: 120,
         resizable: true,
         type: "numericColumn",
         valueFormatter: (params) => {
@@ -83,7 +84,8 @@ export function createMockSettlementByStationColDefs(
       columns.push({
         headerName: key,
         field: key,
-        width: isNumber ? 120 : 150,
+        flex: 1,
+        minWidth: isNumber ? 120 : 150,
         resizable: true,
         type: isNumber ? "numericColumn" : undefined,
         valueFormatter: isNumber

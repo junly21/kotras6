@@ -128,7 +128,7 @@ export function MockSettlementDetailModal({
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-3">
                 <div>
-                  <label className="text-sm font-medium text-gray-500">
+                  <label className="text-sm font-medium min-w-[40px] text-gray-500">
                     정산명
                   </label>
                   <p className="text-base">{detailData.settlementName}</p>

@@ -164,7 +164,8 @@ export default function MockSettlementRegisterPage() {
 
       // 등록 요청 시작 토스트 표시
       setToast({
-        message: "모의정산 등록 요청이 시작되었습니다.",
+        message:
+          "모의정산 등록 요청이 시작되었습니다. 약 15분 정도 소요됩니다.",
         type: "info",
         isVisible: true,
       });
@@ -334,23 +335,6 @@ export default function MockSettlementRegisterPage() {
       flex: 1,
       minWidth: 120,
       resizable: true,
-    },
-    {
-      headerName: "상태",
-      field: "status",
-      flex: 1,
-      minWidth: 100,
-      resizable: true,
-      cellStyle: (params: { value: string }) => {
-        if (params.value === "완료") {
-          return { color: "#059669", fontWeight: "bold" }; // 초록색
-        } else if (params.value === "진행") {
-          return { color: "#D97706", fontWeight: "bold" }; // 주황색
-        } else if (params.value === "대기") {
-          return { color: "#6B7280", fontWeight: "bold" }; // 회색
-        }
-        return {};
-      },
     },
   ];
 

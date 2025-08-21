@@ -91,7 +91,7 @@ export default function RawDataCsvExportButton({
       onClick={handleExport}
       className={`bg-primary font-bold hover:bg-secondary-600 text-white px-4 py-2 rounded-lg transition-colors duration-200 cursor-pointer ${className}`}
       title="원본 데이터로 CSV 파일 내보내기">
-      CSV 내보내기2
+      CSV 내보내기
     </button>
   );
 }

@@ -44,7 +44,7 @@ export function MockSettlementConfirmDialog({
           </h3>
 
           <p className="text-sm text-gray-500 mb-6">
-            현재 백엔드에서 모의정산이 실행 중입니다.
+            현재 모의정산이 실행 중입니다.
             {actionType}을 진행하려면 실행 중인 모의정산을 종료해야 합니다.
             <br />
             <br />

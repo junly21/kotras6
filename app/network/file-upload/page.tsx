@@ -26,6 +26,7 @@ import {
   CellClickedEvent,
 } from "ag-grid-community";
 import { NetworkFileUploadService } from "@/services/networkFileUploadService";
+import ProtectedRoute from "@/components/ProtectedRoute";
 
 // Register all Community features
 ModuleRegistry.registerModules([AllCommunityModule]);
@@ -270,103 +271,107 @@ export default function NetworkFileUploadPage() {
   };
 
   return (
-    <div className="relative min-h-screen">
-      {/* 전체 페이지 로딩 스피너 */}
-      {loading && (
-        <div className="absolute inset-0 flex items-center justify-center bg-white/80 z-50">
-          <div className="text-center">
-            <Spinner />
-            <p className="mt-4 text-gray-600">네트워크 정보를 불러오는 중...</p>
+    <ProtectedRoute requiredPath="/network/file-upload">
+      <div className="relative min-h-screen">
+        {/* 전체 페이지 로딩 스피너 */}
+        {loading && (
+          <div className="absolute inset-0 flex items-center justify-center bg-white/80 z-50">
+            <div className="text-center">
+              <Spinner />
+              <p className="mt-4 text-gray-600">
+                네트워크 정보를 불러오는 중...
+              </p>
+            </div>
           </div>
-        </div>
-      )}
+        )}
 
-      <div className="p-6 space-y-6">
-        <h1 className="text-2xl font-bold">네트워크 파일등록</h1>
+        <div className="p-6 space-y-6">
+          <h1 className="text-2xl font-bold">네트워크 파일등록</h1>
 
-        <FilterForm
-          fields={updatedFields}
-          defaultValues={filters}
-          schema={networkFileUploadSchema}
-          values={filters}
-          onChange={handleFilterChange}
-          onSearch={handleSearch}
-        />
+          <FilterForm
+            fields={updatedFields}
+            defaultValues={filters}
+            schema={networkFileUploadSchema}
+            values={filters}
+            onChange={handleFilterChange}
+            onSearch={handleSearch}
+          />
 
-        {/* 등록 버튼 */}
-        <div className="flex justify-end">
-          <Button onClick={handleAddClick}>등록</Button>
-        </div>
+          {/* 등록 버튼 */}
+          <div className="flex justify-end">
+            <Button onClick={handleAddClick}>등록</Button>
+          </div>
 
-        <div className="space-y-4">
-          <h2 className="text-lg font-semibold">네트워크 파일 목록</h2>
-          {/* 결과 영역 */}
-          {hasSearched && (
-            <TestGrid
-              rowData={rowData}
-              columnDefs={networkFileUploadColDefs}
-              gridRef={gridRef}
-              gridOptions={gridOptions}
-              height={200}
-            />
+          <div className="space-y-4">
+            <h2 className="text-lg font-semibold">네트워크 파일 목록</h2>
+            {/* 결과 영역 */}
+            {hasSearched && (
+              <TestGrid
+                rowData={rowData}
+                columnDefs={networkFileUploadColDefs}
+                gridRef={gridRef}
+                gridOptions={gridOptions}
+                height={200}
+              />
+            )}
+
+            {!hasSearched && !loading && (
+              <div className="bg-gray-50 border-2 border-dashed border-gray-300 rounded-lg p-16">
+                <div className="text-center text-gray-500">
+                  <p className="text-lg font-medium">조회 결과</p>
+                  <p className="text-sm">
+                    네트워크를 선택하고 조회 버튼을 누르면 결과가 표시됩니다.
+                  </p>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* CSV Export 버튼을 상단 그리드와 하단 그리드 사이에 배치 */}
+          {showDetailGrid && (
+            <div className="flex justify-end">
+              <RawDataCsvExportButton
+                fileName={getDownloadFileName()}
+                className="bg-green-500 hover:bg-green-600"
+                columnOrder={getColumnOrder()}
+                rawData={rawDetailData}
+              />
+            </div>
           )}
 
-          {!hasSearched && !loading && (
-            <div className="bg-gray-50 border-2 border-dashed border-gray-300 rounded-lg p-16">
-              <div className="text-center text-gray-500">
-                <p className="text-lg font-medium">조회 결과</p>
-                <p className="text-sm">
-                  네트워크를 선택하고 조회 버튼을 누르면 결과가 표시됩니다.
-                </p>
+          {/* 상세 그리드 영역 */}
+          {showDetailGrid && (
+            <div className="space-y-4">
+              <h2 className="text-lg font-semibold">{detailTitle}</h2>
+              <div className="rounded-lg overflow-hidden">
+                <TestGrid
+                  rowData={detailData}
+                  columnDefs={getDetailColDefs()}
+                  gridRef={detailGridRef}
+                  height={300}
+                />
               </div>
             </div>
           )}
+
+          {/* 네트워크 파일 등록 모달 */}
+          <NetworkFileUploadModal
+            isOpen={isModalOpen}
+            onClose={handleModalClose}
+            onSubmit={handleModalSubmit}
+            loading={modalLoading}
+            existingDates={existingDates}
+          />
+
+          {/* 토스트 알림 */}
+          <Toast
+            isVisible={toast.isVisible}
+            message={toast.message}
+            type={toast.type}
+            onClose={closeToast}
+          />
         </div>
-
-        {/* CSV Export 버튼을 상단 그리드와 하단 그리드 사이에 배치 */}
-        {showDetailGrid && (
-          <div className="flex justify-end">
-            <RawDataCsvExportButton
-              fileName={getDownloadFileName()}
-              className="bg-green-500 hover:bg-green-600"
-              columnOrder={getColumnOrder()}
-              rawData={rawDetailData}
-            />
-          </div>
-        )}
-
-        {/* 상세 그리드 영역 */}
-        {showDetailGrid && (
-          <div className="space-y-4">
-            <h2 className="text-lg font-semibold">{detailTitle}</h2>
-            <div className="rounded-lg overflow-hidden">
-              <TestGrid
-                rowData={detailData}
-                columnDefs={getDetailColDefs()}
-                gridRef={detailGridRef}
-                height={300}
-              />
-            </div>
-          </div>
-        )}
-
-        {/* 네트워크 파일 등록 모달 */}
-        <NetworkFileUploadModal
-          isOpen={isModalOpen}
-          onClose={handleModalClose}
-          onSubmit={handleModalSubmit}
-          loading={modalLoading}
-          existingDates={existingDates}
-        />
-
-        {/* 토스트 알림 */}
-        <Toast
-          isVisible={toast.isVisible}
-          message={toast.message}
-          type={toast.type}
-          onClose={closeToast}
-        />
       </div>
-    </div>
+    </ProtectedRoute>
   );
 }

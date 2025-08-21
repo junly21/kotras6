@@ -10,6 +10,7 @@ import { useCallback, useRef, useState, useEffect } from "react";
 import { AgGridReact } from "ag-grid-react";
 import { JobLogFilters, JobLogData } from "@/types/jobLog";
 import { jobLogFields, jobLogSchema } from "@/features/jobLog/filterConfig";
+import ProtectedRoute from "@/components/ProtectedRoute";
 
 // Register all Community features
 ModuleRegistry.registerModules([AllCommunityModule]);
@@ -132,46 +133,48 @@ export default function SettingsLogsPage() {
   ];
 
   return (
-    <div className="p-6 space-y-6">
-      <h1 className="text-2xl font-bold">작업로그 조회</h1>
+    <ProtectedRoute requiredPath="/settings/logs">
+      <div className="p-6 space-y-6">
+        <h1 className="text-2xl font-bold">작업로그 조회</h1>
 
-      <FilterForm<JobLogFilters>
-        fields={jobLogFields}
-        defaultValues={{ processDiv: "" }}
-        schema={jobLogSchema}
-        onSearch={handleSearch}
-      />
+        <FilterForm<JobLogFilters>
+          fields={jobLogFields}
+          defaultValues={{ processDiv: "" }}
+          schema={jobLogSchema}
+          onSearch={handleSearch}
+        />
 
-      {/* 그리드 */}
-      <div className="relative h-[600px] overflow-y-auto">
-        {hasSearched && loading && (
-          <div className="absolute inset-0 flex items-center justify-center bg-white/80 z-10">
-            <Spinner />
-          </div>
-        )}
-        <TestGrid
-          rowData={hasSearched ? apiData ?? [] : []} // ✅ null 대신 빈 배열
-          columnDefs={colDefs}
-          gridRef={gridRef}
-          height={600}
-          gridOptions={{
-            suppressColumnResize: true,
-            suppressRowClickSelection: true,
-            suppressCellFocus: true,
-            headerHeight: 50,
-            rowHeight: 45,
-            suppressScrollOnNewData: true,
-          }}
+        {/* 그리드 */}
+        <div className="relative h-[600px] overflow-y-auto">
+          {hasSearched && loading && (
+            <div className="absolute inset-0 flex items-center justify-center bg-white/80 z-10">
+              <Spinner />
+            </div>
+          )}
+          <TestGrid
+            rowData={hasSearched ? apiData ?? [] : []} // ✅ null 대신 빈 배열
+            columnDefs={colDefs}
+            gridRef={gridRef}
+            height={600}
+            gridOptions={{
+              suppressColumnResize: true,
+              suppressRowClickSelection: true,
+              suppressCellFocus: true,
+              headerHeight: 50,
+              rowHeight: 45,
+              suppressScrollOnNewData: true,
+            }}
+          />
+        </div>
+
+        {/* 토스트 알림 */}
+        <Toast
+          isVisible={toast.isVisible}
+          message={toast.message}
+          type={toast.type}
+          onClose={() => setToast((prev) => ({ ...prev, isVisible: false }))}
         />
       </div>
-
-      {/* 토스트 알림 */}
-      <Toast
-        isVisible={toast.isVisible}
-        message={toast.message}
-        type={toast.type}
-        onClose={() => setToast((prev) => ({ ...prev, isVisible: false }))}
-      />
-    </div>
+    </ProtectedRoute>
   );
 }

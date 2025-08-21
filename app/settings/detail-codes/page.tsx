@@ -13,6 +13,7 @@ import { CommonCodeData } from "@/types/commonCode";
 import { DetailCodeData, DetailCodeFormData } from "@/types/detailCode";
 import { DetailCodeModal } from "@/components/DetailCodeModal";
 import { validateDetailCodeDeletion } from "@/utils/validation";
+import ProtectedRoute from "@/components/ProtectedRoute";
 
 // Register all Community features
 ModuleRegistry.registerModules([AllCommunityModule]);
@@ -312,85 +313,41 @@ export default function SettingsDetailCodesPage() {
   }, []);
 
   return (
-    <div className="p-6 space-y-6">
-      <h1 className="text-2xl font-bold">상세코드 관리</h1>
+    <ProtectedRoute requiredPath="/settings/detail-codes">
+      <div className="p-6 space-y-6">
+        <h1 className="text-2xl font-bold">상세코드 관리</h1>
 
-      {/* 버튼 영역 */}
-      <div className="flex justify-end gap-2">
-        <Button
-          onClick={handleAddClick}
-          disabled={!selectedCommonCode}
-          className="bg-blue-500 hover:bg-blue-600">
-          추가
-        </Button>
-        <Button
-          onClick={handleDeleteClick}
-          disabled={selectedDetailCodes.length === 0}
-          className="bg-red-500 hover:bg-red-600">
-          삭제
-        </Button>
-      </div>
-
-      {/* 좌우 그리드 레이아웃 */}
-      <div className="grid grid-cols-4 gap-6 h-[600px]">
-        {/* 왼쪽: 공통코드 그리드 */}
-        <div className="col-span-1 flex flex-col h-full">
-          <h2 className="text-lg font-semibold">공통코드 목록</h2>
-          <div className="relative flex-1 h-full">
-            {loading && (
-              <div className="absolute inset-0 flex items-center justify-center bg-white/80 z-10">
-                <Spinner />
-              </div>
-            )}
-            <TestGrid
-              rowData={loading ? [] : commonCodeData ?? []}
-              columnDefs={commonCodeColDefs}
-              gridRef={leftGridRef}
-              gridOptions={{
-                suppressColumnResize: false,
-                suppressRowClickSelection: false,
-                suppressCellFocus: false,
-                headerHeight: 50,
-                rowHeight: 45,
-                suppressScrollOnNewData: true,
-                rowSelection: "single",
-                onRowClicked: onCommonCodeRowClicked,
-              }}
-            />
-          </div>
+        {/* 버튼 영역 */}
+        <div className="flex justify-end gap-2">
+          <Button
+            onClick={handleAddClick}
+            disabled={!selectedCommonCode}
+            className="bg-blue-500 hover:bg-blue-600">
+            추가
+          </Button>
+          <Button
+            onClick={handleDeleteClick}
+            disabled={selectedDetailCodes.length === 0}
+            className="bg-red-500 hover:bg-red-600">
+            삭제
+          </Button>
         </div>
 
-        {/* 오른쪽: 상세코드 그리드 */}
-        <div className="col-span-3 flex flex-col h-full">
-          <h2 className="text-lg font-semibold">
-            상세코드 목록
-            {selectedCommonCode && (
-              <span className="text-sm text-gray-500 ml-2">
-                ({selectedCommonCode.common_code_name})
-              </span>
-            )}
-          </h2>
-          <div className="relative flex-1 h-full">
-            {detailCodeLoading && (
-              <div className="absolute inset-0 flex items-center justify-center bg-white/80 z-10">
-                <Spinner />
-              </div>
-            )}
-            {!selectedCommonCode ? (
-              <div className="h-full flex items-center justify-center bg-gray-50 border-2 border-dashed border-gray-300 rounded">
-                <div className="text-center text-gray-500">
-                  <p className="text-lg font-medium">공통코드를 선택해주세요</p>
-                  <p className="text-sm">왼쪽 그리드에서 공통코드를 클릭하면</p>
-                  <p className="text-sm">
-                    해당 공통코드의 상세코드가 표시됩니다.
-                  </p>
+        {/* 좌우 그리드 레이아웃 */}
+        <div className="grid grid-cols-4 gap-6 h-[600px]">
+          {/* 왼쪽: 공통코드 그리드 */}
+          <div className="col-span-1 flex flex-col h-full">
+            <h2 className="text-lg font-semibold">공통코드 목록</h2>
+            <div className="relative flex-1 h-full">
+              {loading && (
+                <div className="absolute inset-0 flex items-center justify-center bg-white/80 z-10">
+                  <Spinner />
                 </div>
-              </div>
-            ) : (
+              )}
               <TestGrid
-                rowData={detailCodeData}
-                columnDefs={detailCodeColDefs}
-                gridRef={rightGridRef}
+                rowData={loading ? [] : commonCodeData ?? []}
+                columnDefs={commonCodeColDefs}
+                gridRef={leftGridRef}
                 gridOptions={{
                   suppressColumnResize: false,
                   suppressRowClickSelection: false,
@@ -398,35 +355,85 @@ export default function SettingsDetailCodesPage() {
                   headerHeight: 50,
                   rowHeight: 45,
                   suppressScrollOnNewData: true,
-                  rowSelection: "multiple",
-                  onRowDoubleClicked: onDetailCodeRowDoubleClicked,
-                  onSelectionChanged: onDetailCodeSelectionChanged,
+                  rowSelection: "single",
+                  onRowClicked: onCommonCodeRowClicked,
                 }}
               />
-            )}
+            </div>
+          </div>
+
+          {/* 오른쪽: 상세코드 그리드 */}
+          <div className="col-span-3 flex flex-col h-full">
+            <h2 className="text-lg font-semibold">
+              상세코드 목록
+              {selectedCommonCode && (
+                <span className="text-sm text-gray-500 ml-2">
+                  ({selectedCommonCode.common_code_name})
+                </span>
+              )}
+            </h2>
+            <div className="relative flex-1 h-full">
+              {detailCodeLoading && (
+                <div className="absolute inset-0 flex items-center justify-center bg-white/80 z-10">
+                  <Spinner />
+                </div>
+              )}
+              {!selectedCommonCode ? (
+                <div className="h-full flex items-center justify-center bg-gray-50 border-2 border-dashed border-gray-300 rounded">
+                  <div className="text-center text-gray-500">
+                    <p className="text-lg font-medium">
+                      공통코드를 선택해주세요
+                    </p>
+                    <p className="text-sm">
+                      왼쪽 그리드에서 공통코드를 클릭하면
+                    </p>
+                    <p className="text-sm">
+                      해당 공통코드의 상세코드가 표시됩니다.
+                    </p>
+                  </div>
+                </div>
+              ) : (
+                <TestGrid
+                  rowData={detailCodeData}
+                  columnDefs={detailCodeColDefs}
+                  gridRef={rightGridRef}
+                  gridOptions={{
+                    suppressColumnResize: false,
+                    suppressRowClickSelection: false,
+                    suppressCellFocus: false,
+                    headerHeight: 50,
+                    rowHeight: 45,
+                    suppressScrollOnNewData: true,
+                    rowSelection: "multiple",
+                    onRowDoubleClicked: onDetailCodeRowDoubleClicked,
+                    onSelectionChanged: onDetailCodeSelectionChanged,
+                  }}
+                />
+              )}
+            </div>
           </div>
         </div>
+
+        {/* 모달 */}
+        <DetailCodeModal
+          isOpen={isModalOpen}
+          onClose={handleModalClose}
+          onSubmit={handleModalSubmit}
+          initialData={editingData}
+          mode={modalMode}
+          loading={modalLoading}
+          selectedCommonCode={selectedCommonCode?.common_code}
+          existingCodes={detailCodeData.map((code) => code.detail_code)}
+        />
+
+        {/* 토스트 알림 */}
+        <Toast
+          isVisible={toast.isVisible}
+          message={toast.message}
+          type={toast.type}
+          onClose={() => setToast((prev) => ({ ...prev, isVisible: false }))}
+        />
       </div>
-
-      {/* 모달 */}
-      <DetailCodeModal
-        isOpen={isModalOpen}
-        onClose={handleModalClose}
-        onSubmit={handleModalSubmit}
-        initialData={editingData}
-        mode={modalMode}
-        loading={modalLoading}
-        selectedCommonCode={selectedCommonCode?.common_code}
-        existingCodes={detailCodeData.map((code) => code.detail_code)}
-      />
-
-      {/* 토스트 알림 */}
-      <Toast
-        isVisible={toast.isVisible}
-        message={toast.message}
-        type={toast.type}
-        onClose={() => setToast((prev) => ({ ...prev, isVisible: false }))}
-      />
-    </div>
+    </ProtectedRoute>
   );
 }

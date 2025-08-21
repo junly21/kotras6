@@ -12,6 +12,7 @@ import { CommonCodeService } from "@/services/commonCodeService";
 import { CommonCodeData, CommonCodeFormData } from "@/types/commonCode";
 import { CommonCodeModal } from "@/components/CommonCodeModal";
 import { validateCommonCodeDeletion } from "@/utils/validation";
+import ProtectedRoute from "@/components/ProtectedRoute";
 
 // Register all Community features
 ModuleRegistry.registerModules([AllCommunityModule]);
@@ -262,68 +263,70 @@ export default function SettingsCommonCodesPage() {
   }, []);
 
   return (
-    <div className="p-6 space-y-6">
-      <h1 className="text-2xl font-bold">공통코드 관리</h1>
+    <ProtectedRoute requiredPath="/settings/common-codes">
+      <div className="p-6 space-y-6">
+        <h1 className="text-2xl font-bold">공통코드 관리</h1>
 
-      {/* 버튼 영역 */}
-      <div className="flex justify-end gap-2">
-        <Button
-          onClick={handleAddClick}
-          className="bg-blue-500 hover:bg-blue-600">
-          추가
-        </Button>
-        <Button
-          onClick={handleDeleteClick}
-          disabled={selectedRows.length === 0}
-          className="bg-red-500 hover:bg-red-600">
-          삭제
-        </Button>
-      </div>
+        {/* 버튼 영역 */}
+        <div className="flex justify-end gap-2">
+          <Button
+            onClick={handleAddClick}
+            className="bg-blue-500 hover:bg-blue-600">
+            추가
+          </Button>
+          <Button
+            onClick={handleDeleteClick}
+            disabled={selectedRows.length === 0}
+            className="bg-red-500 hover:bg-red-600">
+            삭제
+          </Button>
+        </div>
 
-      {/* 그리드 */}
-      <div className="relative">
-        {loading && (
-          <div className="absolute inset-0 flex items-center justify-center bg-white/80 z-10">
-            <Spinner />
-          </div>
-        )}
-        <TestGrid
-          rowData={loading ? [] : apiData ?? []}
-          columnDefs={colDefs}
-          gridRef={gridRef}
-          height={600}
-          gridOptions={{
-            suppressColumnResize: false,
-            suppressRowClickSelection: false,
-            suppressCellFocus: false,
-            headerHeight: 50,
-            rowHeight: 45,
-            suppressScrollOnNewData: true,
-            rowSelection: "multiple",
-            onRowDoubleClicked: onRowDoubleClicked,
-            onSelectionChanged: onSelectionChanged,
-          }}
+        {/* 그리드 */}
+        <div className="relative">
+          {loading && (
+            <div className="absolute inset-0 flex items-center justify-center bg-white/80 z-10">
+              <Spinner />
+            </div>
+          )}
+          <TestGrid
+            rowData={loading ? [] : apiData ?? []}
+            columnDefs={colDefs}
+            gridRef={gridRef}
+            height={600}
+            gridOptions={{
+              suppressColumnResize: false,
+              suppressRowClickSelection: false,
+              suppressCellFocus: false,
+              headerHeight: 50,
+              rowHeight: 45,
+              suppressScrollOnNewData: true,
+              rowSelection: "multiple",
+              onRowDoubleClicked: onRowDoubleClicked,
+              onSelectionChanged: onSelectionChanged,
+            }}
+          />
+        </div>
+
+        {/* 모달 */}
+        <CommonCodeModal
+          isOpen={isModalOpen}
+          onClose={handleModalClose}
+          onSubmit={handleModalSubmit}
+          initialData={editingData}
+          mode={modalMode}
+          loading={modalLoading}
+          existingCodes={apiData?.map((code) => code.common_code) || []}
+        />
+
+        {/* 토스트 알림 */}
+        <Toast
+          isVisible={toast.isVisible}
+          message={toast.message}
+          type={toast.type}
+          onClose={() => setToast((prev) => ({ ...prev, isVisible: false }))}
         />
       </div>
-
-      {/* 모달 */}
-      <CommonCodeModal
-        isOpen={isModalOpen}
-        onClose={handleModalClose}
-        onSubmit={handleModalSubmit}
-        initialData={editingData}
-        mode={modalMode}
-        loading={modalLoading}
-        existingCodes={apiData?.map((code) => code.common_code) || []}
-      />
-
-      {/* 토스트 알림 */}
-      <Toast
-        isVisible={toast.isVisible}
-        message={toast.message}
-        type={toast.type}
-        onClose={() => setToast((prev) => ({ ...prev, isVisible: false }))}
-      />
-    </div>
+    </ProtectedRoute>
   );
 }

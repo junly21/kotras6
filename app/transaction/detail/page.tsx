@@ -13,6 +13,7 @@ import {
   TransactionDetailFilters,
   TransactionDetailData,
 } from "@/types/transactionDetail";
+import ProtectedRoute from "@/components/ProtectedRoute";
 
 // Register all Community features
 ModuleRegistry.registerModules([AllCommunityModule]);
@@ -273,64 +274,68 @@ export default function TransactionDetailPage() {
   ];
 
   return (
-    <div className="p-6 space-y-6">
-      <h1 className="text-2xl font-bold">상세조회</h1>
+    <ProtectedRoute requiredPath="/transaction/detail">
+      <div className="p-6 space-y-6">
+        <h1 className="text-2xl font-bold">상세조회</h1>
 
-      <TransactionDetailFilterForm
-        defaultValues={{
-          tradeDate: "",
-          cardType: "",
-          agency: "",
-          line: "",
-          stationDiv: "",
-          stations: [],
-        }}
-        onSearch={handleSearch}
-      />
-
-      {/* CSV 내보내기 버튼 */}
-      <div className="flex justify-end">
-        <CsvExportButton
-          gridRef={gridRef}
-          fileName="transaction_detail_data.csv"
-          className="shadow-lg bg-accent-500"
-        />
-      </div>
-
-      {/* 그리드 */}
-      <div className="relative">
-        {hasSearched && loading && (
-          <div className="absolute inset-0 flex items-center justify-center bg-white/80 z-10">
-            <Spinner />
-          </div>
-        )}
-        <TestGrid
-          rowData={hasSearched ? apiData ?? [] : []} // ✅ 모든 데이터 렌더링
-          columnDefs={colDefs}
-          gridRef={gridRef}
-          height={600}
-          pinnedBottomRowData={
-            hasSearched && apiData.length > 0 ? [calculateTotals(apiData)] : []
-          }
-          gridOptions={{
-            suppressColumnResize: true,
-            suppressRowClickSelection: true,
-            suppressCellFocus: true,
-            headerHeight: 50,
-            rowHeight: 45,
-            suppressScrollOnNewData: true,
-            // domLayout 제거하여 고정 높이로 설정
+        <TransactionDetailFilterForm
+          defaultValues={{
+            tradeDate: "",
+            cardType: "",
+            agency: "",
+            line: "",
+            stationDiv: "",
+            stations: [],
           }}
+          onSearch={handleSearch}
+        />
+
+        {/* CSV 내보내기 버튼 */}
+        <div className="flex justify-end">
+          <CsvExportButton
+            gridRef={gridRef}
+            fileName="transaction_detail_data.csv"
+            className="shadow-lg bg-accent-500"
+          />
+        </div>
+
+        {/* 그리드 */}
+        <div className="relative">
+          {hasSearched && loading && (
+            <div className="absolute inset-0 flex items-center justify-center bg-white/80 z-10">
+              <Spinner />
+            </div>
+          )}
+          <TestGrid
+            rowData={hasSearched ? apiData ?? [] : []} // ✅ 모든 데이터 렌더링
+            columnDefs={colDefs}
+            gridRef={gridRef}
+            height={600}
+            pinnedBottomRowData={
+              hasSearched && apiData.length > 0
+                ? [calculateTotals(apiData)]
+                : []
+            }
+            gridOptions={{
+              suppressColumnResize: true,
+              suppressRowClickSelection: true,
+              suppressCellFocus: true,
+              headerHeight: 50,
+              rowHeight: 45,
+              suppressScrollOnNewData: true,
+              // domLayout 제거하여 고정 높이로 설정
+            }}
+          />
+        </div>
+
+        {/* 토스트 알림 */}
+        <Toast
+          isVisible={toast.isVisible}
+          message={toast.message}
+          type={toast.type}
+          onClose={() => setToast((prev) => ({ ...prev, isVisible: false }))}
         />
       </div>
-
-      {/* 토스트 알림 */}
-      <Toast
-        isVisible={toast.isVisible}
-        message={toast.message}
-        type={toast.type}
-        onClose={() => setToast((prev) => ({ ...prev, isVisible: false }))}
-      />
-    </div>
+    </ProtectedRoute>
   );
 }

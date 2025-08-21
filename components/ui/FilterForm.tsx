@@ -105,9 +105,14 @@ export function FilterForm<T extends FieldValues>({
           className
         )}>
         {fields.map((f) => {
-          const options = f.optionsEndpoint
+          let options = f.optionsEndpoint
             ? dynamicOptions[f.name] || []
             : f.options || [];
+
+          // filterOptions가 있으면 적용
+          if (f.filterOptions) {
+            options = f.filterOptions(options);
+          }
 
           return (
             <FormField

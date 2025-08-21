@@ -44,20 +44,11 @@ export default function SettlementByInstitutionPage() {
 
   // ✅ 모든 필터 옵션이 로드되고 첫 번째 기관이 선택되면 자동 조회
   useEffect(() => {
-    console.log("자동 조회 체크:", { isFilterLoaded, filters, hasSearched }); // 디버깅 로그
     if (isFilterLoaded && filters.agency && !hasSearched) {
       console.log("자동 조회 실행:", filters.agency);
       setHasSearched(true);
     }
   }, [isFilterLoaded, filters.agency, hasSearched]);
-
-  // ✅ 기관이 변경되면 자동으로 조회 실행
-  useEffect(() => {
-    if (filters.agency && !hasSearched) {
-      console.log("기관 변경으로 인한 자동 조회:", filters.agency);
-      setHasSearched(true);
-    }
-  }, [filters.agency, hasSearched]);
 
   // 원단위 상태 추가
   const [unit, setUnit] = useState<Unit>("원");

@@ -12,6 +12,7 @@ interface FilterOptionsConfig {
     body?: Record<string, unknown>;
     autoSelectFirst?: boolean;
     transform?: (data: unknown) => FilterOption[];
+    filterOptions?: (options: FilterOption[]) => FilterOption[];
   };
 }
 
@@ -75,9 +76,14 @@ export function useFilterOptions(
         const data = await response.json();
 
         // transform 함수가 있으면 사용, 없으면 기본 구조 사용
-        const transformedOptions = configItem.transform
+        let transformedOptions = configItem.transform
           ? configItem.transform(data)
           : data.options || data || [];
+
+        // filterOptions가 있으면 적용
+        if (configItem.filterOptions) {
+          transformedOptions = configItem.filterOptions(transformedOptions);
+        }
 
         setOptions((prev) => ({ ...prev, [key]: transformedOptions }));
 
@@ -252,18 +258,9 @@ export function useSettlementFilters(
     agency: {
       endpoint: "/api/common/agencies",
       autoSelectFirst: true,
-    },
-    line: {
-      endpoint: "/api/network/lines",
-      method: "POST" as const,
-      body: { network: "", networkLabel: "" }, // 기본값
-      autoSelectFirst: false,
-    },
-    station: {
-      endpoint: "/api/network/nodes",
-      method: "POST" as const,
-      body: { network: "", networkLabel: "", lineLabel: "" }, // 기본값
-      autoSelectFirst: false,
+      // '전체'를 제외한 첫 번째 기관 선택
+      filterOptions: (options: any[]) =>
+        options.filter((opt) => opt.label !== "전체"),
     },
   };
 
@@ -299,7 +296,7 @@ export function useTransactionFilters(
   const config = {
     agency: {
       endpoint: "/api/common/agencies",
-      autoSelectFirst: true,
+      autoSelectFirst: false,
     },
     cardType: {
       endpoint: "/api/transaction-detail/card-types",

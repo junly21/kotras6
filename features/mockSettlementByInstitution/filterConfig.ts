@@ -24,5 +24,7 @@ export const mockSettlementByInstitutionFilterConfig: FieldConfig[] = [
     placeholder: "기관명을 선택하세요",
     required: true,
     optionsEndpoint: "/api/common/agencies",
+    // '전체' 옵션 제외
+    filterOptions: (options) => options.filter((opt) => opt.label !== "전체"),
   },
 ];

@@ -25,7 +25,7 @@ export function createMockSettlementByOdDetailColDefs(): ColDef<MockSettlementBy
       },
     },
     {
-      headerName: "UBRW 금액",
+      headerName: "도시철도부가사용금액",
       field: "ubrw_amt",
       flex: 1,
       minWidth: 150,
@@ -53,4 +53,4 @@ export function createMockSettlementByOdDetailColDefs(): ColDef<MockSettlementBy
       },
     },
   ];
-} 
+}

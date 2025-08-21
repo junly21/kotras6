@@ -210,7 +210,7 @@ export default function Home() {
         <div className="flex-1 bg-white rounded-lg shadow-md justify-between items-center p-4">
           <div className="flex justify-between items-center px-2">
             <h2 className="text-lg font-semibold text-gray-900">OD Pair</h2>
-            <span className="text-sm text-gray-500">(단위: 데이터 건수)</span>
+            <span className="text-sm text-gray-500">건</span>
           </div>
           <div className="h-full">
             {memoizedOdPairStats.length > 0 ? (

@@ -13,6 +13,7 @@ interface TestGridProps {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   gridOptions?: any;
   height?: number | string; // 높이 props 추가
+  enableNumberColoring?: boolean; // 숫자 색상 적용 여부
 }
 
 export default function TestGrid({
@@ -22,9 +23,18 @@ export default function TestGrid({
   gridRef,
   gridOptions = {},
   height = "100%", // 기본값
+  enableNumberColoring = false, // 기본값
 }: TestGridProps) {
   return (
-    <div className="ag-theme-alpine" style={{ height, ['--ag-header-row-border' as any]: "1px solid #363636", ['--ag-wrapper-border' as any]: 'transparent', ['--ag-wrapper-border-radius' as any]: '24px', ['--ag-header-background-color' as any]: '#fff'}}>
+    <div
+      className="ag-theme-alpine"
+      style={{
+        height,
+        ["--ag-header-row-border" as any]: "1px solid #363636",
+        ["--ag-wrapper-border" as any]: "transparent",
+        ["--ag-wrapper-border-radius" as any]: "24px",
+        ["--ag-header-background-color" as any]: "#fff",
+      }}>
       <AgGridReact
         ref={gridRef}
         rowData={rowData}
@@ -35,6 +45,45 @@ export default function TestGrid({
         suppressRowClickSelection={true} // 행 클릭 선택 비활성화
         suppressCellFocus={true} // 셀 포커스 비활성화
         suppressRowHoverHighlight={false} // 행 호버 하이라이트 허용
+        // 숫자 색상 적용이 활성화된 경우 기본 스타일 설정
+        {...(enableNumberColoring && {
+          defaultColDef: {
+            sortable: false,
+            filter: false,
+            resizable: true,
+            suppressMovable: true,
+            ...gridOptions.defaultColDef,
+            cellStyle: (params: any) => {
+              // 기존 cellStyle이 있으면 먼저 적용
+              const baseStyle = gridOptions.defaultColDef?.cellStyle
+                ? typeof gridOptions.defaultColDef.cellStyle === "function"
+                  ? gridOptions.defaultColDef.cellStyle(params)
+                  : gridOptions.defaultColDef.cellStyle
+                : {};
+
+              // 순번 칼럼(#)은 색상 적용 제외
+              if (params.column.colDef.headerName === "#") {
+                return baseStyle;
+              }
+
+              // 숫자 값에 대한 색상 적용 (순번 칼럼 제외)
+              if (typeof params.value === "number") {
+                return {
+                  ...baseStyle,
+                  color:
+                    params.value > 0
+                      ? "#dc2626"
+                      : params.value < 0
+                      ? "#2563eb"
+                      : "#000000",
+                  fontWeight: "bold",
+                };
+              }
+
+              return baseStyle;
+            },
+          },
+        })}
         // 추가 옵션들
         {...gridOptions}
       />

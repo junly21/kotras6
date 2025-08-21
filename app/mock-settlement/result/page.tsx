@@ -310,18 +310,13 @@ export default function MockSettlementResultPage() {
               rowData={settlementRowData}
               columnDefs={settlementColumnDefs}
               gridRef={settlementGridRef}
+              enableNumberColoring={true}
               gridOptions={{
                 suppressCellFocus: true,
                 suppressMovableColumns: true,
                 suppressMenuHide: true,
                 rowSelection: {
                   enableClickSelection: false,
-                },
-                defaultColDef: {
-                  sortable: false,
-                  filter: false,
-                  resizable: true,
-                  suppressMovable: true,
                 },
               }}
             />

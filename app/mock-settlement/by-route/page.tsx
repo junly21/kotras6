@@ -8,6 +8,7 @@ import Spinner from "@/components/Spinner";
 import CsvExportButton from "@/components/CsvExportButton";
 import { MockSettlementByRouteService } from "@/services/mockSettlementByRouteService";
 import { MockSettlementResultService } from "@/services/mockSettlementResultService";
+import { MockSettlementControlService } from "@/services/mockSettlementControlService";
 import {
   mockSettlementByRouteFilterConfig,
   mockSettlementByRouteSchema,
@@ -21,6 +22,7 @@ import { MockSettlementResultData } from "@/types/mockSettlementResult";
 import { AllCommunityModule, ModuleRegistry } from "ag-grid-community";
 import { AgGridReact } from "ag-grid-react";
 import { UnitRadioGroup, type Unit } from "@/components/ui/UnitRadioGroup";
+import { MockSettlementConfirmDialog } from "@/components/MockSettlementConfirmDialog";
 
 // Register all Community features
 ModuleRegistry.registerModules([AllCommunityModule]);
@@ -53,7 +55,12 @@ export default function MockSettlementByRoutePage() {
     type: "info",
   });
 
-  const handleSearch = useCallback(
+  // 모의정산 실행여부 체크 관련 상태
+  const [isConfirmDialogOpen, setIsConfirmDialogOpen] = useState(false);
+  const [pendingAction, setPendingAction] = useState<(() => void) | null>(null);
+
+  // 실제 검색 실행 함수
+  const executeSearch = useCallback(
     async (values: MockSettlementByRouteFilters) => {
       setHasSearched(true);
       setIsLoading(true);
@@ -105,6 +112,25 @@ export default function MockSettlementByRoutePage() {
       }
     },
     []
+  );
+
+  const handleSearch = useCallback(
+    async (values: MockSettlementByRouteFilters) => {
+      // 모의정산 실행여부 체크
+      const isRunningResponse =
+        await MockSettlementControlService.checkIsRunning();
+
+      if (isRunningResponse.success && isRunningResponse.data === true) {
+        // 모의정산이 실행 중인 경우 확인 다이얼로그 표시
+        setPendingAction(() => () => executeSearch(values));
+        setIsConfirmDialogOpen(true);
+        return;
+      }
+
+      // 모의정산이 실행 중이 아닌 경우 바로 검색 진행
+      executeSearch(values);
+    },
+    [executeSearch]
   );
 
   // 상단 그리드 컬럼 정의 (모의정산 정보)
@@ -284,6 +310,33 @@ export default function MockSettlementByRoutePage() {
         message={toast.message}
         type={toast.type}
         onClose={() => setToast((prev) => ({ ...prev, isVisible: false }))}
+      />
+
+      {/* 모의정산 실행중 확인 다이얼로그 */}
+      <MockSettlementConfirmDialog
+        isOpen={isConfirmDialogOpen}
+        onClose={() => {
+          setIsConfirmDialogOpen(false);
+          setPendingAction(null);
+        }}
+        onConfirm={async () => {
+          if (pendingAction) {
+            // 모의정산 강제종료
+            const stopResponse =
+              await MockSettlementControlService.stopSimulation();
+            if (stopResponse.success) {
+              // 강제종료 성공 시 pending action 실행
+              pendingAction();
+            } else {
+              setError(
+                "모의정산 강제종료에 실패했습니다: " + stopResponse.error
+              );
+            }
+          }
+          setIsConfirmDialogOpen(false);
+          setPendingAction(null);
+        }}
+        actionType="조회"
       />
     </div>
   );

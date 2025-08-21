@@ -11,6 +11,7 @@ import {
   MockSettlementInfo,
 } from "@/types/mockSettlementByOd";
 import { MockSettlementByOdService } from "@/services/mockSettlementByOdService";
+import { MockSettlementControlService } from "@/services/mockSettlementControlService";
 import { createMockSettlementByOdColDefs } from "@/features/mockSettlementByOd/gridConfig";
 import { createMockSettlementByOdDetailColDefs } from "@/features/mockSettlementByOd/detailGridConfig";
 import { createMockSettlementInfoColDefs } from "@/features/mockSettlementByOd/infoGridConfig";
@@ -25,6 +26,7 @@ import {
 import { useNetworkData } from "@/hooks/useNetworkData";
 import type { NetworkMapHighlight, Node, Link } from "@/types/network";
 import { AllCommunityModule, ModuleRegistry } from "ag-grid-community";
+import { MockSettlementConfirmDialog } from "@/components/MockSettlementConfirmDialog";
 
 // Register all Community features
 ModuleRegistry.registerModules([AllCommunityModule]);
@@ -72,6 +74,10 @@ export default function MockSettlementByOdPage() {
   );
   const [isDetailLoading, setIsDetailLoading] = useState(false);
   const [selectedPathIds, setSelectedPathIds] = useState<string[]>([]);
+
+  // 모의정산 실행여부 체크 관련 상태
+  const [isConfirmDialogOpen, setIsConfirmDialogOpen] = useState(false);
+  const [pendingAction, setPendingAction] = useState<(() => void) | null>(null);
 
   // 네트워크 데이터 로드
   const {
@@ -232,8 +238,8 @@ export default function MockSettlementByOdPage() {
     [fetchDetailData]
   );
 
-  // 검색 핸들러
-  const handleSearchSubmit = useCallback(
+  // 실제 검색 실행 함수
+  const executeSearch = useCallback(
     async (values: MockSettlementByOdFilters) => {
       setHasSearched(true);
       setFilters(values);
@@ -302,6 +308,26 @@ export default function MockSettlementByOdPage() {
       }
     },
     [fetchDetailData]
+  );
+
+  // 검색 핸들러
+  const handleSearchSubmit = useCallback(
+    async (values: MockSettlementByOdFilters) => {
+      // 모의정산 실행여부 체크
+      const isRunningResponse =
+        await MockSettlementControlService.checkIsRunning();
+
+      if (isRunningResponse.success && isRunningResponse.data === true) {
+        // 모의정산이 실행 중인 경우 확인 다이얼로그 표시
+        setPendingAction(() => () => executeSearch(values));
+        setIsConfirmDialogOpen(true);
+        return;
+      }
+
+      // 모의정산이 실행 중이 아닌 경우 바로 검색 진행
+      executeSearch(values);
+    },
+    [executeSearch]
   );
 
   // 커스텀 툴팁 함수들
@@ -529,6 +555,33 @@ export default function MockSettlementByOdPage() {
             )}
         </div>
       )}
+
+      {/* 모의정산 실행중 확인 다이얼로그 */}
+      <MockSettlementConfirmDialog
+        isOpen={isConfirmDialogOpen}
+        onClose={() => {
+          setIsConfirmDialogOpen(false);
+          setPendingAction(null);
+        }}
+        onConfirm={async () => {
+          if (pendingAction) {
+            // 모의정산 강제종료
+            const stopResponse =
+              await MockSettlementControlService.stopSimulation();
+            if (stopResponse.success) {
+              // 강제종료 성공 시 pending action 실행
+              pendingAction();
+            } else {
+              setError(
+                "모의정산 강제종료에 실패했습니다: " + stopResponse.error
+              );
+            }
+          }
+          setIsConfirmDialogOpen(false);
+          setPendingAction(null);
+        }}
+        actionType="조회"
+      />
     </div>
   );
 }

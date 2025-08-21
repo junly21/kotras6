@@ -12,11 +12,13 @@ import {
   MockSettlementRegisterFormData,
 } from "@/types/mockSettlementRegister";
 import { MockSettlementRegisterService } from "@/services/mockSettlementRegisterService";
+import { MockSettlementControlService } from "@/services/mockSettlementControlService";
 import TestGrid from "@/components/TestGrid";
 import Spinner from "@/components/Spinner";
 import { MockSettlementModal } from "@/components/MockSettlementModal";
 import { MockSettlementDetailModal } from "@/components/MockSettlementDetailModal";
 import { SimulateModal } from "@/components/SimulateModal";
+import { MockSettlementConfirmDialog } from "@/components/MockSettlementConfirmDialog";
 import { Button } from "@/components/ui/button";
 import { AllCommunityModule, ModuleRegistry } from "ag-grid-community";
 
@@ -49,6 +51,10 @@ export default function MockSettlementRegisterPage() {
     simStmtGrpId: string;
   } | null>(null);
   const [isSimulateModalOpen, setIsSimulateModalOpen] = useState(false);
+
+  // 모의정산 실행여부 체크 관련 상태
+  const [isConfirmDialogOpen, setIsConfirmDialogOpen] = useState(false);
+  const [pendingAction, setPendingAction] = useState<(() => void) | null>(null);
 
   // AG Grid ref
   const gridRef = useRef(null);
@@ -134,8 +140,8 @@ export default function MockSettlementRegisterPage() {
     []
   );
 
-  // 모의정산 등록 모달 제출 핸들러
-  const handleMockSettlementSubmit = useCallback(
+  // 모의정산 실행여부 체크 및 등록 실행 함수
+  const executeMockSettlementRegistration = useCallback(
     async (data: MockSettlementRegisterFormData) => {
       console.log("모의정산 등록 데이터:", data);
 
@@ -172,6 +178,26 @@ export default function MockSettlementRegisterPage() {
     [filters, handleSearchSubmit]
   );
 
+  // 모의정산 등록 모달 제출 핸들러
+  const handleMockSettlementSubmit = useCallback(
+    async (data: MockSettlementRegisterFormData) => {
+      // 모의정산 실행여부 체크
+      const isRunningResponse =
+        await MockSettlementControlService.checkIsRunning();
+      // && isRunningResponse.data === true
+      if (isRunningResponse.success) {
+        // 모의정산이 실행 중인 경우 확인 다이얼로그 표시
+        setPendingAction(() => () => executeMockSettlementRegistration(data));
+        setIsConfirmDialogOpen(true);
+        return;
+      }
+
+      // 모의정산이 실행 중이 아닌 경우 바로 등록 진행
+      executeMockSettlementRegistration(data);
+    },
+    [executeMockSettlementRegistration]
+  );
+
   // 시뮬레이션 모달 닫기 핸들러
   const handleSimulateModalClose = useCallback(() => {
     setIsSimulateModalOpen(false);
@@ -200,6 +226,27 @@ export default function MockSettlementRegisterPage() {
     setIsDetailModalOpen(false);
     setSelectedSettlement(null);
   }, []);
+
+  // 확인 다이얼로그 핸들러들
+  const handleConfirmDialogClose = useCallback(() => {
+    setIsConfirmDialogOpen(false);
+    setPendingAction(null);
+  }, []);
+
+  const handleConfirmDialogConfirm = useCallback(async () => {
+    if (pendingAction) {
+      // 모의정산 강제종료
+      const stopResponse = await MockSettlementControlService.stopSimulation();
+      if (stopResponse.success) {
+        // 강제종료 성공 시 pending action 실행
+        pendingAction();
+      } else {
+        setError("모의정산 강제종료에 실패했습니다: " + stopResponse.error);
+      }
+    }
+    setIsConfirmDialogOpen(false);
+    setPendingAction(null);
+  }, [pendingAction]);
 
   // 컬럼 정의
   const columnDefs = [
@@ -404,6 +451,14 @@ export default function MockSettlementRegisterPage() {
       <SimulateModal
         isOpen={isSimulateModalOpen}
         onClose={handleSimulateModalClose}
+      />
+
+      {/* 모의정산 실행중 확인 다이얼로그 */}
+      <MockSettlementConfirmDialog
+        isOpen={isConfirmDialogOpen}
+        onClose={handleConfirmDialogClose}
+        onConfirm={handleConfirmDialogConfirm}
+        actionType="등록"
       />
     </div>
   );

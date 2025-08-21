@@ -93,13 +93,16 @@ export function TransactionDetailFilterForm({
         );
         const agencyLabel = selectedAgency?.label || value.agency;
 
+        // '전체' 선택 시에는 'ALL'로 전송, 그 외에는 label 값 사용
+        const agencyValue = agencyLabel === "전체" ? "ALL" : agencyLabel;
+
         // 노선명 옵션 로드
         fetch("/api/transaction-detail/lines", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ agency: agencyLabel }),
+          body: JSON.stringify({ agency: agencyValue }),
         })
           .then((res) => res.json())
           .then((data: { options: FieldOption[] }) => {
@@ -161,9 +164,13 @@ export function TransactionDetailFilterForm({
     );
     const selectedLine = lineOptions.find((opt) => opt.value === values.line);
 
+    const agencyLabel = selectedAgency?.label || values.agency;
+    // '전체' 선택 시에는 'ALL'로 전송, 그 외에는 label 값 사용
+    const agencyValue = agencyLabel === "전체" ? "ALL" : agencyLabel;
+
     const convertedValues = {
       ...values,
-      agency: selectedAgency?.label || values.agency,
+      agency: agencyValue,
       line: selectedLine?.label || values.line,
       // stationDiv는 이미 RIDE/ALGH 값이므로 그대로 사용
     };

@@ -4,6 +4,7 @@ import React, { useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { useSidebarStore, getMenuData, MenuItem } from "../store/sidebarStore";
 import { useSessionContext } from "../contexts/SessionContext";
+import { hasPathPermission } from "../utils/agencyPermissions";
 
 const MenuItemComponent: React.FC<{ item: MenuItem; level: number }> = ({
   item,
@@ -67,40 +68,31 @@ const MenuItemComponent: React.FC<{ item: MenuItem; level: number }> = ({
 export default function SideBar() {
   const pathname = usePathname();
   const { setCurrentPath } = useSidebarStore();
-  const { canAccess } = useSessionContext();
+  const { session } = useSessionContext();
   const menuData = getMenuData();
 
-  // 권한에 따라 메뉴 필터링
+  // 2depth 세부 권한에 따라 메뉴 필터링
   const filterMenuByPermissions = (items: MenuItem[]): MenuItem[] => {
     return items
       .filter((item) => {
-        // 모의정산 메뉴 권한 체크 - 권한이 없으면 완전히 숨김
-        if (
-          item.id === "mock-settlement" ||
-          item.path?.includes("/mock-settlement")
-        ) {
-          return canAccess("mockSettlement");
+        // 부모 메뉴인 경우, 자식 메뉴들의 권한을 모두 체크
+        if (item.children && item.children.length > 0) {
+          // 자식 메뉴 중 하나라도 권한이 있으면 부모 메뉴 표시
+          const hasAnyChildPermission = item.children.some((child) => {
+            if (child.path) {
+              return hasPathPermission(session.agencyCode || "", child.path);
+            }
+            return false;
+          });
+          return hasAnyChildPermission;
         }
 
-        // 정산 메뉴 권한 체크
-        if (item.id === "settlement" || item.path?.includes("/settlement")) {
-          return canAccess("settlement");
+        // 단일 메뉴인 경우 경로 권한 체크
+        if (item.path) {
+          return hasPathPermission(session.agencyCode || "", item.path);
         }
 
-        // 거래분석 메뉴 권한 체크
-        if (
-          item.id === "transaction" ||
-          item.path?.includes("/transaction/analysis")
-        ) {
-          return canAccess("transactionAnalysis");
-        }
-
-        // 네트워크 관리 메뉴 권한 체크
-        if (item.id === "network" || item.path?.includes("/network")) {
-          return canAccess("networkManagement");
-        }
-
-        // 기본적으로 접근 가능 (홈, 설정 등)
+        // 기본적으로 접근 가능 (홈 등)
         return true;
       })
       .map((item) => ({

@@ -3,28 +3,53 @@
 import React from "react";
 import { useRouter } from "next/navigation";
 import { useSessionContext } from "@/contexts/SessionContext";
-import { FeaturePermissions } from "@/types/agency";
+import { hasPathPermission } from "@/utils/agencyPermissions";
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
-  requiredPermission: keyof FeaturePermissions;
+  requiredPermission?: string; // 기존 1depth 권한 (하위 호환성)
+  requiredPath?: string; // 2depth 경로 권한 체크
   fallbackPath?: string;
 }
 
 export default function ProtectedRoute({
   children,
   requiredPermission,
+  requiredPath,
   fallbackPath = "/",
 }: ProtectedRouteProps) {
-  const { canAccess, isInitialized } = useSessionContext();
+  const { canAccess, session, isInitialized } = useSessionContext();
   const router = useRouter();
 
   React.useEffect(() => {
-    if (isInitialized && !canAccess(requiredPermission)) {
-      console.warn(`권한이 없습니다: ${requiredPermission}`);
+    if (!isInitialized) return;
+
+    let hasAccess = true;
+
+    // 2depth 경로 권한 체크 (우선순위 높음)
+    if (requiredPath) {
+      hasAccess = hasPathPermission(session.agencyCode || "", requiredPath);
+    }
+    // 기존 1depth 권한 체크 (하위 호환성)
+    else if (requiredPermission) {
+      hasAccess = canAccess(
+        requiredPermission as keyof import("@/types/agency").FeaturePermissions
+      );
+    }
+
+    if (!hasAccess) {
+      console.warn(`권한이 없습니다: ${requiredPath || requiredPermission}`);
       router.push(fallbackPath);
     }
-  }, [canAccess, requiredPermission, router, fallbackPath, isInitialized]);
+  }, [
+    canAccess,
+    requiredPermission,
+    requiredPath,
+    router,
+    fallbackPath,
+    isInitialized,
+    session.agencyCode,
+  ]);
 
   // 권한 체크 중이거나 권한이 없는 경우 로딩 표시
   if (!isInitialized) {
@@ -38,8 +63,18 @@ export default function ProtectedRoute({
     );
   }
 
+  // 권한 체크
+  let hasAccess = true;
+  if (requiredPath) {
+    hasAccess = hasPathPermission(session.agencyCode || "", requiredPath);
+  } else if (requiredPermission) {
+    hasAccess = canAccess(
+      requiredPermission as keyof import("@/types/agency").FeaturePermissions
+    );
+  }
+
   // 권한이 없는 경우 접근 차단
-  if (!canAccess(requiredPermission)) {
+  if (!hasAccess) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">

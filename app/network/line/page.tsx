@@ -39,7 +39,9 @@ export default function NetworkLinePage() {
 
   // 전체 로딩 상태: 기본 데이터 로딩 중이거나 하이라이트가 아직 적용되지 않음
   const isLoading =
-    isDataLoading || !hasSearched || (hasSearched && !activeLine);
+    isDataLoading ||
+    (hasSearched && !activeLine) ||
+    (!hasSearched && filters.network && filters.agency && filters.line);
 
   // 조회버튼 클릭 시 API 요청용 (map/page.tsx와 동일)
   const apiCall = useCallback(() => {
@@ -120,12 +122,20 @@ export default function NetworkLinePage() {
     if (filters.network && filters.agency && filters.line && !hasSearched) {
       setHasSearched(true);
     }
+    // 필터가 초기화된 경우 hasSearched도 초기화
+    if ((!filters.network || !filters.agency || !filters.line) && hasSearched) {
+      setHasSearched(false);
+    }
   }, [filters.network, filters.agency, filters.line, hasSearched]);
 
   const handleFilterChangeWithLine = useCallback(
     (values: NetworkMapFilters) => {
       handleFilterChange(values);
-      if (values.line !== "ALL") {
+      // 필터가 초기화된 경우 (빈 값들) 하이라이트 제거
+      if (!values.network || !values.agency || !values.line) {
+        setActiveLine(null);
+        setHasSearched(false);
+      } else if (values.line !== "ALL") {
         setActiveLine(values.line);
       }
     },

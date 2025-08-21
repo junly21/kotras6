@@ -158,7 +158,6 @@ export interface NetworkMapHighlight {
 
 export interface NetworkMapTooltip {
   node?: (node: Node) => React.ReactNode;
-  link?: (link: Link) => React.ReactNode;
 }
 
 export interface NetworkMapProps {

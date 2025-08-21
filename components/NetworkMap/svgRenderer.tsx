@@ -1,6 +1,6 @@
 import React from "react";
 import { toCamelCaseAttrs } from "./utils";
-import { DefaultNodeTooltip, DefaultLinkTooltip } from "./DefaultTooltips";
+import { DefaultNodeTooltip } from "./DefaultTooltips";
 import type { Node, Link } from "@/types/network";
 import {
   Tooltip,
@@ -100,9 +100,15 @@ function renderNodeElement(
     </text>
   );
 
-  if (showTooltips && tooltips?.node) {
+  // 하이라이트된 요소만 툴팁 표시 (opacity가 0.6 이상인 경우)
+  const shouldShowTooltip = opacity >= 0.6;
+
+  // 하이라이트 상태에 따라 z-index 조정 (하이라이트된 요소를 최상위로)
+  const zIndex = shouldShowTooltip ? 10 : 1;
+
+  if (showTooltips && shouldShowTooltip && tooltips?.node) {
     return (
-      <g key={id} style={{ opacity }}>
+      <g key={id} style={{ opacity, zIndex }}>
         <Tooltip>
           <TooltipTrigger asChild>{nodeElement}</TooltipTrigger>
           <RadixTooltipContent>{tooltips.node(nodeData)}</RadixTooltipContent>
@@ -110,9 +116,9 @@ function renderNodeElement(
         {textElement}
       </g>
     );
-  } else if (showTooltips) {
+  } else if (showTooltips && shouldShowTooltip) {
     return (
-      <g key={id} style={{ opacity }}>
+      <g key={id} style={{ opacity, zIndex }}>
         <Tooltip>
           <TooltipTrigger asChild>{nodeElement}</TooltipTrigger>
           <RadixTooltipContent>
@@ -124,7 +130,7 @@ function renderNodeElement(
     );
   } else {
     return (
-      <g key={id} style={{ opacity }}>
+      <g key={id} style={{ opacity, zIndex }}>
         {nodeElement}
         {textElement}
       </g>
@@ -139,11 +145,7 @@ function renderLinkElement(
   node: INode,
   link: Link,
   highlightState: HighlightState,
-  onLinkClick?: (link: Link) => void,
-  showTooltips = true,
-  tooltips?: {
-    link?: (link: Link) => React.ReactNode;
-  }
+  onLinkClick?: (link: Link) => void
 ): React.ReactNode {
   const id = node.attributes.id;
   const opacity = calculateOpacity(id, highlightState, false, link.line);
@@ -171,25 +173,8 @@ function renderLinkElement(
     />
   );
 
-  if (showTooltips && tooltips?.link) {
-    return (
-      <Tooltip key={id}>
-        <TooltipTrigger asChild>{linkElement}</TooltipTrigger>
-        <RadixTooltipContent>{tooltips.link(link)}</RadixTooltipContent>
-      </Tooltip>
-    );
-  } else if (showTooltips) {
-    return (
-      <Tooltip key={id}>
-        <TooltipTrigger asChild>{linkElement}</TooltipTrigger>
-        <RadixTooltipContent>
-          <DefaultLinkTooltip link={link} />
-        </RadixTooltipContent>
-      </Tooltip>
-    );
-  } else {
-    return <g key={id}>{linkElement}</g>;
-  }
+  // 간선은 툴팁을 표시하지 않음
+  return <g key={id}>{linkElement}</g>;
 }
 
 /**
@@ -217,13 +202,40 @@ export function renderSvgNode(
   showTooltips = true,
   tooltips?: {
     node?: (node: Node) => React.ReactNode;
-    link?: (link: Link) => React.ReactNode;
   }
 ): React.ReactNode {
   // 1) 역(Station): id가 숫자만
   if (node.name === "path" && /^\d+$/.test(node.attributes.id)) {
     const nodeData = nodesData.find((n) => n.id === node.attributes.id);
     if (!nodeData) return null;
+
+    // 하이라이트 상태 확인 - 하이라이트되지 않은 요소는 pointer-events: none 적용
+    if (highlightState) {
+      const opacity = calculateOpacity(
+        node.attributes.id,
+        highlightState,
+        true,
+        nodeData.line
+      );
+      if (opacity < 0.6) {
+        // 하이라이트되지 않은 요소는 pointer-events: none 적용
+        const disabledNode = {
+          ...node,
+          attributes: {
+            ...node.attributes,
+            "pointer-events": "none",
+          },
+        };
+        return renderNodeElement(
+          disabledNode,
+          nodeData,
+          highlightState!,
+          onNodeClick,
+          showTooltips,
+          tooltips
+        );
+      }
+    }
 
     return renderNodeElement(
       node,
@@ -247,14 +259,7 @@ export function renderSvgNode(
 
     if (!link) return null;
 
-    return renderLinkElement(
-      node,
-      link,
-      highlightState!,
-      onLinkClick,
-      showTooltips,
-      tooltips
-    );
+    return renderLinkElement(node, link, highlightState!, onLinkClick);
   }
 
   // 3) 나머지 원소들은 그대로 재귀
@@ -275,4 +280,80 @@ export function renderSvgNode(
       )
     )
   );
+}
+
+/**
+ * SVG 구조를 하이라이트 상태에 따라 재구성합니다.
+ * 하이라이트된 요소를 최상위에 배치하여 마우스 이벤트 우선순위를 높입니다.
+ */
+export function reorderSvgForHighlightPriority(
+  svgNode: INode,
+  highlightState: HighlightState
+): INode {
+  if (!svgNode.children || svgNode.children.length === 0) {
+    return svgNode;
+  }
+
+  // 하이라이트된 요소와 하이라이트되지 않은 요소를 분리
+  const highlightedElements: INode[] = [];
+  const normalElements: INode[] = [];
+
+  svgNode.children.forEach((child) => {
+    if (child.name === "path") {
+      const id = child.attributes.id;
+      if (id && /^\d+$/.test(id)) {
+        // 역 노드인 경우 - activeLines에서 노선 정보 찾기
+        let nodeLine = "";
+        if (highlightState.activeLines.size > 0) {
+          // 첫 번째 활성 노선 사용 (대부분의 경우 하나의 노선만 선택됨)
+          nodeLine = Array.from(highlightState.activeLines)[0];
+        }
+
+        const opacity = calculateOpacity(id, highlightState, true, nodeLine);
+
+        if (opacity >= 0.6) {
+          // 하이라이트된 요소는 최상위로
+          highlightedElements.push(child);
+        } else {
+          // 하이라이트되지 않은 요소는 제거하지 않음 (시각적 표시 유지)
+          normalElements.push(child);
+        }
+      } else if (id && /^\d+-\d+$/.test(id)) {
+        // 간선인 경우 - activeLines에서 노선 정보 찾기
+        let linkLine = "";
+        if (highlightState.activeLines.size > 0) {
+          linkLine = Array.from(highlightState.activeLines)[0];
+        }
+
+        const opacity = calculateOpacity(id, highlightState, false, linkLine);
+
+        if (opacity >= 0.6) {
+          // 하이라이트된 요소는 최상위로
+          highlightedElements.push(child);
+        } else {
+          // 하이라이트되지 않은 요소는 제거하지 않음 (시각적 표시 유지)
+          normalElements.push(child);
+        }
+      } else {
+        // 기타 path 요소는 그대로 유지
+        normalElements.push(child);
+      }
+    } else if (child.children && child.children.length > 0) {
+      // 자식이 있는 요소는 재귀적으로 처리
+      const reorderedChild = reorderSvgForHighlightPriority(
+        child,
+        highlightState
+      );
+      normalElements.push(reorderedChild);
+    } else {
+      // 기타 요소는 그대로 유지
+      normalElements.push(child);
+    }
+  });
+
+  // 하이라이트되지 않은 요소를 먼저, 하이라이트된 요소를 나중에 배치
+  return {
+    ...svgNode,
+    children: [...normalElements, ...highlightedElements],
+  };
 }

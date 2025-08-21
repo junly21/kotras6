@@ -10,7 +10,7 @@ import type { NetworkMapProps } from "@/types/network";
 import { Button } from "../ui/button";
 
 import { calculateHighlightState } from "./highlightUtils";
-import { renderSvgNode } from "./svgRenderer";
+import { renderSvgNode, reorderSvgForHighlightPriority } from "./svgRenderer";
 
 export function NetworkMap({
   nodes,
@@ -39,6 +39,7 @@ export function NetworkMap({
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
   const [pan, setPan] = useState(defaultPan);
+
   const svgRef = useRef<SVGSVGElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -57,19 +58,56 @@ export function NetworkMap({
       .then((svgJson) => {
         if (!isMounted) return;
 
-        setSvgReactTree(
-          renderSvgNode(
+        // 하이라이트가 있는 경우 렌더링 순서를 조정
+        if (highlights.length > 0) {
+          // SVG 구조를 하이라이트 상태에 따라 재구성
+          console.log(
+            "Applying SVG reordering for",
+            highlights.length,
+            "highlights"
+          );
+          const reorderedSvgJson = reorderSvgForHighlightPriority(
             svgJson,
-            nodes,
-            links,
-            onNodeClick,
-            onLinkClick,
-            undefined,
-            highlightState,
-            showTooltips,
-            tooltips
-          )
-        );
+            highlightState
+          );
+          console.log("SVG reordering completed");
+
+          // 디버깅: 하이라이트 상태 확인
+          console.log("Highlight state:", {
+            activeLines: Array.from(highlightState.activeLines),
+            highlightedNodes: highlightState.highlightedNodes.size,
+            highlightedLinks: highlightState.highlightedLinks.size,
+          });
+
+          setSvgReactTree(
+            renderSvgNode(
+              reorderedSvgJson,
+              nodes,
+              links,
+              onNodeClick,
+              onLinkClick,
+              undefined,
+              highlightState,
+              showTooltips,
+              tooltips
+            )
+          );
+        } else {
+          console.log("No highlights, using original SVG structure");
+          setSvgReactTree(
+            renderSvgNode(
+              svgJson,
+              nodes,
+              links,
+              onNodeClick,
+              onLinkClick,
+              undefined,
+              highlightState,
+              showTooltips,
+              tooltips
+            )
+          );
+        }
       })
       .catch((error) => {
         console.error("NetworkMap parseSvg 에러:", error);
@@ -100,6 +138,10 @@ export function NetworkMap({
     [pan]
   );
 
+  const handleMouseUp = useCallback(() => setIsDragging(false), []);
+  const handleMouseLeave = useCallback(() => setIsDragging(false), []);
+
+  // 마우스 이동 시 팬 처리
   const handleMouseMove = useCallback(
     (e: React.MouseEvent) => {
       if (isDragging) {
@@ -111,9 +153,6 @@ export function NetworkMap({
     },
     [isDragging, dragStart]
   );
-
-  const handleMouseUp = useCallback(() => setIsDragging(false), []);
-  const handleMouseLeave = useCallback(() => setIsDragging(false), []);
 
   // 확대/축소 핸들러
   const handleZoom = useCallback(

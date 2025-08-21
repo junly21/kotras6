@@ -79,7 +79,6 @@ export function useSession(): UseSessionReturn {
   const initializeSession = useCallback(async () => {
     // 이미 초기화 중이거나 완료된 경우 중복 호출 방지
     if (isInitializingRef.current || hasInitializedRef.current || isLoading) {
-      console.log("세션 초기화 중복 호출 방지");
       return;
     }
 
@@ -88,8 +87,6 @@ export function useSession(): UseSessionReturn {
     setError(null);
 
     try {
-      console.log("세션 초기화 시작...");
-
       const response = await fetch("/api/common/sessions", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -135,15 +132,6 @@ export function useSession(): UseSessionReturn {
           lastActivity: now,
         });
 
-        console.log(
-          "세션 초기화 성공:",
-          data.data,
-          "기관:",
-          agency,
-          "권한:",
-          permissions
-        );
-
         // 세션 갱신 타이머 설정
         scheduleSessionRefresh(now);
 
@@ -164,7 +152,6 @@ export function useSession(): UseSessionReturn {
       // 실패 시 재시도 (5초 후) - 한 번만
       if (!hasInitializedRef.current) {
         setTimeout(() => {
-          console.log("세션 초기화 재시도...");
           isInitializingRef.current = false;
           initializeSession();
         }, 5000);
@@ -184,8 +171,6 @@ export function useSession(): UseSessionReturn {
     setError(null);
 
     try {
-      console.log("세션 갱신 시작...");
-
       const response = await fetch("/api/common/sessions", {
         method: "GET",
         headers: { "Content-Type": "application/json" },
@@ -241,15 +226,6 @@ export function useSession(): UseSessionReturn {
           lastActivity: now,
         }));
 
-        console.log(
-          "세션 갱신 성공:",
-          data.data,
-          "기관:",
-          agency,
-          "권한:",
-          permissions
-        );
-
         // 세션 갱신 타이머 재설정
         scheduleSessionRefresh(now);
       } else {
@@ -267,7 +243,6 @@ export function useSession(): UseSessionReturn {
 
         // 3초 후 재초기화 시도
         setTimeout(() => {
-          console.log("세션 재초기화 시도...");
           hasInitializedRef.current = false;
           isInitializingRef.current = false;
           initializeSession();
@@ -289,10 +264,7 @@ export function useSession(): UseSessionReturn {
       const timeSinceLastActivity = Date.now() - lastActivity;
       const delay = Math.max(0, timeUntilRefresh - timeSinceLastActivity);
 
-      console.log(`세션 갱신 예약: ${Math.round(delay / 1000)}초 후`);
-
       refreshTimerRef.current = setTimeout(() => {
-        console.log("세션 갱신 타이머 실행");
         refreshSession();
       }, delay);
     },
@@ -312,7 +284,6 @@ export function useSession(): UseSessionReturn {
 
       // 세션이 만료되었는지 확인
       if (timeSinceLastActivity > SESSION_TIMEOUT) {
-        console.log("세션이 만료되었습니다. 자동 갱신 시도...");
         refreshSession();
       }
     }, 60000); // 1분마다 체크
@@ -348,8 +319,6 @@ export function useSession(): UseSessionReturn {
     });
     setError(null);
     setIsInitialized(false);
-
-    console.log("세션이 클리어되었습니다.");
   }, []);
 
   // 컴포넌트 마운트 시 세션 초기화 (한 번만)

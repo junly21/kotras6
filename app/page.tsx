@@ -59,17 +59,11 @@ export default function Home() {
   useEffect(() => {
     // 세션이 초기화되지 않았거나 로딩 중이면 API 요청하지 않음
     if (!isInitialized || isSessionLoading) {
-      console.log("메인페이지 - 세션 초기화 대기 중:", {
-        isInitialized,
-        isSessionLoading,
-      });
       return;
     }
 
     async function fetchNetworkData() {
       try {
-        console.log("메인페이지 - 세션 초기화 완료, 노선도 API 요청 시작");
-
         // 1. 기관 목록 로드
         const agencyRes = await fetch("/api/common/agencies");
         if (!agencyRes.ok) throw new Error("기관 목록을 불러올 수 없습니다.");
@@ -87,13 +81,6 @@ export default function Home() {
         const agencyLabel =
           firstAgency.label === "전체" ? "ALL" : firstAgency.label;
 
-        console.log("메인페이지 - 노선도 API 요청 시작:", {
-          network: "LATEST",
-          agency: firstAgency.value,
-          line: "ALL",
-          networkLabel: agencyLabel,
-        });
-
         // line/page.tsx와 동일한 방식으로 NetworkMapService 사용
         const response = await NetworkMapService.getMapData({
           network: "LATEST",
@@ -105,43 +92,27 @@ export default function Home() {
         if (response.success && response.data) {
           // 3. 하이라이트 처리 (line/page.tsx와 동일한 로직)
           const { lineData } = response.data;
-          console.log("메인페이지 - lineData:", lineData);
 
           if (lineData && Array.isArray(lineData)) {
-            console.log("메인페이지 - lineData 배열 확인:", lineData.length);
-
             const apiLineNames = lineData
               .map(
                 (line: { subway?: string; seq?: string }) =>
                   line.subway || line.seq
               )
               .filter(Boolean);
-            console.log("메인페이지 - 추출된 노선명:", apiLineNames);
 
             const uniqueLineNames = [...new Set(apiLineNames)];
-            console.log("메인페이지 - 중복 제거된 노선명:", uniqueLineNames);
 
             const finalActiveLine =
               uniqueLineNames.length > 0 ? uniqueLineNames.join(",") : null;
-            console.log("메인페이지 - 최종 activeLine:", finalActiveLine);
 
             setActiveLine(finalActiveLine);
-          } else {
-            console.log("메인페이지 - lineData 조건문 실패:", {
-              lineDataExists: !!lineData,
-              isArray: Array.isArray(lineData),
-              lineDataType: typeof lineData,
-              lineDataValue: lineData,
-            });
           }
-        } else {
-          console.log("메인페이지 - API 응답 실패:", response);
         }
 
         // API 호출 완료 (성공/실패 상관없이)
         setIsNetworkDataLoading(false);
-      } catch (error) {
-        console.error("노선도 데이터 로드 실패:", error);
+      } catch {
         alert("노선도 데이터를 불러올 수 없습니다.");
         setIsNetworkDataLoading(false);
       }
@@ -155,25 +126,17 @@ export default function Home() {
 
   // 하이라이트 설정 (line/page.tsx와 동일한 로직)
   const highlights = useMemo(() => {
-    console.log(
-      "메인페이지 - highlights 메모이제이션 실행, activeLine:",
-      activeLine
-    );
-
     if (!activeLine) {
-      console.log("메인페이지 - activeLine이 없어서 빈 배열 반환");
       return [];
     }
 
     const lineNames = activeLine.split(",");
-    console.log("메인페이지 - 분리된 노선명:", lineNames);
 
     const result = lineNames.map((lineName) => ({
       type: "line" as const,
       value: lineName.trim(),
     }));
 
-    console.log("메인페이지 - 최종 highlights:", result);
     return result;
   }, [activeLine]);
 
@@ -182,12 +145,6 @@ export default function Home() {
 
   // 전체 로딩 상태: 메인 데이터 로딩 중이거나 노선도 API 호출이 아직 진행 중
   const isLoading = loading || isNetworkDataLoading;
-
-  // 디버깅용 로그 - highlights와 activeLine 변화 추적
-  useEffect(() => {
-    console.log("메인페이지 - NetworkMap 렌더링 - highlights:", highlights);
-    console.log("메인페이지 - NetworkMap 렌더링 - activeLine:", activeLine);
-  }, [highlights, activeLine]);
 
   if (isLoading) {
     return (

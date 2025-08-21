@@ -39,7 +39,6 @@ export class MainService {
       }
 
       const result = await response.json();
-      console.log("MainService - stations API 응답:", result);
 
       // StationOption을 Node로 변환
       const stationOptions = result.options || [];
@@ -67,8 +66,6 @@ export class MainService {
             remarks: "",
           })
       );
-
-      console.log("MainService - 변환된 데이터:", convertedData);
       return { success: true, data: convertedData };
     } catch (error) {
       console.error("네트워크 노드 조회 에러:", error);
@@ -94,7 +91,6 @@ export class MainService {
       }
 
       const result = await response.json();
-      console.log("MainService - 링크 API 응답:", result);
 
       if (!result.success) {
         return {
@@ -106,8 +102,6 @@ export class MainService {
       // NetworkLink 배열을 Link로 변환
       const rawData = result.data as NetworkLink[];
       const convertedData = (rawData || []).map(convertToLink);
-
-      console.log("MainService - 변환된 링크 데이터:", convertedData);
       return { success: true, data: convertedData };
     } catch (error) {
       console.error("네트워크 링크 조회 에러:", error);
@@ -128,8 +122,6 @@ export class MainService {
         },
       });
 
-      console.log("MainService - 원본 카드 통계 데이터:", data);
-
       // 외부 API에서 직접 배열을 반환하므로 data 자체가 배열
       const rawData = data as CardStats[];
       return { success: true, data: rawData || [] };
@@ -149,8 +141,6 @@ export class MainService {
         method: "POST",
         body: {},
       });
-
-      console.log("MainService - 원본 OD Pair 데이터:", data);
 
       // 외부 API에서 직접 배열을 반환하므로 data 자체가 배열
       const rawData = data as ODPairStats[];
@@ -180,7 +170,6 @@ export class MainService {
       }
 
       const result = await response.json();
-      console.log("MainService - 권종별 통행수 API 응답:", result);
 
       return { success: true, data: result.data || [] };
     } catch (error) {
@@ -207,7 +196,6 @@ export class MainService {
       }
 
       const result = await response.json();
-      console.log("MainService - OD Pair 통계 API 응답:", result);
 
       return { success: true, data: result.data || [] };
     } catch (error) {

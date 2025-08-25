@@ -166,7 +166,7 @@ export default function NetworkLinePage() {
   }
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="space-y-6">
       <h1 className="text-2xl font-bold">노선도 조회</h1>
 
       {/* FilterForm 적용 */}
@@ -203,7 +203,7 @@ export default function NetworkLinePage() {
       />
 
       <div className="flex gap-6">
-        <div className="flex-1 h-[920px] border rounded-[24px] p-4 bg-white">
+        <div className="flex-1 h-[550px] border rounded-[24px] p-4 bg-white">
           {isLoading ? (
             <div className="flex flex-col items-center justify-center h-64 text-gray-500 space-y-4">
               <Spinner size="lg" />

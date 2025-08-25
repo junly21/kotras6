@@ -275,7 +275,7 @@ export default function TransactionDetailPage() {
 
   return (
     <ProtectedRoute requiredPath="/transaction/detail">
-      <div className="p-6 space-y-6">
+      <div className="space-y-6">
         <h1 className="text-2xl font-bold">상세조회</h1>
 
         <TransactionDetailFilterForm
@@ -310,7 +310,7 @@ export default function TransactionDetailPage() {
             rowData={hasSearched ? apiData ?? [] : []} // ✅ 모든 데이터 렌더링
             columnDefs={colDefs}
             gridRef={gridRef}
-            height={600}
+            height={430}
             pinnedBottomRowData={
               hasSearched && apiData.length > 0
                 ? [calculateTotals(apiData)]

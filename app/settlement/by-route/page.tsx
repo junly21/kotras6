@@ -84,7 +84,7 @@ export default function SettlementByRoutePage() {
   }, []);
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="space-y-6">
       <h1 className="text-2xl font-bold">노선별 조회</h1>
 
       <FilterForm<SettlementByRouteFilters>
@@ -138,7 +138,7 @@ export default function SettlementByRoutePage() {
                     defaultColDef: {
                       sortable: false,
                       filter: false,
-                      resizable: true,
+                      resizable: false,
                       suppressMovable: true, // 개별 컬럼 이동 비활성화
                     },
                   }}

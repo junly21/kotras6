@@ -7,21 +7,21 @@ export const networkFileUploadColDefs: ColDef<NetworkFileUploadData>[] = [
     field: "net_nm",
     flex: 2,
     minWidth: 150,
-    resizable: true,
+    resizable: false,
   },
   {
     headerName: "등록일",
     field: "net_dt",
     flex: 1,
     minWidth: 150,
-    resizable: true,
+    resizable: false,
   },
   {
     headerName: "노드",
     colId: "노드",
     flex: 1,
     minWidth: 150,
-    resizable: true,
+    resizable: false,
     valueGetter: () => "[보기]",
     cellStyle: {
       cursor: "pointer",
@@ -32,7 +32,7 @@ export const networkFileUploadColDefs: ColDef<NetworkFileUploadData>[] = [
     colId: "링크",
     flex: 1,
     minWidth: 150,
-    resizable: true,
+    resizable: false,
     valueGetter: () => "[보기]",
     cellStyle: {
       cursor: "pointer",
@@ -43,7 +43,7 @@ export const networkFileUploadColDefs: ColDef<NetworkFileUploadData>[] = [
     colId: "플랫폼",
     flex: 1,
     minWidth: 150,
-    resizable: true,
+    resizable: false,
     valueGetter: () => "[보기]",
     cellStyle: {
       cursor: "pointer",

@@ -18,21 +18,21 @@ export function createSettlementByRouteColDefs(
         headerName: "수급액",
         field: "receiveAmount",
         width: 120,
-        resizable: true,
+        resizable: false,
         type: "numericColumn",
       },
       {
         headerName: "지급액",
         field: "payAmount",
         width: 120,
-        resizable: true,
+        resizable: false,
         type: "numericColumn",
       },
       {
         headerName: "차액",
         field: "difference",
         width: 120,
-        resizable: true,
+        resizable: false,
         type: "numericColumn",
       },
     ];
@@ -50,7 +50,7 @@ export function createSettlementByRouteColDefs(
       headerName: "노선명",
       field: "line_nm",
       width: 150,
-      resizable: true,
+      resizable: false,
       pinned: "left",
       cellStyle: { fontWeight: "bold" },
       valueFormatter: (params) => {
@@ -97,7 +97,7 @@ export function createSettlementByRouteColDefs(
         headerName: type === "지급" ? "지급" : "수급",
         field: key,
         width: 170,
-        resizable: true,
+        resizable: false,
         type: "numericColumn",
         valueFormatter: (params) => {
           if (params.value != null && typeof params.value === "number") {
@@ -116,7 +116,7 @@ export function createSettlementByRouteColDefs(
         headerName: key,
         field: key,
         width: isNumber ? 120 : 150,
-        resizable: true,
+        resizable: false,
         type: isNumber ? "numericColumn" : undefined,
         valueFormatter: isNumber
           ? (params) => {

@@ -347,7 +347,7 @@ export default function MockSettlementByOdPage() {
   );
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold">모의정산 OD별 조회</h1>
       </div>
@@ -436,7 +436,7 @@ export default function MockSettlementByOdPage() {
                       defaultColDef: {
                         sortable: false,
                         filter: false,
-                        resizable: true,
+                        resizable: false,
                         suppressMovable: true,
                       },
                     }}
@@ -466,7 +466,7 @@ export default function MockSettlementByOdPage() {
                       defaultColDef: {
                         sortable: false,
                         filter: false,
-                        resizable: true,
+                        resizable: false,
                         suppressMovable: true,
                       },
                       onRowClicked: (event: { data: MockSettlementByOdData }) => {
@@ -514,7 +514,7 @@ export default function MockSettlementByOdPage() {
                         defaultColDef: {
                           sortable: false,
                           filter: false,
-                          resizable: true,
+                          resizable: false,
                           suppressMovable: true,
                         },
                       }}

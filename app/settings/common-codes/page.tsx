@@ -75,21 +75,21 @@ export default function SettingsCommonCodesPage() {
       field: "common_code",
       minWidth: 150,
       flex: 1,
-      resizable: true,
+      resizable: false,
     },
     {
       headerName: "공통코드명",
       field: "common_code_name",
       minWidth: 200,
       flex: 1,
-      resizable: true,
+      resizable: false,
     },
     {
       headerName: "시스템코드유무",
       field: "syscd_yn",
       minWidth: 180,
       flex: 1,
-      resizable: true,
+      resizable: false,
       valueFormatter: (params: { value: string }) => {
         return params.value || "N";
       },
@@ -99,35 +99,35 @@ export default function SettingsCommonCodesPage() {
       field: "value_1",
       minWidth: 120,
       flex: 1,
-      resizable: true,
+      resizable: false,
     },
     {
       headerName: "값2",
       field: "value_2",
       minWidth: 120,
       flex: 1,
-      resizable: true,
+      resizable: false,
     },
     {
       headerName: "값3",
       field: "value_3",
       minWidth: 120,
       flex: 1,
-      resizable: true,
+      resizable: false,
     },
     {
       headerName: "비고",
       field: "remark",
       minWidth: 200,
       flex: 1,
-      resizable: true,
+      resizable: false,
     },
     {
       headerName: "사용여부",
       field: "use_yn",
       minWidth: 180,
       flex: 1,
-      resizable: true,
+      resizable: false,
       valueFormatter: (params: { value: string }) => {
         return params.value || "N";
       },
@@ -264,7 +264,7 @@ export default function SettingsCommonCodesPage() {
 
   return (
     <ProtectedRoute requiredPath="/settings/common-codes">
-      <div className="p-6 space-y-6">
+      <div className="space-y-6">
         <h1 className="text-2xl font-bold">공통코드 관리</h1>
 
         {/* 버튼 영역 */}

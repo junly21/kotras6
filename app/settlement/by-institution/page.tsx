@@ -117,14 +117,14 @@ export default function SettlementByInstitutionPage() {
       field: "대상기관",
       minWidth: 200,
       flex: 1,
-      resizable: true,
+      resizable: false,
     },
     {
       headerName: "지급",
       field: "지급액",
       minWidth: 200,
       flex: 1,
-      resizable: true,
+      resizable: false,
       valueFormatter: (params: { value: number }) => {
         if (unit === "원") {
           return params.value.toLocaleString() + "원";
@@ -139,7 +139,7 @@ export default function SettlementByInstitutionPage() {
       field: "수급액",
       minWidth: 200,
       flex: 1,
-      resizable: true,
+      resizable: false,
       valueFormatter: (params: { value: number }) => {
         if (unit === "원") {
           return params.value.toLocaleString() + "원";
@@ -154,7 +154,7 @@ export default function SettlementByInstitutionPage() {
       field: "차액",
       minWidth: 200,
       flex: 1,
-      resizable: true,
+      resizable: false,
       valueFormatter: (params: { value: number }) => {
         if (unit === "원") {
           return params.value.toLocaleString() + "원";
@@ -167,7 +167,7 @@ export default function SettlementByInstitutionPage() {
   ];
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="space-y-6">
       <h1 className="text-2xl font-bold">정산결과 기관별 조회</h1>
 
       {/* ✅ 필터 폼 로딩 상태 표시 */}

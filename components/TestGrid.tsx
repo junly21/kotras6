@@ -54,7 +54,7 @@ export default function TestGrid({
           defaultColDef: {
             sortable: false,
             filter: false,
-            resizable: true,
+            resizable: false,
             suppressMovable: true,
             ...gridOptions.defaultColDef,
             cellStyle: (params: any) => {

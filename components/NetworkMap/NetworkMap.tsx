@@ -24,7 +24,7 @@ export function NetworkMap({
 }: NetworkMapProps) {
   const {
     width = "100%",
-    height = 800,
+    height = "100%",
     showZoomControls = true,
     showTooltips = true,
     defaultZoom = 1,

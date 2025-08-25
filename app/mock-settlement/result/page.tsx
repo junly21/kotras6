@@ -132,42 +132,42 @@ export default function MockSettlementResultPage() {
       field: "settlementName",
       flex: 1,
       minWidth: 200,
-      resizable: true,
+      resizable: false,
     },
     {
       headerName: "거래일자",
       field: "transactionDate",
       flex: 1,
       minWidth: 180,
-      resizable: true,
+      resizable: false,
     },
     {
       headerName: "태그기관",
       field: "tagAgency",
       flex: 1,
       minWidth: 180,
-      resizable: true,
+      resizable: false,
     },
     {
       headerName: "초승노선",
       field: "initialLine",
       flex: 1,
       minWidth: 180,
-      resizable: true,
+      resizable: false,
     },
     {
       headerName: "노선동등",
       field: "lineSection",
       flex: 1,
       minWidth: 180,
-      resizable: true,
+      resizable: false,
     },
     {
       headerName: "인.km",
       field: "distanceKm",
       flex: 1,
       minWidth: 180,
-      resizable: true,
+      resizable: false,
       valueFormatter: (params: { value: number }) => {
         return params.value.toLocaleString();
       },
@@ -204,7 +204,7 @@ export default function MockSettlementResultPage() {
   const settlementRowData = useUnitConversion(settlementResults, unit);
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold">모의정산 정산결과</h1>
       </div>
@@ -270,7 +270,7 @@ export default function MockSettlementResultPage() {
                       defaultColDef: {
                         sortable: false,
                         filter: false,
-                        resizable: true,
+                        resizable: false,
                         suppressMovable: true,
                       },
                     }}

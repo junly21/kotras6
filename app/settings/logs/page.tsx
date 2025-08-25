@@ -85,28 +85,28 @@ export default function SettingsLogsPage() {
       field: "process_div",
       flex: 1,
       minWidth: 150,
-      resizable: true,
+      resizable: false,
     },
     {
       headerName: "상세구분",
       field: "detail_div",
       flex: 1,
       minWidth: 200,
-      resizable: true,
+      resizable: false,
     },
     {
       headerName: "작업유형",
       field: "action_type",
       flex: 1,
       minWidth: 150,
-      resizable: true,
+      resizable: false,
     },
     {
       headerName: "작업일시",
       field: "process_dtm",
       flex: 1,
       minWidth: 200,
-      resizable: true,
+      resizable: false,
       valueFormatter: (params: { value: number }) => {
         if (!params.value) return "";
         return new Date(params.value).toLocaleString();
@@ -117,14 +117,14 @@ export default function SettingsLogsPage() {
       field: "action_div",
       flex: 1,
       minWidth: 150,
-      resizable: true,
+      resizable: false,
     },
     {
       headerName: "처리건수",
       field: "process_cnt",
       flex: 1,
       minWidth: 120,
-      resizable: true,
+      resizable: false,
       valueFormatter: (params: { value: number }) => {
         if (!params.value) return "0";
         return params.value.toLocaleString();
@@ -134,7 +134,7 @@ export default function SettingsLogsPage() {
 
   return (
     <ProtectedRoute requiredPath="/settings/logs">
-      <div className="p-6 space-y-6">
+      <div className="space-y-6">
         <h1 className="text-2xl font-bold">작업로그 조회</h1>
 
         <FilterForm<JobLogFilters>

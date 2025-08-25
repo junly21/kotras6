@@ -272,7 +272,7 @@ export default function NetworkFileUploadPage() {
 
   return (
     <ProtectedRoute requiredPath="/network/file-upload">
-      <div className="relative min-h-screen">
+      <div className="relative">
         {/* 전체 페이지 로딩 스피너 */}
         {loading && (
           <div className="absolute inset-0 flex items-center justify-center bg-white/80 z-50">
@@ -285,7 +285,7 @@ export default function NetworkFileUploadPage() {
           </div>
         )}
 
-        <div className="p-6 space-y-6">
+        <div className="space-y-6">
           <h1 className="text-2xl font-bold">네트워크 파일등록</h1>
 
           <FilterForm
@@ -298,12 +298,11 @@ export default function NetworkFileUploadPage() {
           />
 
           {/* 등록 버튼 */}
-          <div className="flex justify-end">
-            <Button onClick={handleAddClick}>등록</Button>
-          </div>
-
           <div className="space-y-4">
-            <h2 className="text-lg font-semibold">네트워크 파일 목록</h2>
+            <div className="flex justify-between">
+              <h2 className="text-lg font-semibold">네트워크 파일 목록</h2>
+              <Button onClick={handleAddClick}>등록</Button>
+            </div>
             {/* 결과 영역 */}
             {hasSearched && (
               <TestGrid
@@ -328,21 +327,24 @@ export default function NetworkFileUploadPage() {
           </div>
 
           {/* CSV Export 버튼을 상단 그리드와 하단 그리드 사이에 배치 */}
-          {showDetailGrid && (
-            <div className="flex justify-end">
-              <RawDataCsvExportButton
-                fileName={getDownloadFileName()}
-                className="bg-green-500 hover:bg-green-600"
-                columnOrder={getColumnOrder()}
-                rawData={rawDetailData}
-              />
-            </div>
-          )}
+          
 
           {/* 상세 그리드 영역 */}
           {showDetailGrid && (
             <div className="space-y-4">
-              <h2 className="text-lg font-semibold">{detailTitle}</h2>
+              <div className="flex justify-between">
+                <h2 className="text-lg font-semibold">{detailTitle}</h2>
+                {showDetailGrid && (
+                  <div className="flex justify-end">
+                    <RawDataCsvExportButton
+                      fileName={getDownloadFileName()}
+                      className="bg-green-500 hover:bg-green-600"
+                      columnOrder={getColumnOrder()}
+                      rawData={rawDetailData}
+                    />
+                  </div>
+                )}
+              </div>
               <div className="rounded-lg overflow-hidden">
                 <TestGrid
                   rowData={detailData}

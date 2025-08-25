@@ -205,7 +205,7 @@ export default function NetworkMapPage() {
   }, []);
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="space-y-6">
       <h1 className="text-2xl font-bold">지도 조회</h1>
 
       {/* 공통 FilterForm 적용 */}
@@ -236,7 +236,7 @@ export default function NetworkMapPage() {
       />
 
       {/* 지도 영역 */}
-      <div className="relative h-[600px] overflow-hidden rounded-[24px] border border-gray-200">
+      <div className="relative h-[550px] overflow-hidden rounded-[24px] border border-gray-200">
         <div id="network-map" className="h-full w-full" />
       </div>
 

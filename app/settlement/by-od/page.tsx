@@ -264,7 +264,7 @@ export default function SettlementByOdPage() {
   );
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold">OD별 정산결과 조회</h1>
       </div>
@@ -349,7 +349,7 @@ export default function SettlementByOdPage() {
                       defaultColDef: {
                         sortable: false,
                         filter: false,
-                        resizable: true,
+                        resizable: false,
                         suppressMovable: true,
                       },
                       onRowClicked: (event: { data: SettlementByOdData }) => {
@@ -398,7 +398,7 @@ export default function SettlementByOdPage() {
                         defaultColDef: {
                           sortable: false,
                           filter: false,
-                          resizable: true,
+                          resizable: false,
                           suppressMovable: true,
                         },
                       }}

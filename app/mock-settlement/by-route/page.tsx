@@ -140,42 +140,42 @@ export default function MockSettlementByRoutePage() {
       field: "settlementName",
       flex: 1,
       minWidth: 150,
-      resizable: true,
+      resizable: false,
     },
     {
       headerName: "거래일자",
       field: "transactionDate",
       flex: 1,
       minWidth: 120,
-      resizable: true,
+      resizable: false,
     },
     {
       headerName: "태그기관",
       field: "tagAgency",
       flex: 1,
       minWidth: 120,
-      resizable: true,
+      resizable: false,
     },
     {
       headerName: "초승노선",
       field: "initialLine",
       flex: 1,
       minWidth: 120,
-      resizable: true,
+      resizable: false,
     },
     {
       headerName: "노선동등",
       field: "lineSection",
       flex: 1,
       minWidth: 120,
-      resizable: true,
+      resizable: false,
     },
     {
       headerName: "인.km",
       field: "distanceKm",
       flex: 1,
       minWidth: 100,
-      resizable: true,
+      resizable: false,
       valueFormatter: (params: { value: number }) => {
         return params.value.toLocaleString();
       },
@@ -192,7 +192,7 @@ export default function MockSettlementByRoutePage() {
   const byRouteRowData = byRouteData;
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="space-y-6">
       <h1 className="text-2xl font-bold">모의정산 노선별 조회</h1>
 
       <FilterForm<MockSettlementByRouteFilters>
@@ -252,7 +252,7 @@ export default function MockSettlementByRoutePage() {
                       defaultColDef: {
                         sortable: false,
                         filter: false,
-                        resizable: true,
+                        resizable: false,
                         suppressMovable: true,
                       },
                     }}
@@ -303,7 +303,7 @@ export default function MockSettlementByRoutePage() {
                 defaultColDef: {
                   sortable: false,
                   filter: false,
-                  resizable: true,
+                  resizable: false,
                   suppressMovable: true,
                 },
               }}

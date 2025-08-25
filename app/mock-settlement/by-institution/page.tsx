@@ -124,42 +124,42 @@ export default function MockSettlementByInstitutionPage() {
       field: "settlementName",
       flex: 1,
       minWidth: 150,
-      resizable: true,
+      resizable: false,
     },
     {
       headerName: "거래일자",
       field: "transactionDate",
       flex: 1,
       minWidth: 120,
-      resizable: true,
+      resizable: false,
     },
     {
       headerName: "태그기관",
       field: "tagAgency",
       flex: 1,
       minWidth: 120,
-      resizable: true,
+      resizable: false,
     },
     {
       headerName: "초승노선",
       field: "initialLine",
       flex: 1,
       minWidth: 120,
-      resizable: true,
+      resizable: false,
     },
     {
       headerName: "노선동등",
       field: "lineSection",
       flex: 1,
       minWidth: 120,
-      resizable: true,
+      resizable: false,
     },
     {
       headerName: "인.km",
       field: "distanceKm",
       flex: 1,
       minWidth: 100,
-      resizable: true,
+      resizable: false,
       valueFormatter: (params: { value: number }) => {
         return params.value.toLocaleString();
       },
@@ -174,14 +174,14 @@ export default function MockSettlementByInstitutionPage() {
       field: "대상기관",
       flex: 1,
       minWidth: 200,
-      resizable: true,
+      resizable: false,
     },
     {
       headerName: "지급",
       field: "지급액",
       flex: 1,
       minWidth: 200,
-      resizable: true,
+      resizable: false,
       valueFormatter: (params: { value: number }) => {
         if (unit === "원") {
           return params.value.toLocaleString() + "원";
@@ -196,7 +196,7 @@ export default function MockSettlementByInstitutionPage() {
       field: "수급액",
       flex: 1,
       minWidth: 200,
-      resizable: true,
+      resizable: false,
       valueFormatter: (params: { value: number }) => {
         if (unit === "원") {
           return params.value.toLocaleString() + "원";
@@ -211,7 +211,7 @@ export default function MockSettlementByInstitutionPage() {
       field: "차액",
       flex: 1,
       minWidth: 200,
-      resizable: true,
+      resizable: false,
       valueFormatter: (params: { value: number }) => {
         if (unit === "원") {
           return params.value.toLocaleString() + "원";
@@ -227,7 +227,7 @@ export default function MockSettlementByInstitutionPage() {
   const byInstitutionRowData = useUnitConversion(byInstitutionData, unit);
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="space-y-6">
       <h1 className="text-2xl font-bold">모의정산 기관별 조회</h1>
 
       <FilterForm<MockSettlementByInstitutionFilters>
@@ -287,7 +287,7 @@ export default function MockSettlementByInstitutionPage() {
                       defaultColDef: {
                         sortable: false,
                         filter: false,
-                        resizable: true,
+                        resizable: false,
                         suppressMovable: true,
                       },
                     }}

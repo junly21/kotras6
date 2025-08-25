@@ -80,14 +80,14 @@ export default function SettingsDetailCodesPage() {
       field: "common_code",
       minWidth: 150,
       flex: 1,
-      resizable: true,
+      resizable: false,
     },
     {
       headerName: "공통코드명",
       field: "common_code_name",
       minWidth: 200,
       flex: 1,
-      resizable: true,
+      resizable: false,
     },
   ];
 
@@ -98,42 +98,42 @@ export default function SettingsDetailCodesPage() {
       field: "detail_code",
       minWidth: 120,
       flex: 1,
-      resizable: true,
+      resizable: false,
     },
     {
       headerName: "값1",
       field: "value_1",
       minWidth: 120,
       flex: 1,
-      resizable: true,
+      resizable: false,
     },
     {
       headerName: "값2",
       field: "value_2",
       minWidth: 200,
       flex: 1,
-      resizable: true,
+      resizable: false,
     },
     {
       headerName: "값3",
       field: "value_3",
       minWidth: 120,
       flex: 1,
-      resizable: true,
+      resizable: false,
     },
     {
       headerName: "비고",
       field: "remark",
       minWidth: 200,
       flex: 1,
-      resizable: true,
+      resizable: false,
     },
     {
       headerName: "사용여부",
       field: "use_yn",
       minWidth: 120,
       flex: 1,
-      resizable: true,
+      resizable: false,
       valueFormatter: (params: { value: string }) => {
         return params.value || "N";
       },
@@ -143,7 +143,7 @@ export default function SettingsDetailCodesPage() {
       field: "syscd_yn",
       minWidth: 150,
       flex: 1,
-      resizable: true,
+      resizable: false,
       valueFormatter: (params: { value: string }) => {
         return params.value || "N";
       },
@@ -314,7 +314,7 @@ export default function SettingsDetailCodesPage() {
 
   return (
     <ProtectedRoute requiredPath="/settings/detail-codes">
-      <div className="p-6 space-y-6">
+      <div className="space-y-6">
         <h1 className="text-2xl font-bold">상세코드 관리</h1>
 
         {/* 버튼 영역 */}

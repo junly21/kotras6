@@ -30,7 +30,7 @@ export function createSettlementByStationColDefs(
       headerName: "역명",
       field: "stn_nm",
       width: 150,
-      resizable: true,
+      resizable: false,
       pinned: "left",
       cellStyle: { fontWeight: "bold" },
     },
@@ -64,7 +64,7 @@ export function createSettlementByStationColDefs(
           headerName: type === "지급" ? "지급" : "수급",
           field: key,
           width: 170,
-          resizable: true,
+          resizable: false,
           type: "numericColumn",
           valueFormatter: (params) => {
             if (params.value != null && typeof params.value === "number") {
@@ -84,7 +84,7 @@ export function createSettlementByStationColDefs(
         headerName: key,
         field: key,
         width: isNumber ? 120 : 150,
-        resizable: true,
+        resizable: false,
         type: isNumber ? "numericColumn" : undefined,
         valueFormatter: isNumber
           ? (params) => {

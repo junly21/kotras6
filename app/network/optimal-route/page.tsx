@@ -171,7 +171,7 @@ export default function NetworkOptimalRoutePage() {
   const bestRoute = routeData?.data?.find((route) => route.rank === 1);
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="space-y-6">
       <h1 className="text-2xl font-bold">최적경로</h1>
 
       {/* 필터폼 */}

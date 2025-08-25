@@ -186,7 +186,7 @@ export default function MockSettlementByStationPage() {
         field: "settlementName",
         flex: 1,
         minWidth: 150,
-        resizable: true,
+        resizable: false,
         cellStyle: { fontWeight: "bold" },
       },
       {
@@ -194,14 +194,14 @@ export default function MockSettlementByStationPage() {
         field: "transactionDate",
         flex: 1,
         minWidth: 120,
-        resizable: true,
+        resizable: false,
       },
       {
         headerName: "태그기관",
         field: "tagAgency",
         flex: 1,
         minWidth: 120,
-        resizable: true,
+        resizable: false,
         cellStyle: { textAlign: "center" },
       },
       {
@@ -209,7 +209,7 @@ export default function MockSettlementByStationPage() {
         field: "initialLine",
         flex: 1,
         minWidth: 120,
-        resizable: true,
+        resizable: false,
         cellStyle: { textAlign: "center" },
       },
       {
@@ -217,7 +217,7 @@ export default function MockSettlementByStationPage() {
         field: "lineSection",
         flex: 1,
         minWidth: 120,
-        resizable: true,
+        resizable: false,
         cellStyle: { textAlign: "center" },
       },
       {
@@ -225,7 +225,7 @@ export default function MockSettlementByStationPage() {
         field: "distanceKm",
         flex: 1,
         minWidth: 100,
-        resizable: true,
+        resizable: false,
         type: "numericColumn",
         valueFormatter: (params: { value: number }) => {
           return params.value.toLocaleString();
@@ -264,7 +264,7 @@ export default function MockSettlementByStationPage() {
   }, [byStationData]);
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="space-y-6">
       <h1 className="text-2xl font-bold">모의정산 역사별 조회</h1>
 
       <FilterForm<MockSettlementByStationFilters>
@@ -331,7 +331,7 @@ export default function MockSettlementByStationPage() {
                       defaultColDef: {
                         sortable: false,
                         filter: false,
-                        resizable: true,
+                        resizable: false,
                         suppressMovable: true,
                       },
                     }}
@@ -428,7 +428,7 @@ export default function MockSettlementByStationPage() {
                 defaultColDef: {
                   sortable: false,
                   filter: false,
-                  resizable: true,
+                  resizable: false,
                   suppressMovable: true,
                 },
               }}

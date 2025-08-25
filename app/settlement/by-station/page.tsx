@@ -132,7 +132,7 @@ export default function SettlementByStationPage() {
   );
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold">역사별 정산결과 조회</h1>
       </div>
@@ -238,7 +238,7 @@ export default function SettlementByStationPage() {
                     defaultColDef: {
                       sortable: false,
                       filter: false,
-                      resizable: true,
+                      resizable: false,
                       suppressMovable: true, // 개별 컬럼 이동 비활성화
                     },
                   }}

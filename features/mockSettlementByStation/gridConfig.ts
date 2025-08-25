@@ -33,7 +33,7 @@ export function createMockSettlementByStationColDefs(
       headerName: "역명",
       field: "stn_nm",
       width: 150,
-      resizable: true,
+      resizable: false,
       pinned: "left",
       cellStyle: { fontWeight: "bold" },
     },
@@ -66,7 +66,7 @@ export function createMockSettlementByStationColDefs(
         field: key,
         flex: 1,
         minWidth: 120,
-        resizable: true,
+        resizable: false,
         type: "numericColumn",
         valueFormatter: (params) => {
           if (params.value != null && typeof params.value === "number") {
@@ -86,7 +86,7 @@ export function createMockSettlementByStationColDefs(
         field: key,
         flex: 1,
         minWidth: isNumber ? 120 : 150,
-        resizable: true,
+        resizable: false,
         type: isNumber ? "numericColumn" : undefined,
         valueFormatter: isNumber
           ? (params) => {

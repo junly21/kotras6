@@ -45,6 +45,9 @@ export default function TestGrid({
         suppressRowClickSelection={true} // 행 클릭 선택 비활성화
         suppressCellFocus={true} // 셀 포커스 비활성화
         suppressRowHoverHighlight={false} // 행 호버 하이라이트 허용
+        localeText={{
+          noRowsToShow: "조회된 결과가 없습니다. 조회를 진행해주세요",
+        }}
         // 숫자 색상 적용이 활성화된 경우 기본 스타일 설정
         {...(enableNumberColoring && {
           defaultColDef: {

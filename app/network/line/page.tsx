@@ -56,13 +56,6 @@ export default function NetworkLinePage() {
       agencyOptions.find((a) => a.value === filters.agency)?.label || "";
     const agencyLabel = agencyLabelRaw === "전체" ? "ALL" : agencyLabelRaw;
 
-    console.log("노선도 데이터 요청:", {
-      network: filters.network,
-      agency: filters.agency,
-      line: filters.line,
-      networkLabel: agencyLabel,
-    });
-
     return NetworkMapService.getMapData({
       network: filters.network,
       agency: filters.agency,
@@ -90,6 +83,7 @@ export default function NetworkLinePage() {
 
         const finalActiveLine =
           matchedLineNames.length > 0 ? matchedLineNames.join(",") : null;
+
         setActiveLine(finalActiveLine);
       } else {
         // 특정 노선 선택 시: 해당 노선만 하이라이트
@@ -99,8 +93,7 @@ export default function NetworkLinePage() {
     [filters.line, defaultLinks]
   );
 
-  const onError = useCallback((error: string) => {
-    console.error("노선도 데이터 로드 실패:", error);
+  const onError = useCallback(() => {
     setActiveLine(null); // 에러 시 하이라이트 제거
   }, []);
 

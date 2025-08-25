@@ -223,7 +223,7 @@ export function renderSvgNode(
           ...node,
           attributes: {
             ...node.attributes,
-            "pointer-events": "none",
+            pointerEvents: "none",
           },
         };
         return renderNodeElement(

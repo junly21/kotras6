@@ -180,7 +180,7 @@ export default function RouteSearchResultPage() {
   // 그리드 높이 동적 계산 - useMemo로 최적화
   const gridHeight = useMemo(() => {
     if (!processedResults || processedResults.length === 0) return 200;
-    const rowHeight = 35;
+    const rowHeight = 48;
     const headerHeight = 48;
     const minHeight = 200;
     const maxHeight = 480;
@@ -212,7 +212,7 @@ export default function RouteSearchResultPage() {
   const hasError = searchError;
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold">경로탐색 결과조회</h1>
       </div>
@@ -242,7 +242,6 @@ export default function RouteSearchResultPage() {
         values={filters}
         onChange={handleFilterChange}
         onSearch={handleSearchSubmit}
-        className="bg-gray-50"
       />
 
       {/* 결과 그리드 */}
@@ -282,7 +281,7 @@ export default function RouteSearchResultPage() {
               rowData={processedResults}
               columnDefs={colDefs}
               gridRef={gridRef}
-              height={gridHeight}
+              height={160}
               gridOptions={{
                 onRowClicked: onRowClicked,
                 rowSelection: "none", // 체크박스 사용하므로 단일 선택 비활성화

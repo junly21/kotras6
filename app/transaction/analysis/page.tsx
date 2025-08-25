@@ -192,7 +192,7 @@ export default function TransactionAnalysisPage() {
           columnDefs={colDefs}
           gridRef={gridRef}
           gridOptions={{
-            suppressColumnResize: true,
+            suppressColumnResize: false,
             suppressRowClickSelection: true,
             suppressCellFocus: true,
             headerHeight: 50,

@@ -145,10 +145,38 @@
   padding: 1.25em;
 }
 
+.ag-header-cell-text {
+  width: 100%;
+  text-align: center !important;
+}
+
 /*  */
 .text-destructive {
   position: absolute;
   top: 2.5em;
+}
+
+footer {
+  position: relative;
+}
+
+footer::before {
+  position: absolute;
+  content: '';
+  width: calc(100% - 2rem);
+  left: 50%;
+  transform: translateX(-50%);
+  top: 0;
+  height: 1px;
+  background-color: rgba(54,54,54,0.4);
+}
+
+.footer-logo {
+  display: block;
+  width: 160px;
+  height: 30px;
+  background: url('../public/footer-logo.svg') 50% 50% no-repeat;
+  background-size: 100%;
 }
 
 @layer base {

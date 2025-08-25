@@ -106,45 +106,45 @@ export default function SettlementByRoutePage() {
         </div>
       )}
 
-      {/* CSV Export 버튼을 그리드 상단에 배치 */}
-      {hasSearched && data.length > 0 && (
-        <div className="flex justify-end mb-2">
-          <CsvExportButton
-            gridRef={gridRef}
-            fileName="settlement_by_route_data.csv"
-            className="shadow-lg bg-accent-500"
-          />
-        </div>
-      )}
-
       {hasSearched && (
         <div className="space-y-4">
           {!loading && data.length > 0 && (
-            <div className="bg-white border border-gray-200 rounded-lg p-4">
-              <h3 className="text-lg font-semibold mb-4">노선별 조회 결과</h3>
-              <div className="h-96">
-                <TestGrid
-                  rowData={data}
-                  columnDefs={columnDefs}
-                  gridRef={gridRef}
-                  gridOptions={{
-                    headerHeight: 40, // 그룹핑된 헤더를 위한 높이 조정
-                    suppressCellFocus: true,
-                    suppressMovableColumns: true, // 컬럼 드래그 앤 드롭 비활성화
-                    suppressMenuHide: true, // 컬럼 메뉴 숨김 비활성화
-                    rowSelection: {
-                      enableClickSelection: false, // 행 클릭 선택 비활성화 (새로운 방식)
-                    },
-                    defaultColDef: {
-                      sortable: false,
-                      filter: false,
-                      resizable: false,
-                      suppressMovable: true, // 개별 컬럼 이동 비활성화
-                    },
-                  }}
-                />
+            <>
+              <div className="flex justify-between items-center">
+                <h3 className="text-lg font-semibold">노선별 조회 결과</h3>
+                {hasSearched && data.length > 0 && (
+                  <CsvExportButton
+                    gridRef={gridRef}
+                    fileName="settlement_by_route_data.csv"
+                    className="shadow-lg bg-accent-500"
+                  />
+                )}
               </div>
+              <div className="bg-white border border-gray-200 rounded-[24px] p-4">
+                <div className="h-[490px]">
+                  <TestGrid
+                    rowData={data}
+                    columnDefs={columnDefs}
+                    gridRef={gridRef}
+                    gridOptions={{
+                      headerHeight: 40, // 그룹핑된 헤더를 위한 높이 조정
+                      suppressCellFocus: true,
+                      suppressMovableColumns: true, // 컬럼 드래그 앤 드롭 비활성화
+                      suppressMenuHide: true, // 컬럼 메뉴 숨김 비활성화
+                      rowSelection: {
+                        enableClickSelection: false, // 행 클릭 선택 비활성화 (새로운 방식)
+                      },
+                      defaultColDef: {
+                        sortable: false,
+                        filter: false,
+                        resizable: false,
+                        suppressMovable: true, // 개별 컬럼 이동 비활성화
+                      },
+                    }}
+                  />
+                </div>
             </div>
+            </>
           )}
 
           {!loading && data.length === 0 && (

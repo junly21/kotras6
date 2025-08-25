@@ -20,6 +20,7 @@ export function createRouteSearchColDefs(
   return [
     {
       headerName: "선택",
+      resizable: false,
       field: "isSelected",
       width: 100,
       sortable: false,
@@ -45,6 +46,7 @@ export function createRouteSearchColDefs(
     },
     {
       headerName: "순번",
+      resizable: false,
       field: "rank",
       width: 100,
       sortable: true,
@@ -57,6 +59,7 @@ export function createRouteSearchColDefs(
     },
     {
       headerName: "출발역",
+      resizable: false,
       field: "startStation",
       minWidth: 150,
       flex: 1,
@@ -69,6 +72,7 @@ export function createRouteSearchColDefs(
     },
     {
       headerName: "도착역",
+      resizable: false,
       field: "endStation",
       minWidth: 150,
       flex: 1,
@@ -81,6 +85,7 @@ export function createRouteSearchColDefs(
     },
     {
       headerName: "경로",
+      resizable: false,
       field: "path",
       minWidth: 400,
       flex: 2,
@@ -115,6 +120,7 @@ export function createRouteSearchColDefs(
     },
     {
       headerName: "환승",
+      resizable: false,
       field: "transferCount",
       minWidth: 200,
       flex: 1,
@@ -138,6 +144,7 @@ export function createRouteSearchColDefs(
     },
     {
       headerName: "상세정보",
+      resizable: false,
       field: "detail",
       minWidth: 150,
       flex: 1,

@@ -96,7 +96,8 @@ export function createSettlementByRouteColDefs(
       group.columns.push({
         headerName: type === "지급" ? "지급" : "수급",
         field: key,
-        width: 170,
+        minWidth: 170,
+        flex: 1,
         resizable: false,
         type: "numericColumn",
         valueFormatter: (params) => {
@@ -115,7 +116,8 @@ export function createSettlementByRouteColDefs(
       columns.push({
         headerName: key,
         field: key,
-        width: isNumber ? 120 : 150,
+        minWidth: isNumber ? 120 : 150,
+        flex: 1,
         resizable: false,
         type: isNumber ? "numericColumn" : undefined,
         valueFormatter: isNumber

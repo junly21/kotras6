@@ -157,7 +157,7 @@ export default function SettingsLogsPage() {
             gridRef={gridRef}
             height={600}
             gridOptions={{
-              suppressColumnResize: true,
+              suppressColumnResize: false,
               suppressRowClickSelection: true,
               suppressCellFocus: true,
               headerHeight: 50,

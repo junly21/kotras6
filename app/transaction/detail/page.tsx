@@ -317,7 +317,7 @@ export default function TransactionDetailPage() {
                 : []
             }
             gridOptions={{
-              suppressColumnResize: true,
+              suppressColumnResize: false,
               suppressRowClickSelection: true,
               suppressCellFocus: true,
               headerHeight: 50,

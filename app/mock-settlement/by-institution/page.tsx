@@ -322,7 +322,7 @@ export default function MockSettlementByInstitutionPage() {
         </div>
 
         {/* 좌우 그리드 레이아웃 */}
-        <div className="grid grid-cols-2 gap-6 h-[600px]">
+        <div className="grid grid-cols-2 gap-6 h-[525px]">
           {/* 왼쪽: 기관별 조회 결과 그리드 */}
           <div className="flex flex-col h-full">
             <h2 className="text-lg font-semibold">기관별 조회 결과 목록</h2>
@@ -337,7 +337,7 @@ export default function MockSettlementByInstitutionPage() {
                 columnDefs={byInstitutionColumnDefs}
                 gridRef={byInstitutionGridRef}
                 gridOptions={{
-                  suppressColumnResize: true,
+                  suppressColumnResize: false,
                   suppressRowClickSelection: true,
                   suppressCellFocus: true,
                   headerHeight: 50,

@@ -310,7 +310,7 @@ export default function NetworkFileUploadPage() {
                 columnDefs={networkFileUploadColDefs}
                 gridRef={gridRef}
                 gridOptions={gridOptions}
-                height={200}
+                height={160}
               />
             )}
 

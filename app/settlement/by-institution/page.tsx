@@ -187,7 +187,7 @@ export default function SettlementByInstitutionPage() {
       </div>
 
       {/* 원단위 변경 및 CSV 내보내기 버튼 */}
-      <div className="flex justify-end gap-4">
+      <div className="flex justify-between gap-4">
         <UnitRadioGroup value={unit} onChange={setUnit} />
         <CsvExportButton
           gridRef={gridRef}
@@ -197,7 +197,7 @@ export default function SettlementByInstitutionPage() {
       </div>
 
       {/* 좌우 그리드 레이아웃 */}
-      <div className="grid grid-cols-2 gap-6 h-[600px]">
+      <div className="grid grid-cols-2 gap-6 h-[525px]">
         {/* 왼쪽: 정산결과 그리드 */}
         <div className="flex flex-col h-full">
           <h2 className="text-lg font-semibold">정산결과 목록</h2>
@@ -212,7 +212,7 @@ export default function SettlementByInstitutionPage() {
               columnDefs={colDefs}
               gridRef={gridRef}
               gridOptions={{
-                suppressColumnResize: true,
+                suppressColumnResize: false,
                 suppressRowClickSelection: true,
                 suppressCellFocus: true,
                 headerHeight: 50,

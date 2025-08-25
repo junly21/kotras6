@@ -180,7 +180,7 @@ export default function RouteSearchResultPage() {
   // 그리드 높이 동적 계산 - useMemo로 최적화
   const gridHeight = useMemo(() => {
     if (!processedResults || processedResults.length === 0) return 200;
-    const rowHeight = 48;
+    const rowHeight = 35;
     const headerHeight = 48;
     const minHeight = 200;
     const maxHeight = 480;

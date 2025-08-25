@@ -216,7 +216,7 @@ export default function SettlementByInstitutionPage() {
                 suppressRowClickSelection: true,
                 suppressCellFocus: true,
                 headerHeight: 50,
-                rowHeight: 45,
+                rowHeight: 35,
                 suppressScrollOnNewData: true,
               }}
             />

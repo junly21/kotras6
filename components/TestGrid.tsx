@@ -41,6 +41,7 @@ export default function TestGrid({
         columnDefs={columnDefs}
         pinnedBottomRowData={pinnedBottomRowData}
         // 기본 그리드 옵션
+        rowHeight={35}
         suppressColumnResize={false} // 컬럼 리사이징 허용 (개별 컬럼에서 제어)
         suppressRowClickSelection={true} // 행 클릭 선택 비활성화
         suppressCellFocus={true} // 셀 포커스 비활성화

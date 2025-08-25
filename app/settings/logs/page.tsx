@@ -161,7 +161,7 @@ export default function SettingsLogsPage() {
               suppressRowClickSelection: true,
               suppressCellFocus: true,
               headerHeight: 50,
-              rowHeight: 45,
+              rowHeight: 35,
               suppressScrollOnNewData: true,
             }}
           />

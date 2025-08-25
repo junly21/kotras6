@@ -341,7 +341,6 @@ export default function MockSettlementByInstitutionPage() {
                   suppressRowClickSelection: true,
                   suppressCellFocus: true,
                   headerHeight: 50,
-                  rowHeight: 45,
                   suppressScrollOnNewData: true,
                 }}
               />

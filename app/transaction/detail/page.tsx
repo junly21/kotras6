@@ -321,7 +321,7 @@ export default function TransactionDetailPage() {
               suppressRowClickSelection: true,
               suppressCellFocus: true,
               headerHeight: 50,
-              rowHeight: 45,
+              rowHeight: 35,
               suppressScrollOnNewData: true,
               // domLayout 제거하여 고정 높이로 설정
             }}

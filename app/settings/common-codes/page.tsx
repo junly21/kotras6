@@ -299,7 +299,7 @@ export default function SettingsCommonCodesPage() {
               suppressRowClickSelection: false,
               suppressCellFocus: false,
               headerHeight: 50,
-              rowHeight: 45,
+              rowHeight: 35,
               suppressScrollOnNewData: true,
               rowSelection: "multiple",
               onRowDoubleClicked: onRowDoubleClicked,

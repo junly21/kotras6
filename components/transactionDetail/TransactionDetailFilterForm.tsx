@@ -385,13 +385,13 @@ export function TransactionDetailFilterForm({
           <Button type="submit" className="rounded-lg">
             조회
           </Button>
-          <Button
+          {/* <Button
             type="button"
             className="rounded-lg"
             variant="outline"
             onClick={() => form.reset()}>
             초기화
-          </Button>
+          </Button> */}
         </div>
       </form>
 

@@ -8,7 +8,7 @@ export function RouteSummary({ route }: RouteSummaryProps) {
   // 시간을 분:초 형식으로 변환하는 함수
   const formatTime = (seconds: number) => {
     const minutes = Math.floor(seconds / 60);
-    const remainingSeconds = seconds % 60;
+    const remainingSeconds = Math.floor(seconds % 60);
     return `${minutes}분 ${remainingSeconds}초`;
   };
 
@@ -27,12 +27,12 @@ export function RouteSummary({ route }: RouteSummaryProps) {
           </div>
           <div className="flex items-center">
             <span className="text-blue-600 font-medium">거리:</span>
-            <span className="ml-2">{route.km}km</span>
+            <span className="ml-2">{route.km.toFixed(3)}km</span>
           </div>
           <div className="flex items-center">
             <span className="text-blue-600 font-medium">소요시간:</span>
             <span className="ml-2">
-              {Math.round(route.sta_pass_sec / 60)}분
+              {Math.floor(route.sta_pass_sec / 60)}분
             </span>
           </div>
           <div className="flex items-center">

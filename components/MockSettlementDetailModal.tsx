@@ -7,8 +7,11 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import Spinner from "@/components/Spinner";
+import { MockSettlementRegisterData } from "@/types/mockSettlementRegister";
+import { MockSettlementResultData } from "@/types/mockSettlementResult";
 
 interface MockSettlementDetailData {
+  simStmtGrpId: string;
   settlementName: string;
   transactionDate: string;
   tagAgency: string;
@@ -17,27 +20,37 @@ interface MockSettlementDetailData {
   distanceKm: number;
   weightRatio: string;
   registrationDate: string;
-  // 추가 상세 필드들
-  totalAmount?: number;
-  passengerCount?: number;
-  routeDetails?: Array<{
-    fromStation: string;
-    toStation: string;
-    distance: number;
-    fare: number;
-  }>;
+  status: "대기" | "완료";
 }
 
 interface MockSettlementDetailModalProps {
   isOpen: boolean;
   onClose: () => void;
   simStmtGrpId: string;
+  gridData?: MockSettlementRegisterData | MockSettlementResultData;
 }
+
+/** =============================
+ *  레이아웃 유틸 클래스 (MockSettlementModal과 동일)
+ *  ============================= */
+// 섹션: 반응형 그리드 (FHD에서 4열)
+const sectionCols =
+  "grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4";
+// 필드(한 줄): 라벨 고정폭 + 값 가변폭
+const fieldRow =
+  "grid grid-cols-[var(--label-w)_minmax(0,1fr)] items-center gap-3";
+// 라벨: 한 줄 유지
+const labelCx =
+  "text-sm font-medium whitespace-nowrap leading-tight text-gray-500";
+// 값: 입력칸과 동일한 스타일
+const valueCx =
+  "text-base bg-gray-50 px-3 py-2 rounded-md border border-gray-200";
 
 export function MockSettlementDetailModal({
   isOpen,
   onClose,
   simStmtGrpId,
+  gridData,
 }: MockSettlementDetailModalProps) {
   const [detailData, setDetailData] = useState<MockSettlementDetailData | null>(
     null
@@ -48,6 +61,10 @@ export function MockSettlementDetailModal({
   // 모달이 열릴 때마다 상세 데이터 조회
   useEffect(() => {
     if (isOpen && simStmtGrpId) {
+      console.log(
+        "MockSettlementDetailModal - 모달 열림, simStmtGrpId:",
+        simStmtGrpId
+      );
       fetchDetailData();
     }
   }, [isOpen, simStmtGrpId]);
@@ -57,28 +74,36 @@ export function MockSettlementDetailModal({
     setError(null);
 
     try {
-      const response = await fetch("/api/mock-settlement/settlement-info", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          simStmtGrpId,
-        }),
-      });
+      console.log("MockSettlementDetailModal - fetchDetailData 호출됨");
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
+      if (gridData) {
+        // 그리드에서 받은 실제 데이터 사용
+        const actualData: MockSettlementDetailData = {
+          simStmtGrpId:
+            "simStmtGrpId" in gridData
+              ? gridData.simStmtGrpId
+              : gridData.settlementName,
+          settlementName: gridData.settlementName,
+          transactionDate: gridData.transactionDate,
+          tagAgency: gridData.tagAgency,
+          initialLine: gridData.initialLine,
+          lineSection: gridData.lineSection,
+          distanceKm: gridData.distanceKm,
+          weightRatio:
+            "weightRatio" in gridData ? gridData.weightRatio : "1:1:1",
+          registrationDate:
+            "registrationDate" in gridData ? gridData.registrationDate : "N/A",
+          status: "status" in gridData ? gridData.status : "완료",
+        };
 
-      const result = await response.json();
-
-      if (Array.isArray(result) && result.length > 0) {
-        setDetailData(result[0]);
-      } else if (result.error) {
-        setError(result.error);
+        setDetailData(actualData);
+        console.log(
+          "MockSettlementDetailModal - 실제 데이터 설정:",
+          actualData
+        );
       } else {
-        setError("상세 데이터를 찾을 수 없습니다.");
+        // gridData가 없는 경우 에러
+        setError("그리드 데이터를 찾을 수 없습니다.");
       }
     } catch (error) {
       console.error("모의정산 상세 데이터 조회 에러:", error);
@@ -93,16 +118,16 @@ export function MockSettlementDetailModal({
   };
 
   const handleClose = () => {
-    if (!isLoading) {
-      setDetailData(null);
-      setError(null);
-      onClose();
-    }
+    console.log("MockSettlementDetailModal - 모달 닫힘");
+    setDetailData(null);
+    setError(null);
+    onClose();
   };
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+      {/* MockSettlementModal과 동일한 폭 + 스크롤 */}
+      <DialogContent className="w-[1600px] max-w-[95vw] 2xl:w-[1760px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-xl font-bold">
             모의정산 상세 정보
@@ -125,135 +150,119 @@ export function MockSettlementDetailModal({
         {detailData && !isLoading && (
           <div className="space-y-6">
             {/* 기본 정보 */}
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-3">
-                <div>
-                  <label className="text-sm font-medium min-w-[40px] text-gray-500">
-                    정산명
-                  </label>
-                  <p className="text-base">{detailData.settlementName}</p>
+            <div className="space-y-4 [--label-w:160px]">
+              <h3 className="text-lg font-semibold border-b pb-2">기본 정보</h3>
+              <div className={sectionCols}>
+                <div className={fieldRow}>
+                  <span className={labelCx}>정산명 *</span>
+                  <div className={valueCx}>{detailData.settlementName}</div>
                 </div>
-                <div>
-                  <label className="text-sm font-medium text-gray-500">
-                    거래일자
-                  </label>
-                  <p className="text-base">{detailData.transactionDate}</p>
+                <div className={fieldRow}>
+                  <span className={labelCx}>거래일자 *</span>
+                  <div className={valueCx}>{detailData.transactionDate}</div>
                 </div>
-                <div>
-                  <label className="text-sm font-medium text-gray-500">
-                    태그기관
-                  </label>
-                  <p className="text-base">{detailData.tagAgency}</p>
-                </div>
-                <div>
-                  <label className="text-sm font-medium text-gray-500">
-                    초승노선
-                  </label>
-                  <p className="text-base">{detailData.initialLine}</p>
-                </div>
-              </div>
-
-              <div className="space-y-3">
-                <div>
-                  <label className="text-sm font-medium text-gray-500">
-                    노선동등
-                  </label>
-                  <p className="text-base">{detailData.lineSection}</p>
-                </div>
-                <div>
-                  <label className="text-sm font-medium text-gray-500">
-                    인.km
-                  </label>
-                  <p className="text-base">
-                    {detailData.distanceKm?.toLocaleString()}
-                  </p>
-                </div>
-                <div>
-                  <label className="text-sm font-medium text-gray-500">
-                    가중치(지상:지하:고가)
-                  </label>
-                  <p className="text-base">{detailData.weightRatio}</p>
-                </div>
-                <div>
-                  <label className="text-sm font-medium text-gray-500">
-                    등록일자
-                  </label>
-                  <p className="text-base">{detailData.registrationDate}</p>
+                <div className={fieldRow}>
+                  <span className={labelCx}>등록일자</span>
+                  <div className={valueCx}>{detailData.registrationDate}</div>
                 </div>
               </div>
             </div>
 
-            {/* 추가 상세 정보 */}
-            {detailData.totalAmount && (
-              <div className="border-t pt-4">
-                <h3 className="text-lg font-semibold mb-3">정산 요약</h3>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="text-sm font-medium text-gray-500">
-                      총 정산 금액
-                    </label>
-                    <p className="text-lg font-bold text-blue-600">
-                      {detailData.totalAmount.toLocaleString()}원
-                    </p>
-                  </div>
-                  {detailData.passengerCount && (
-                    <div>
-                      <label className="text-sm font-medium text-gray-500">
-                        총 승객 수
-                      </label>
-                      <p className="text-lg font-bold text-green-600">
-                        {detailData.passengerCount.toLocaleString()}명
-                      </p>
-                    </div>
-                  )}
+            {/* 기본운임 배분 비율 */}
+            <div className="space-y-4 [--label-w:160px]">
+              <h3 className="text-lg font-semibold border-b pb-2">
+                기본운임 배분 비율
+              </h3>
+              <div className={sectionCols}>
+                <div className={fieldRow}>
+                  <span className={labelCx}>태그기관 비율 (%)</span>
+                  <div className={valueCx}>{detailData.tagAgency}</div>
+                </div>
+                <div className={fieldRow}>
+                  <span className={labelCx}>초승노선 비율 (%)</span>
+                  <div className={valueCx}>{detailData.initialLine}</div>
+                </div>
+                <div className={fieldRow}>
+                  <span className={labelCx}>노선동등 비율 (%)</span>
+                  <div className={valueCx}>{detailData.lineSection}</div>
+                </div>
+                <div className={fieldRow}>
+                  <span className={labelCx}>인·km 비율 (%)</span>
+                  <div className={valueCx}>{detailData.distanceKm}%</div>
                 </div>
               </div>
-            )}
+            </div>
 
-            {/* 노선 상세 정보 */}
-            {detailData.routeDetails && detailData.routeDetails.length > 0 && (
-              <div className="border-t pt-4">
-                <h3 className="text-lg font-semibold mb-3">노선 상세 정보</h3>
-                <div className="overflow-x-auto">
-                  <table className="min-w-full border border-gray-200">
-                    <thead className="bg-gray-50">
-                      <tr>
-                        <th className="px-4 py-2 text-left text-sm font-medium text-gray-500 border-b">
-                          출발역
-                        </th>
-                        <th className="px-4 py-2 text-left text-sm font-medium text-gray-500 border-b">
-                          도착역
-                        </th>
-                        <th className="px-4 py-2 text-right text-sm font-medium text-gray-500 border-b">
-                          거리(km)
-                        </th>
-                        <th className="px-4 py-2 text-right text-sm font-medium text-gray-500 border-b">
-                          요금(원)
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {detailData.routeDetails.map((route, index) => (
-                        <tr key={index} className="hover:bg-gray-50">
-                          <td className="px-4 py-2 border-b">
-                            {route.fromStation}
-                          </td>
-                          <td className="px-4 py-2 border-b">
-                            {route.toStation}
-                          </td>
-                          <td className="px-4 py-2 text-right border-b">
-                            {route.distance.toFixed(2)}
-                          </td>
-                          <td className="px-4 py-2 text-right border-b">
-                            {route.fare.toLocaleString()}
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
+            {/* 기본운임 인·km 가중치 */}
+            <div className="space-y-4 [--label-w:160px]">
+              <h3 className="text-lg font-semibold border-b pb-2">
+                기본운임 인·km 가중치
+              </h3>
+              <div className={sectionCols}>
+                <div className={fieldRow}>
+                  <span className={labelCx}>지하 가중치</span>
+                  <div className={valueCx}>1</div>
+                </div>
+                <div className={fieldRow}>
+                  <span className={labelCx}>고가 가중치</span>
+                  <div className={valueCx}>1</div>
+                </div>
+                <div className={fieldRow}>
+                  <span className={labelCx}>가중치 비율</span>
+                  <div className={valueCx}>{detailData.weightRatio}</div>
                 </div>
               </div>
-            )}
+            </div>
+
+            {/* 도시철도부가사용금 인·km 가중치 */}
+            <div className="space-y-4 [--label-w:160px]">
+              <h3 className="text-lg font-semibold border-b pb-2">
+                도시철도부가사용금 인·km 가중치
+              </h3>
+              <div className={sectionCols}>
+                <div className={fieldRow}>
+                  <span className={labelCx}>도시철도 지하 가중치</span>
+                  <div className={valueCx}>1</div>
+                </div>
+                <div className={fieldRow}>
+                  <span className={labelCx}>도시철도 고가 가중치</span>
+                  <div className={valueCx}>1</div>
+                </div>
+                <div className={fieldRow}>
+                  <span className={labelCx}>도시철도 가중치 비율</span>
+                  <div className={valueCx}>1:1:1</div>
+                </div>
+              </div>
+            </div>
+
+            {/* 수송기여도 */}
+            <div className="space-y-4 [--label-w:160px]">
+              <h3 className="text-lg font-semibold border-b pb-2">
+                수송기여도
+              </h3>
+              <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
+                {[
+                  "한국철도공사",
+                  "서울교통공사",
+                  "인천교통공사",
+                  "공항철도",
+                  "서울시메트로9호선",
+                  "신분당선",
+                  "의정부경전철",
+                  "용인경전철",
+                  "경기철도",
+                  "우이신설경전철",
+                  "김포시청",
+                  "신림선",
+                  "새서울철도",
+                ].map((agency) => (
+                  <div key={agency} className={fieldRow}>
+                    <span className={labelCx}>{agency}</span>
+                    <div className={valueCx}>1.0</div>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
         )}
 

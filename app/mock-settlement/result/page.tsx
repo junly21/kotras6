@@ -208,6 +208,29 @@ export default function MockSettlementResultPage() {
     },
   ];
 
+  // 숫자 컬럼용 동적 스타일 함수
+  const getNumberCellStyle = (params: { value: number }) => {
+    const num = Number(params.value);
+    const color = num > 0 ? "#dc2626" : num < 0 ? "#2563eb" : "#000000";
+    return {
+      textAlign: "right" as const,
+      color: color,
+    };
+  };
+
+  // 숫자 컬럼용 포맷터 함수
+  const getNumberFormatter = (params: { value: number }) => {
+    if (params.value == null) return "";
+    const num = Number(params.value);
+    if (unit === "원") {
+      return Math.floor(num).toLocaleString();
+    }
+    return num.toLocaleString(undefined, {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    });
+  };
+
   // 하단 그리드 컬럼 정의 (settlement/overview와 동일)
   const settlementColumnDefs = [
     {
@@ -216,21 +239,92 @@ export default function MockSettlementResultPage() {
         params.node?.rowPinned ? "Total" : (params.node?.rowIndex ?? 0) + 1,
       width: 60,
       pinned: "left",
+      cellStyle: { textAlign: "center" },
     },
-    { headerName: "기관", field: "pay_oper" },
-    { headerName: "용인경전철", field: "용인경전철" },
-    { headerName: "공항철도", field: "공항철도" },
-    { headerName: "새서울철도", field: "새서울철도" },
-    { headerName: "인천교통공사", field: "인천교통공사" },
-    { headerName: "서울시메트로9호선", field: "서울시메트로9호선" },
-    { headerName: "의정부경전철", field: "의정부경전철" },
-    { headerName: "서울교통공사", field: "서울교통공사" },
-    { headerName: "김포시청", field: "김포시청" },
-    { headerName: "한국철도공사", field: "한국철도공사" },
-    { headerName: "우이신설경전철", field: "우이신설경전철" },
-    { headerName: "신림선", field: "신림선" },
-    { headerName: "신분당선", field: "신분당선" },
-    { headerName: "경기철도", field: "경기철도" },
+    {
+      headerName: "기관",
+      field: "pay_oper",
+      pinned: "left",
+      width: 120,
+    },
+    {
+      headerName: "용인경전철",
+      field: "용인경전철",
+      cellStyle: getNumberCellStyle,
+      valueFormatter: getNumberFormatter,
+    },
+    {
+      headerName: "공항철도",
+      field: "공항철도",
+      cellStyle: getNumberCellStyle,
+      valueFormatter: getNumberFormatter,
+    },
+    {
+      headerName: "새서울철도",
+      field: "새서울철도",
+      cellStyle: getNumberCellStyle,
+      valueFormatter: getNumberFormatter,
+    },
+    {
+      headerName: "인천교통공사",
+      field: "인천교통공사",
+      cellStyle: getNumberCellStyle,
+      valueFormatter: getNumberFormatter,
+    },
+    {
+      headerName: "서울시메트로9호선",
+      field: "서울시메트로9호선",
+      cellStyle: getNumberCellStyle,
+      valueFormatter: getNumberFormatter,
+    },
+    {
+      headerName: "의정부경전철",
+      field: "의정부경전철",
+      cellStyle: getNumberCellStyle,
+      valueFormatter: getNumberFormatter,
+    },
+    {
+      headerName: "서울교통공사",
+      field: "서울교통공사",
+      cellStyle: getNumberCellStyle,
+      valueFormatter: getNumberFormatter,
+    },
+    {
+      headerName: "김포시청",
+      field: "김포시청",
+      cellStyle: getNumberCellStyle,
+      valueFormatter: getNumberFormatter,
+    },
+    {
+      headerName: "한국철도공사",
+      field: "한국철도공사",
+      cellStyle: getNumberCellStyle,
+      valueFormatter: getNumberFormatter,
+    },
+    {
+      headerName: "우이신설경전철",
+      field: "우이신설경전철",
+      cellStyle: getNumberCellStyle,
+      valueFormatter: getNumberFormatter,
+    },
+    {
+      headerName: "신림선",
+      field: "신림선",
+      cellStyle: getNumberCellStyle,
+      valueFormatter: getNumberFormatter,
+    },
+    {
+      headerName: "신분당선",
+      field: "신분당선",
+      cellStyle: getNumberCellStyle,
+      valueFormatter: getNumberFormatter,
+    },
+    {
+      headerName: "경기철도",
+      field: "경기철도",
+      cellStyle: getNumberCellStyle,
+      valueFormatter: getNumberFormatter,
+    },
   ];
 
   // 하단 그리드 데이터에 단위 변환 적용
@@ -271,7 +365,7 @@ export default function MockSettlementResultPage() {
 
       {/* 상단: 모의정산 결과 그리드 */}
       {!hasSearched && (
-        <div className="bg-gray-50 border flex flex-col justify-center items-center h-[162px] border-2 border-dashed border-gray-300 rounded-lg p-16">
+        <div className="bg-gray-50 border flex flex-col justify-center items-center h-[140px] border-2 border-dashed border-gray-300 rounded-lg p-16">
           <div className="text-center text-gray-500">
             <p className="text-lg font-medium">모의정산 결과</p>
             <p className="text-sm">
@@ -323,19 +417,20 @@ export default function MockSettlementResultPage() {
       )}
 
       {/* 하단: 정산결과 그리드 */}
-      <div className="space-y-4">
-        <div className="flex justify-between items-center">
-          <h3 className="text-lg font-semibold">정산결과</h3>
-          <div className="flex items-center gap-4">
-            <UnitRadioGroup value={unit} onChange={setUnit} />
-            <CsvExportButton
-              gridRef={settlementGridRef}
-              fileName="settlement_result_data.csv"
-              className="shadow-lg bg-accent-500"
-            />
-          </div>
-        </div>
 
+      <div className="space-y-4">
+        {hasSearched && (
+          <div className="flex justify-between items-center">
+            <UnitRadioGroup value={unit} onChange={setUnit} />
+            <div className="flex items-center gap-4">
+              <CsvExportButton
+                gridRef={settlementGridRef}
+                fileName="settlement_result_data.csv"
+                className="shadow-lg bg-accent-500"
+              />
+            </div>
+          </div>
+        )}
         <div className="bg-white border border-gray-200 rounded-[24px] p-4">
           <div className="h-[500px]">
             <TestGrid

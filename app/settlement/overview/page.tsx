@@ -63,17 +63,18 @@ export default function TestGridPage() {
   });
 
   // 숫자 컬럼용 동적 스타일 함수
-  const getNumberCellStyle = (params: any) => {
+  const getNumberCellStyle = (params: { value: number }) => {
     const num = Number(params.value);
     const color = num > 0 ? "#dc2626" : num < 0 ? "#2563eb" : "#000000";
     return {
       textAlign: "right" as const,
       color: color,
+      fontWeight: "bold",
     };
   };
 
   // 숫자 컬럼용 포맷터 함수
-  const getNumberFormatter = (params: any) => {
+  const getNumberFormatter = (params: { value: number }) => {
     if (params.value == null) return "";
     const num = Number(params.value);
     if (unit === "원") {
@@ -216,6 +217,9 @@ export default function TestGridPage() {
           gridRef={gridRef}
           height={750}
           enableNumberColoring={true}
+          gridOptions={{
+            rowHeight: 48,
+          }}
         />
       </div>
 

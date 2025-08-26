@@ -423,15 +423,29 @@ export default function MockSettlementByOdPage() {
 
       {/* 결과 영역 */}
       {!hasSearched && (
-        <div className="bg-gray-50 flex flex-col justify-center items-center h-[590px] border-2 border-dashed border-gray-300 rounded-lg p-16">
-          <div className="text-center text-gray-500">
-            <p className="text-lg font-medium">조회 결과</p>
-            <p className="text-sm">
-              정산그룹, 출발역, 도착역을 선택하고 조회 버튼을 누르면 결과가
-              표시됩니다.
-            </p>
+        <>
+          {/* 상단: 모의정산 정보 안내 */}
+          <div className="bg-gray-50 border flex flex-col justify-center items-center h-[140px] border-2 border-dashed border-gray-300 rounded-lg p-16 mb-4">
+            <div className="text-center text-gray-500">
+              <p className="text-lg font-medium">모의정산 정보</p>
+              <p className="text-sm">
+                정산명, 출발역, 도착역을 선택하고 조회 버튼을 누르면 모의정산
+                정보가 표시됩니다.
+              </p>
+            </div>
           </div>
-        </div>
+
+          {/* 하단: OD별 조회 결과 안내 */}
+          <div className="bg-gray-50 flex flex-col justify-center items-center h-[450px] border-2 border-dashed border-gray-300 rounded-lg p-16">
+            <div className="text-center text-gray-500">
+              <p className="text-lg font-medium">OD별 조회 결과</p>
+              <p className="text-sm">
+                정산명, 출발역, 도착역을 선택하고 조회 버튼을 누르면 OD별
+                정산결과가 표시됩니다.
+              </p>
+            </div>
+          </div>
+        </>
       )}
 
       {hasSearched && (

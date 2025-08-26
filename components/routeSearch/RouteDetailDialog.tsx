@@ -40,7 +40,9 @@ export function RouteDetailDialog({
               </p>
             </div>
             <div>
-              <h3 className="text-sm font-medium text-gray-500 mb-1">요금</h3>
+              <h3 className="text-sm font-medium text-gray-500 mb-1">
+                시간비용
+              </h3>
               <p className="text-lg font-semibold">
                 {route.cost?.toLocaleString()}원
               </p>

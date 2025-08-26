@@ -31,16 +31,16 @@ export function OptimalRouteMap({ route }: OptimalRouteMapProps) {
     <div className="bg-white border border-gray-200 rounded-lg p-4">
       <h3 className="text-lg font-semibold text-gray-800 mb-3">노선도</h3>
       {isMapLoading ? (
-        <div className="flex items-center justify-center h-96">
+        <div className="flex items-center justify-center h-[464px]">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
           <span className="ml-2 text-gray-600">노선도를 불러오는 중...</span>
         </div>
       ) : mapError ? (
-        <div className="flex items-center justify-center h-96 text-red-600">
+        <div className="flex items-center justify-center h-[464px] text-red-600">
           노선도 로드 실패: {mapError}
         </div>
       ) : (
-        <div className="h-96">
+        <div className="h-[464px]">
           <NetworkMap
             nodes={nodes}
             links={links}
@@ -48,11 +48,11 @@ export function OptimalRouteMap({ route }: OptimalRouteMapProps) {
             highlights={routeHighlights}
             config={{
               width: "100%",
-              height: 360,
+              height: 440,
               showZoomControls: true,
               showTooltips: true,
-              defaultZoom: 1,
-              defaultPan: { x: -2400, y: -2500 },
+              defaultZoom: 0.3,
+              defaultPan: { x: -1200, y: -1500 },
             }}
           />
         </div>

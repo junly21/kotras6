@@ -13,10 +13,10 @@ export function RouteSummary({ route }: RouteSummaryProps) {
   };
 
   return (
-    <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-      <h3 className="text-lg font-semibold text-blue-800 mb-3">경로 요약</h3>
-      <div className="space-y-3">
-        <div className="grid grid-cols-2 gap-4">
+    <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 h-[200px] flex flex-col">
+      <h3 className="text-lg font-semibold text-blue-800 mb-2">경로 요약</h3>
+      <div className="space-y-2 flex-1">
+        <div className="grid grid-cols-2 gap-3 text-sm">
           <div className="flex items-center">
             <span className="text-blue-600 font-medium">출발역:</span>
             <span className="ml-2">{route.start_node}</span>
@@ -47,21 +47,25 @@ export function RouteSummary({ route }: RouteSummaryProps) {
             <span className="text-blue-600 font-medium">환승대기시간:</span>
             <span className="ml-2">{formatTime(route.trans_sty_sec)}</span>
           </div>
-        </div>
-        {route.transfer_list && route.transfer_list.length > 0 && (
-          <div>
+          <div className="flex items-center">
             <span className="text-blue-600 font-medium">환승역:</span>
-            <div className="flex flex-wrap gap-1 mt-1">
-              {route.transfer_list.map((station, idx) => (
-                <span
-                  key={idx}
-                  className="px-2 py-1 bg-blue-100 text-blue-800 rounded text-sm">
-                  {station}
-                </span>
-              ))}
-            </div>
+            <span className="ml-2">
+              {route.transfer_list && route.transfer_list.length > 0 ? (
+                <div className="flex flex-wrap gap-1">
+                  {route.transfer_list.map((station, idx) => (
+                    <span
+                      key={idx}
+                      className="px-1.5 py-0.5 bg-blue-100 text-blue-800 rounded text-xs">
+                      {station}
+                    </span>
+                  ))}
+                </div>
+              ) : (
+                <span className="text-gray-500">-</span>
+              )}
+            </span>
           </div>
-        )}
+        </div>
       </div>
     </div>
   );

@@ -216,12 +216,12 @@ export default function NetworkOptimalRoutePage() {
           <div className="space-y-6 opacity-50">
             {/* 상단: 경로 요약 + 상세 경로 미리보기 */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <div className="bg-blue-50 border border-blue-200 rounded-[24px] p-4">
-                <h3 className="text-lg font-semibold text-blue-800 mb-3">
+              <div className="bg-blue-50 border border-blue-200 rounded-[24px] p-3 h-[200px] flex flex-col">
+                <h3 className="text-lg font-semibold text-blue-800 mb-2">
                   경로 요약
                 </h3>
-                <div className="space-y-3">
-                  <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2 flex-1">
+                  <div className="grid grid-cols-2 gap-3 text-sm">
                     <div className="flex items-center">
                       <span className="text-blue-600 font-medium">출발역:</span>
                       <span className="ml-2 text-gray-400">-</span>
@@ -250,16 +250,26 @@ export default function NetworkOptimalRoutePage() {
                       </span>
                       <span className="ml-2 text-gray-400">-</span>
                     </div>
+                    <div className="flex items-center">
+                      <span className="text-blue-600 font-medium">
+                        환승대기시간:
+                      </span>
+                      <span className="ml-2 text-gray-400">-</span>
+                    </div>
+                    <div className="flex items-center">
+                      <span className="text-blue-600 font-medium">환승역:</span>
+                      <span className="ml-2 text-gray-400">-</span>
+                    </div>
                   </div>
                 </div>
               </div>
 
-              <div className="bg-gray-50 border border-gray-200 rounded-[24px] p-4">
-                <h3 className="text-lg font-semibold text-gray-800 mb-3">
+              <div className="bg-gray-50 border border-gray-200 rounded-[24px] p-3 h-[200px] flex flex-col">
+                <h3 className="text-lg font-semibold text-gray-800 mb-2">
                   상세 경로
                 </h3>
-                <div className="space-y-2 max-h-64 overflow-y-auto">
-                  <div className="text-gray-400 text-center py-8">
+                <div className="space-y-2 flex-1 flex items-center justify-center">
+                  <div className="text-gray-400 text-center">
                     경로 정보가 여기에 표시됩니다
                   </div>
                 </div>
@@ -269,7 +279,7 @@ export default function NetworkOptimalRoutePage() {
             {/* 하단: 노선도 미리보기 */}
             <h3 className="text-lg font-semibold text-gray-800 mb-3">노선도</h3>
             <div className="bg-white border border-gray-200 rounded-[24px] p-4">
-              <div className="h-96 bg-gray-50 border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center">
+              <div className="h-[400px] bg-gray-50 border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center">
                 <div className="text-center text-gray-400">
                   <svg
                     className="w-16 h-16 mx-auto mb-4"

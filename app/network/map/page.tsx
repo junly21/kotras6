@@ -206,7 +206,7 @@ export default function NetworkMapPage() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-bold">지도 조회</h1>
+      <h1 className="text-2xl font-bold">네트워크 지도 조회</h1>
 
       {/* 공통 FilterForm 적용 */}
       <FilterForm<NetworkMapFilters>

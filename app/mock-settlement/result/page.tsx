@@ -421,8 +421,9 @@ export default function MockSettlementResultPage() {
       <div className="space-y-4">
         {hasSearched && (
           <div className="flex justify-between items-center">
-            <UnitRadioGroup value={unit} onChange={setUnit} />
+            <h3 className="text-lg font-semibold">정산결과 조회</h3>
             <div className="flex items-center gap-4">
+              <UnitRadioGroup value={unit} onChange={setUnit} />
               <CsvExportButton
                 gridRef={settlementGridRef}
                 fileName="settlement_result_data.csv"

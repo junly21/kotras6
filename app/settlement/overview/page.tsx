@@ -69,7 +69,6 @@ export default function TestGridPage() {
     return {
       textAlign: "right" as const,
       color: color,
-      fontWeight: "bold",
     };
   };
 
@@ -195,16 +194,19 @@ export default function TestGridPage() {
         <h1 className="text-2xl font-bold">정산결과</h1>
       </div>
 
-      {/* CSV 내보내기 버튼을 그리드 우상단에 배치 */}
-
-      <div className="mb-8 flex justify-between gap-4">
-        <UnitRadioGroup value={unit} onChange={setUnit} />
-        <CsvExportButton
-          gridRef={gridRef}
-          fileName="pay_recv_data.csv"
-          className="shadow-lg bg-accent-500"
-        />
+      {/* 정산결과 그리드 제목 및 버튼 */}
+      <div className="flex justify-between items-center mb-4">
+        <h3 className="text-lg font-semibold">정산결과 조회</h3>
+        <div className="flex items-center gap-4">
+          <UnitRadioGroup value={unit} onChange={setUnit} />
+          <CsvExportButton
+            gridRef={gridRef}
+            fileName="pay_recv_data.csv"
+            className="shadow-lg bg-accent-500"
+          />
+        </div>
       </div>
+
       <div className="relative">
         {loading && (
           <div className="absolute inset-0 flex items-center justify-center bg-white/80 z-10">

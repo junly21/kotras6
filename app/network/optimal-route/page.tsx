@@ -172,7 +172,7 @@ export default function NetworkOptimalRoutePage() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-bold">최적경로</h1>
+      <h1 className="text-2xl font-bold">네트워크 최적경로</h1>
 
       {/* 필터폼 */}
       <FilterForm<OptimalRouteFilters>

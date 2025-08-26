@@ -167,7 +167,7 @@ export default function NetworkLinePage() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-bold">노선도 조회</h1>
+      <h1 className="text-2xl font-bold">네트워크 노선도 조회</h1>
 
       {/* FilterForm 적용 */}
       <FilterForm<NetworkMapFilters>

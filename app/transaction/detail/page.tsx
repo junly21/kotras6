@@ -276,7 +276,7 @@ export default function TransactionDetailPage() {
   return (
     <ProtectedRoute requiredPath="/transaction/detail">
       <div className="space-y-6">
-        <h1 className="text-2xl font-bold">상세조회</h1>
+        <h1 className="text-2xl font-bold">거래내역 상세조회</h1>
 
         <TransactionDetailFilterForm
           defaultValues={{
@@ -291,12 +291,15 @@ export default function TransactionDetailPage() {
         />
 
         {/* CSV 내보내기 버튼 */}
-        <div className="flex justify-end">
-          <CsvExportButton
-            gridRef={gridRef}
-            fileName="transaction_detail_data.csv"
-            className="shadow-lg bg-accent-500"
-          />
+        <div className="flex justify-between items-center mb-4">
+          <h3 className="text-lg font-semibold">상세조회 결과</h3>
+          <div className="flex items-center gap-4">
+            <CsvExportButton
+              gridRef={gridRef}
+              fileName="transaction_detail_data.csv"
+              className="shadow-lg bg-accent-500"
+            />
+          </div>
         </div>
 
         {/* 그리드 */}

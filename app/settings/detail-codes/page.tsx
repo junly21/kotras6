@@ -323,7 +323,7 @@ export default function SettingsDetailCodesPage() {
             onClick={handleAddClick}
             disabled={!selectedCommonCode}
             className="bg-blue-500 hover:bg-blue-600">
-            추가
+            등록
           </Button>
           <Button
             onClick={handleDeleteClick}

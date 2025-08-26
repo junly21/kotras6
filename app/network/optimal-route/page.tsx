@@ -220,8 +220,8 @@ export default function NetworkOptimalRoutePage() {
                 <h3 className="text-lg font-semibold text-blue-800 mb-2">
                   경로 요약
                 </h3>
-                <div className="space-y-2 flex-1">
-                  <div className="grid grid-cols-2 gap-3 text-sm">
+                <div className="space-y-3">
+                  <div className="grid grid-cols-2 gap-2">
                     <div className="flex items-center">
                       <span className="text-blue-600 font-medium">출발역:</span>
                       <span className="ml-2 text-gray-400">-</span>

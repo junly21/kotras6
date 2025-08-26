@@ -162,52 +162,11 @@ export default function SettlementByStationPage() {
         values={filters}
         onChange={handleFilterChange}
         onSearch={handleSearchSubmit}
-        className="bg-gray-50"
       />
-
-      {/* CSV Export 버튼 */}
-      {hasSearched && searchResults.length > 0 && (
-        <div className="flex justify-end">
-          <button
-            onClick={async () => {
-              try {
-                const response = await fetch(
-                  "/api/settlement/by-station/download",
-                  {
-                    method: "POST",
-                    headers: {
-                      "Content-Type": "application/json",
-                    },
-                    body: JSON.stringify({}), // 빈 객체 전송
-                  }
-                );
-
-                if (response.ok) {
-                  const blob = await response.blob();
-                  const url = window.URL.createObjectURL(blob);
-                  const a = document.createElement("a");
-                  a.href = url;
-                  a.download = "역사별_정산결과.csv";
-                  document.body.appendChild(a);
-                  a.click();
-                  window.URL.revokeObjectURL(url);
-                  document.body.removeChild(a);
-                } else {
-                  console.error("CSV 다운로드 실패");
-                }
-              } catch (error) {
-                console.error("CSV 다운로드 중 오류:", error);
-              }
-            }}
-            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md shadow-lg">
-            CSV 다운로드
-          </button>
-        </div>
-      )}
 
       {/* 결과 영역 */}
       {!hasSearched && (
-        <div className="bg-gray-50 border-2 border-dashed border-gray-300 rounded-lg p-16">
+        <div className="bg-gray-50 flex flex-col justify-center items-center h-[590px] border-2 border-dashed border-gray-300 rounded-lg p-16">
           <div className="text-center text-gray-500">
             <p className="text-lg font-medium">조회 결과</p>
             <p className="text-sm">
@@ -220,9 +179,49 @@ export default function SettlementByStationPage() {
       {hasSearched && (
         <div className="space-y-4">
           {!isLoading && searchResults.length > 0 && (
-            <div className="bg-white border border-gray-200 rounded-lg p-4">
-              <h3 className="text-lg font-semibold mb-4">역사별 정산결과</h3>
-              <div className="h-96">
+            <>
+            <div className="flex justify-between items-center">
+              <h3 className="text-lg font-semibold">역사별 정산결과</h3>
+              {/* CSV Export 버튼 */}
+              {hasSearched && searchResults.length > 0 && (
+                  <button
+                    onClick={async () => {
+                      try {
+                        const response = await fetch(
+                          "/api/settlement/by-station/download",
+                          {
+                            method: "POST",
+                            headers: {
+                              "Content-Type": "application/json",
+                            },
+                            body: JSON.stringify({}), // 빈 객체 전송
+                          }
+                        );
+
+                        if (response.ok) {
+                          const blob = await response.blob();
+                          const url = window.URL.createObjectURL(blob);
+                          const a = document.createElement("a");
+                          a.href = url;
+                          a.download = "역사별_정산결과.csv";
+                          document.body.appendChild(a);
+                          a.click();
+                          window.URL.revokeObjectURL(url);
+                          document.body.removeChild(a);
+                        } else {
+                          console.error("CSV 다운로드 실패");
+                        }
+                      } catch (error) {
+                        console.error("CSV 다운로드 중 오류:", error);
+                      }
+                    }}
+                    className="shadow-lg bg-accent-500">
+                    CSV 다운로드
+                  </button>
+              )}
+            </div>
+            <div className="bg-white border border-gray-200 rounded-[24px] p-4">
+              <div className="h-[490px]">
                 <TestGrid
                   rowData={searchResults}
                   columnDefs={columnDefs}
@@ -245,6 +244,7 @@ export default function SettlementByStationPage() {
                 />
               </div>
             </div>
+            </>
           )}
 
           {!isLoading && searchResults.length === 0 && (

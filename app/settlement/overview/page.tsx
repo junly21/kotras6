@@ -115,7 +115,7 @@ export default function TestGridPage() {
           rowData={loading ? null : rowData}
           columnDefs={colDefs}
           gridRef={gridRef}
-          height={600}
+          height={635}
           enableNumberColoring={true}
         />
       </div>

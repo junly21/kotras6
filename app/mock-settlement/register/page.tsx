@@ -372,40 +372,11 @@ export default function MockSettlementRegisterPage() {
           values={filters}
           onChange={handleFilterChange}
           onSearch={handleSearchSubmit}
-          className="bg-gray-50"
         />
-
-        {/* 등록 버튼 */}
-        <div className="flex justify-end">
-          <Button
-            onClick={async () => {
-              // 모의정산 실행여부 체크
-              const isRunningResponse =
-                await MockSettlementControlService.checkIsRunning();
-
-              if (
-                isRunningResponse.success &&
-                isRunningResponse.data === true
-              ) {
-                // 모의정산이 실행 중인 경우 확인 다이얼로그 표시
-                setPendingAction(
-                  () => () => setIsMockSettlementModalOpen(true)
-                );
-                setIsConfirmDialogOpen(true);
-                return;
-              }
-
-              // 모의정산이 실행 중이 아닌 경우 모달 열기
-              setIsMockSettlementModalOpen(true);
-            }}
-            className="bg-blue-600 hover:bg-blue-700">
-            등록
-          </Button>
-        </div>
 
         {/* 결과 영역 */}
         {!hasSearched && (
-          <div className="bg-gray-50 border-2 border-dashed border-gray-300 rounded-lg p-16">
+          <div className="bg-gray-50 flex flex-col justify-center items-center h-[590px] border-2 border-dashed border-gray-300 rounded-lg p-16">
             <div className="text-center text-gray-500">
               <p className="text-lg font-medium">조회 결과</p>
               <p className="text-sm">
@@ -420,11 +391,39 @@ export default function MockSettlementRegisterPage() {
           <div className="space-y-4">
             {!isLoading && searchResults.length > 0 && (
               <>
-                <h3 className="text-lg font-semibold mb-4">
-                  모의정산 등록 목록
-                </h3>
+                <div className="flex justify-between items-center">
+                  <h3 className="text-lg font-semibold">
+                    모의정산 등록 목록
+                  </h3>
+                  {/* 등록 버튼 */}
+                  <div className="flex justify-end">
+                    <Button
+                      onClick={async () => {
+                        // 모의정산 실행여부 체크
+                        const isRunningResponse =
+                          await MockSettlementControlService.checkIsRunning();
+
+                        if (
+                          isRunningResponse.success &&
+                          isRunningResponse.data === true
+                        ) {
+                          // 모의정산이 실행 중인 경우 확인 다이얼로그 표시
+                          setPendingAction(
+                            () => () => setIsMockSettlementModalOpen(true)
+                          );
+                          setIsConfirmDialogOpen(true);
+                          return;
+                        }
+
+                        // 모의정산이 실행 중이 아닌 경우 모달 열기
+                        setIsMockSettlementModalOpen(true);
+                      }}>
+                      등록
+                    </Button>
+                  </div>
+                </div>
                 <div className="bg-white border border-gray-200 rounded-[24px] p-4">
-                  <div className="h-96">
+                  <div className="h-[500px]">
                     <TestGrid
                       rowData={searchResults}
                       columnDefs={columnDefs}

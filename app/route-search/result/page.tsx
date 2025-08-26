@@ -248,7 +248,7 @@ export default function RouteSearchResultPage() {
       <div className="space-y-4">
         {!hasSearched ? (
           // 조회 전 안내 메시지
-          <div className="bg-blue-50 border border-blue-200 rounded-[24px] p-8 text-center">
+          <div className="bg-blue-50 flex flex-col justify-center items-center border h-[590px] border-blue-200 rounded-[24px] p-8 text-center">
             <div className="text-blue-600 mb-2">
               <svg
                 className="w-12 h-12 mx-auto mb-4"

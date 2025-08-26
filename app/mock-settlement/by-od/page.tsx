@@ -386,7 +386,6 @@ export default function MockSettlementByOdPage() {
         values={filters}
         onChange={handleFilterChange}
         onSearch={handleSearchSubmit}
-        className="bg-gray-50"
       />
 
       {/* CSV Export 버튼 */}
@@ -402,7 +401,7 @@ export default function MockSettlementByOdPage() {
 
       {/* 결과 영역 */}
       {!hasSearched && (
-        <div className="bg-gray-50 border-2 border-dashed border-gray-300 rounded-lg p-16">
+        <div className="bg-gray-50 flex flex-col justify-center items-center h-[590px] border-2 border-dashed border-gray-300 rounded-lg p-16">
           <div className="text-center text-gray-500">
             <p className="text-lg font-medium">조회 결과</p>
             <p className="text-sm">

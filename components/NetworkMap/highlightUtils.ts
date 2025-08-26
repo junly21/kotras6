@@ -222,7 +222,7 @@ export function calculateOpacity(
     if (line && activeLines.has(line)) {
       return 1;
     }
-    return 0.2;
+    return 0.1;
   }
 
   return 1; // 기본값

@@ -88,7 +88,14 @@ function renderNodeElement(
     <text
       x={textPos.x}
       y={textPos.y}
-      fontSize={24}
+      fontSize={(() => {
+        const raw = nodeData.name.split("_")[1] || nodeData.name;
+        const idx = raw.indexOf("(");
+        const stationName = idx > -1 ? raw.slice(0, idx) : raw;
+        if (stationName.length >= 8) return 16;
+        if (stationName.length >= 6) return 20;
+        return 24;
+      })()}
       fontFamily="Arial, sans-serif"
       fill="#374151"
       pointerEvents="none">

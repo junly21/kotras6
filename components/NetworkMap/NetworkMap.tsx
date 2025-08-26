@@ -25,11 +25,11 @@ export function NetworkMap({
   const {
     showZoomControls = true,
     showTooltips = true,
-    defaultZoom = 0.3,
-    defaultPan = { x: -1000, y: -1500 },
+    defaultZoom = 0.25,
+    defaultPan = { x: -1000, y: -1200 },
     minZoom = 0.1,
-    maxZoom = 5.0,
-    zoomSensitivity = 0.3,
+    maxZoom = 1.0,
+    zoomSensitivity = 0.05,
   } = config;
 
   const [svgReactTree, setSvgReactTree] = useState<React.ReactNode>(null);
@@ -248,11 +248,8 @@ export function NetworkMap({
             축소
           </Button>
           <Button onClick={handleReset} size="sm" variant="outline">
-            리셋
+            초기화
           </Button>
-          <span className="flex items-center px-2 text-sm text-muted-foreground">
-            확대율: {Math.round(scale * 100)}%
-          </span>
         </div>
       )}
       <div

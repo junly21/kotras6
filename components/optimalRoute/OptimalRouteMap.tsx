@@ -51,8 +51,8 @@ export function OptimalRouteMap({ route }: OptimalRouteMapProps) {
               height: "100%",
               showZoomControls: true,
               showTooltips: true,
-              defaultZoom: 0.3,
-              defaultPan: { x: -1200, y: -1500 },
+              defaultZoom: 0.25,
+              defaultPan: { x: -1000, y: -1200 },
             }}
           />
         </div>

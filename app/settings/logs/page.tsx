@@ -145,7 +145,7 @@ export default function SettingsLogsPage() {
         />
 
         {/* 그리드 */}
-        <div className="relative h-[600px] overflow-y-auto">
+        <div className="relative h-[580px] overflow-y-auto">
           {hasSearched && loading && (
             <div className="absolute inset-0 flex items-center justify-center bg-white/80 z-10">
               <Spinner />
@@ -155,7 +155,6 @@ export default function SettingsLogsPage() {
             rowData={hasSearched ? apiData ?? [] : []} // ✅ null 대신 빈 배열
             columnDefs={colDefs}
             gridRef={gridRef}
-            height={600}
             gridOptions={{
               suppressColumnResize: false,
               suppressRowClickSelection: true,

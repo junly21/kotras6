@@ -188,7 +188,7 @@ export function MockSettlementModal({
                     <FormItem className={fieldRow}>
                       <FormLabel className={labelCx}>정산명 *</FormLabel>
                       <FormControl>
-                        <Input {...field} placeholder="정산명을 입력하세요" />
+                        <Input {...field} placeholder="정산명을 입력하세요" className="bg-white" />
                       </FormControl>
                       <FormMessage className={msgCx} showErrorMessages />
                     </FormItem>

@@ -9,7 +9,7 @@ export const NETWORK_MAP_CONFIGS = {
   },
   line: {
     width: "100%" as const,
-    height: 800,
+    height: "100%",
     showZoomControls: true,
     showTooltips: true,
   },

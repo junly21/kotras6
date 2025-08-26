@@ -310,7 +310,7 @@ export default function TransactionDetailPage() {
             rowData={hasSearched ? apiData ?? [] : []} // ✅ 모든 데이터 렌더링
             columnDefs={colDefs}
             gridRef={gridRef}
-            height={430}
+            height={465}
             pinnedBottomRowData={
               hasSearched && apiData.length > 0
                 ? [calculateTotals(apiData)]

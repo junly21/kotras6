@@ -236,7 +236,7 @@ export default function NetworkMapPage() {
       />
 
       {/* 지도 영역 */}
-      <div className="relative h-[550px] overflow-hidden rounded-[24px] border border-gray-200">
+      <div className="relative h-[590px] overflow-hidden rounded-[24px] border border-gray-200">
         <div id="network-map" className="h-full w-full" />
       </div>
 

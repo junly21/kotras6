@@ -300,7 +300,7 @@ export default function MockSettlementByStationPage() {
 
       {/* 상단: 모의정산 정보 그리드 */}
       {!hasSearched && (
-        <div className="bg-gray-50 border-2 border-dashed border-gray-300 rounded-lg p-16">
+        <div className="bg-gray-50 flex flex-col justify-center items-center h-[590px] border-2 border-dashed border-gray-300 rounded-lg p-16">
           <div className="text-center text-gray-500">
             <p className="text-lg font-medium">모의정산 정보</p>
             <p className="text-sm">
@@ -316,7 +316,7 @@ export default function MockSettlementByStationPage() {
             <>
               <h3 className="text-lg font-semibold mb-4">모의정산 정보</h3>
               <div className="bg-white border border-gray-200 rounded-[24px] p-4">
-                <div className="h-96">
+                <div className="h-[150px]">
                   <TestGrid
                     rowData={mockSettlementData}
                     columnDefs={mockSettlementColumnDefs}
@@ -398,7 +398,7 @@ export default function MockSettlementByStationPage() {
                 }
               }}
               disabled={isDownloading} // 다운로드 중일 때 버튼 비활성화
-              className="shadow-lg bg-gray-500 text-white px-4 py-2 rounded-md disabled:opacity-50 disabled:cursor-not-allowed">
+              className="bg-primary font-bold hover:bg-secondary-600 text-white px-4 py-2 rounded-lg transition-colors duration-200 cursor-pointer">
               {isDownloading ? (
                 <div className="flex items-center gap-2">
                   <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>

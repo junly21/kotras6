@@ -234,12 +234,11 @@ export default function MockSettlementResultPage() {
         values={filters}
         onChange={handleFilterChange}
         onSearch={handleSearchSubmit}
-        className="bg-gray-50"
       />
 
       {/* 상단: 모의정산 결과 그리드 */}
       {!hasSearched && (
-        <div className="bg-gray-50 border-2 border-dashed border-gray-300 rounded-lg p-16">
+        <div className="bg-gray-50 border flex flex-col justify-center items-center h-[590px] border-2 border-dashed border-gray-300 rounded-lg p-16">
           <div className="text-center text-gray-500">
             <p className="text-lg font-medium">모의정산 결과</p>
             <p className="text-sm">
@@ -305,7 +304,7 @@ export default function MockSettlementResultPage() {
         </div>
 
         <div className="bg-white border border-gray-200 rounded-[24px] p-4">
-          <div className="h-96">
+          <div className="h-[500px]">
             <TestGrid
               rowData={settlementRowData}
               columnDefs={settlementColumnDefs}

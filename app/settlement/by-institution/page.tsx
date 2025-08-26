@@ -187,7 +187,7 @@ export default function SettlementByInstitutionPage() {
       </div>
 
       {/* 원단위 변경 및 CSV 내보내기 버튼 */}
-      <div className="flex justify-between gap-4">
+      <div className="flex justify-between gap-4 mb-4">
         <UnitRadioGroup value={unit} onChange={setUnit} />
         <CsvExportButton
           gridRef={gridRef}

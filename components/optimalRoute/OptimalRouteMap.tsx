@@ -48,7 +48,7 @@ export function OptimalRouteMap({ route }: OptimalRouteMapProps) {
             highlights={routeHighlights}
             config={{
               width: "100%",
-              height: 360,
+              height: "100%",
               showZoomControls: true,
               showTooltips: true,
               defaultZoom: 1,

@@ -169,7 +169,7 @@ export function MockSettlementModal({
                     <FormItem className="min-w-0">
                       <FormLabel>정산명 *</FormLabel>
                       <FormControl>
-                        <Input {...field} placeholder="정산명을 입력하세요" />
+                        <Input {...field} placeholder="정산명을 입력하세요" className="bg-white" />
                       </FormControl>
                       <FormMessage />
                     </FormItem>

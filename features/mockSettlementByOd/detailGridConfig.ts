@@ -23,6 +23,7 @@ export function createMockSettlementByOdDetailColDefs(): ColDef<MockSettlementBy
         }
         return "";
       },
+      cellStyle: {textAlign: "right"}
     },
     {
       headerName: "도시철도부가사용금액",
@@ -37,6 +38,7 @@ export function createMockSettlementByOdDetailColDefs(): ColDef<MockSettlementBy
         }
         return "";
       },
+      cellStyle: {textAlign: "right"}
     },
     {
       headerName: "거리(km)",

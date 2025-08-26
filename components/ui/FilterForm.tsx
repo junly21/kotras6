@@ -153,7 +153,7 @@ export function FilterForm<T extends FieldValues>({
                             onValueChange={field.onChange}
                             value={field.value}
                             disabled={f.disabled}>
-                            <SelectTrigger className="min-w-36 bg-white border border-[#d9d9d9]">
+                            <SelectTrigger className="min-w-[200px] bg-white border border-[#d9d9d9]">
                               <SelectValue
                                 placeholder={f.placeholder || "선택"}
                               />

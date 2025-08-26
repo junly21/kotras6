@@ -215,7 +215,7 @@ export default function SettlementByStationPage() {
                         console.error("CSV 다운로드 중 오류:", error);
                       }
                     }}
-                    className="shadow-lg bg-accent-500">
+                    className="bg-primary font-bold hover:bg-secondary-600 text-white px-4 py-2 rounded-lg transition-colors duration-200 cursor-pointer">
                     CSV 다운로드
                   </button>
               )}

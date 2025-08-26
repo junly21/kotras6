@@ -272,7 +272,7 @@ export default function MockSettlementByInstitutionPage() {
             <>
               <h3 className="text-lg font-semibold mb-4">모의정산 정보</h3>
               <div className="bg-white border border-gray-200 rounded-[24px] p-4">
-                <div className="h-96">
+                <div className="h-[150px]">
                   <TestGrid
                     rowData={mockSettlementData}
                     columnDefs={mockSettlementColumnDefs}

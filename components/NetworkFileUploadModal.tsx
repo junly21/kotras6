@@ -267,11 +267,11 @@ export function NetworkFileUploadModal({
             </div>
 
             {/* 파일 업로드 섹션 */}
-            <div className="space-y-4">
+            <div className="space-y-6">
               <h3 className="text-sm font-medium text-gray-700 border-b pb-2">
                 파일 업로드
               </h3>
-              <div className="space-y-4">
+              <div className="space-y-6">
                 <FormField
                   control={form.control}
                   name="nodeFile"
@@ -292,7 +292,10 @@ export function NetworkFileUploadModal({
                           </div>
                         )}
                       </div>
-                      <FormMessage showErrorMessages={true} />
+                      <FormMessage
+                        showErrorMessages={true}
+                        className="mt-2 ml-2"
+                      />
                     </FormItem>
                   )}
                 />
@@ -316,7 +319,10 @@ export function NetworkFileUploadModal({
                           </div>
                         )}
                       </div>
-                      <FormMessage showErrorMessages={true} />
+                      <FormMessage
+                        showErrorMessages={true}
+                        className="mt-2 ml-2"
+                      />
                     </FormItem>
                   )}
                 />
@@ -341,7 +347,10 @@ export function NetworkFileUploadModal({
                           </div>
                         )}
                       </div>
-                      <FormMessage showErrorMessages={true} />
+                      <FormMessage
+                        showErrorMessages={true}
+                        className="mt-2 ml-2"
+                      />
                     </FormItem>
                   )}
                 />

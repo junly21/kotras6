@@ -225,6 +225,120 @@ export default function NetworkFileUploadPage() {
     },
   };
 
+  // 상세 그리드용 하단 고정 행 데이터 (총계)
+  const getDetailPinnedBottomRowData = (data: any[], title: string) => {
+    if (!data || data.length === 0) return [];
+
+    // 각 그리드 타입별로 첫 번째 컬럼에 총 건수 표시
+    let result: any = {};
+
+    if (title === "노드 목록") {
+      // 노드 목록: sta_nm(역명)에 총 건수 표시
+      result = {
+        seq: undefined,
+        sta_nm: `총 ${data.length}건`,
+        sta_num: undefined,
+        x: undefined,
+        y: undefined,
+        kscc: undefined,
+        subway: undefined,
+        transfer: undefined,
+        transfer_cd: undefined,
+        open_date: undefined,
+        gate_chk: undefined,
+        oper: undefined,
+        remarks: undefined,
+        consign_oper: undefined,
+        avg_stay: undefined,
+        avg_stay_new: undefined,
+      };
+    } else if (title === "링크 목록") {
+      // 링크 목록: link_cd(링크코드)에 총 건수 표시
+      result = {
+        seq: undefined,
+        from_sta_nm: undefined,
+        from_sta_num: undefined,
+        to_sta_nm: undefined,
+        to_sta_num: undefined,
+        link_cd: `총 ${data.length}건`,
+        sta_pass_sec: undefined,
+        trans_mv_sec: undefined,
+        trans_sty_sec: undefined,
+        cost: undefined,
+        km: undefined,
+        subway: undefined,
+        open_date: undefined,
+        start_x: undefined,
+        start_y: undefined,
+        end_x: undefined,
+        end_y: undefined,
+        km_g: undefined,
+        km_ung: undefined,
+        start_oper: undefined,
+        end_oper: undefined,
+        geom: undefined,
+        direction: undefined,
+        oper: undefined,
+        oper_line: undefined,
+        consign_oper: undefined,
+        elev_tot: undefined,
+        elev_ung: undefined,
+        elev: undefined,
+        elev_g: undefined,
+      };
+    } else if (title === "플랫폼 목록") {
+      // 플랫폼 목록: link_cd(링크코드)에 총 건수 표시
+      result = {
+        seq: undefined,
+        link_seq: undefined,
+        link_cd: `총 ${data.length}건`,
+        from_sta_nm: undefined,
+        from_dic: undefined,
+        from_dic_sub: undefined,
+        from_sta_num: undefined,
+        to_sta_nm: undefined,
+        to_dic: undefined,
+        to_dic_sub: undefined,
+        to_sta_num: undefined,
+        tot_mv_m: undefined,
+        tot_mv_sec: undefined,
+        flat_mv_m: undefined,
+        tot_step_up: undefined,
+        tot_step_down: undefined,
+        only_step_up: undefined,
+        only_step_up_m: undefined,
+        only_step_down: undefined,
+        only_step_down_m: undefined,
+        step_esc_up_step: undefined,
+        step_esc_up_yn: undefined,
+        step_esc_up_m: undefined,
+        step_esc_down_step: undefined,
+        step_esc_down_yn: undefined,
+        step_esc_down_m: undefined,
+        only_esc_up_yn: undefined,
+        only_esc_up_m: undefined,
+        only_esc_down_yn: undefined,
+        only_esc_down_m: undefined,
+        tot_sty_sec: undefined,
+        trans_cnt: undefined,
+      };
+    }
+
+    return [result];
+  };
+
+  // 상세 그리드용 하단 고정 행 스타일
+  const getDetailRowStyle = (params: { node: { rowPinned?: string } }) => {
+    if (params.node.rowPinned === "bottom") {
+      return {
+        backgroundColor: "#f8fafc",
+        fontWeight: "bold",
+        borderTop: "2px solid #e2e8f0",
+      };
+    }
+    return {};
+  };
+
   // 모달 핸들러
   const handleAddClick = () => {
     setIsModalOpen(true);
@@ -327,7 +441,6 @@ export default function NetworkFileUploadPage() {
           </div>
 
           {/* CSV Export 버튼을 상단 그리드와 하단 그리드 사이에 배치 */}
-          
 
           {/* 상세 그리드 영역 */}
           {showDetailGrid && (
@@ -351,6 +464,13 @@ export default function NetworkFileUploadPage() {
                   columnDefs={getDetailColDefs()}
                   gridRef={detailGridRef}
                   height={300}
+                  gridOptions={{
+                    pinnedBottomRowData: getDetailPinnedBottomRowData(
+                      detailData,
+                      detailTitle
+                    ),
+                    getRowStyle: getDetailRowStyle,
+                  }}
                 />
               </div>
             </div>

@@ -150,7 +150,7 @@
   text-align: center !important;
 }
 
-.ag-header-container {
+.ag-header-container, .ag-pinned-left-header {
   background: #f1f1f1;
 }
 

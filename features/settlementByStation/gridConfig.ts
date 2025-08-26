@@ -63,7 +63,8 @@ export function createSettlementByStationColDefs(
         group.columns.push({
           headerName: type === "지급" ? "지급" : "수급",
           field: key,
-          width: 170,
+          flex: 1,
+          minWidth: 170,
           resizable: false,
           type: "numericColumn",
           valueFormatter: (params) => {

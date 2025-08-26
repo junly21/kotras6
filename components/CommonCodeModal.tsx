@@ -135,7 +135,7 @@ export function CommonCodeModal({
                         disabled={mode === "edit"}
                       />
                     </FormControl>
-                    <FormMessage />
+                    <FormMessage showErrorMessages={true} />
                   </FormItem>
                 )}
               />
@@ -148,7 +148,7 @@ export function CommonCodeModal({
                     <FormControl>
                       <Input {...field} placeholder="공통코드명을 입력하세요" />
                     </FormControl>
-                    <FormMessage />
+                    <FormMessage showErrorMessages={true} />
                   </FormItem>
                 )}
               />
@@ -163,7 +163,7 @@ export function CommonCodeModal({
                     <FormControl>
                       <Input {...field} placeholder="값1을 입력하세요" />
                     </FormControl>
-                    <FormMessage />
+                    <FormMessage showErrorMessages={true} />
                   </FormItem>
                 )}
               />
@@ -176,7 +176,7 @@ export function CommonCodeModal({
                     <FormControl>
                       <Input {...field} placeholder="값2를 입력하세요" />
                     </FormControl>
-                    <FormMessage />
+                    <FormMessage showErrorMessages={true} />
                   </FormItem>
                 )}
               />
@@ -191,7 +191,7 @@ export function CommonCodeModal({
                     <FormControl>
                       <Input {...field} placeholder="값3을 입력하세요" />
                     </FormControl>
-                    <FormMessage />
+                    <FormMessage showErrorMessages={true} />
                   </FormItem>
                 )}
               />
@@ -204,7 +204,7 @@ export function CommonCodeModal({
                     <FormControl>
                       <Input {...field} placeholder="비고를 입력하세요" />
                     </FormControl>
-                    <FormMessage />
+                    <FormMessage showErrorMessages={true} />
                   </FormItem>
                 )}
               />
@@ -227,7 +227,7 @@ export function CommonCodeModal({
                         <SelectItem value="N">아니오</SelectItem>
                       </SelectContent>
                     </Select>
-                    <FormMessage />
+                    <FormMessage showErrorMessages={true} />
                   </FormItem>
                 )}
               />
@@ -253,7 +253,7 @@ export function CommonCodeModal({
                         <SelectItem value="N">아니오</SelectItem>
                       </SelectContent>
                     </Select>
-                    <FormMessage />
+                    <FormMessage showErrorMessages={true} />
                   </FormItem>
                 )}
               />

@@ -127,7 +127,9 @@ export function DetailCodeModal({
                 name="DETAIL_CODE"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="min-w-[85px]">상세코드 *</FormLabel>
+                    <FormLabel className="min-w-[85px]">
+                      상세코드 <span className="text-red-500">*</span>
+                    </FormLabel>
                     <FormControl>
                       <Input
                         {...field}
@@ -135,7 +137,7 @@ export function DetailCodeModal({
                         disabled={mode === "edit"}
                       />
                     </FormControl>
-                    <FormMessage />
+                    <FormMessage showErrorMessages={true} />
                   </FormItem>
                 )}
               />
@@ -154,7 +156,7 @@ export function DetailCodeModal({
                         disabled={true}
                       />
                     </FormControl>
-                    <FormMessage />
+                    <FormMessage showErrorMessages={true} />
                   </FormItem>
                 )}
               />
@@ -169,7 +171,7 @@ export function DetailCodeModal({
                     <FormControl>
                       <Input {...field} placeholder="값1을 입력하세요" />
                     </FormControl>
-                    <FormMessage />
+                    <FormMessage showErrorMessages={true} />
                   </FormItem>
                 )}
               />
@@ -182,7 +184,7 @@ export function DetailCodeModal({
                     <FormControl>
                       <Input {...field} placeholder="값2를 입력하세요" />
                     </FormControl>
-                    <FormMessage />
+                    <FormMessage showErrorMessages={true} />
                   </FormItem>
                 )}
               />
@@ -197,7 +199,7 @@ export function DetailCodeModal({
                     <FormControl>
                       <Input {...field} placeholder="값3을 입력하세요" />
                     </FormControl>
-                    <FormMessage />
+                    <FormMessage showErrorMessages={true} />
                   </FormItem>
                 )}
               />
@@ -210,7 +212,7 @@ export function DetailCodeModal({
                     <FormControl>
                       <Input {...field} placeholder="비고를 입력하세요" />
                     </FormControl>
-                    <FormMessage />
+                    <FormMessage showErrorMessages={true} />
                   </FormItem>
                 )}
               />
@@ -233,7 +235,7 @@ export function DetailCodeModal({
                         <SelectItem value="N">아니오</SelectItem>
                       </SelectContent>
                     </Select>
-                    <FormMessage />
+                    <FormMessage showErrorMessages={true} />
                   </FormItem>
                 )}
               />
@@ -259,7 +261,7 @@ export function DetailCodeModal({
                         <SelectItem value="N">아니오</SelectItem>
                       </SelectContent>
                     </Select>
-                    <FormMessage />
+                    <FormMessage showErrorMessages={true} />
                   </FormItem>
                 )}
               />

@@ -15,7 +15,6 @@ import {
   FormItem,
   FormLabel,
   FormControl,
-  FormMessage,
 } from "@/components/ui/form";
 
 import {
@@ -214,7 +213,6 @@ export function TransactionDetailFilterForm({
                     </SelectContent>
                   </Select>
                 </FormControl>
-                <FormMessage />
               </FormItem>
             )}
           />
@@ -245,7 +243,6 @@ export function TransactionDetailFilterForm({
                     </SelectContent>
                   </Select>
                 </FormControl>
-                <FormMessage />
               </FormItem>
             )}
           />
@@ -276,7 +273,6 @@ export function TransactionDetailFilterForm({
                     </SelectContent>
                   </Select>
                 </FormControl>
-                <FormMessage />
               </FormItem>
             )}
           />
@@ -310,7 +306,6 @@ export function TransactionDetailFilterForm({
                     </SelectContent>
                   </Select>
                 </FormControl>
-                <FormMessage />
               </FormItem>
             )}
           />
@@ -336,7 +331,6 @@ export function TransactionDetailFilterForm({
                     </SelectContent>
                   </Select>
                 </FormControl>
-                <FormMessage />
               </FormItem>
             )}
           />
@@ -373,7 +367,6 @@ export function TransactionDetailFilterForm({
                       </span>
                     </Button>
                   </FormControl>
-                  <FormMessage />
                 </FormItem>
               );
             }}
@@ -401,6 +394,8 @@ export function TransactionDetailFilterForm({
         onClose={() => setIsStationModalOpen(false)}
         onConfirm={(selectedStations) => {
           form.setValue("stations", selectedStations);
+          // 역 선택 후 에러 상태 클리어
+          form.clearErrors("stations");
           setIsStationModalOpen(false);
         }}
         options={dynamicOptions.stations || []}

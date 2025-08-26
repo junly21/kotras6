@@ -15,7 +15,6 @@ import {
   FormItem,
   FormLabel,
   FormControl,
-  FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import {
@@ -172,8 +171,6 @@ export function FilterForm<T extends FieldValues>({
                       </FormControl>
                     )
                   )}
-
-                  <FormMessage />
                 </FormItem>
               )}
             />

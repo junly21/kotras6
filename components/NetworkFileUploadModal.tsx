@@ -169,6 +169,8 @@ export function NetworkFileUploadModal({
       }
 
       form.setValue(field, file);
+      // 해당 필드의 에러를 클리어
+      form.clearErrors(field);
       setValidationError("");
 
       // 파일명 표시
@@ -238,7 +240,7 @@ export function NetworkFileUploadModal({
                           placeholder="네트워크명을 입력하세요"
                         />
                       </FormControl>
-                      <FormMessage />
+                      <FormMessage showErrorMessages={true} />
                     </FormItem>
                   )}
                 />
@@ -257,7 +259,7 @@ export function NetworkFileUploadModal({
                           placeholder="날짜를 선택하세요"
                         />
                       </FormControl>
-                      <FormMessage />
+                      <FormMessage showErrorMessages={true} />
                     </FormItem>
                   )}
                 />
@@ -278,21 +280,19 @@ export function NetworkFileUploadModal({
                       <FormLabel className="min-w-[85px]">
                         노드 파일 <span className="text-red-500">*</span>
                       </FormLabel>
-                      <FormControl>
-                        <div className="space-y-2 flex-1">
-                          <Input
-                            type="file"
-                            accept=".csv"
-                            onChange={(e) => handleFileChange("nodeFile", e)}
-                          />
-                          {nodeFileName && (
-                            <div className="text-xs text-green-600 bg-green-50 p-2 rounded border">
-                              ✓ {nodeFileName}
-                            </div>
-                          )}
-                        </div>
-                      </FormControl>
-                      <FormMessage />
+                      <div className="space-y-2 flex-1">
+                        <Input
+                          type="file"
+                          accept=".csv"
+                          onChange={(e) => handleFileChange("nodeFile", e)}
+                        />
+                        {nodeFileName && (
+                          <div className="text-xs text-green-600 bg-green-50 p-2 rounded border">
+                            ✓ {nodeFileName}
+                          </div>
+                        )}
+                      </div>
+                      <FormMessage showErrorMessages={true} />
                     </FormItem>
                   )}
                 />
@@ -304,21 +304,19 @@ export function NetworkFileUploadModal({
                       <FormLabel className="min-w-[85px]">
                         링크 파일 <span className="text-red-500">*</span>
                       </FormLabel>
-                      <FormControl>
-                        <div className="space-y-2 flex-1">
-                          <Input
-                            type="file"
-                            accept=".csv"
-                            onChange={(e) => handleFileChange("linkFile", e)}
-                          />
-                          {linkFileName && (
-                            <div className="text-xs text-green-600 bg-green-50 p-2 rounded border">
-                              ✓ {linkFileName}
-                            </div>
-                          )}
-                        </div>
-                      </FormControl>
-                      <FormMessage />
+                      <div className="space-y-2 flex-1">
+                        <Input
+                          type="file"
+                          accept=".csv"
+                          onChange={(e) => handleFileChange("linkFile", e)}
+                        />
+                        {linkFileName && (
+                          <div className="text-xs text-green-600 bg-green-50 p-2 rounded border">
+                            ✓ {linkFileName}
+                          </div>
+                        )}
+                      </div>
+                      <FormMessage showErrorMessages={true} />
                     </FormItem>
                   )}
                 />
@@ -331,23 +329,19 @@ export function NetworkFileUploadModal({
                       <FormLabel className="min-w-[85px]">
                         플랫폼 파일 <span className="text-red-500">*</span>
                       </FormLabel>
-                      <FormControl>
-                        <div className="space-y-2 flex-1">
-                          <Input
-                            type="file"
-                            accept=".csv"
-                            onChange={(e) =>
-                              handleFileChange("platformFile", e)
-                            }
-                          />
-                          {platformFileName && (
-                            <div className="text-xs text-green-600 bg-green-50 p-2 rounded border">
-                              ✓ {platformFileName}
-                            </div>
-                          )}
-                        </div>
-                      </FormControl>
-                      <FormMessage />
+                      <div className="space-y-2 flex-1">
+                        <Input
+                          type="file"
+                          accept=".csv"
+                          onChange={(e) => handleFileChange("platformFile", e)}
+                        />
+                        {platformFileName && (
+                          <div className="text-xs text-green-600 bg-green-50 p-2 rounded border">
+                            ✓ {platformFileName}
+                          </div>
+                        )}
+                      </div>
+                      <FormMessage showErrorMessages={true} />
                     </FormItem>
                   )}
                 />

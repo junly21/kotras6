@@ -289,7 +289,7 @@ export default function MockSettlementByInstitutionPage() {
 
       {/* 상단: 모의정산 정보 그리드 */}
       {!hasSearched && (
-        <div className="bg-gray-50 flex flex-col justify-center items-center h-[590px] border-2 border-dashed border-gray-300 rounded-lg p-16">
+        <div className="bg-gray-50 flex flex-col justify-center items-center h-[140px] border-2 border-dashed border-gray-300 rounded-lg p-16">
           <div className="text-center text-gray-500">
             <p className="text-lg font-medium">모의정산 정보</p>
             <p className="text-sm">
@@ -304,8 +304,8 @@ export default function MockSettlementByInstitutionPage() {
           {!isLoading && mockSettlementData.length > 0 && (
             <>
               <h3 className="text-lg font-semibold mb-4">모의정산 정보</h3>
-              <div className="bg-white border border-gray-200 rounded-[24px] p-4">
-                <div className="h-[150px]">
+              <div className="bg-white border border-gray-200 rounded-[24px] p-2">
+                <div className="h-32">
                   <TestGrid
                     rowData={mockSettlementData}
                     columnDefs={mockSettlementColumnDefs}
@@ -342,7 +342,7 @@ export default function MockSettlementByInstitutionPage() {
       )}
 
       {/* 하단: 기관별 조회 결과 그리드 */}
-      <div className="space-y-4">
+      <div className="space-y-2">
         <div className="flex justify-between items-center">
           <h3 className="text-lg font-semibold">기관별 조회 결과</h3>
           <div className="flex items-center gap-4">
@@ -359,7 +359,6 @@ export default function MockSettlementByInstitutionPage() {
         <div className="grid grid-cols-2 gap-6 h-[525px]">
           {/* 왼쪽: 기관별 조회 결과 그리드 */}
           <div className="flex flex-col h-full">
-            <h2 className="text-lg font-semibold">기관별 조회 결과 목록</h2>
             <div className="relative flex-1 h-full">
               {hasSearched && isLoading && (
                 <div className="absolute inset-0 flex items-center justify-center bg-white/80 z-10">
@@ -383,7 +382,6 @@ export default function MockSettlementByInstitutionPage() {
 
           {/* 오른쪽: 차트 영역 */}
           <div className="flex flex-col h-full">
-            <h2 className="text-lg font-semibold">차트 분석</h2>
             <div className="relative flex-1 h-full">
               {!hasSearched ? (
                 <div className="h-full flex items-center justify-center bg-gray-50 border-2 border-dashed border-gray-300 rounded">

@@ -333,7 +333,7 @@ export default function MockSettlementByStationPage() {
 
       {/* 상단: 모의정산 정보 그리드 */}
       {!hasSearched && (
-        <div className="bg-gray-50 flex flex-col justify-center items-center h-[590px] border-2 border-dashed border-gray-300 rounded-lg p-16">
+        <div className="bg-gray-50 flex flex-col justify-center items-center h-[140px] border-2 border-dashed border-gray-300 rounded-lg p-16">
           <div className="text-center text-gray-500">
             <p className="text-lg font-medium">모의정산 정보</p>
             <p className="text-sm">
@@ -348,8 +348,8 @@ export default function MockSettlementByStationPage() {
           {!isLoading && mockSettlementData.length > 0 && (
             <>
               <h3 className="text-lg font-semibold mb-4">모의정산 정보</h3>
-              <div className="bg-white border border-gray-200 rounded-[24px] p-4">
-                <div className="h-[150px]">
+              <div className="bg-white border border-gray-200 rounded-[24px] p-2">
+                <div className="h-32">
                   <TestGrid
                     rowData={mockSettlementData}
                     columnDefs={mockSettlementColumnDefs}
@@ -446,7 +446,7 @@ export default function MockSettlementByStationPage() {
         </div>
 
         <div className="bg-white border border-gray-200 rounded-[24px] p-4">
-          <div className="h-96">
+          <div className="h-[450px]">
             <TestGrid
               rowData={byStationData}
               columnDefs={byStationColumnDefs}

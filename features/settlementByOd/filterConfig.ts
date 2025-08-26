@@ -7,7 +7,7 @@ export const settlementByOdFilterConfig: FieldConfig[] = [
     type: "combobox",
     placeholder: "출발역을 선택하세요",
     required: true,
-    optionsEndpoint: "/api/selectNetWorkNodeSelectBox",
+    optionsEndpoint: "/api/selectNetWorkNodeList",
   },
   {
     name: "STN_ID2",
@@ -15,6 +15,6 @@ export const settlementByOdFilterConfig: FieldConfig[] = [
     type: "combobox",
     placeholder: "도착역을 선택하세요",
     required: true,
-    optionsEndpoint: "/api/selectNetWorkNodeSelectBox",
+    optionsEndpoint: "/api/selectNetWorkNodeList",
   },
 ];

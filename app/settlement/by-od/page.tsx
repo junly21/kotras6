@@ -303,8 +303,6 @@ export default function SettlementByOdPage() {
         onSearch={handleSearchSubmit}
       />
 
-      
-
       {/* 결과 영역 */}
       {!hasSearched && (
         <div className="bg-gray-50 flex flex-col justify-center items-center h-[590px] border-2 border-dashed border-gray-300 rounded-lg p-16">
@@ -323,16 +321,6 @@ export default function SettlementByOdPage() {
             <>
               <div className="flex justify-between items-center">
                 <h3 className="text-lg font-semibold">OD별 정산결과</h3>
-                {/* CSV Export 버튼 */}
-                {hasSearched && searchResults.length > 0 && (
-                  <div className="flex justify-end">
-                    <CsvExportButton
-                      gridRef={gridRef}
-                      fileName="OD별_정산결과.csv"
-                      className="bg-blue-600 hover:bg-blue-700"
-                    />
-                  </div>
-                )}
               </div>
               <div className="bg-white border border-gray-200 rounded-[24px] p-4">
                 <div className="h-[150px]">
@@ -362,7 +350,6 @@ export default function SettlementByOdPage() {
                 </div>
               </div>
             </>
-            
           )}
 
           {!isLoading && searchResults.length === 0 && (
@@ -444,7 +431,6 @@ export default function SettlementByOdPage() {
                   )}
                 </div>
               </>
-              
             )}
         </div>
       )}

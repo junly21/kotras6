@@ -62,6 +62,29 @@ export default function TestGridPage() {
     onError,
   });
 
+  // 숫자 컬럼용 동적 스타일 함수
+  const getNumberCellStyle = (params: any) => {
+    const num = Number(params.value);
+    const color = num > 0 ? "#dc2626" : num < 0 ? "#2563eb" : "#000000";
+    return {
+      textAlign: "right" as const,
+      color: color,
+    };
+  };
+
+  // 숫자 컬럼용 포맷터 함수
+  const getNumberFormatter = (params: any) => {
+    if (params.value == null) return "";
+    const num = Number(params.value);
+    if (unit === "원") {
+      return Math.floor(num).toLocaleString();
+    }
+    return num.toLocaleString(undefined, {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    });
+  };
+
   const colDefs = [
     {
       headerName: "#",
@@ -69,22 +92,98 @@ export default function TestGridPage() {
         params.node?.rowPinned ? "Total" : (params.node?.rowIndex ?? 0) + 1,
       width: 60,
       pinned: "left",
+      cellStyle: { textAlign: "center" },
     },
-    { headerName: "기관", field: "pay_oper" },
-    { headerName: "총계", field: "total" },
-    { headerName: "한국철도공사", field: "한국철도공사" },
-    { headerName: "서울교통공사", field: "서울교통공사" },
-    { headerName: "인천교통공사", field: "인천교통공사" },
-    { headerName: "공항철도", field: "공항철도" },
-    { headerName: "서울시메트로9호선", field: "서울시메트로9호선" },
-    { headerName: "신분당선", field: "신분당선" },
-    { headerName: "의정부경전철", field: "의정부경전철" },
-    { headerName: "용인경전철", field: "용인경전철" },
-    { headerName: "경기철도", field: "경기철도" },
-    { headerName: "우이신설경전철", field: "우이신설경전철" },
-    { headerName: "김포시청", field: "김포시청" },
-    { headerName: "신림선", field: "신림선" },
-    { headerName: "새서울철도", field: "새서울철도" },
+    {
+      headerName: "기관",
+      field: "pay_oper",
+      pinned: "left",
+      width: 120,
+    },
+    {
+      headerName: "총계",
+      field: "total",
+      cellStyle: getNumberCellStyle,
+      valueFormatter: getNumberFormatter,
+    },
+    {
+      headerName: "한국철도공사",
+      field: "한국철도공사",
+      cellStyle: getNumberCellStyle,
+      valueFormatter: getNumberFormatter,
+    },
+    {
+      headerName: "서울교통공사",
+      field: "서울교통공사",
+      cellStyle: getNumberCellStyle,
+      valueFormatter: getNumberFormatter,
+    },
+    {
+      headerName: "인천교통공사",
+      field: "인천교통공사",
+      cellStyle: getNumberCellStyle,
+      valueFormatter: getNumberFormatter,
+    },
+    {
+      headerName: "공항철도",
+      field: "공항철도",
+      cellStyle: getNumberCellStyle,
+      valueFormatter: getNumberFormatter,
+    },
+    {
+      headerName: "서울시메트로9호선",
+      field: "서울시메트로9호선",
+      cellStyle: getNumberCellStyle,
+      valueFormatter: getNumberFormatter,
+    },
+    {
+      headerName: "신분당선",
+      field: "신분당선",
+      cellStyle: getNumberCellStyle,
+      valueFormatter: getNumberFormatter,
+    },
+    {
+      headerName: "의정부경전철",
+      field: "의정부경전철",
+      cellStyle: getNumberCellStyle,
+      valueFormatter: getNumberFormatter,
+    },
+    {
+      headerName: "용인경전철",
+      field: "용인경전철",
+      cellStyle: getNumberCellStyle,
+      valueFormatter: getNumberFormatter,
+    },
+    {
+      headerName: "경기철도",
+      field: "경기철도",
+      cellStyle: getNumberCellStyle,
+      valueFormatter: getNumberFormatter,
+    },
+    {
+      headerName: "우이신설경전철",
+      field: "우이신설경전철",
+      cellStyle: getNumberCellStyle,
+      valueFormatter: getNumberFormatter,
+    },
+    {
+      headerName: "김포시청",
+      field: "김포시청",
+      cellStyle: getNumberCellStyle,
+      valueFormatter: getNumberFormatter,
+    },
+    {
+      headerName: "신림선",
+      field: "신림선",
+      cellStyle: getNumberCellStyle,
+      valueFormatter: getNumberFormatter,
+    },
+    {
+      headerName: "새서울철도",
+      field: "새서울철도",
+      cellStyle: getNumberCellStyle,
+      valueFormatter: getNumberFormatter,
+    },
   ];
 
   const rowData = useUnitConversion(apiData, unit);
@@ -97,7 +196,7 @@ export default function TestGridPage() {
 
       {/* CSV 내보내기 버튼을 그리드 우상단에 배치 */}
 
-      <div className="mb-2 flex justify-between gap-4">
+      <div className="mb-8 flex justify-between gap-4">
         <UnitRadioGroup value={unit} onChange={setUnit} />
         <CsvExportButton
           gridRef={gridRef}
@@ -115,7 +214,7 @@ export default function TestGridPage() {
           rowData={loading ? null : rowData}
           columnDefs={colDefs}
           gridRef={gridRef}
-          height={635}
+          height={750}
           enableNumberColoring={true}
         />
       </div>

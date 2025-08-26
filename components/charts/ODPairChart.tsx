@@ -56,6 +56,16 @@ export function ODPairChart({ data }: Props) {
     return sorted;
   }, [data]);
 
+  // x축 텍스트 정리 함수 (transition 제거, (~~~) 제거)
+  const cleanXAxisText = useMemo(() => {
+    return (text: string) => {
+      return text
+        .replace(/\([^)]*\)/g, "") // (~~~) 제거
+        .replace(/transition/gi, "") // transition 제거 (대소문자 구분 없이)
+        .trim(); // 앞뒤 공백 제거
+    };
+  }, []);
+
   const formatValue = useMemo(
     () => (value: number) => {
       return value.toLocaleString();
@@ -101,13 +111,16 @@ export function ODPairChart({ data }: Props) {
   return (
     <div className="w-full h-full flex flex-col">
       {/* 차트 제목과 단위 */}
+      <div className="flex justify-between items-center px-2 mb-2">
+        <span className="text-sm text-gray-500">건</span>
+      </div>
 
       {/* 차트 영역 */}
       <div className="flex-1">
         <ResponsiveContainer width="100%" height="100%">
           <BarChart
             data={topData}
-            margin={{ top: 20, right: 30, left: -20, bottom: 60 }}>
+            margin={{ top: 10, right: 30, left: -20, bottom: -20 }}>
             {/* Y축 그리드 (가로선만) */}
             <CartesianGrid
               strokeDasharray="3 3"
@@ -121,10 +134,11 @@ export function ODPairChart({ data }: Props) {
               type="category"
               dataKey="출발도착"
               tick={{ fontSize: 11, fill: "#666" }}
-              angle={-45}
-              textAnchor="end"
+              angle={0}
+              textAnchor="middle"
               height={80}
               interval={0}
+              tickFormatter={cleanXAxisText}
             />
 
             {/* Y축 (숫자) */}
@@ -144,7 +158,8 @@ export function ODPairChart({ data }: Props) {
               dataKey="cnt"
               radius={[5, 5, 0, 0]}
               isAnimationActive={true}
-              animationDuration={800}>
+              animationDuration={800}
+              barSize={30}>
               {topData.map((entry, index) => (
                 <Cell
                   key={`cell-${index}`}

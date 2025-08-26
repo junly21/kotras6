@@ -119,7 +119,7 @@ export default function Home() {
     }
 
     fetchNetworkData();
-  }, [isInitialized, isSessionLoading]);
+  }, [isInitialized]);
 
   // 메모이제이션된 값들
   const mapConfig = useMemo(() => NETWORK_MAP_CONFIGS.main, []);
@@ -173,53 +173,67 @@ export default function Home() {
   return (
     <div className="h-[calc(100vh-280px)] flex flex-col p-2 gap-4">
       {/* 네트워크 맵 */}
-      <div className="h-[400px] bg-white rounded-lg shadow-md p-4">
-        <h2 className="text-lg font-semibold mb-4">네트워크 맵</h2>
-        {mapLoading ? (
-          <div className="flex items-center justify-center h-64 text-gray-500">
-            노선도를 불러오는 중...
-          </div>
-        ) : (
-          <NetworkMap
-            nodes={nodes}
-            links={links}
-            svgText={svgText}
-            config={mapConfig}
-            highlights={highlights}
-          />
-        )}
+      <div className="space-y-2">
+        <h2 className="text-lg font-semibold text-gray-900">네트워크 맵</h2>
+        <div className="h-[500px] bg-white rounded-lg shadow-md overflow-hidden">
+          {mapLoading ? (
+            <div className="flex items-center justify-center h-full text-gray-500">
+              노선도를 불러오는 중...
+            </div>
+          ) : (
+            <div className="w-full h-full">
+              <NetworkMap
+                nodes={nodes}
+                links={links}
+                svgText={svgText}
+                config={mapConfig}
+                highlights={highlights}
+              />
+            </div>
+          )}
+        </div>
       </div>
 
-      {/* 하단: 좌우 분할 */}
-      <div className="flex gap-4 h-90">
-        {/* 좌측: 권종별 통행수 파이차트 */}
-        <div className="flex-1 bg-white rounded-lg shadow-md p-4">
-          <h2 className="text-lg font-semibold mb-4">권종별 통행수</h2>
-          <div className="h-full">
-            {memoizedCardStats.length > 0 ? (
-              <PieChart data={memoizedCardStats} />
-            ) : (
-              <div className="flex items-center justify-center h-full text-gray-500">
-                데이터를 불러오는 중...
-              </div>
-            )}
+      {/* 하단: 좌우 분할 (2:8 비율) */}
+      <div className="space-y-2">
+        {/* 차트 제목들 */}
+        <div className="flex gap-4">
+          <div className="w-3/10">
+            <h2 className="text-lg font-semibold text-gray-900">
+              권종별 통행수
+            </h2>
+          </div>
+          <div className="w-7/10">
+            <h2 className="text-lg font-semibold text-gray-900">OD Pair</h2>
           </div>
         </div>
 
-        {/* 우측: OD Pair 차트 */}
-        <div className="flex-1 bg-white rounded-lg shadow-md justify-between items-center p-4">
-          <div className="flex justify-between items-center px-2">
-            <h2 className="text-lg font-semibold text-gray-900">OD Pair</h2>
-            <span className="text-sm text-gray-500">건</span>
+        {/* 차트 영역 */}
+        <div className="flex gap-4 h-80">
+          {/* 좌측: 권종별 통행수 파이차트 (2) */}
+          <div className="w-3/10 bg-white rounded-lg shadow-md p-4">
+            <div className="h-full">
+              {memoizedCardStats.length > 0 ? (
+                <PieChart data={memoizedCardStats} />
+              ) : (
+                <div className="flex items-center justify-center h-full text-gray-500">
+                  데이터를 불러오는 중...
+                </div>
+              )}
+            </div>
           </div>
-          <div className="h-full">
-            {memoizedOdPairStats.length > 0 ? (
-              <ODPairChart data={memoizedOdPairStats} />
-            ) : (
-              <div className="flex items-center justify-center h-full text-gray-500">
-                데이터를 불러오는 중...
-              </div>
-            )}
+
+          {/* 우측: OD Pair 차트 (8) */}
+          <div className="w-7/10 bg-white rounded-lg shadow-md p-4">
+            <div className="h-full">
+              {memoizedOdPairStats.length > 0 ? (
+                <ODPairChart data={memoizedOdPairStats} />
+              ) : (
+                <div className="flex items-center justify-center h-full text-gray-500">
+                  데이터를 불러오는 중...
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>

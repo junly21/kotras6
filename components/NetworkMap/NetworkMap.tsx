@@ -23,12 +23,10 @@ export function NetworkMap({
   onLinkClick,
 }: NetworkMapProps) {
   const {
-    width = "100%",
-    height = "100%",
     showZoomControls = true,
     showTooltips = true,
-    defaultZoom = 1,
-    defaultPan = { x: -2400, y: -2500 },
+    defaultZoom = 0.3,
+    defaultPan = { x: -1000, y: -1500 },
     minZoom = 0.1,
     maxZoom = 5.0,
     zoomSensitivity = 0.3,
@@ -237,10 +235,12 @@ export function NetworkMap({
   }, [scale, pan]);
 
   return (
-    <div style={{ width, height, position: "relative", overflow: "hidden" }}>
+    <div
+      className="w-full h-full flex flex-col"
+      style={{ position: "relative", overflow: "hidden" }}>
       {/* zoom buttons */}
       {showZoomControls && (
-        <div className="flex gap-2 mb-2">
+        <div className="flex gap-2 mb-2 p-2">
           <Button onClick={() => handleZoom(1)} size="sm">
             확대
           </Button>
@@ -257,9 +257,8 @@ export function NetworkMap({
       )}
       <div
         ref={containerRef}
+        className="flex-1"
         style={{
-          width: "100%",
-          height: "100%",
           userSelect: "none",
           WebkitUserSelect: "none",
           MozUserSelect: "none",

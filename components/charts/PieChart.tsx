@@ -53,7 +53,8 @@ export function PieChart({ data }: Props) {
   const renderCustomLabel = useMemo(() => {
     return (props: any) => {
       const { cx, cy, midAngle, outerRadius, percent, name } = props;
-      if (!percent || percent < 0.05) return null; // 5% 미만은 라벨 숨김
+      if (!cx || !cy || !midAngle || !outerRadius || !percent || !name)
+        return null;
 
       const RADIAN = Math.PI / 180;
       const radius = outerRadius * 1.2;
@@ -67,14 +68,14 @@ export function PieChart({ data }: Props) {
           fill="#374151"
           textAnchor={x > cx ? "start" : "end"}
           dominantBaseline="central"
-          fontSize={12}
+          fontSize={11}
           fontWeight={500}
           fontFamily="Inter, system-ui, sans-serif">
           {`${name} ${(percent * 100).toFixed(0)}%`}
         </text>
       );
     };
-  }, []);
+  }, [chartData]);
 
   // 커스텀 툴팁 메모이제이션
   const CustomTooltip = useMemo(() => {
@@ -158,8 +159,9 @@ export function PieChart({ data }: Props) {
           label={renderCustomLabel}
           labelLine={false}
           animationDuration={800}
-          isAnimationActive={true}
-          filter="url(#shadow)">
+          isAnimationActive={false}
+          filter="url(#shadow)"
+          onClick={() => {}}>
           {chartData.map((entry, index) => (
             <Cell
               key={`cell-${index}`}
@@ -172,11 +174,11 @@ export function PieChart({ data }: Props) {
 
         <Legend
           layout="horizontal"
-          verticalAlign="bottom"
+          verticalAlign="top"
           align="center"
           wrapperStyle={{
-            paddingTop: "20px",
-            fontSize: "12px",
+            paddingBottom: "10px",
+            fontSize: "11px",
             fontFamily: "Inter, system-ui, sans-serif",
           }}
           formatter={legendFormatter}

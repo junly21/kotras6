@@ -16,6 +16,7 @@ import TestGrid from "@/components/TestGrid";
 import Spinner from "@/components/Spinner";
 import CsvExportButton from "@/components/CsvExportButton";
 import { Toast } from "@/components/ui/Toast";
+import { MockSettlementDetailModal } from "@/components/MockSettlementDetailModal";
 import {
   AllCommunityModule,
   ModuleRegistry,
@@ -53,6 +54,13 @@ export default function MockSettlementResultPage() {
   // 단위 상태
   const [unit, setUnit] = useState<Unit>("원");
 
+  // 모달 상태
+  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+  const [selectedSettlement, setSelectedSettlement] = useState<{
+    simStmtGrpId: string;
+    data: MockSettlementResultData;
+  } | null>(null);
+
   // 토스트 상태
   const [toast, setToast] = useState<{
     isVisible: boolean;
@@ -68,6 +76,31 @@ export default function MockSettlementResultPage() {
   const handleFilterChange = (values: MockSettlementResultFilters) => {
     setFilters(values);
   };
+
+  // 행 더블클릭 핸들러
+  const handleRowDoubleClick = useCallback(
+    (event: { data: MockSettlementResultData }) => {
+      console.log("행 더블클릭 이벤트 발생:", event);
+      const { data } = event;
+      if (data && data.settlementName) {
+        console.log("선택된 데이터:", data);
+        setSelectedSettlement({
+          simStmtGrpId: data.settlementName, // settlementName을 simStmtGrpId로 사용
+          data: data,
+        });
+        setIsDetailModalOpen(true);
+      } else {
+        console.log("settlementName이 없습니다:", data);
+      }
+    },
+    []
+  );
+
+  // 상세 모달 닫기 핸들러
+  const handleDetailModalClose = useCallback(() => {
+    setIsDetailModalOpen(false);
+    setSelectedSettlement(null);
+  }, []);
 
   // 검색 핸들러
   const handleSearchSubmit = useCallback(
@@ -238,7 +271,7 @@ export default function MockSettlementResultPage() {
 
       {/* 상단: 모의정산 결과 그리드 */}
       {!hasSearched && (
-        <div className="bg-gray-50 border flex flex-col justify-center items-center h-[590px] border-2 border-dashed border-gray-300 rounded-lg p-16">
+        <div className="bg-gray-50 border flex flex-col justify-center items-center h-[162px] border-2 border-dashed border-gray-300 rounded-lg p-16">
           <div className="text-center text-gray-500">
             <p className="text-lg font-medium">모의정산 결과</p>
             <p className="text-sm">
@@ -249,12 +282,11 @@ export default function MockSettlementResultPage() {
       )}
 
       {hasSearched && (
-        <div className="space-y-4">
+        <div className="space-y-2">
           {!isLoading && mockSettlementResults.length > 0 && (
             <>
-              <h3 className="text-lg font-semibold mb-4">모의정산 정보</h3>
-              <div className="bg-white border border-gray-200 rounded-[24px] p-4">
-                <div className="h-36">
+              <div className="bg-white border border-gray-200 rounded-[24px] p-2">
+                <div className="h-32">
                   <TestGrid
                     rowData={mockSettlementResults}
                     columnDefs={mockSettlementColumnDefs}
@@ -272,6 +304,7 @@ export default function MockSettlementResultPage() {
                         resizable: false,
                         suppressMovable: true,
                       },
+                      onRowDoubleClicked: handleRowDoubleClick,
                     }}
                   />
                 </div>
@@ -322,6 +355,16 @@ export default function MockSettlementResultPage() {
           </div>
         </div>
       </div>
+
+      {/* 모의정산 상세 모달 */}
+      {selectedSettlement && (
+        <MockSettlementDetailModal
+          isOpen={isDetailModalOpen}
+          onClose={handleDetailModalClose}
+          simStmtGrpId={selectedSettlement.simStmtGrpId}
+          gridData={selectedSettlement.data}
+        />
+      )}
 
       {/* 토스트 알림 */}
       <Toast

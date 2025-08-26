@@ -23,6 +23,7 @@ import { AllCommunityModule, ModuleRegistry } from "ag-grid-community";
 import { AgGridReact } from "ag-grid-react";
 import { UnitRadioGroup, type Unit } from "@/components/ui/UnitRadioGroup";
 import { MockSettlementConfirmDialog } from "@/components/MockSettlementConfirmDialog";
+import { MockSettlementDetailModal } from "@/components/MockSettlementDetailModal";
 
 // Register all Community features
 ModuleRegistry.registerModules([AllCommunityModule]);
@@ -54,6 +55,13 @@ export default function MockSettlementByRoutePage() {
     message: "",
     type: "info",
   });
+
+  // 모달 상태
+  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+  const [selectedSettlement, setSelectedSettlement] = useState<{
+    simStmtGrpId: string;
+    data: MockSettlementResultData;
+  } | null>(null);
 
   // 모의정산 실행여부 체크 관련 상태
   const [isConfirmDialogOpen, setIsConfirmDialogOpen] = useState(false);
@@ -188,6 +196,31 @@ export default function MockSettlementByRoutePage() {
     return createMockSettlementByRouteColDefs(byRouteData, unit);
   }, [byRouteData, unit]);
 
+  // 행 더블클릭 핸들러
+  const handleRowDoubleClick = useCallback(
+    (event: { data: MockSettlementResultData }) => {
+      console.log("행 더블클릭 이벤트 발생:", event);
+      const { data } = event;
+      if (data && data.settlementName) {
+        console.log("선택된 데이터:", data);
+        setSelectedSettlement({
+          simStmtGrpId: data.settlementName,
+          data: data,
+        });
+        setIsDetailModalOpen(true);
+      } else {
+        console.log("settlementName이 없습니다:", data);
+      }
+    },
+    []
+  );
+
+  // 상세 모달 닫기 핸들러
+  const handleDetailModalClose = useCallback(() => {
+    setIsDetailModalOpen(false);
+    setSelectedSettlement(null);
+  }, []);
+
   // 원단위 변환은 그리드 컬럼 설정에서 처리
   const byRouteRowData = byRouteData;
 
@@ -255,6 +288,7 @@ export default function MockSettlementByRoutePage() {
                         resizable: false,
                         suppressMovable: true,
                       },
+                      onRowDoubleClicked: handleRowDoubleClick,
                     }}
                   />
                 </div>
@@ -319,6 +353,16 @@ export default function MockSettlementByRoutePage() {
         type={toast.type}
         onClose={() => setToast((prev) => ({ ...prev, isVisible: false }))}
       />
+
+      {/* 모의정산 상세 모달 */}
+      {selectedSettlement && (
+        <MockSettlementDetailModal
+          isOpen={isDetailModalOpen}
+          onClose={handleDetailModalClose}
+          simStmtGrpId={selectedSettlement.simStmtGrpId}
+          gridData={selectedSettlement.data}
+        />
+      )}
 
       {/* 모의정산 실행중 확인 다이얼로그 */}
       <MockSettlementConfirmDialog

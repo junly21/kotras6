@@ -27,6 +27,7 @@ import { useNetworkData } from "@/hooks/useNetworkData";
 import type { NetworkMapHighlight, Node, Link } from "@/types/network";
 import { AllCommunityModule, ModuleRegistry } from "ag-grid-community";
 import { MockSettlementConfirmDialog } from "@/components/MockSettlementConfirmDialog";
+import { MockSettlementDetailModal } from "@/components/MockSettlementDetailModal";
 
 // Register all Community features
 ModuleRegistry.registerModules([AllCommunityModule]);
@@ -74,6 +75,13 @@ export default function MockSettlementByOdPage() {
   );
   const [isDetailLoading, setIsDetailLoading] = useState(false);
   const [selectedPathIds, setSelectedPathIds] = useState<string[]>([]);
+
+  // 모달 상태
+  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+  const [selectedSettlement, setSelectedSettlement] = useState<{
+    simStmtGrpId: string;
+    data: MockSettlementInfo;
+  } | null>(null);
 
   // 모의정산 실행여부 체크 관련 상태
   const [isConfirmDialogOpen, setIsConfirmDialogOpen] = useState(false);
@@ -207,6 +215,31 @@ export default function MockSettlementByOdPage() {
     },
     []
   );
+
+  // 모의정산 정보 행 더블클릭 핸들러
+  const handleInfoRowDoubleClick = useCallback(
+    (event: { data: MockSettlementInfo }) => {
+      console.log("모의정산 정보 행 더블클릭 이벤트 발생:", event);
+      const { data } = event;
+      if (data && data.settlementName) {
+        console.log("선택된 모의정산 정보:", data);
+        setSelectedSettlement({
+          simStmtGrpId: data.settlementName,
+          data: data,
+        });
+        setIsDetailModalOpen(true);
+      } else {
+        console.log("settlementName이 없습니다:", data);
+      }
+    },
+    []
+  );
+
+  // 상세 모달 닫기 핸들러
+  const handleDetailModalClose = useCallback(() => {
+    setIsDetailModalOpen(false);
+    setSelectedSettlement(null);
+  }, []);
 
   // 행 클릭 핸들러
   const handleRowClick = useCallback(
@@ -427,6 +460,7 @@ export default function MockSettlementByOdPage() {
                         resizable: false,
                         suppressMovable: true,
                       },
+                      onRowDoubleClicked: handleInfoRowDoubleClick,
                     }}
                   />
                 </div>
@@ -469,7 +503,9 @@ export default function MockSettlementByOdPage() {
                         resizable: false,
                         suppressMovable: true,
                       },
-                      onRowClicked: (event: { data: MockSettlementByOdData }) => {
+                      onRowClicked: (event: {
+                        data: MockSettlementByOdData;
+                      }) => {
                         handleRowClick(event.data);
                       },
                     }}
@@ -560,6 +596,16 @@ export default function MockSettlementByOdPage() {
               </>
             )}
         </div>
+      )}
+
+      {/* 모의정산 상세 모달 */}
+      {selectedSettlement && (
+        <MockSettlementDetailModal
+          isOpen={isDetailModalOpen}
+          onClose={handleDetailModalClose}
+          simStmtGrpId={selectedSettlement.simStmtGrpId}
+          gridData={selectedSettlement.data}
+        />
       )}
 
       {/* 모의정산 실행중 확인 다이얼로그 */}

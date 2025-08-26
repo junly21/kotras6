@@ -50,6 +50,7 @@ export default function MockSettlementRegisterPage() {
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   const [selectedSettlement, setSelectedSettlement] = useState<{
     simStmtGrpId: string;
+    data: MockSettlementRegisterData;
   } | null>(null);
   const [isSimulateModalOpen, setIsSimulateModalOpen] = useState(false);
 
@@ -238,6 +239,7 @@ export default function MockSettlementRegisterPage() {
         console.log("선택된 데이터:", data);
         setSelectedSettlement({
           simStmtGrpId: data.simStmtGrpId,
+          data: data, // 전체 데이터도 전달
         });
         setIsDetailModalOpen(true);
       } else {
@@ -392,9 +394,7 @@ export default function MockSettlementRegisterPage() {
             {!isLoading && searchResults.length > 0 && (
               <>
                 <div className="flex justify-between items-center">
-                  <h3 className="text-lg font-semibold">
-                    모의정산 등록 목록
-                  </h3>
+                  <h3 className="text-lg font-semibold">모의정산 등록 목록</h3>
                   {/* 등록 버튼 */}
                   <div className="flex justify-end">
                     <Button
@@ -472,6 +472,7 @@ export default function MockSettlementRegisterPage() {
             isOpen={isDetailModalOpen}
             onClose={handleDetailModalClose}
             simStmtGrpId={selectedSettlement.simStmtGrpId}
+            gridData={selectedSettlement.data}
           />
         )}
 

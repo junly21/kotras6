@@ -10,6 +10,7 @@ import { MockSettlementByInstitutionService } from "@/services/mockSettlementByI
 import { MockSettlementResultService } from "@/services/mockSettlementResultService";
 import { useCallback, useRef, useState, useEffect } from "react";
 import { AgGridReact } from "ag-grid-react";
+import { MockSettlementDetailModal } from "@/components/MockSettlementDetailModal";
 import {
   MockSettlementByInstitutionFilters,
   MockSettlementByInstitutionData,
@@ -44,6 +45,13 @@ export default function MockSettlementByInstitutionPage() {
   const [byInstitutionData, setByInstitutionData] = useState<
     MockSettlementByInstitutionData[]
   >([]);
+
+  // 모달 상태
+  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+  const [selectedSettlement, setSelectedSettlement] = useState<{
+    simStmtGrpId: string;
+    data: MockSettlementResultData;
+  } | null>(null);
 
   // 원단위 상태 추가
   const [unit, setUnit] = useState<Unit>("원");
@@ -223,6 +231,31 @@ export default function MockSettlementByInstitutionPage() {
     },
   ];
 
+  // 행 더블클릭 핸들러
+  const handleRowDoubleClick = useCallback(
+    (event: { data: MockSettlementResultData }) => {
+      console.log("행 더블클릭 이벤트 발생:", event);
+      const { data } = event;
+      if (data && data.settlementName) {
+        console.log("선택된 데이터:", data);
+        setSelectedSettlement({
+          simStmtGrpId: data.settlementName,
+          data: data,
+        });
+        setIsDetailModalOpen(true);
+      } else {
+        console.log("settlementName이 없습니다:", data);
+      }
+    },
+    []
+  );
+
+  // 상세 모달 닫기 핸들러
+  const handleDetailModalClose = useCallback(() => {
+    setIsDetailModalOpen(false);
+    setSelectedSettlement(null);
+  }, []);
+
   // 원단위 변환된 데이터
   const byInstitutionRowData = useUnitConversion(byInstitutionData, unit);
 
@@ -290,6 +323,7 @@ export default function MockSettlementByInstitutionPage() {
                         resizable: false,
                         suppressMovable: true,
                       },
+                      onRowDoubleClicked: handleRowDoubleClick,
                     }}
                   />
                 </div>
@@ -387,6 +421,16 @@ export default function MockSettlementByInstitutionPage() {
           </div>
         </div>
       </div>
+
+      {/* 모의정산 상세 모달 */}
+      {selectedSettlement && (
+        <MockSettlementDetailModal
+          isOpen={isDetailModalOpen}
+          onClose={handleDetailModalClose}
+          simStmtGrpId={selectedSettlement.simStmtGrpId}
+          gridData={selectedSettlement.data}
+        />
+      )}
 
       {/* 토스트 알림 */}
       <Toast

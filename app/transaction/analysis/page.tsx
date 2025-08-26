@@ -8,7 +8,7 @@ import { AllCommunityModule, ModuleRegistry } from "ag-grid-community";
 import { useApi } from "@/hooks/useApi";
 import { useAgencyOptions } from "@/hooks/useFilterOptions";
 import { TransactionAnalysisService } from "@/services/transactionAnalysisService";
-import { useCallback, useRef, useState, useEffect } from "react";
+import { useCallback, useRef, useState, useEffect, useMemo } from "react";
 import { AgGridReact } from "ag-grid-react";
 import {
   TransactionAnalysisFilters,
@@ -146,8 +146,40 @@ export default function TransactionAnalysisPage() {
       valueFormatter: (params: { value: number }) =>
         params.value.toLocaleString(),
       resizable: false,
+      cellStyle: { textAlign: "right" },
     },
   ];
+
+  // 하단 고정 행 데이터 (총계)
+  const pinnedBottomRowData = useMemo(() => {
+    if (!apiData || apiData.length === 0) return [];
+
+    const totalCount = apiData.reduce((sum, item) => sum + Number(item.cnt), 0);
+
+    return [
+      {
+        oper_nm: `총 ${apiData.length}건`,
+        ride_nm: "",
+        algh_nm: "",
+        cnt: totalCount,
+      },
+    ];
+  }, [apiData]);
+
+  // 하단 고정 행 스타일
+  const getRowStyle = useCallback(
+    (params: { node: { rowPinned?: string } }) => {
+      if (params.node.rowPinned === "bottom") {
+        return {
+          backgroundColor: "#f8fafc",
+          fontWeight: "bold",
+          borderTop: "2px solid #e2e8f0",
+        };
+      }
+      return {};
+    },
+    []
+  );
 
   return (
     <div className="space-y-6">
@@ -201,6 +233,8 @@ export default function TransactionAnalysisPage() {
             headerHeight: 50,
             rowHeight: 35,
             suppressScrollOnNewData: true,
+            pinnedBottomRowData: pinnedBottomRowData,
+            getRowStyle: getRowStyle,
           }}
         />
       </div>

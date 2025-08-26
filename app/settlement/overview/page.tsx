@@ -101,7 +101,7 @@ export default function TestGridPage() {
       width: 120,
     },
     {
-      headerName: "총계",
+      headerName: `총계 (${unit})`,
       field: "total",
       cellStyle: getNumberCellStyle,
       valueFormatter: getNumberFormatter,

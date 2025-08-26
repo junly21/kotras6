@@ -19,7 +19,6 @@ import {
   settlementByInstitutionSchema,
 } from "@/features/settlementByInstitution/filterConfig";
 import { UnitRadioGroup, type Unit } from "@/components/ui/UnitRadioGroup";
-import { useUnitConversion } from "@/hooks/useUnitConversion";
 import { InstitutionChart } from "@/components/charts/InstitutionChart";
 
 // Register all Community features
@@ -108,8 +107,14 @@ export default function SettlementByInstitutionPage() {
     setFilters(values);
   }, []);
 
-  // 원단위 변환된 데이터
-  const rowData = useUnitConversion(apiData, unit);
+  // 그리드용 단위변환된 데이터
+  const rowData =
+    apiData?.map((item) => ({
+      ...item,
+      지급액: unit === "원" ? item.지급액 : item.지급액 / 100000000,
+      수급액: unit === "원" ? item.수급액 : item.수급액 / 100000000,
+      차액: unit === "원" ? item.차액 : item.차액 / 100000000,
+    })) || [];
 
   const colDefs = [
     {
@@ -120,47 +125,35 @@ export default function SettlementByInstitutionPage() {
       resizable: false,
     },
     {
-      headerName: "지급",
+      headerName: `지급 (${unit})`,
       field: "지급액",
       minWidth: 200,
       flex: 1,
       resizable: false,
       valueFormatter: (params: { value: number }) => {
-        if (unit === "원") {
-          return params.value.toLocaleString() + "원";
-        } else {
-          return params.value.toLocaleString() + unit;
-        }
+        return params.value.toLocaleString();
       },
       cellStyle: { textAlign: "right" },
     },
     {
-      headerName: "수급",
+      headerName: `수급 (${unit})`,
       field: "수급액",
       minWidth: 200,
       flex: 1,
       resizable: false,
       valueFormatter: (params: { value: number }) => {
-        if (unit === "원") {
-          return params.value.toLocaleString() + "원";
-        } else {
-          return params.value.toLocaleString() + unit;
-        }
+        return params.value.toLocaleString();
       },
       cellStyle: { textAlign: "right" },
     },
     {
-      headerName: "계",
+      headerName: `계 (${unit})`,
       field: "차액",
       minWidth: 200,
       flex: 1,
       resizable: false,
       valueFormatter: (params: { value: number }) => {
-        if (unit === "원") {
-          return params.value.toLocaleString() + "원";
-        } else {
-          return params.value.toLocaleString() + unit;
-        }
+        return params.value.toLocaleString();
       },
       cellStyle: { textAlign: "right" },
     },
@@ -239,7 +232,7 @@ export default function SettlementByInstitutionPage() {
               </div>
             ) : hasSearched && apiData && apiData.length > 0 ? (
               <div className="h-full w-full">
-                <InstitutionChart key={unit} data={rowData} unit={unit} />
+                <InstitutionChart data={apiData || []} />
               </div>
             ) : (
               <div className="h-full flex items-center justify-center bg-gray-50 border-2 border-dashed border-gray-300 rounded">

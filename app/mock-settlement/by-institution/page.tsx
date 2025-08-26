@@ -5,10 +5,9 @@ import CsvExportButton from "@/components/CsvExportButton";
 import { FilterForm } from "@/components/ui/FilterForm";
 import { Toast } from "@/components/ui/Toast";
 import { AllCommunityModule, ModuleRegistry } from "ag-grid-community";
-import { useApi } from "@/hooks/useApi";
 import { MockSettlementByInstitutionService } from "@/services/mockSettlementByInstitutionService";
 import { MockSettlementResultService } from "@/services/mockSettlementResultService";
-import { useCallback, useRef, useState, useEffect } from "react";
+import { useCallback, useRef, useState } from "react";
 import { AgGridReact } from "ag-grid-react";
 import { MockSettlementDetailModal } from "@/components/MockSettlementDetailModal";
 import {
@@ -21,7 +20,6 @@ import {
   mockSettlementByInstitutionSchema,
 } from "@/features/mockSettlementByInstitution/filterConfig";
 import { UnitRadioGroup, type Unit } from "@/components/ui/UnitRadioGroup";
-import { useUnitConversion } from "@/hooks/useUnitConversion";
 import { InstitutionChart } from "@/components/charts/InstitutionChart";
 
 // Register all Community features
@@ -30,10 +28,6 @@ ModuleRegistry.registerModules([AllCommunityModule]);
 export default function MockSettlementByInstitutionPage() {
   const mockSettlementGridRef = useRef<AgGridReact>(null);
   const byInstitutionGridRef = useRef<AgGridReact>(null);
-  const [filters, setFilters] = useState<MockSettlementByInstitutionFilters>({
-    settlementName: "",
-    agency: "",
-  });
 
   // ✅ 검색 수행 여부 상태 추가
   const [hasSearched, setHasSearched] = useState(false);
@@ -70,7 +64,6 @@ export default function MockSettlementByInstitutionPage() {
   const handleSearch = useCallback(
     async (values: MockSettlementByInstitutionFilters) => {
       setHasSearched(true);
-      setFilters(values);
       setIsLoading(true);
       setError(null);
 
@@ -185,47 +178,35 @@ export default function MockSettlementByInstitutionPage() {
       resizable: false,
     },
     {
-      headerName: "지급",
+      headerName: `지급 (${unit})`,
       field: "지급액",
       flex: 1,
       minWidth: 200,
       resizable: false,
       valueFormatter: (params: { value: number }) => {
-        if (unit === "원") {
-          return params.value.toLocaleString() + "원";
-        } else {
-          return params.value.toLocaleString() + unit;
-        }
+        return params.value.toLocaleString();
       },
       cellStyle: { textAlign: "right" },
     },
     {
-      headerName: "수급",
+      headerName: `수급 (${unit})`,
       field: "수급액",
       flex: 1,
       minWidth: 200,
       resizable: false,
       valueFormatter: (params: { value: number }) => {
-        if (unit === "원") {
-          return params.value.toLocaleString() + "원";
-        } else {
-          return params.value.toLocaleString() + unit;
-        }
+        return params.value.toLocaleString();
       },
       cellStyle: { textAlign: "right" },
     },
     {
-      headerName: "계",
+      headerName: `계 (${unit})`,
       field: "차액",
       flex: 1,
       minWidth: 200,
       resizable: false,
       valueFormatter: (params: { value: number }) => {
-        if (unit === "원") {
-          return params.value.toLocaleString() + "원";
-        } else {
-          return params.value.toLocaleString() + unit;
-        }
+        return params.value.toLocaleString();
       },
       cellStyle: { textAlign: "right" },
     },
@@ -256,8 +237,13 @@ export default function MockSettlementByInstitutionPage() {
     setSelectedSettlement(null);
   }, []);
 
-  // 원단위 변환된 데이터
-  const byInstitutionRowData = useUnitConversion(byInstitutionData, unit);
+  // 그리드용 단위변환된 데이터
+  const byInstitutionRowData = byInstitutionData.map((item) => ({
+    ...item,
+    지급액: unit === "원" ? item.지급액 : item.지급액 / 100000000,
+    수급액: unit === "원" ? item.수급액 : item.수급액 / 100000000,
+    차액: unit === "원" ? item.차액 : item.차액 / 100000000,
+  }));
 
   return (
     <div className="space-y-6">
@@ -401,11 +387,7 @@ export default function MockSettlementByInstitutionPage() {
                 byInstitutionData &&
                 byInstitutionData.length > 0 ? (
                 <div className="h-full w-full">
-                  <InstitutionChart
-                    key={unit}
-                    data={byInstitutionRowData}
-                    unit={unit}
-                  />
+                  <InstitutionChart data={byInstitutionData || []} />
                 </div>
               ) : (
                 <div className="h-full flex items-center justify-center bg-gray-50 border-2 border-dashed border-gray-300 rounded">

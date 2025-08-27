@@ -139,9 +139,33 @@ export default function SettlementByInstitutionPage() {
     return [
       {
         대상기관: `총 ${apiData.length}개`,
-        지급액: `${(totalPayment * unitMultiplier).toLocaleString()}원`,
-        수급액: `${(totalReceipt * unitMultiplier).toLocaleString()}원`,
-        차액: `${(totalDifference * unitMultiplier).toLocaleString()}원`,
+        지급액: `${(totalPayment * unitMultiplier).toLocaleString()}${
+          unit === "원"
+            ? "원"
+            : unit === "천"
+            ? "천원"
+            : unit === "백만"
+            ? "백만원"
+            : "억원"
+        }`,
+        수급액: `${(totalReceipt * unitMultiplier).toLocaleString()}${
+          unit === "원"
+            ? "원"
+            : unit === "천"
+            ? "천원"
+            : unit === "백만"
+            ? "백만원"
+            : "억원"
+        }`,
+        차액: `${(totalDifference * unitMultiplier).toLocaleString()}${
+          unit === "원"
+            ? "원"
+            : unit === "천"
+            ? "천원"
+            : unit === "백만"
+            ? "백만원"
+            : "억원"
+        }`,
       },
     ];
   }, [apiData, unit]);
@@ -252,21 +276,11 @@ export default function SettlementByInstitutionPage() {
         />
       </div>
 
-      {/* 원단위 변경 및 CSV 내보내기 버튼 */}
-      <div className="flex justify-between gap-4 mb-4">
-        <UnitRadioGroup value={unit} onChange={setUnit} />
-        <CsvExportButton
-          gridRef={gridRef}
-          fileName="settlement_by_institution_data.csv"
-          className="shadow-lg bg-accent-500"
-        />
-      </div>
-
       {/* 좌우 그리드 레이아웃 */}
       <div className="grid grid-cols-2 gap-6 h-[650px]">
         {/* 왼쪽: 정산결과 그리드 */}
         <div className="flex flex-col h-full">
-          <h2 className="text-lg font-semibold">정산결과 목록</h2>
+          <h2 className="text-lg font-semibold">기관별 조회 결과</h2>
           <div className="relative flex-1 h-full">
             {hasSearched && loading && (
               <div className="absolute inset-0 flex items-center justify-center bg-white/80 z-10">
@@ -292,7 +306,16 @@ export default function SettlementByInstitutionPage() {
 
         {/* 오른쪽: 차트 영역 */}
         <div className="flex flex-col h-full">
-          <h2 className="text-lg font-semibold">차트 분석</h2>
+          <div className="flex justify-end items-center mb-4">
+            <div className="flex items-center gap-4">
+              <UnitRadioGroup value={unit} onChange={setUnit} />
+              <CsvExportButton
+                gridRef={gridRef}
+                fileName="settlement_by_institution_data.csv"
+                className="shadow-lg bg-accent-500"
+              />
+            </div>
+          </div>
           <div className="relative flex-1 h-full">
             {!hasSearched ? (
               <div className="h-full flex items-center justify-center bg-gray-50 border-2 border-dashed border-gray-300 rounded">

@@ -311,9 +311,27 @@ export default function MockSettlementByInstitutionPage() {
     return [
       {
         대상기관: `총 ${byInstitutionData.length}개`,
-        지급액: `${(totalPayment * unitMultiplier).toLocaleString()}원`,
-        수급액: `${(totalReceipt * unitMultiplier).toLocaleString()}원`,
-        차액: `${(totalDifference * unitMultiplier).toLocaleString()}원`,
+        지급액: `${(totalPayment * unitMultiplier).toLocaleString()}${
+          unit === "원"
+            ? "원"
+            : unit === "천"
+            ? "천원"
+            : unit === "백만"
+            ? "백만원"
+            : "억원"
+        }`,
+        수급액: `${(totalReceipt * unitMultiplier).toLocaleString()}${
+          unit === "천" ? "천원" : unit === "백만" ? "백만원" : "억원"
+        }`,
+        차액: `${(totalDifference * unitMultiplier).toLocaleString()}${
+          unit === "원"
+            ? "원"
+            : unit === "천"
+            ? "천원"
+            : unit === "백만"
+            ? "백만원"
+            : "억원"
+        }`,
       },
     ];
   }, [byInstitutionData, unit]);

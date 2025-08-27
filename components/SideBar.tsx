@@ -49,7 +49,7 @@ const MenuItemComponent: React.FC<{ item: MenuItem; level: number }> = ({
         onClick={handleClick}
         className={`${baseClasses} ${activeClasses} ${parentClasses} ${cursorClasses}`}>
         <span className="flex items-center gap-2">
-          {item.icon && <img className="size-8" src={item.icon}></img>}
+          {item.icon && <img className="size-8" src={item.icon} alt="" />}
           {item.label}
         </span>
       </button>

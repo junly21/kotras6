@@ -1,5 +1,4 @@
 import { create } from "zustand";
-import { persist } from "zustand/middleware";
 
 export interface MenuItem {
   id: string;
@@ -21,102 +20,91 @@ interface SidebarState {
   isActiveMenu: (path: string) => boolean; // 활성 메뉴 판별 함수 추가
 }
 
-export const useSidebarStore = create<SidebarState>()(
-  persist(
-    (set, get) => ({
-      openMenus: [],
-      currentPath: "",
+export const useSidebarStore = create<SidebarState>((set, get) => ({
+  openMenus: [],
+  currentPath: "",
 
-      setCurrentPath: (path: string) => {
-        set({ currentPath: path });
+  setCurrentPath: (path: string) => {
+    set({ currentPath: path });
 
-        // 현재 경로에 해당하는 부모 메뉴들을 자동으로 열기
-        const menuData = getMenuData();
-        const openParentMenus: string[] = [];
+    // 현재 경로에 해당하는 부모 메뉴들을 자동으로 열기
+    const menuData = getMenuData();
+    const openParentMenus: string[] = [];
 
-        const findAndOpenParents = (
-          items: MenuItem[],
-          targetPath: string
-        ): boolean => {
-          for (const item of items) {
-            if (item.path === targetPath) {
-              return true;
-            }
-            if (item.children) {
-              if (findAndOpenParents(item.children, targetPath)) {
-                openParentMenus.push(item.id);
-                return true;
-              }
-            }
+    const findAndOpenParents = (
+      items: MenuItem[],
+      targetPath: string
+    ): boolean => {
+      for (const item of items) {
+        if (item.path === targetPath) {
+          return true;
+        }
+        if (item.children) {
+          if (findAndOpenParents(item.children, targetPath)) {
+            openParentMenus.push(item.id);
+            return true;
           }
-          return false;
-        };
+        }
+      }
+      return false;
+    };
 
-        findAndOpenParents(menuData, path);
+    findAndOpenParents(menuData, path);
 
-        // 기존에 열린 메뉴들과 새로 열어야 할 메뉴들을 합침
-        const currentOpenMenus = get().openMenus;
-        const newOpenMenus = [
-          ...new Set([...currentOpenMenus, ...openParentMenus]),
-        ];
+    // 기존에 열린 메뉴들과 새로 열어야 할 메뉴들을 합침
+    const currentOpenMenus = get().openMenus;
+    const newOpenMenus = [
+      ...new Set([...currentOpenMenus, ...openParentMenus]),
+    ];
 
-        set({ openMenus: newOpenMenus });
-      },
+    set({ openMenus: newOpenMenus });
+  },
 
-      toggleMenu: (menuId: string) => {
-        set((state) => {
-          const newOpenMenus = state.openMenus.includes(menuId)
-            ? state.openMenus.filter((id) => id !== menuId)
-            : [...state.openMenus, menuId];
-          return { openMenus: newOpenMenus };
-        });
-      },
+  toggleMenu: (menuId: string) => {
+    set((state) => {
+      const newOpenMenus = state.openMenus.includes(menuId)
+        ? state.openMenus.filter((id) => id !== menuId)
+        : [...state.openMenus, menuId];
+      return { openMenus: newOpenMenus };
+    });
+  },
 
-      openMenu: (menuId: string) => {
-        set((state) => {
-          if (!state.openMenus.includes(menuId)) {
-            return { openMenus: [...state.openMenus, menuId] };
-          }
-          return state;
-        });
-      },
+  openMenu: (menuId: string) => {
+    set((state) => {
+      if (!state.openMenus.includes(menuId)) {
+        return { openMenus: [...state.openMenus, menuId] };
+      }
+      return state;
+    });
+  },
 
-      closeMenu: (menuId: string) => {
-        set((state) => ({
-          openMenus: state.openMenus.filter((id) => id !== menuId),
-        }));
-      },
+  closeMenu: (menuId: string) => {
+    set((state) => ({
+      openMenus: state.openMenus.filter((id) => id !== menuId),
+    }));
+  },
 
-      isMenuOpen: (menuId: string) => {
-        return get().openMenus.includes(menuId);
-      },
+  isMenuOpen: (menuId: string) => {
+    return get().openMenus.includes(menuId);
+  },
 
-      isCurrentPath: (path: string) => {
-        return get().currentPath === path;
-      },
+  isCurrentPath: (path: string) => {
+    return get().currentPath === path;
+  },
 
-      isActiveMenu: (path: string) => {
-        const currentPath = get().currentPath;
-        if (!path || !currentPath) return false;
+  isActiveMenu: (path: string) => {
+    const currentPath = get().currentPath;
+    if (!path || !currentPath) return false;
 
-        // 정확한 경로 일치
-        if (currentPath === path) return true;
+    // 정확한 경로 일치
+    if (currentPath === path) return true;
 
-        // 부모 경로와 일치하는 경우 (예: /settlement/by-institution이 /settlement로 시작하는 경우)
-        if (path !== "/" && currentPath.startsWith(path)) return true;
+    // 부모 경로와 일치하는 경우 (예: /settlement/by-institution이 /settlement로 시작하는 경우)
+    if (path !== "/" && currentPath.startsWith(path)) return true;
 
-        return false;
-      },
-    }),
-    {
-      name: "sidebar-storage", // localStorage 키 이름
-      partialize: (state) => ({
-        openMenus: state.openMenus,
-        currentPath: state.currentPath,
-      }), // 저장할 상태만 선택
-    }
-  )
-);
+    return false;
+  },
+}));
 
 // 메뉴 데이터 정의
 export const getMenuData = (): MenuItem[] => [

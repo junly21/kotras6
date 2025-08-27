@@ -108,7 +108,7 @@ export function NetworkMap({
         }
       })
       .catch((error) => {
-        console.error("NetworkMap parseSvg 에러:", error);
+        console.error("SVG 파싱 오류:", error);
       });
 
     return () => {
@@ -118,14 +118,15 @@ export function NetworkMap({
     svgText,
     nodes,
     links,
+    highlights,
+    highlightState,
     onNodeClick,
     onLinkClick,
-    highlightState,
     showTooltips,
     tooltips,
   ]);
 
-  // 이벤트 핸들러들
+  // 이벤트 핸들러들 - 모든 Hook을 조건부 return 이전에 호출
   const handleMouseDown = useCallback(
     (e: React.MouseEvent) => {
       if (e.button === 0) {
@@ -232,7 +233,31 @@ export function NetworkMap({
     return () => {
       container.removeEventListener("wheel", handleWheelEvent);
     };
-  }, [scale, pan]);
+  }, [scale, pan, minZoom, maxZoom, zoomSensitivity]);
+
+  // 데이터가 없으면 로딩 상태 표시
+  if (!svgText || !nodes.length || !links.length) {
+    return (
+      <div className="flex items-center justify-center h-full">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto mb-2"></div>
+          <p className="text-gray-600">노선도 데이터를 불러오는 중...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // SVG가 아직 파싱되지 않았으면 로딩 상태 표시
+  if (!svgReactTree) {
+    return (
+      <div className="flex items-center justify-center h-full">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto mb-2"></div>
+          <p className="text-gray-600">노선도를 렌더링하는 중...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div

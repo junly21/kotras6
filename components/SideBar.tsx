@@ -10,12 +10,12 @@ const MenuItemComponent: React.FC<{ item: MenuItem; level: number }> = ({
   item,
   level,
 }) => {
-  const { isMenuOpen, toggleMenu, isCurrentPath } = useSidebarStore();
+  const { isMenuOpen, toggleMenu, isActiveMenu } = useSidebarStore();
   const router = useRouter();
 
   const hasChildren = item.children && item.children.length > 0;
   const isOpen = isMenuOpen(item.id);
-  const isActive = item.path ? isCurrentPath(item.path) : false;
+  const isActive = item.path ? isActiveMenu(item.path) : false;
   const isClickable = !hasChildren && item.path; // 클릭 가능한지 여부
 
   const handleClick = (e: React.MouseEvent) => {
@@ -33,7 +33,7 @@ const MenuItemComponent: React.FC<{ item: MenuItem; level: number }> = ({
   const baseClasses =
     "flex text-[rgba(54,54,54,0.4)] items-center w-full px-3 py-2 text-sm rounded-full transition-colors duration-200";
   const activeClasses = isActive
-    ? "bg-blue-100 text-blue-700 font-medium"
+    ? "bg-[#E6E6E6] text-blue-700 font-medium"
     : "text-[#363636] hover:bg-[#E6E6E6] hover:rounded-full";
 
   const parentClasses = hasChildren

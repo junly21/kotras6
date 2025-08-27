@@ -79,3 +79,25 @@ export function SettlementNodeTooltip({
     </div>
   );
 }
+
+// 정산 정보가 포함된 링크 툴팁
+export function SettlementLinkTooltip({ link }: { link: Link }) {
+  return (
+    <div>
+      <div style={{ fontWeight: 700, color: "#2563eb", marginBottom: 8 }}>
+        노선 정보
+      </div>
+      <div style={{ fontSize: 14, lineHeight: 1.7 }}>
+        <div>
+          <b>노선명:</b> {link.line}
+        </div>
+        <div>
+          <b>운영사:</b> {link.operator}
+        </div>
+        <div>
+          <b>거리:</b> {link.distance?.toFixed(1)}km
+        </div>
+      </div>
+    </div>
+  );
+}

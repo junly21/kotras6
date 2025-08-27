@@ -7,7 +7,7 @@ import { Toast } from "@/components/ui/Toast";
 import { AllCommunityModule, ModuleRegistry } from "ag-grid-community";
 import { MockSettlementByInstitutionService } from "@/services/mockSettlementByInstitutionService";
 import { MockSettlementResultService } from "@/services/mockSettlementResultService";
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useRef, useState, useMemo } from "react";
 import { AgGridReact } from "ag-grid-react";
 import { MockSettlementDetailModal } from "@/components/MockSettlementDetailModal";
 import {
@@ -245,6 +245,51 @@ export default function MockSettlementByInstitutionPage() {
     차액: unit === "원" ? item.차액 : item.차액 / 100000000,
   }));
 
+  // 하단 고정 행 데이터 (총계)
+  const pinnedBottomRowData = useMemo(() => {
+    if (!byInstitutionData || byInstitutionData.length === 0) return [];
+
+    const totalPayment = byInstitutionData.reduce(
+      (sum, item) => sum + Number(item.지급액),
+      0
+    );
+    const totalReceipt = byInstitutionData.reduce(
+      (sum, item) => sum + Number(item.수급액),
+      0
+    );
+    const totalDifference = byInstitutionData.reduce(
+      (sum, item) => sum + Number(item.차액),
+      0
+    );
+
+    // 단위변환 적용
+    const unitMultiplier = unit === "원" ? 1 : 1 / 100000000;
+
+    return [
+      {
+        대상기관: `총 ${byInstitutionData.length}개`,
+        지급액: totalPayment * unitMultiplier,
+        수급액: totalReceipt * unitMultiplier,
+        차액: totalDifference * unitMultiplier,
+      },
+    ];
+  }, [byInstitutionData, unit]);
+
+  // 하단 고정 행 스타일
+  const getRowStyle = useCallback(
+    (params: { node: { rowPinned?: string } }) => {
+      if (params.node.rowPinned === "bottom") {
+        return {
+          backgroundColor: "#f8fafc",
+          fontWeight: "bold",
+          borderTop: "2px solid #e2e8f0",
+        };
+      }
+      return {};
+    },
+    []
+  );
+
   return (
     <div className="space-y-6">
       <h1 className="text-2xl font-bold">모의정산 기관별 조회</h1>
@@ -342,12 +387,12 @@ export default function MockSettlementByInstitutionPage() {
         </div>
 
         {/* 좌우 그리드 레이아웃 */}
-        <div className="grid grid-cols-2 gap-6 h-[525px]">
+        <div className="grid grid-cols-2 gap-6 h-[450px]">
           {/* 왼쪽: 기관별 조회 결과 그리드 */}
-          <div className="flex flex-col h-full">
-            <div className="relative flex-1 h-full">
+          <div className="flex flex-col h-full ]">
+            <div className="relative flex-1 h-full max-h-[425px]">
               {hasSearched && isLoading && (
-                <div className="absolute inset-0 flex items-center justify-center bg-white/80 z-10">
+                <div className="absolute inset-0 h-100vh flex items-center justify-center bg-white/80 z-10">
                   <Spinner />
                 </div>
               )}
@@ -361,16 +406,18 @@ export default function MockSettlementByInstitutionPage() {
                   suppressCellFocus: true,
                   headerHeight: 50,
                   suppressScrollOnNewData: true,
+                  pinnedBottomRowData: pinnedBottomRowData,
+                  getRowStyle: getRowStyle,
                 }}
               />
             </div>
           </div>
 
           {/* 오른쪽: 차트 영역 */}
-          <div className="flex flex-col h-full">
-            <div className="relative flex-1 h-full">
+          <div className="flex flex-col h-full ">
+            <div className="relative flex-1 h-full  ">
               {!hasSearched ? (
-                <div className="h-full flex items-center justify-center bg-gray-50 border-2 border-dashed border-gray-300 rounded">
+                <div className="h-full max-h-[425px] flex items-center justify-center bg-gray-50 border-2 border-dashed border-gray-300 rounded">
                   <div className="text-center text-gray-500">
                     <p className="text-lg font-medium">
                       조회 버튼을 눌러주세요

@@ -8,7 +8,7 @@ import { AllCommunityModule, ModuleRegistry } from "ag-grid-community";
 import { useApi } from "@/hooks/useApi";
 import { useSettlementFilters } from "@/hooks/useFilterOptions";
 import { SettlementByInstitutionService } from "@/services/settlementByInstitutionService";
-import { useCallback, useRef, useState, useEffect } from "react";
+import { useCallback, useRef, useState, useEffect, useMemo } from "react";
 import { AgGridReact } from "ag-grid-react";
 import {
   SettlementByInstitutionFilters,
@@ -116,6 +116,51 @@ export default function SettlementByInstitutionPage() {
       차액: unit === "원" ? item.차액 : item.차액 / 100000000,
     })) || [];
 
+  // 하단 고정 행 데이터 (총계)
+  const pinnedBottomRowData = useMemo(() => {
+    if (!apiData || apiData.length === 0) return [];
+
+    const totalPayment = apiData.reduce(
+      (sum, item) => sum + Number(item.지급액),
+      0
+    );
+    const totalReceipt = apiData.reduce(
+      (sum, item) => sum + Number(item.수급액),
+      0
+    );
+    const totalDifference = apiData.reduce(
+      (sum, item) => sum + Number(item.차액),
+      0
+    );
+
+    // 단위변환 적용
+    const unitMultiplier = unit === "원" ? 1 : 1 / 100000000;
+
+    return [
+      {
+        대상기관: `총 ${apiData.length}개`,
+        지급액: totalPayment * unitMultiplier,
+        수급액: totalReceipt * unitMultiplier,
+        차액: totalDifference * unitMultiplier,
+      },
+    ];
+  }, [apiData, unit]);
+
+  // 하단 고정 행 스타일
+  const getRowStyle = useCallback(
+    (params: { node: { rowPinned?: string } }) => {
+      if (params.node.rowPinned === "bottom") {
+        return {
+          backgroundColor: "#f8fafc",
+          fontWeight: "bold",
+          borderTop: "2px solid #e2e8f0",
+        };
+      }
+      return {};
+    },
+    []
+  );
+
   const colDefs = [
     {
       headerName: "기관명",
@@ -190,7 +235,7 @@ export default function SettlementByInstitutionPage() {
       </div>
 
       {/* 좌우 그리드 레이아웃 */}
-      <div className="grid grid-cols-2 gap-6 h-[525px]">
+      <div className="grid grid-cols-2 gap-6 h-[650px]">
         {/* 왼쪽: 정산결과 그리드 */}
         <div className="flex flex-col h-full">
           <h2 className="text-lg font-semibold">정산결과 목록</h2>
@@ -211,6 +256,8 @@ export default function SettlementByInstitutionPage() {
                 headerHeight: 50,
                 rowHeight: 35,
                 suppressScrollOnNewData: true,
+                pinnedBottomRowData: pinnedBottomRowData,
+                getRowStyle: getRowStyle,
               }}
             />
           </div>

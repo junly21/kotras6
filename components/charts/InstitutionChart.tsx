@@ -53,7 +53,7 @@ export function InstitutionChart({ data }: Props) {
 
   return (
     <div className="h-full flex flex-col">
-      <ResponsiveContainer width="100%" height="85%">
+      <ResponsiveContainer width="100%" height="100%">
         <BarChart
           data={chartData}
           layout="vertical"

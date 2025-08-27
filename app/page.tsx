@@ -175,7 +175,7 @@ export default function Home() {
       {/* 네트워크 맵 */}
       <div className="space-y-2">
         <h2 className="text-lg font-semibold text-gray-900">네트워크 노선도</h2>
-        <div className="h-[500px] bg-white rounded-lg shadow-md overflow-hidden">
+        <div className="h-[450px] bg-white rounded-lg shadow-md overflow-hidden">
           {mapLoading ? (
             <div className="flex items-center justify-center h-full text-gray-500">
               노선도를 불러오는 중...

@@ -1,4 +1,5 @@
 export interface RouteSearchFilter {
+  PATH_GRP_ID: string;
   RIDE_STN_ID: string;
   ALGH_STN_ID: string;
 }

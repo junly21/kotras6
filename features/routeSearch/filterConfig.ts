@@ -2,6 +2,14 @@ import { FieldConfig } from "@/types/filterForm";
 
 export const routeSearchFilterConfig: FieldConfig[] = [
   {
+    name: "PATH_GRP_ID",
+    label: "경로탐색 네트워크",
+    type: "select",
+    placeholder: "네트워크를 선택하세요",
+    required: true,
+    optionsEndpoint: "/api/route-search/networks",
+  },
+  {
     name: "RIDE_STN_ID",
     label: "출발역",
     type: "combobox",

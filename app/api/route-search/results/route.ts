@@ -10,6 +10,7 @@ export async function POST(request: Request) {
     console.log("Body:", body);
 
     const filter: RouteSearchFilter = {
+      PATH_GRP_ID: body.PATH_GRP_ID,
       RIDE_STN_ID: body.RIDE_STN_ID,
       ALGH_STN_ID: body.ALGH_STN_ID,
     };

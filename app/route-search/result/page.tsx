@@ -37,6 +37,7 @@ const routeSearchSchema = z
 
 // 기본값
 const defaultValues: RouteSearchFilter = {
+  PATH_GRP_ID: "",
   RIDE_STN_ID: "",
   ALGH_STN_ID: "",
 };
@@ -62,6 +63,18 @@ export default function RouteSearchResultPage() {
     (values: RouteSearchFilter) => {
       setFilters(values);
 
+      // 경로탐색 그룹이 변경되면 출발역과 도착역 초기화
+      if (values.PATH_GRP_ID && values.PATH_GRP_ID !== filters.PATH_GRP_ID) {
+        console.log("경로탐색 그룹 선택됨:", values.PATH_GRP_ID);
+        setFilters((prev) => ({
+          ...prev,
+          RIDE_STN_ID: "",
+          ALGH_STN_ID: "",
+        }));
+        setArrivalStationOptions([]);
+        return;
+      }
+
       // 출발역이 선택되면 도착역 옵션 로드
       if (values.RIDE_STN_ID && values.RIDE_STN_ID !== filters.RIDE_STN_ID) {
         console.log(
@@ -75,7 +88,10 @@ export default function RouteSearchResultPage() {
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ RIDE_STN_ID: values.RIDE_STN_ID }),
+          body: JSON.stringify({
+            PATH_GRP_ID: values.PATH_GRP_ID,
+            RIDE_STN_ID: values.RIDE_STN_ID,
+          }),
         })
           .then((res) => res.json())
           .then((data: { options: StationOption[] }) => {
@@ -93,7 +109,7 @@ export default function RouteSearchResultPage() {
           });
       }
     },
-    [filters.RIDE_STN_ID]
+    [filters.PATH_GRP_ID, filters.RIDE_STN_ID]
   );
 
   // 검색 핸들러 - useCallback으로 최적화
@@ -202,16 +218,22 @@ export default function RouteSearchResultPage() {
   // 동적 필터 설정 생성 - useMemo로 최적화
   const dynamicFilterConfig = useMemo(() => {
     return routeSearchFilterConfig.map((field) => {
+      if (field.name === "RIDE_STN_ID") {
+        return {
+          ...field,
+          disabled: !filters.PATH_GRP_ID,
+        };
+      }
       if (field.name === "ALGH_STN_ID") {
         return {
           ...field,
           options: arrivalStationOptions,
-          disabled: !filters.RIDE_STN_ID,
+          disabled: !filters.PATH_GRP_ID || !filters.RIDE_STN_ID,
         };
       }
       return field;
     });
-  }, [arrivalStationOptions, filters.RIDE_STN_ID]);
+  }, [arrivalStationOptions, filters.PATH_GRP_ID, filters.RIDE_STN_ID]);
 
   // 전체 로딩 상태
   const isLoading = searchLoading;
@@ -275,8 +297,8 @@ export default function RouteSearchResultPage() {
               경로 탐색
             </h2>
             <p className="text-blue-600">
-              출발역과 도착역을 선택한 후 &quot;조회&quot; 버튼을 클릭하여
-              경로를 탐색해주세요.
+              네트워크를 선택한 후, 출발역과 도착역을 선택하여 &quot;조회&quot;
+              버튼을 클릭해주세요.
             </p>
           </div>
         ) : processedResults.length > 0 ? (

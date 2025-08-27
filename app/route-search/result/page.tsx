@@ -317,7 +317,7 @@ export default function RouteSearchResultPage() {
       {hasSearched && processedResults.length > 0 && (
         <div className="space-y-4">
           <h2 className="text-xl font-semibold">지하철 노선도</h2>
-          <div className="bg-white rounded-[24px] p-4">
+          <div className="bg-white h-[700px] rounded-[24px] p-4">
             {isMapLoading ? (
               <div className="flex items-center justify-center h-64">
                 <Spinner />
@@ -338,31 +338,10 @@ export default function RouteSearchResultPage() {
                   height: 600,
                   showZoomControls: true,
                   showTooltips: true,
-                  defaultZoom: 1,
-                  defaultPan: { x: -2400, y: -2500 },
+                  defaultZoom: 0.25,
+                  defaultPan: { x: -800, y: -1000 },
                 }}
               />
-            )}
-            {!isMapLoading && !mapError && (
-              <div className="mt-4 text-sm text-gray-600">
-                {selectedPaths.length > 0 ? (
-                  <>
-                    <p>
-                      • <span className="font-medium">체크된 경로</span>: 각
-                      경로의 RGB 색상으로 표시
-                    </p>
-                    <p>
-                      • <span className="font-medium">선택 순서</span>: 체크박스
-                      선택 순서대로 색상 적용
-                    </p>
-                  </>
-                ) : (
-                  <p>
-                    • <span className="font-medium">체크박스</span>를 선택하면
-                    해당 경로가 노선도에 표시됩니다.
-                  </p>
-                )}
-              </div>
             )}
           </div>
         </div>

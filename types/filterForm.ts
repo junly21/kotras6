@@ -22,4 +22,6 @@ export interface FieldConfig {
   disabled?: boolean;
   dependsOn?: string; // 다른 필드에 의존하는 경우 해당 필드명
   filterOptions?: (options: FieldOption[]) => FieldOption[]; // 옵션 필터링 함수
+  error?: string; // 에러 메시지
+  className?: string; // CSS 클래스명
 }

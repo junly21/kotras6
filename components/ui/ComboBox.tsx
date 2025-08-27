@@ -25,6 +25,7 @@ interface ComboBoxProps {
   onChange: (value: string) => void;
   placeholder?: string;
   disabled?: boolean;
+  className?: string;
 }
 
 export function ComboBox({
@@ -33,6 +34,7 @@ export function ComboBox({
   onChange,
   placeholder = "선택",
   disabled,
+  className,
 }: ComboBoxProps) {
   const [open, setOpen] = useState(false);
   const [searchValue, setSearchValue] = useState("");
@@ -49,7 +51,7 @@ export function ComboBox({
           variant="outline"
           role="combobox"
           aria-expanded={open}
-          className="min-w-[200px] justify-between"
+          className={`min-w-[200px] justify-between ${className || ""}`}
           disabled={disabled}>
           {value ? options.find((o) => o.value === value)?.label : placeholder}
         </Button>

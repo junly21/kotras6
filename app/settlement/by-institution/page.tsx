@@ -146,21 +146,6 @@ export default function SettlementByInstitutionPage() {
     ];
   }, [apiData, unit]);
 
-  // 하단 고정 행 스타일
-  const getRowStyle = useCallback(
-    (params: { node: { rowPinned?: string } }) => {
-      if (params.node.rowPinned === "bottom") {
-        return {
-          backgroundColor: "#f8fafc",
-          fontWeight: "bold",
-          borderTop: "2px solid #e2e8f0",
-        };
-      }
-      return {};
-    },
-    []
-  );
-
   const colDefs = [
     {
       headerName: "기관명",
@@ -168,6 +153,16 @@ export default function SettlementByInstitutionPage() {
       minWidth: 200,
       flex: 1,
       resizable: false,
+      cellStyle: (params: any) => {
+        if (params.node.rowPinned === "bottom") {
+          return {
+            fontWeight: "bold",
+            backgroundColor: "#f8f9fa",
+            borderTop: "2px solid #dee2e6",
+          };
+        }
+        return {};
+      },
     },
     {
       headerName: `지급 (${unit})`,
@@ -178,7 +173,18 @@ export default function SettlementByInstitutionPage() {
       valueFormatter: (params: { value: number }) => {
         return params.value.toLocaleString();
       },
-      cellStyle: { textAlign: "right" },
+      cellStyle: (params: any) => {
+        const baseStyle = { textAlign: "right" };
+        if (params.node.rowPinned === "bottom") {
+          return {
+            ...baseStyle,
+            fontWeight: "bold",
+            backgroundColor: "#f8f9fa",
+            borderTop: "2px solid #dee2e6",
+          };
+        }
+        return baseStyle;
+      },
     },
     {
       headerName: `수급 (${unit})`,
@@ -189,7 +195,18 @@ export default function SettlementByInstitutionPage() {
       valueFormatter: (params: { value: number }) => {
         return params.value.toLocaleString();
       },
-      cellStyle: { textAlign: "right" },
+      cellStyle: (params: any) => {
+        const baseStyle = { textAlign: "right" };
+        if (params.node.rowPinned === "bottom") {
+          return {
+            ...baseStyle,
+            fontWeight: "bold",
+            backgroundColor: "#f8f9fa",
+            borderTop: "2px solid #dee2e6",
+          };
+        }
+        return baseStyle;
+      },
     },
     {
       headerName: `계 (${unit})`,
@@ -200,7 +217,18 @@ export default function SettlementByInstitutionPage() {
       valueFormatter: (params: { value: number }) => {
         return params.value.toLocaleString();
       },
-      cellStyle: { textAlign: "right" },
+      cellStyle: (params: any) => {
+        const baseStyle = { textAlign: "right" };
+        if (params.node.rowPinned === "bottom") {
+          return {
+            ...baseStyle,
+            fontWeight: "bold",
+            backgroundColor: "#f8f9fa",
+            borderTop: "2px solid #dee2e6",
+          };
+        }
+        return baseStyle;
+      },
     },
   ];
 
@@ -257,7 +285,6 @@ export default function SettlementByInstitutionPage() {
                 rowHeight: 35,
                 suppressScrollOnNewData: true,
                 pinnedBottomRowData: pinnedBottomRowData,
-                getRowStyle: getRowStyle,
               }}
             />
           </div>

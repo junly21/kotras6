@@ -70,42 +70,136 @@ export default function SettlementByStationPage() {
     []
   );
   const [hasSearched, setHasSearched] = useState(false);
+  const [validationErrors, setValidationErrors] = useState<{
+    [key: string]: string;
+  }>({});
 
   // AG Grid ref
   const gridRef = useRef(null);
 
+  // 중복된 역 검증 함수
+  const validateStations = useCallback((values: SettlementByStationFilters) => {
+    const selectedStations = [
+      values.STN_ID1,
+      values.STN_ID2,
+      values.STN_ID3,
+      values.STN_ID4,
+      values.STN_ID5,
+    ].filter((station) => station && station.trim() !== "");
+
+    const uniqueStations = [...new Set(selectedStations)];
+    const hasDuplicates = selectedStations.length !== uniqueStations.length;
+
+    if (hasDuplicates) {
+      // 중복된 역들을 찾아서 에러 표시
+      const errors: { [key: string]: string } = {};
+      const seen = new Set<string>();
+
+      Object.entries(values).forEach(([key, value]) => {
+        if (value && value.trim() !== "") {
+          if (seen.has(value)) {
+            errors[key] = "중복된 역입니다";
+          } else {
+            seen.add(value);
+          }
+        }
+      });
+
+      setValidationErrors(errors);
+      return false;
+    } else {
+      setValidationErrors({});
+      return true;
+    }
+  }, []);
+
   // 동적 컬럼 정의 생성
   const columnDefs = useMemo(() => {
-    // API 응답에서 선택된 역 이름들을 추출
-    const selectedStations: string[] = [];
+    try {
+      // API 응답에서 선택된 역 이름들을 추출
+      const selectedStations: string[] = [];
+      if (searchResults.length > 0) {
+        const firstItem = searchResults[0];
+        const keys = Object.keys(firstItem);
+
+        keys.forEach((key) => {
+          if (key !== "stn_nm") {
+            const parts = key.split("_");
+            if (parts.length >= 3) {
+              // 1_가능(1907)_지급 형태에서 역명 추출
+              const stationName = parts.slice(1, -1).join("_");
+              if (!selectedStations.includes(stationName)) {
+                selectedStations.push(stationName);
+              }
+            } else if (parts.length === 2) {
+              // 2개 부분으로 나뉘는 경우
+              const stationName = parts[0];
+              if (!selectedStations.includes(stationName)) {
+                selectedStations.push(stationName);
+              }
+            }
+          }
+        });
+      }
+
+      return createSettlementByStationColDefs(searchResults, selectedStations);
+    } catch (error) {
+      console.error("컬럼 정의 생성 중 오류:", error);
+      // 에러 발생 시 기본 컬럼만 반환
+      return [
+        {
+          headerName: "역명",
+          field: "stn_nm",
+          width: 150,
+          pinned: "left",
+        },
+      ];
+    }
+  }, [searchResults]);
+
+  // 푸터 행 데이터 생성
+  const footerRowData = useMemo(() => {
+    if (!searchResults || searchResults.length === 0) return [];
+
+    const footerRow: Record<string, string | number> = {
+      stn_nm: `총 ${searchResults.length}건`,
+    };
+
+    // 각 컬럼의 총계 계산
     if (searchResults.length > 0) {
       const firstItem = searchResults[0];
       const keys = Object.keys(firstItem);
 
       keys.forEach((key) => {
         if (key !== "stn_nm") {
-          const parts = key.split("_");
-          if (parts.length >= 2) {
-            const stationName = parts[0];
-            if (!selectedStations.includes(stationName)) {
-              selectedStations.push(stationName);
-            }
-          }
+          const total = searchResults.reduce((sum, item) => {
+            const value = item[key];
+            return sum + (typeof value === "number" ? value : 0);
+          }, 0);
+          footerRow[key] = total;
         }
       });
     }
 
-    return createSettlementByStationColDefs(searchResults, selectedStations);
+    return [footerRow];
   }, [searchResults]);
 
   // 필터 변경 핸들러
   const handleFilterChange = (values: SettlementByStationFilters) => {
     setFilters(values);
+    // 필터 변경 시 중복 검증
+    validateStations(values);
   };
 
   // 검색 핸들러
   const handleSearchSubmit = useCallback(
     async (values: SettlementByStationFilters) => {
+      // 중복 검증
+      if (!validateStations(values)) {
+        setError("중복된 역을 선택했습니다. 다른 역을 선택해주세요.");
+        return;
+      }
+
       setHasSearched(true);
       setFilters(values);
       setIsLoading(true);
@@ -128,8 +222,17 @@ export default function SettlementByStationPage() {
         setIsLoading(false);
       }
     },
-    []
+    [validateStations]
   );
+
+  // 필터 설정에 validationErrors 전달
+  const filterConfigWithErrors = useMemo(() => {
+    return settlementByStationFilterConfig.map((field) => ({
+      ...field,
+      error: validationErrors[field.name] || undefined,
+      className: validationErrors[field.name] ? "border-red-500" : undefined,
+    }));
+  }, [validationErrors]);
 
   return (
     <div className="space-y-6">
@@ -156,7 +259,7 @@ export default function SettlementByStationPage() {
 
       {/* 필터 폼 */}
       <FilterForm
-        fields={settlementByStationFilterConfig}
+        fields={filterConfigWithErrors}
         defaultValues={defaultValues}
         schema={settlementByStationSchema}
         values={filters}
@@ -240,6 +343,7 @@ export default function SettlementByStationPage() {
                         resizable: false,
                         suppressMovable: true, // 개별 컬럼 이동 비활성화
                       },
+                      pinnedBottomRowData: footerRowData, // 푸터 행 데이터 추가
                     }}
                   />
                 </div>

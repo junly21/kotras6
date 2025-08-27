@@ -43,6 +43,33 @@ export default function SettlementByRoutePage() {
     return createSettlementByRouteColDefs(data);
   }, [data]);
 
+  // 푸터 행 데이터 생성
+  const footerRowData = useMemo(() => {
+    if (!data || data.length === 0) return [];
+
+    const footerRow: Record<string, string | number> = {
+      line_nm: `총 ${data.length}건`,
+    };
+
+    // 각 컬럼의 총계 계산
+    if (data.length > 0) {
+      const firstItem = data[0];
+      const keys = Object.keys(firstItem);
+
+      keys.forEach((key) => {
+        if (key !== "line_nm") {
+          const total = data.reduce((sum, item) => {
+            const value = item[key];
+            return sum + (typeof value === "number" ? value : 0);
+          }, 0);
+          footerRow[key] = total;
+        }
+      });
+    }
+
+    return [footerRow];
+  }, [data]);
+
   const handleSearch = useCallback(async (values: SettlementByRouteFilters) => {
     console.log("노선별 조회 검색:", values);
     setHasSearched(true);
@@ -140,6 +167,7 @@ export default function SettlementByRoutePage() {
                         resizable: false,
                         suppressMovable: true, // 개별 컬럼 이동 비활성화
                       },
+                      pinnedBottomRowData: footerRowData, // 푸터 행 데이터 추가
                     }}
                   />
                 </div>

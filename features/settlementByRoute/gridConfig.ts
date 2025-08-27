@@ -52,7 +52,6 @@ export function createSettlementByRouteColDefs(
       width: 150,
       resizable: false,
       pinned: "left",
-      cellStyle: { fontWeight: "bold" },
       valueFormatter: (params) => {
         if (params.value && typeof params.value === "string") {
           // 기관명_노선명 형태에서 노선명만 추출
@@ -62,6 +61,16 @@ export function createSettlementByRouteColDefs(
           }
         }
         return params.value || "";
+      },
+      cellStyle: (params: any) => {
+        if (params.node.rowPinned === "bottom") {
+          return {
+            fontWeight: "bold",
+            backgroundColor: "#f8f9fa",
+            borderTop: "2px solid #dee2e6",
+          };
+        }
+        return {};
       },
     },
   ];
@@ -106,7 +115,18 @@ export function createSettlementByRouteColDefs(
           }
           return params.value || "";
         },
-        cellStyle: { textAlign: "right" },
+        cellStyle: (params: any) => {
+          const baseStyle = { textAlign: "right" };
+          if (params.node.rowPinned === "bottom") {
+            return {
+              ...baseStyle,
+              fontWeight: "bold",
+              backgroundColor: "#f8f9fa",
+              borderTop: "2px solid #dee2e6",
+            };
+          }
+          return baseStyle;
+        },
       });
     } else {
       // 그룹핑할 수 없는 키는 개별 컬럼으로 추가

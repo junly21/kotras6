@@ -196,6 +196,33 @@ export default function MockSettlementByRoutePage() {
     return createMockSettlementByRouteColDefs(byRouteData, unit);
   }, [byRouteData, unit]);
 
+  // 푸터 행 데이터 생성
+  const footerRowData = useMemo(() => {
+    if (!byRouteData || byRouteData.length === 0) return [];
+
+    const footerRow: Record<string, string | number> = {
+      line_nm: `총 ${byRouteData.length}건`,
+    };
+
+    // 각 컬럼의 총계 계산
+    if (byRouteData.length > 0) {
+      const firstItem = byRouteData[0];
+      const keys = Object.keys(firstItem);
+
+      keys.forEach((key) => {
+        if (key !== "line_nm") {
+          const total = byRouteData.reduce((sum, item) => {
+            const value = item[key];
+            return sum + (typeof value === "number" ? value : 0);
+          }, 0);
+          footerRow[key] = total;
+        }
+      });
+    }
+
+    return [footerRow];
+  }, [byRouteData]);
+
   // 행 더블클릭 핸들러
   const handleRowDoubleClick = useCallback(
     (event: { data: MockSettlementResultData }) => {
@@ -340,6 +367,7 @@ export default function MockSettlementByRoutePage() {
                   resizable: false,
                   suppressMovable: true,
                 },
+                pinnedBottomRowData: footerRowData, // 푸터 행 데이터 추가
               }}
             />
           </div>

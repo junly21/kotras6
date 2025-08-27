@@ -134,6 +134,7 @@ export function FilterForm<T extends FieldValues>({
                         onChange={field.onChange}
                         placeholder={f.placeholder}
                         disabled={f.disabled}
+                        className={f.className}
                       />
                     </FormControl>
                   ) : (
@@ -144,15 +145,25 @@ export function FilterForm<T extends FieldValues>({
                             {...field}
                             placeholder={f.placeholder}
                             disabled={f.disabled}
+                            className={f.className}
                           />
                         ) : f.type === "date" ? (
-                          <Input type="date" {...field} disabled={f.disabled} />
+                          <Input
+                            type="date"
+                            {...field}
+                            disabled={f.disabled}
+                            className={f.className}
+                          />
                         ) : (
                           <Select
                             onValueChange={field.onChange}
                             value={field.value}
                             disabled={f.disabled}>
-                            <SelectTrigger className="min-w-[200px] bg-white border border-[#d9d9d9]">
+                            <SelectTrigger
+                              className={cn(
+                                "min-w-[200px] bg-white border border-[#d9d9d9]",
+                                f.className
+                              )}>
                               <SelectValue
                                 placeholder={f.placeholder || "선택"}
                               />
@@ -170,6 +181,11 @@ export function FilterForm<T extends FieldValues>({
                         )}
                       </FormControl>
                     )
+                  )}
+
+                  {/* 에러 메시지 표시 */}
+                  {f.error && (
+                    <p className="text-red-500 text-sm mt-1">{f.error}</p>
                   )}
                 </FormItem>
               )}

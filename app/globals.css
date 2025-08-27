@@ -42,8 +42,8 @@
 }
 
 :root {
-  --font-sans: "Pretendard", ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji",
-      "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  --font-sans: "Pretendard", ui-sans-serif, system-ui, sans-serif,
+    "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
   --radius: 0.625rem;
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
@@ -150,7 +150,8 @@
   text-align: center !important;
 }
 
-.ag-header-container, .ag-pinned-left-header {
+.ag-header-container,
+.ag-pinned-left-header {
   background: #f1f1f1;
 }
 
@@ -166,20 +167,20 @@ footer {
 
 footer::before {
   position: absolute;
-  content: '';
+  content: "";
   width: calc(100% - 2rem);
   left: 50%;
   transform: translateX(-50%);
   top: 0;
   height: 1px;
-  background-color: rgba(54,54,54,0.4);
+  background-color: rgba(54, 54, 54, 0.4);
 }
 
 .footer-logo {
   display: block;
   width: 160px;
   height: 30px;
-  background: url('../public/footer-logo.svg') 50% 50% no-repeat;
+  background: url("../public/footer-logo.svg") 50% 50% no-repeat;
   background-size: 100%;
 }
 
@@ -190,4 +191,24 @@ footer::before {
   body {
     @apply bg-background text-foreground;
   }
+}
+
+/* AG Grid 푸터 행 스타일 */
+.ag-theme-alpine .ag-row-pinned.ag-row-pinned-bottom {
+  background-color: #f8f9fa !important;
+  border-top: 2px solid #dee2e6 !important;
+}
+
+.ag-theme-alpine .ag-row-pinned.ag-row-pinned-bottom .ag-cell {
+  font-weight: bold !important;
+  background-color: #f8f9fa !important;
+}
+
+.ag-theme-alpine .ag-row-pinned.ag-row-pinned-bottom .ag-cell[col-id="stn_nm"],
+.ag-theme-alpine .ag-row-pinned.ag-row-pinned-bottom .ag-cell[col-id="line_nm"],
+.ag-theme-alpine
+  .ag-row-pinned.ag-row-pinned-bottom
+  .ag-cell[col-id="대상기관"] {
+  color: #059669 !important;
+  font-weight: bold !important;
 }

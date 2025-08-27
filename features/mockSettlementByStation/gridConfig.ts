@@ -3,8 +3,7 @@ import type { MockSettlementByStationData } from "@/types/mockSettlementByStatio
 
 // 동적으로 컬럼을 생성하는 함수 (그룹핑 포함)
 export function createMockSettlementByStationColDefs(
-  data: MockSettlementByStationData[],
-  selectedStations: string[]
+  data: MockSettlementByStationData[]
 ): (
   | ColDef<MockSettlementByStationData>
   | ColGroupDef<MockSettlementByStationData>
@@ -35,7 +34,16 @@ export function createMockSettlementByStationColDefs(
       width: 150,
       resizable: false,
       pinned: "left",
-      cellStyle: { fontWeight: "bold" },
+      cellStyle: (params: any) => {
+        if (params.node.rowPinned === "bottom") {
+          return {
+            fontWeight: "bold",
+            backgroundColor: "#f8f9fa",
+            borderTop: "2px solid #dee2e6",
+          };
+        }
+        return {};
+      },
     },
   ];
 
@@ -49,9 +57,10 @@ export function createMockSettlementByStationColDefs(
     if (key === "stn_nm") return; // stn_nm은 이미 처리됨
 
     const parts = key.split("_");
-    if (parts.length >= 2) {
-      const stationName = parts[0]; // 역명
-      const type = parts[1]; // 지급/수급/차액 등
+    if (parts.length >= 3) {
+      // 1_가능(1907)_지급 형태에서 역명과 타입 추출
+      const stationName = parts.slice(1, -1).join("_"); // 중간 부분을 역명으로 (가능(1907))
+      const type = parts[parts.length - 1]; // 마지막 부분을 타입으로 (지급)
 
       if (!groupMap.has(stationName)) {
         groupMap.set(stationName, {
@@ -74,7 +83,57 @@ export function createMockSettlementByStationColDefs(
           }
           return params.value || "";
         },
-        cellStyle: { textAlign: "right" },
+        cellStyle: (params: any) => {
+          const baseStyle = { textAlign: "right" };
+          if (params.node.rowPinned === "bottom") {
+            return {
+              ...baseStyle,
+              fontWeight: "bold",
+              backgroundColor: "#f8f9fa",
+              borderTop: "2px solid #dee2e6",
+            };
+          }
+          return baseStyle;
+        },
+      });
+    } else if (parts.length === 2) {
+      // 2개 부분으로 나뉘는 경우 (예: station_type)
+      const stationName = parts[0];
+      const type = parts[1];
+
+      if (!groupMap.has(stationName)) {
+        groupMap.set(stationName, {
+          groupName: stationName,
+          columns: [],
+        });
+      }
+
+      const group = groupMap.get(stationName)!;
+      group.columns.push({
+        headerName: type,
+        field: key,
+        flex: 1,
+        minWidth: 120,
+        resizable: false,
+        type: "numericColumn",
+        valueFormatter: (params) => {
+          if (params.value != null && typeof params.value === "number") {
+            return params.value.toLocaleString();
+          }
+          return params.value || "";
+        },
+        cellStyle: (params: any) => {
+          const baseStyle = { textAlign: "right" };
+          if (params.node.rowPinned === "bottom") {
+            return {
+              ...baseStyle,
+              fontWeight: "bold",
+              backgroundColor: "#f8f9fa",
+              borderTop: "2px solid #dee2e6",
+            };
+          }
+          return baseStyle;
+        },
       });
     } else {
       // 그룹핑할 수 없는 키는 개별 컬럼으로 추가

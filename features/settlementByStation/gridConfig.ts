@@ -32,7 +32,16 @@ export function createSettlementByStationColDefs(
       width: 150,
       resizable: false,
       pinned: "left",
-      cellStyle: { fontWeight: "bold" },
+      cellStyle: (params: any) => {
+        if (params.node.rowPinned === "bottom") {
+          return {
+            fontWeight: "bold",
+            backgroundColor: "#f8f9fa",
+            borderTop: "2px solid #dee2e6",
+          };
+        }
+        return {};
+      },
     },
   ];
 
@@ -43,12 +52,13 @@ export function createSettlementByStationColDefs(
   >();
 
   keys.forEach((key) => {
-    if (key === "stn_nm") return; // stn_nm은 이미 처리됨
+    if (key === "stn_nm") return;
 
     const parts = key.split("_");
-    if (parts.length >= 2) {
-      const stationName = parts[0]; // 역명
-      const type = parts[1]; // 지급/수급
+    if (parts.length >= 3) {
+      // 1_가능(1907)_지급 형태에서 역명과 타입 추출
+      const stationName = parts.slice(1, -1).join("_"); // 중간 부분을 역명으로 (가능(1907))
+      const type = parts[parts.length - 1]; // 마지막 부분을 타입으로 (지급)
 
       // 선택된 역인지 확인
       if (selectedStations.includes(stationName)) {
@@ -73,7 +83,60 @@ export function createSettlementByStationColDefs(
             }
             return params.value || "";
           },
-          cellStyle: { textAlign: "right" },
+          cellStyle: (params: any) => {
+            const baseStyle = { textAlign: "right" };
+            if (params.node.rowPinned === "bottom") {
+              return {
+                ...baseStyle,
+                fontWeight: "bold",
+                backgroundColor: "#f8f9fa",
+                borderTop: "2px solid #dee2e6",
+              };
+            }
+            return baseStyle;
+          },
+        });
+      }
+    } else if (parts.length === 2) {
+      // 2개 부분으로 나뉘는 경우 (예: station_type)
+      const stationName = parts[0];
+      const type = parts[1];
+
+      // 선택된 역인지 확인
+      if (selectedStations.includes(stationName)) {
+        if (!groupMap.has(stationName)) {
+          groupMap.set(stationName, {
+            groupName: stationName,
+            columns: [],
+          });
+        }
+
+        const group = groupMap.get(stationName)!;
+        group.columns.push({
+          headerName: type === "지급" ? "지급" : "수급",
+          field: key,
+          flex: 1,
+          minWidth: 170,
+          resizable: false,
+          type: "numericColumn",
+          valueFormatter: (params) => {
+            if (params.value != null && typeof params.value === "number") {
+              return params.value.toLocaleString();
+            }
+            return params.value || "";
+          },
+          cellStyle: (params: any) => {
+            const baseStyle = { textAlign: "right" };
+            if (params.node.rowPinned === "bottom") {
+              return {
+                ...baseStyle,
+                fontWeight: "bold",
+                backgroundColor: "#f8f9fa",
+                borderTop: "2px solid #dee2e6",
+              };
+            }
+            return baseStyle;
+          },
         });
       }
     } else {

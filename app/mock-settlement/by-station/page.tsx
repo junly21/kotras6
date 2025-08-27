@@ -108,6 +108,50 @@ export default function MockSettlementByStationPage() {
   const [isConfirmDialogOpen, setIsConfirmDialogOpen] = useState(false);
   const [pendingAction, setPendingAction] = useState<(() => void) | null>(null);
 
+  // 중복된 역 검증 상태
+  const [validationErrors, setValidationErrors] = useState<{
+    [key: string]: string;
+  }>({});
+
+  // 중복된 역 검증 함수
+  const validateStations = useCallback(
+    (values: MockSettlementByStationFilters) => {
+      const selectedStations = [
+        values.STN_ID1,
+        values.STN_ID2,
+        values.STN_ID3,
+        values.STN_ID4,
+        values.STN_ID5,
+      ].filter((station) => station && station.trim() !== "");
+
+      const uniqueStations = [...new Set(selectedStations)];
+      const hasDuplicates = selectedStations.length !== uniqueStations.length;
+
+      if (hasDuplicates) {
+        // 중복된 역들을 찾아서 에러 표시
+        const errors: { [key: string]: string } = {};
+        const seen = new Set<string>();
+
+        Object.entries(values).forEach(([key, value]) => {
+          if (key !== "settlementName" && value && value.trim() !== "") {
+            if (seen.has(value)) {
+              errors[key] = "중복된 역입니다";
+            } else {
+              seen.add(value);
+            }
+          }
+        });
+
+        setValidationErrors(errors);
+        return false;
+      } else {
+        setValidationErrors({});
+        return true;
+      }
+    },
+    []
+  );
+
   // 실제 검색 실행 함수
   const executeSearch = useCallback(
     async (values: MockSettlementByStationFilters) => {
@@ -169,6 +213,12 @@ export default function MockSettlementByStationPage() {
 
   const handleSearch = useCallback(
     async (values: MockSettlementByStationFilters) => {
+      // 중복 검증
+      if (!validateStations(values)) {
+        setError("중복된 역을 선택했습니다. 다른 역을 선택해주세요.");
+        return;
+      }
+
       // 모의정산 실행여부 체크
       const isRunningResponse =
         await MockSettlementControlService.checkIsRunning();
@@ -183,7 +233,7 @@ export default function MockSettlementByStationPage() {
       // 모의정산이 실행 중이 아닌 경우 바로 검색 진행
       executeSearch(values);
     },
-    [executeSearch]
+    [executeSearch, validateStations]
   );
 
   // 상단 그리드 컬럼 정의 (모의정산 정보) - 동적으로 생성
@@ -195,7 +245,6 @@ export default function MockSettlementByStationPage() {
         flex: 1,
         minWidth: 150,
         resizable: false,
-        cellStyle: { fontWeight: "bold" },
       },
       {
         headerName: "거래일자",
@@ -271,37 +320,100 @@ export default function MockSettlementByStationPage() {
 
   // 하단 그리드 컬럼 정의 (역사별 조회 결과) - 동적 그룹핑 컬럼 사용
   const byStationColumnDefs = useMemo(() => {
-    // API 응답에서 선택된 역 이름들을 추출
-    const selectedStations: string[] = [];
+    try {
+      // API 응답에서 선택된 역 이름들을 추출
+      const selectedStations: string[] = [];
+      if (byStationData.length > 0) {
+        const firstItem = byStationData[0];
+        const keys = Object.keys(firstItem);
+
+        keys.forEach((key) => {
+          if (key !== "stn_nm") {
+            const parts = key.split("_");
+            if (parts.length >= 3) {
+              // 1_가능(1907)_지급 형태에서 역명 추출
+              const stationName = parts.slice(1, -1).join("_");
+              if (!selectedStations.includes(stationName)) {
+                selectedStations.push(stationName);
+              }
+            } else if (parts.length === 2) {
+              // 2개 부분으로 나뉘는 경우
+              const stationName = parts[0];
+              if (!selectedStations.includes(stationName)) {
+                selectedStations.push(stationName);
+              }
+            }
+          }
+        });
+      }
+
+      return createMockSettlementByStationColDefs(byStationData);
+    } catch (error) {
+      console.error("컬럼 정의 생성 중 오류:", error);
+      // 에러 발생 시 기본 컬럼만 반환
+      return [
+        {
+          headerName: "역명",
+          field: "stn_nm",
+          width: 150,
+          pinned: "left",
+        },
+      ];
+    }
+  }, [byStationData]);
+
+  // 푸터 행 데이터 생성
+  const footerRowData = useMemo(() => {
+    if (!byStationData || byStationData.length === 0) return [];
+
+    const footerRow: Record<string, string | number> = {
+      stn_nm: `총 ${byStationData.length}건`,
+    };
+
+    // 각 컬럼의 총계 계산
     if (byStationData.length > 0) {
       const firstItem = byStationData[0];
       const keys = Object.keys(firstItem);
 
       keys.forEach((key) => {
         if (key !== "stn_nm") {
-          const parts = key.split("_");
-          if (parts.length >= 2) {
-            const stationName = parts[0];
-            if (!selectedStations.includes(stationName)) {
-              selectedStations.push(stationName);
-            }
-          }
+          const total = byStationData.reduce((sum, item) => {
+            const value = item[key];
+            return sum + (typeof value === "number" ? value : 0);
+          }, 0);
+          footerRow[key] = total;
         }
       });
     }
 
-    return createMockSettlementByStationColDefs(
-      byStationData,
-      selectedStations
-    );
+    return [footerRow];
   }, [byStationData]);
+
+  // 필터 설정에 validationErrors 전달
+  const filterConfigWithErrors = useMemo(() => {
+    return mockSettlementByStationFilterConfig.map((field) => ({
+      ...field,
+      error: validationErrors[field.name] || undefined,
+      className: validationErrors[field.name] ? "border-red-500" : undefined,
+    }));
+  }, [validationErrors]);
+
+  // 필터 변경 핸들러 추가
+  const handleFilterChange = useCallback(
+    (values: MockSettlementByStationFilters) => {
+      setFilters(values);
+      // 필터 변경 시 중복 검증
+      validateStations(values);
+    },
+    [validateStations]
+  );
 
   return (
     <div className="space-y-6">
       <h1 className="text-2xl font-bold">모의정산 역사별 조회</h1>
 
       <FilterForm<MockSettlementByStationFilters>
-        fields={mockSettlementByStationFilterConfig}
+        fields={filterConfigWithErrors}
         defaultValues={{
           settlementName: "",
           STN_ID1: "",
@@ -311,6 +423,8 @@ export default function MockSettlementByStationPage() {
           STN_ID5: "",
         }}
         schema={mockSettlementByStationSchema}
+        values={filters}
+        onChange={handleFilterChange}
         onSearch={handleSearch}
       />
 
@@ -465,6 +579,7 @@ export default function MockSettlementByStationPage() {
                   resizable: false,
                   suppressMovable: true,
                 },
+                pinnedBottomRowData: footerRowData, // 푸터 행 데이터 추가
               }}
             />
           </div>

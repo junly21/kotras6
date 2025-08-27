@@ -62,7 +62,7 @@ export default function SettlementByRoutePage() {
             const value = item[key];
             return sum + (typeof value === "number" ? value : 0);
           }, 0);
-          footerRow[key] = total;
+          footerRow[key] = `${total.toLocaleString()}원`;
         }
       });
     }

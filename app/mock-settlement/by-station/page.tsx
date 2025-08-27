@@ -381,7 +381,7 @@ export default function MockSettlementByStationPage() {
             const value = item[key];
             return sum + (typeof value === "number" ? value : 0);
           }, 0);
-          footerRow[key] = total;
+          footerRow[key] = `${total.toLocaleString()}원`;
         }
       });
     }
@@ -560,7 +560,7 @@ export default function MockSettlementByStationPage() {
         </div>
 
         <div className="bg-white border border-gray-200 rounded-[24px] p-4">
-          <div className="h-[450px]">
+          <div className="h-[350px]">
             <TestGrid
               rowData={byStationData}
               columnDefs={byStationColumnDefs}

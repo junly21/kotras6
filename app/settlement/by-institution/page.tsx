@@ -139,9 +139,9 @@ export default function SettlementByInstitutionPage() {
     return [
       {
         대상기관: `총 ${apiData.length}개`,
-        지급액: totalPayment * unitMultiplier,
-        수급액: totalReceipt * unitMultiplier,
-        차액: totalDifference * unitMultiplier,
+        지급액: `${(totalPayment * unitMultiplier).toLocaleString()}원`,
+        수급액: `${(totalReceipt * unitMultiplier).toLocaleString()}원`,
+        차액: `${(totalDifference * unitMultiplier).toLocaleString()}원`,
       },
     ];
   }, [apiData, unit]);

@@ -14,7 +14,6 @@ import { MockSettlementByOdService } from "@/services/mockSettlementByOdService"
 import { MockSettlementControlService } from "@/services/mockSettlementControlService";
 import { createMockSettlementByOdColDefs } from "@/features/mockSettlementByOd/gridConfig";
 import { createMockSettlementByOdDetailColDefs } from "@/features/mockSettlementByOd/detailGridConfig";
-import { createMockSettlementInfoColDefs } from "@/features/mockSettlementByOd/infoGridConfig";
 import TestGrid from "@/components/TestGrid";
 import CsvExportButton from "@/components/CsvExportButton";
 import Spinner from "@/components/Spinner";
@@ -28,6 +27,7 @@ import type { NetworkMapHighlight, Node, Link } from "@/types/network";
 import { AllCommunityModule, ModuleRegistry } from "ag-grid-community";
 import { MockSettlementConfirmDialog } from "@/components/MockSettlementConfirmDialog";
 import { MockSettlementDetailModal } from "@/components/MockSettlementDetailModal";
+import { MockSettlementResultService } from "@/services/mockSettlementResultService";
 
 // Register all Community features
 ModuleRegistry.registerModules([AllCommunityModule]);
@@ -102,6 +102,42 @@ export default function MockSettlementByOdPage() {
   const detailGridRef = useRef(null);
   const infoGridRef = useRef(null);
 
+  // 선택된 행 상태 추가
+  const [selectedRowIndex, setSelectedRowIndex] = useState<number | null>(null);
+
+  // 선택된 행 스타일 적용 함수
+  const getRowStyle = useCallback(
+    (params: any) => {
+      // selectedRow가 있고, 현재 행이 선택된 행과 동일한 경우 파란색 배경 유지
+      if (
+        params.data &&
+        selectedRow &&
+        params.data.path_key === selectedRow.path_key &&
+        params.data.path_id === selectedRow.path_id
+      ) {
+        return { backgroundColor: "#e3f2fd" }; // 선택된 행은 파란색 배경
+      }
+      return {};
+    },
+    [selectedRow]
+  );
+
+  // 경유지 상세정보 그리드 행 스타일 함수
+  const getDetailRowStyle = useCallback(
+    (params: any) => {
+      // 마지막 행인 경우 footer 스타일 적용
+      if (params.rowIndex === detailData.length - 1) {
+        return {
+          backgroundColor: "#f8f9fa",
+          fontWeight: "bold",
+          borderTop: "2px solid #dee2e6",
+        };
+      }
+      return {};
+    },
+    [detailData.length]
+  );
+
   // 페이지 로드 시 정산명과 역 목록 자동 로드
   useEffect(() => {
     // 정산명 목록은 FilterForm에서 자동으로 로드됨
@@ -172,6 +208,56 @@ export default function MockSettlementByOdPage() {
     return map;
   }, [detailData, findNodeIdsByStationName]);
 
+  // 상단 그리드 컬럼 정의 (모의정산 정보) - by-route와 동일한 설정
+  const mockSettlementColumnDefs = [
+    {
+      headerName: "정산명",
+      field: "settlementName",
+      flex: 1,
+      minWidth: 150,
+      resizable: false,
+    },
+    {
+      headerName: "거래일자",
+      field: "transactionDate",
+      flex: 1,
+      minWidth: 120,
+      resizable: false,
+    },
+    {
+      headerName: "태그기관",
+      field: "tagAgency",
+      flex: 1,
+      minWidth: 120,
+      resizable: false,
+    },
+    {
+      headerName: "초승노선",
+      field: "initialLine",
+      flex: 1,
+      minWidth: 120,
+      resizable: false,
+    },
+    {
+      headerName: "노선동등",
+      field: "lineSection",
+      flex: 1,
+      minWidth: 120,
+      resizable: false,
+    },
+    {
+      headerName: "인.km",
+      field: "distanceKm",
+      flex: 1,
+      minWidth: 100,
+      resizable: false,
+      valueFormatter: (params: { value: number }) => {
+        return params.value.toLocaleString();
+      },
+      cellStyle: { textAlign: "right" },
+    },
+  ];
+
   // 컬럼 정의
   const columnDefs = useMemo(() => {
     return createMockSettlementByOdColDefs();
@@ -179,10 +265,6 @@ export default function MockSettlementByOdPage() {
 
   const detailColumnDefs = useMemo(() => {
     return createMockSettlementByOdDetailColDefs();
-  }, []);
-
-  const infoColumnDefs = useMemo(() => {
-    return createMockSettlementInfoColDefs();
   }, []);
 
   // 필터 변경 핸들러
@@ -243,7 +325,7 @@ export default function MockSettlementByOdPage() {
 
   // 행 클릭 핸들러
   const handleRowClick = useCallback(
-    (rowData: MockSettlementByOdData) => {
+    (rowData: MockSettlementByOdData, rowIndex: number) => {
       console.log("행 클릭된 데이터:", rowData);
       setSelectedRow(rowData);
       // 소계 행이 아닌 경우에만 상세정보 조회 및 경로 ID 설정
@@ -280,26 +362,26 @@ export default function MockSettlementByOdPage() {
       setError(null);
 
       try {
-        // 모의정산 정보 조회
-        const infoResponse = await MockSettlementByOdService.getSettlementInfo(
-          values.settlementName
-        );
-        if (infoResponse.success && infoResponse.data) {
-          setSettlementInfo(infoResponse.data);
+        // 두 개의 API 호출로 각각 데이터 조회 (다른 페이지들과 동일한 방식)
+        const [mockResponse, byOdResponse] = await Promise.all([
+          MockSettlementResultService.getMockSettlementInfoData(
+            values.settlementName
+          ),
+          MockSettlementByOdService.getSettlementData(values),
+        ]);
+
+        if (mockResponse.success && mockResponse.data) {
+          setSettlementInfo(mockResponse.data);
         } else {
-          console.error("모의정산 정보 조회 실패:", infoResponse.error);
+          console.error("모의정산 정보 조회 실패:", mockResponse.error);
           setSettlementInfo([]);
         }
 
-        // OD별 정산 데이터 조회
-        const response = await MockSettlementByOdService.getSettlementData(
-          values
-        );
-        if (response.success && response.data) {
-          setSearchResults(response.data);
+        if (byOdResponse.success && byOdResponse.data) {
+          setSearchResults(byOdResponse.data);
 
           // 첫 번째 행(소계가 아닌)에 대해 자동으로 상세정보 조회
-          const firstValidRow = response.data.find(
+          const firstValidRow = byOdResponse.data.find(
             (row: MockSettlementByOdData) => row.path_detail !== "-"
           );
           if (firstValidRow) {
@@ -330,7 +412,7 @@ export default function MockSettlementByOdPage() {
             console.log("유효한 행을 찾을 수 없습니다");
           }
         } else {
-          setError(response.error || "데이터 조회에 실패했습니다.");
+          setError(byOdResponse.error || "데이터 조회에 실패했습니다.");
         }
       } catch (err) {
         setError(
@@ -421,11 +503,11 @@ export default function MockSettlementByOdPage() {
         onSearch={handleSearchSubmit}
       />
 
-      {/* 결과 영역 */}
-      {!hasSearched && (
-        <>
-          {/* 상단: 모의정산 정보 안내 */}
-          <div className="bg-gray-50 border flex flex-col justify-center items-center h-[140px] border-2 border-dashed border-gray-300 rounded-lg p-16 mb-4">
+      {/* 모의정산 정보 그리드 - 항상 표시 */}
+      <div className="space-y-4">
+        <h3 className="text-lg font-semibold mb-4">모의정산 정보</h3>
+        {!hasSearched ? (
+          <div className="bg-gray-50 border flex flex-col justify-center items-center h-[140px] border-2 border-dashed border-gray-300 rounded-lg p-16">
             <div className="text-center text-gray-500">
               <p className="text-lg font-medium">모의정산 정보</p>
               <p className="text-sm">
@@ -434,31 +516,14 @@ export default function MockSettlementByOdPage() {
               </p>
             </div>
           </div>
-
-          {/* 하단: OD별 조회 결과 안내 */}
-          <div className="bg-gray-50 flex flex-col justify-center items-center h-[450px] border-2 border-dashed border-gray-300 rounded-lg p-16">
-            <div className="text-center text-gray-500">
-              <p className="text-lg font-medium">OD별 조회 결과</p>
-              <p className="text-sm">
-                정산명, 출발역, 도착역을 선택하고 조회 버튼을 누르면 OD별
-                정산결과가 표시됩니다.
-              </p>
-            </div>
-          </div>
-        </>
-      )}
-
-      {hasSearched && (
-        <div className="space-y-4">
-          {/* 모의정산 정보 그리드 */}
-          {settlementInfo.length > 0 && (
-            <>
-              <h3 className="text-lg font-semibold mb-4">모의정산 정보</h3>
+        ) : (
+          <>
+            {settlementInfo.length > 0 && (
               <div className="bg-white border border-gray-200 rounded-[24px] p-4">
-                <div className="h-96">
+                <div className="h-32">
                   <TestGrid
                     rowData={settlementInfo}
-                    columnDefs={infoColumnDefs}
+                    columnDefs={mockSettlementColumnDefs}
                     gridRef={infoGridRef}
                     gridOptions={{
                       headerHeight: 40,
@@ -479,9 +544,33 @@ export default function MockSettlementByOdPage() {
                   />
                 </div>
               </div>
-            </>
-          )}
+            )}
+            {settlementInfo.length === 0 && (
+              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                <p className="text-yellow-800">
+                  조회된 모의정산 정보가 없습니다.
+                </p>
+              </div>
+            )}
+          </>
+        )}
+      </div>
 
+      {/* 결과 영역 */}
+      {!hasSearched && (
+        <div className="bg-gray-50 flex flex-col justify-center items-center h-[450px] border-2 border-dashed border-gray-300 rounded-lg p-16">
+          <div className="text-center text-gray-500">
+            <p className="text-lg font-medium">OD별 조회 결과</p>
+            <p className="text-sm">
+              정산명, 출발역, 도착역을 선택하고 조회 버튼을 누르면 OD별
+              정산결과가 표시됩니다.
+            </p>
+          </div>
+        </div>
+      )}
+
+      {hasSearched && (
+        <div className="space-y-4">
           {!isLoading && searchResults.length > 0 && (
             <>
               <div className="flex justify-between items-center">
@@ -499,7 +588,8 @@ export default function MockSettlementByOdPage() {
                       suppressMovableColumns: true,
                       suppressMenuHide: true,
                       rowSelection: {
-                        enableClickSelection: false,
+                        enableClickSelection: true,
+                        suppressRowDeselection: true,
                       },
                       defaultColDef: {
                         sortable: false,
@@ -509,9 +599,11 @@ export default function MockSettlementByOdPage() {
                       },
                       onRowClicked: (event: {
                         data: MockSettlementByOdData;
+                        rowIndex: number;
                       }) => {
-                        handleRowClick(event.data);
+                        handleRowClick(event.data, event.rowIndex);
                       },
+                      getRowStyle: getRowStyle, // 행 클릭 시 스타일 적용
                     }}
                   />
                 </div>
@@ -557,6 +649,7 @@ export default function MockSettlementByOdPage() {
                           resizable: false,
                           suppressMovable: true,
                         },
+                        getRowStyle: getDetailRowStyle, // 마지막 행 스타일 적용
                       }}
                     />
                   </div>
@@ -588,8 +681,6 @@ export default function MockSettlementByOdPage() {
                         config={{
                           width: "100%",
                           height: "100%",
-                          showZoomControls: true,
-                          showTooltips: true,
                         }}
                         highlights={pathHighlights}
                         tooltips={customTooltips}

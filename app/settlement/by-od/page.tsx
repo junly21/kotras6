@@ -73,6 +73,9 @@ export default function SettlementByOdPage() {
   const gridRef = useRef(null);
   const detailGridRef = useRef(null);
 
+  // 선택된 행 상태 추가
+  const [selectedRowIndex, setSelectedRowIndex] = useState<number | null>(null);
+
   // 경로 하이라이트 계산
   const pathHighlights = useMemo((): NetworkMapHighlight[] => {
     console.log("경로 하이라이트 계산 시작:", {
@@ -173,8 +176,9 @@ export default function SettlementByOdPage() {
 
   // 행 클릭 핸들러
   const handleRowClick = useCallback(
-    (rowData: SettlementByOdData) => {
+    (rowData: SettlementByOdData, rowIndex: number) => {
       setSelectedRow(rowData);
+      setSelectedRowIndex(rowIndex);
       // 소계 행이 아닌 경우에만 상세정보 조회 및 경로 ID 설정
       if (rowData.path_detail !== "-") {
         fetchDetailData(rowData.path_key, rowData.path_id);
@@ -195,6 +199,39 @@ export default function SettlementByOdPage() {
       }
     },
     [fetchDetailData]
+  );
+
+  // 선택된 행 스타일 적용 함수
+  const getRowStyle = useCallback(
+    (params: any) => {
+      // selectedRow가 있고, 현재 행이 선택된 행과 동일한 경우 파란색 배경 유지
+      if (
+        params.data &&
+        selectedRow &&
+        params.data.path_key === selectedRow.path_key &&
+        params.data.path_id === selectedRow.path_id
+      ) {
+        return { backgroundColor: "#e3f2fd" }; // 선택된 행은 파란색 배경
+      }
+      return {};
+    },
+    [selectedRow]
+  );
+
+  // 경유지 상세정보 그리드 행 스타일 함수
+  const getDetailRowStyle = useCallback(
+    (params: any) => {
+      // 마지막 행인 경우 footer 스타일 적용
+      if (params.rowIndex === detailData.length - 1) {
+        return {
+          backgroundColor: "#f8f9fa",
+          fontWeight: "bold",
+          borderTop: "2px solid #dee2e6",
+        };
+      }
+      return {};
+    },
+    [detailData.length]
   );
 
   // 검색 핸들러
@@ -342,9 +379,13 @@ export default function SettlementByOdPage() {
                         resizable: false,
                         suppressMovable: true,
                       },
-                      onRowClicked: (event: { data: SettlementByOdData }) => {
-                        handleRowClick(event.data);
+                      onRowClicked: (event: {
+                        data: SettlementByOdData;
+                        rowIndex: number;
+                      }) => {
+                        handleRowClick(event.data, event.rowIndex);
                       },
+                      getRowStyle: getRowStyle, // 행 클릭 시 스타일 적용
                     }}
                   />
                 </div>
@@ -390,6 +431,7 @@ export default function SettlementByOdPage() {
                           resizable: false,
                           suppressMovable: true,
                         },
+                        getRowStyle: getDetailRowStyle, // 마지막 행 스타일 적용
                       }}
                     />
                   </div>

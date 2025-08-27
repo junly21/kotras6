@@ -209,12 +209,12 @@ export default function TransactionDetailPage() {
       resizable: false,
     },
     {
-      headerName: "총배분금",
+      headerName: "총배분금 (원)",
       field: "fnl_dist_amt",
       minWidth: 150,
       flex: 1,
       valueFormatter: (params: { value: number | null | undefined }) =>
-        (params.value || 0).toLocaleString() + "원",
+        (params.value || 0).toLocaleString(),
       cellStyle: (params: any) => {
         const baseStyle = { textAlign: "right" };
         if (params.node.rowPinned === "bottom") {
@@ -230,12 +230,12 @@ export default function TransactionDetailPage() {
       resizable: false,
     },
     {
-      headerName: "기본배분금",
+      headerName: "기본배분금 (원)",
       field: "base_dist_amt",
       minWidth: 150,
       flex: 1,
       valueFormatter: (params: { value: number | null | undefined }) =>
-        (params.value || 0).toLocaleString() + "원",
+        (params.value || 0).toLocaleString(),
       cellStyle: (params: any) => {
         const baseStyle = { textAlign: "right" };
         if (params.node.rowPinned === "bottom") {
@@ -251,12 +251,12 @@ export default function TransactionDetailPage() {
       resizable: false,
     },
     {
-      headerName: "도시철도부가사용금",
+      headerName: "도시철도부가사용금 (원)",
       field: "ubrw_adtn_use_amt",
       minWidth: 200,
       flex: 1,
       valueFormatter: (params: { value: number | null | undefined }) =>
-        (params.value || 0).toLocaleString() + "원",
+        (params.value || 0).toLocaleString(),
       cellStyle: (params: any) => {
         const baseStyle = { textAlign: "right" };
         if (params.node.rowPinned === "bottom") {

@@ -19,6 +19,23 @@ export function RouteDetailDialog({
 }: RouteDetailDialogProps) {
   if (!route) return null;
 
+  // 운영사 목록 처리: '환승' 제외하고 중복 제거
+  const getUniqueOperators = (operList: string) => {
+    if (!operList) return [];
+
+    // 쉼표로 구분된 운영사 목록을 배열로 변환
+    const operators = operList.split(",").map((op) => op.trim());
+
+    // '환승' 제외하고 중복 제거
+    const uniqueOperators = [
+      ...new Set(operators.filter((op) => op !== "환승")),
+    ];
+
+    return uniqueOperators;
+  };
+
+  const uniqueOperators = getUniqueOperators(route.oper_list);
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
@@ -55,10 +72,21 @@ export function RouteDetailDialog({
             </div>
           </div>
 
-          <div className="mb-6">
-            <h3 className="text-sm font-medium text-gray-500 mb-2">운영사</h3>
-            <p className="text-base">{route.oper_list || "-"}</p>
-          </div>
+          {/* 운영사 정보 - 중복 제거 및 '환승' 제외 */}
+          {uniqueOperators.length > 0 && (
+            <div className="mb-6">
+              <h3 className="text-sm font-medium text-gray-500 mb-2">운영사</h3>
+              <div className="flex flex-wrap gap-2">
+                {uniqueOperators.map((operator, index) => (
+                  <span
+                    key={index}
+                    className="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm">
+                    {operator}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
 
           <div className="mb-6">
             <h3 className="text-sm font-medium text-gray-500 mb-2">

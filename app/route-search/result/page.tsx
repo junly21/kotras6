@@ -180,14 +180,22 @@ export default function RouteSearchResultPage() {
   // 그리드 높이 동적 계산 - useMemo로 최적화
   const gridHeight = useMemo(() => {
     if (!processedResults || processedResults.length === 0) return 200;
-    const rowHeight = 48;
-    const headerHeight = 48;
-    const minHeight = 200;
-    const maxHeight = 480;
-    const calculatedHeight = Math.min(
-      Math.max(processedResults.length * rowHeight + headerHeight, minHeight),
-      maxHeight
-    );
+
+    const baseHeight = 160; // 기본 높이 (1-2개 행일 때)
+
+    let calculatedHeight: number;
+
+    if (processedResults.length <= 2) {
+      // 1-2개 행: 기본 높이
+      calculatedHeight = baseHeight;
+    } else if (processedResults.length <= 9) {
+      // 3-9개 행: 기본 높이의 2배
+      calculatedHeight = baseHeight * 1.5;
+    } else {
+      // 9개 이상: 기본 높이의 2배의 2배 (4배)
+      calculatedHeight = baseHeight * 3;
+    }
+
     return calculatedHeight;
   }, [processedResults]);
 
@@ -281,7 +289,7 @@ export default function RouteSearchResultPage() {
               rowData={processedResults}
               columnDefs={colDefs}
               gridRef={gridRef}
-              height={160}
+              height={gridHeight}
               gridOptions={{
                 onRowClicked: onRowClicked,
                 rowSelection: "none", // 체크박스 사용하므로 단일 선택 비활성화

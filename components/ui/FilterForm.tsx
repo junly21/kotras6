@@ -100,102 +100,318 @@ export function FilterForm<T extends FieldValues>({
       <form
         onSubmit={form.handleSubmit(onSearch)}
         className={cn(
-          "flex flex-wrap gap-4 items-center bg-[#E9E9E9] border border-[#D9D9D9] p-4 rounded-xl",
+          "bg-[#E9E9E9] border border-[#D9D9D9] p-4 rounded-xl",
           className
         )}>
-        {fields.map((f) => {
-          let options = f.optionsEndpoint
-            ? dynamicOptions[f.name] || []
-            : f.options || [];
+        {/* 요소가 3개 이하일 때: 1줄에 모든 요소와 조회버튼 배치 */}
+        {fields.length <= 3 && (
+          <div className="flex flex-wrap gap-4 items-start">
+            {fields.map((f) => {
+              let options = f.optionsEndpoint
+                ? dynamicOptions[f.name] || []
+                : f.options || [];
 
-          // filterOptions가 있으면 적용
-          if (f.filterOptions) {
-            options = f.filterOptions(options);
-          }
+              // filterOptions가 있으면 적용
+              if (f.filterOptions) {
+                options = f.filterOptions(options);
+              }
 
-          return (
-            <FormField
-              key={f.name}
-              control={form.control}
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              name={f.name as any}
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>
-                    {f.label}
-                    {f.required && <span className="text-red-500">*</span>}
-                  </FormLabel>
+              return (
+                <FormField
+                  key={f.name}
+                  control={form.control}
+                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                  name={f.name as any}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>
+                        {f.label}
+                        {f.required && <span className="text-red-500">*</span>}
+                      </FormLabel>
 
-                  {f.type === "combobox" ? (
-                    <FormControl>
-                      <ComboBox
-                        options={options}
-                        value={field.value}
-                        onChange={field.onChange}
-                        placeholder={f.placeholder}
-                        disabled={f.disabled}
-                        className={f.className}
-                      />
-                    </FormControl>
-                  ) : (
-                    ["text", "date", "select"].includes(f.type) && (
-                      <FormControl>
-                        {f.type === "text" ? (
-                          <Input
-                            {...field}
+                      {f.type === "combobox" ? (
+                        <FormControl>
+                          <ComboBox
+                            options={options}
+                            value={field.value}
+                            onChange={field.onChange}
                             placeholder={f.placeholder}
                             disabled={f.disabled}
                             className={f.className}
                           />
-                        ) : f.type === "date" ? (
-                          <Input
-                            type="date"
-                            {...field}
-                            disabled={f.disabled}
-                            className={f.className}
-                          />
-                        ) : (
-                          <Select
-                            onValueChange={field.onChange}
-                            value={field.value}
-                            disabled={f.disabled}>
-                            <SelectTrigger
-                              className={cn(
-                                "min-w-[200px] bg-white border border-[#d9d9d9]",
-                                f.className
-                              )}>
-                              <SelectValue
-                                placeholder={f.placeholder || "선택"}
+                        </FormControl>
+                      ) : (
+                        ["text", "date", "select"].includes(f.type) && (
+                          <FormControl>
+                            {f.type === "text" ? (
+                              <Input
+                                {...field}
+                                placeholder={f.placeholder}
+                                disabled={f.disabled}
+                                className={f.className}
                               />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {options.map((opt) => (
-                                <SelectItem
-                                  key={opt.value}
-                                  value={String(opt.value)}>
-                                  {opt.label}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
+                            ) : f.type === "date" ? (
+                              <Input
+                                type="date"
+                                {...field}
+                                disabled={f.disabled}
+                                className={f.className}
+                              />
+                            ) : (
+                              <Select
+                                onValueChange={field.onChange}
+                                value={field.value}
+                                disabled={f.disabled}>
+                                <SelectTrigger
+                                  className={cn(
+                                    "w-[200px] bg-white border border-[#d9d9d9]",
+                                    f.className
+                                  )}>
+                                  <SelectValue
+                                    placeholder={f.placeholder || "선택"}
+                                    className="truncate"
+                                  />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {options.map((opt) => (
+                                    <SelectItem
+                                      key={opt.value}
+                                      value={String(opt.value)}
+                                      className="truncate">
+                                      {opt.label}
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                            )}
+                          </FormControl>
+                        )
+                      )}
+
+                      {/* 에러 메시지 표시 */}
+                      {f.error && (
+                        <p className="text-red-500 text-sm mt-1">{f.error}</p>
+                      )}
+                    </FormItem>
+                  )}
+                />
+              );
+            })}
+
+            {/* 조회 버튼을 같은 줄에 배치 */}
+            <div className="flex items-end">
+              <Button type="submit" className="rounded-lg">
+                조회
+              </Button>
+            </div>
+          </div>
+        )}
+
+        {/* 요소가 4개 이상일 때: 2줄로 분할 */}
+        {fields.length > 3 && (
+          <>
+            {/* 첫 번째 줄 */}
+            <div className="flex flex-wrap gap-4 items-start mb-4">
+              {fields.slice(0, Math.ceil(fields.length / 2)).map((f) => {
+                let options = f.optionsEndpoint
+                  ? dynamicOptions[f.name] || []
+                  : f.options || [];
+
+                // filterOptions가 있으면 적용
+                if (f.filterOptions) {
+                  options = f.filterOptions(options);
+                }
+
+                return (
+                  <FormField
+                    key={f.name}
+                    control={form.control}
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                    name={f.name as any}
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>
+                          {f.label}
+                          {f.required && (
+                            <span className="text-red-500">*</span>
+                          )}
+                        </FormLabel>
+
+                        {f.type === "combobox" ? (
+                          <FormControl>
+                            <ComboBox
+                              options={options}
+                              value={field.value}
+                              onChange={field.onChange}
+                              placeholder={f.placeholder}
+                              disabled={f.disabled}
+                              className={f.className}
+                            />
+                          </FormControl>
+                        ) : (
+                          ["text", "date", "select"].includes(f.type) && (
+                            <FormControl>
+                              {f.type === "text" ? (
+                                <Input
+                                  {...field}
+                                  placeholder={f.placeholder}
+                                  disabled={f.disabled}
+                                  className={f.className}
+                                />
+                              ) : f.type === "date" ? (
+                                <Input
+                                  type="date"
+                                  {...field}
+                                  disabled={f.disabled}
+                                  className={f.className}
+                                />
+                              ) : (
+                                <Select
+                                  onValueChange={field.onChange}
+                                  value={field.value}
+                                  disabled={f.disabled}>
+                                  <SelectTrigger
+                                    className={cn(
+                                      "w-[200px] bg-white border border-[#d9d9d9]",
+                                      f.className
+                                    )}>
+                                    <SelectValue
+                                      placeholder={f.placeholder || "선택"}
+                                      className="truncate"
+                                    />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    {options.map((opt) => (
+                                      <SelectItem
+                                        key={opt.value}
+                                        value={String(opt.value)}
+                                        className="truncate">
+                                        {opt.label}
+                                      </SelectItem>
+                                    ))}
+                                  </SelectContent>
+                                </Select>
+                              )}
+                            </FormControl>
+                          )
                         )}
-                      </FormControl>
-                    )
-                  )}
 
-                  {/* 에러 메시지 표시 */}
-                  {f.error && (
-                    <p className="text-red-500 text-sm mt-1">{f.error}</p>
-                  )}
-                </FormItem>
-              )}
-            />
-          );
-        })}
+                        {/* 에러 메시지 표시 */}
+                        {f.error && (
+                          <p className="text-red-500 text-sm mt-1">{f.error}</p>
+                        )}
+                      </FormItem>
+                    )}
+                  />
+                );
+              })}
+            </div>
 
-        <Button type="submit" className="rounded-lg">
-          조회
-        </Button>
+            {/* 두 번째 줄 - 조회버튼 포함 */}
+            <div className="flex flex-wrap gap-4 items-start">
+              {fields.slice(Math.ceil(fields.length / 2)).map((f) => {
+                let options = f.optionsEndpoint
+                  ? dynamicOptions[f.name] || []
+                  : f.options || [];
+
+                // filterOptions가 있으면 적용
+                if (f.filterOptions) {
+                  options = f.filterOptions(options);
+                }
+
+                return (
+                  <FormField
+                    key={f.name}
+                    control={form.control}
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                    name={f.name as any}
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>
+                          {f.label}
+                          {f.required && (
+                            <span className="text-red-500">*</span>
+                          )}
+                        </FormLabel>
+
+                        {f.type === "combobox" ? (
+                          <FormControl>
+                            <ComboBox
+                              options={options}
+                              value={field.value}
+                              onChange={field.onChange}
+                              placeholder={f.placeholder}
+                              disabled={f.disabled}
+                              className={f.className}
+                            />
+                          </FormControl>
+                        ) : (
+                          ["text", "date", "select"].includes(f.type) && (
+                            <FormControl>
+                              {f.type === "text" ? (
+                                <Input
+                                  {...field}
+                                  placeholder={f.placeholder}
+                                  disabled={f.disabled}
+                                  className={f.className}
+                                />
+                              ) : f.type === "date" ? (
+                                <Input
+                                  type="date"
+                                  {...field}
+                                  disabled={f.disabled}
+                                  className={f.className}
+                                />
+                              ) : (
+                                <Select
+                                  onValueChange={field.onChange}
+                                  value={field.value}
+                                  disabled={f.disabled}>
+                                  <SelectTrigger
+                                    className={cn(
+                                      "w-[200px] bg-white border border-[#d9d9d9]",
+                                      f.className
+                                    )}>
+                                    <SelectValue
+                                      placeholder={f.placeholder || "선택"}
+                                      className="truncate"
+                                    />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    {options.map((opt) => (
+                                      <SelectItem
+                                        key={opt.value}
+                                        value={String(opt.value)}
+                                        className="truncate">
+                                        {opt.label}
+                                      </SelectItem>
+                                    ))}
+                                  </SelectContent>
+                                </Select>
+                              )}
+                            </FormControl>
+                          )
+                        )}
+
+                        {/* 에러 메시지 표시 */}
+                        {f.error && (
+                          <p className="text-red-500 text-sm mt-1">{f.error}</p>
+                        )}
+                      </FormItem>
+                    )}
+                  />
+                );
+              })}
+
+              {/* 조회 버튼을 두 번째 줄에 배치 */}
+              <div className="flex items-end">
+                <Button type="submit" className="rounded-lg">
+                  조회
+                </Button>
+              </div>
+            </div>
+          </>
+        )}
         {/* <Button
           type="button"
           className="rounded-lg"

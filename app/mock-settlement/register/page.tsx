@@ -382,8 +382,7 @@ export default function MockSettlementRegisterPage() {
             <div className="text-center text-gray-500">
               <p className="text-lg font-medium">조회 결과</p>
               <p className="text-sm">
-                정산명과 거래일자를 선택하고 조회 버튼을 누르면 결과가
-                표시됩니다.
+                정산명을 선택하고 조회 버튼을 누르면 결과가 표시됩니다.
               </p>
             </div>
           </div>

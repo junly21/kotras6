@@ -18,7 +18,6 @@ export function getAgencyInfo(agencyCode: string): AgencyInfo {
 
   // 서비스 기관 (중간 레벨)
   const serviceAgencies: Record<string, string> = {
-    한국철도공사: "한국철도공사",
     서울교통공사: "서울교통공사",
     인천교통공사: "인천교통공사",
     // 더 추가 가능

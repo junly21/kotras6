@@ -70,9 +70,9 @@ export function createSettlementByOdColDefs(): ColDef<SettlementByOdData>[] {
         return params.value;
       },
       cellStyle: (params: any) => {
-        // 소계 행인 경우 배경색 변경
+        // 소계 행인 경우 bold체만 적용
         if (params.value === "-") {
-          return { backgroundColor: "#F3F4F6", fontWeight: "bold" };
+          return { fontWeight: "bold" };
         }
         return {};
       },
@@ -91,9 +91,9 @@ export function createSettlementByOdColDefs(): ColDef<SettlementByOdData>[] {
         return "";
       },
       cellStyle: (params: any) => {
-        // 소계 행인 경우 배경색 변경
+        // 소계 행인 경우 bold체만 적용
         if (params.data?.path_detail === "-") {
-          return { backgroundColor: "#F3F4F6", fontWeight: "bold" };
+          return { fontWeight: "bold" };
         }
         return {};
       },
@@ -112,12 +112,15 @@ export function createSettlementByOdColDefs(): ColDef<SettlementByOdData>[] {
         return "";
       },
       cellStyle: (params: any) => {
-        
         // 소계 행인 경우 배경색 변경
         if (params.data?.path_detail === "-") {
-          return { backgroundColor: "#F3F4F6", fontWeight: "bold",textAlign: "right" };
+          return {
+            backgroundColor: "#F3F4F6",
+            fontWeight: "bold",
+            textAlign: "right",
+          };
         }
-        return {textAlign: "right"};
+        return { textAlign: "right" };
       },
     },
   ];

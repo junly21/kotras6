@@ -135,6 +135,28 @@ export default function SettlementByOdPage() {
     return map;
   }, [detailData, findNodeIdsByStationName]);
 
+  // 그리드 높이 동적 계산
+  const gridHeight = useMemo(() => {
+    if (!searchResults || searchResults.length === 0) return 150;
+
+    const baseHeight = 150; // 기본 높이 (1-2개 행일 때)
+
+    let calculatedHeight: number;
+
+    if (searchResults.length <= 2) {
+      // 1-2개 행: 기본 높이
+      calculatedHeight = baseHeight;
+    } else if (searchResults.length <= 9) {
+      // 3-9개 행: 기본 높이의 1.5배
+      calculatedHeight = baseHeight * 1.5;
+    } else {
+      // 9개 이상: 기본 높이의 2배
+      calculatedHeight = baseHeight * 2;
+    }
+
+    return calculatedHeight;
+  }, [searchResults]);
+
   // 컬럼 정의
   const columnDefs = useMemo(() => {
     return createSettlementByOdColDefs();
@@ -201,21 +223,57 @@ export default function SettlementByOdPage() {
     [fetchDetailData]
   );
 
+  // 그룹별 배경색 계산
+  const getGroupBackgroundColor = useCallback(
+    (rowIndex: number) => {
+      if (!searchResults || searchResults.length === 0) return "";
+
+      let groupIndex = 0;
+      for (let i = 0; i <= rowIndex; i++) {
+        if (searchResults[i].rn === 1) {
+          groupIndex++;
+        }
+      }
+
+      // 그룹별로 다른 배경색 적용 (3가지 옅은 색상)
+      const groupColors = [
+        "#f0f8f0", // 옅은 초록색
+        "#fff8f0", // 옅은 주황색
+        "#f8f0f8", // 옅은 보라색
+      ];
+
+      return groupColors[groupIndex % groupColors.length];
+    },
+    [searchResults]
+  );
+
   // 선택된 행 스타일 적용 함수
   const getRowStyle = useCallback(
     (params: any) => {
-      // selectedRow가 있고, 현재 행이 선택된 행과 동일한 경우 파란색 배경 유지
+      let style: any = {};
+
+      // 그룹별 배경색 적용 (소계 행 포함)
+      const groupColor = getGroupBackgroundColor(params.rowIndex);
+      if (groupColor) {
+        style.backgroundColor = groupColor;
+      }
+
+      // selectedRow가 있고, 현재 행이 선택된 행과 동일한 경우 파란색 배경과 테두리 적용
       if (
         params.data &&
         selectedRow &&
         params.data.path_key === selectedRow.path_key &&
         params.data.path_id === selectedRow.path_id
       ) {
-        return { backgroundColor: "#e3f2fd" }; // 선택된 행은 파란색 배경
+        style.backgroundColor = "#e3f2fd"; // 선택된 행은 파란색 배경
+        style.border = "2px solid #1976d2"; // 파란색 테두리
+        style.borderRadius = "4px"; // 모서리 둥글게
+        style.boxShadow = "0 2px 4px rgba(25, 118, 210, 0.2)"; // 그림자 효과
       }
-      return {};
+
+      return style;
     },
-    [selectedRow]
+    [selectedRow, getGroupBackgroundColor]
   );
 
   // 경유지 상세정보 그리드 행 스타일 함수
@@ -360,7 +418,7 @@ export default function SettlementByOdPage() {
                 <h3 className="text-lg font-semibold">OD별 정산결과</h3>
               </div>
               <div className="bg-white border border-gray-200 rounded-[24px] p-4">
-                <div className="h-[150px]">
+                <div style={{ height: `${gridHeight}px` }}>
                   <TestGrid
                     rowData={searchResults}
                     columnDefs={columnDefs}

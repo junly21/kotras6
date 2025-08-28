@@ -53,10 +53,20 @@ export async function POST(request: NextRequest) {
       const { data } = await callExternalApi("insertSimPayRecvInfo.do", {
         method: "POST",
         body: requestBody,
+        timeout: 40 * 60 * 1000, // 40분 타임아웃 설정
       });
 
       console.log("외부 API 모의정산 등록 결과:", data);
-      return NextResponse.json(data, { headers: createCorsHeaders() });
+
+      // 응답 형식을 통일하여 success 필드 포함
+      return NextResponse.json(
+        {
+          success: true,
+          data: data,
+          message: "모의정산 등록이 완료되었습니다.",
+        },
+        { headers: createCorsHeaders() }
+      );
     }
 
     // 기존 조회 로직

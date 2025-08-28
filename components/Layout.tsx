@@ -2,6 +2,8 @@ import React, { ReactNode } from "react";
 import Header from "./Header";
 import SideBar from "./SideBar";
 import Footer from "./Footer";
+import { GlobalToastManager } from "./GlobalToastManager";
+import { BackgroundTaskStatus } from "./BackgroundTaskStatus";
 
 interface LayoutProps {
   children: ReactNode;
@@ -24,6 +26,12 @@ export default function Layout({ children }: LayoutProps) {
           <Footer />
         </div>
       </div>
+
+      {/* 전역 토스트 매니저 */}
+      <GlobalToastManager />
+
+      {/* 백그라운드 작업 상태 */}
+      <BackgroundTaskStatus />
     </div>
   );
 }

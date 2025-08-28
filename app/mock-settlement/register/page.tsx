@@ -13,6 +13,7 @@ import {
 } from "@/types/mockSettlementRegister";
 import { MockSettlementRegisterService } from "@/services/mockSettlementRegisterService";
 import { MockSettlementControlService } from "@/services/mockSettlementControlService";
+import { BackgroundTaskService } from "@/services/backgroundTaskService";
 import TestGrid from "@/components/TestGrid";
 import Spinner from "@/components/Spinner";
 import { MockSettlementModal } from "@/components/MockSettlementModal";
@@ -91,6 +92,14 @@ export default function MockSettlementRegisterPage() {
     loadTradeDates();
   }, [loadTradeDates]);
 
+  // 컴포넌트 언마운트 시 백그라운드 모니터링 정리
+  useEffect(() => {
+    return () => {
+      // 페이지를 떠날 때 모든 백그라운드 모니터링 중단
+      BackgroundTaskService.stopAllMonitoring();
+    };
+  }, []);
+
   // 초기 진입 시 기본 조회 (정산명 공백, 거래일자 ALL)
   useEffect(() => {
     const fetchInitial = async () => {
@@ -165,36 +174,17 @@ export default function MockSettlementRegisterPage() {
 
       // 등록 요청 시작 토스트 표시
       setToast({
-        message:
-          "모의정산 등록 요청이 시작되었습니다. 약 15분 정도 소요됩니다.",
+        message: "모의정산 등록이 백그라운드에서 시작되었습니다.",
         type: "info",
         isVisible: true,
       });
 
       try {
-        const response =
-          await MockSettlementRegisterService.registerMockSettlement(data);
+        // 백그라운드에서 모의정산 등록 실행
+        BackgroundTaskService.executeMockSettlementRegistration(data);
 
-        if (response.success) {
-          console.log("모의정산 등록 성공:", response.data);
-          // 성공 토스트 표시
-          setToast({
-            message: "모의정산 등록이 완료되었습니다.",
-            type: "success",
-            isVisible: true,
-          });
-          // 등록 후 목록 새로고침
-          handleSearchSubmit(filters);
-        } else {
-          console.error("모의정산 등록 실패:", response.error);
-          // 실패 토스트 표시
-          setToast({
-            message: response.error || "모의정산 등록에 실패했습니다.",
-            type: "error",
-            isVisible: true,
-          });
-          setError(response.error || "모의정산 등록에 실패했습니다.");
-        }
+        // 등록 후 목록 새로고침 (백그라운드에서 완료 시 자동으로 처리됨)
+        // handleSearchSubmit(filters);
       } catch (error) {
         console.error("모의정산 등록 중 오류:", error);
         // 에러 토스트 표시

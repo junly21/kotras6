@@ -24,6 +24,18 @@ export default function SettingsLogsPage() {
   // ✅ 검색 수행 여부 상태 추가
   const [hasSearched, setHasSearched] = useState(false);
 
+  // 컬럼 정의 상태 추가
+  const [colDefs, setColDefs] = useState<
+    Array<{
+      headerName: string;
+      field: string;
+      flex: number;
+      minWidth: number;
+      resizable: boolean;
+      valueFormatter?: (params: { value: number }) => string;
+    }>
+  >([]);
+
   // 토스트 상태
   const [toast, setToast] = useState<{
     isVisible: boolean;
@@ -74,63 +86,182 @@ export default function SettingsLogsPage() {
     }
   }, [filters, refetch, hasSearched]);
 
+  // filters.processDiv가 변경될 때마다 컬럼 정의 업데이트
+  useEffect(() => {
+    const newColDefs = getColumnDefs(filters.processDiv);
+    setColDefs(newColDefs);
+  }, [filters.processDiv]);
+
   const handleSearch = useCallback((values: JobLogFilters) => {
     setHasSearched(true); // ✅ 검색 시작
     setFilters(values);
   }, []);
 
-  const colDefs = [
-    {
-      headerName: "프로세스구분",
-      field: "process_div",
-      flex: 1,
-      minWidth: 150,
-      resizable: false,
-    },
-    {
-      headerName: "상세구분",
-      field: "detail_div",
-      flex: 1,
-      minWidth: 200,
-      resizable: false,
-    },
-    {
-      headerName: "작업유형",
-      field: "action_type",
-      flex: 1,
-      minWidth: 150,
-      resizable: false,
-    },
-    {
-      headerName: "작업일시",
-      field: "process_dtm",
-      flex: 1,
-      minWidth: 200,
-      resizable: false,
-      valueFormatter: (params: { value: number }) => {
-        if (!params.value) return "";
-        return new Date(params.value).toLocaleString();
-      },
-    },
-    {
-      headerName: "작업구분",
-      field: "action_div",
-      flex: 1,
-      minWidth: 150,
-      resizable: false,
-    },
-    {
-      headerName: "처리건수",
-      field: "process_cnt",
-      flex: 1,
-      minWidth: 120,
-      resizable: false,
-      valueFormatter: (params: { value: number }) => {
-        if (!params.value) return "0";
-        return params.value.toLocaleString();
-      },
-    },
-  ];
+  // 프로세스구분에 따른 컬럼 정의
+  const getColumnDefs = (processDiv: string) => {
+    if (processDiv === "SETTLE") {
+      return [
+        {
+          headerName: "프로세스구분",
+          field: "process_div",
+          flex: 1,
+          minWidth: 150,
+          resizable: false,
+        },
+        {
+          headerName: "상세구분",
+          field: "detail_div",
+          flex: 1,
+          minWidth: 200,
+          resizable: false,
+        },
+        {
+          headerName: "거래일자",
+          field: "card_dt",
+          flex: 1,
+          minWidth: 150,
+          resizable: false,
+        },
+        {
+          headerName: "작업시작시간",
+          field: "stmt_start_dtm",
+          flex: 1,
+          minWidth: 200,
+          resizable: false,
+          valueFormatter: (params: { value: number }) => {
+            if (!params.value) return "";
+            return new Date(params.value).toLocaleString();
+          },
+        },
+        {
+          headerName: "작업종료시간",
+          field: "stmt_end_dtm",
+          flex: 1,
+          minWidth: 200,
+          resizable: false,
+          valueFormatter: (params: { value: number }) => {
+            if (!params.value) return "";
+            return new Date(params.value).toLocaleString();
+          },
+        },
+        {
+          headerName: "비고",
+          field: "remark",
+          flex: 1,
+          minWidth: 200,
+          resizable: false,
+        },
+      ];
+    } else if (processDiv === "REFINE") {
+      // 정제용 컬럼 정의
+      return [
+        {
+          headerName: "프로세스구분",
+          field: "process_div",
+          flex: 1,
+          minWidth: 150,
+          resizable: false,
+        },
+        {
+          headerName: "상세구분",
+          field: "detail_div",
+          flex: 1,
+          minWidth: 200,
+          resizable: false,
+        },
+        {
+          headerName: "작업유형",
+          field: "action_type",
+          flex: 1,
+          minWidth: 150,
+          resizable: false,
+        },
+        {
+          headerName: "작업일시",
+          field: "process_dtm",
+          flex: 1,
+          minWidth: 200,
+          resizable: false,
+          valueFormatter: (params: { value: number }) => {
+            if (!params.value) return "";
+            return new Date(params.value).toLocaleString();
+          },
+        },
+        {
+          headerName: "작업구분",
+          field: "action_div",
+          flex: 1,
+          minWidth: 150,
+          resizable: false,
+        },
+        {
+          headerName: "처리건수",
+          field: "process_cnt",
+          flex: 1,
+          minWidth: 120,
+          resizable: false,
+          valueFormatter: (params: { value: number }) => {
+            if (!params.value) return "0";
+            return params.value.toLocaleString();
+          },
+        },
+      ];
+    } else {
+      // 기본 컬럼 정의 (빈 값일 때)
+      return [
+        {
+          headerName: "프로세스구분",
+          field: "process_div",
+          flex: 1,
+          minWidth: 150,
+          resizable: false,
+        },
+        {
+          headerName: "상세구분",
+          field: "detail_div",
+          flex: 1,
+          minWidth: 200,
+          resizable: false,
+        },
+        {
+          headerName: "작업유형",
+          field: "action_type",
+          flex: 1,
+          minWidth: 150,
+          resizable: false,
+        },
+        {
+          headerName: "작업일시",
+          field: "process_dtm",
+          flex: 1,
+          minWidth: 200,
+          resizable: false,
+          valueFormatter: (params: { value: number }) => {
+            if (!params.value) return "";
+            return new Date(params.value).toLocaleString();
+          },
+        },
+        {
+          headerName: "작업구분",
+          field: "action_div",
+          flex: 1,
+          minWidth: 150,
+          resizable: false,
+        },
+        {
+          headerName: "처리건수",
+          field: "process_cnt",
+          flex: 1,
+          minWidth: 120,
+          resizable: false,
+          valueFormatter: (params: { value: number }) => {
+            if (!params.value) return "0";
+            return params.value.toLocaleString();
+          },
+        },
+      ];
+    }
+  };
 
   return (
     <ProtectedRoute requiredPath="/settings/logs">

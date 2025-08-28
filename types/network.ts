@@ -169,6 +169,7 @@ export interface NetworkMapProps {
   tooltips?: NetworkMapTooltip;
   onNodeClick?: (node: Node) => void;
   onLinkClick?: (link: Link) => void;
+  apiStationNumbers?: Set<string>; // API 응답의 sta_num들
 }
 
 // 노드/링크 매칭 관련 타입

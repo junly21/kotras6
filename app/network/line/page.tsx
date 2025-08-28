@@ -27,6 +27,9 @@ export default function NetworkLinePage() {
 
   const [activeLine, setActiveLine] = useState<string | null>(null);
   const [hasSearched, setHasSearched] = useState(false);
+  const [apiStationNumbers, setApiStationNumbers] = useState<Set<string>>(
+    new Set()
+  );
 
   // 최초 노선도 렌더링용 데이터 (useNetworkData 사용)
   const {
@@ -89,6 +92,14 @@ export default function NetworkLinePage() {
         // 특정 노선 선택 시: 해당 노선만 하이라이트
         setActiveLine(filters.line);
       }
+
+      // API 응답의 sta_num들을 Set으로 저장
+      if (data.nodeData && data.nodeData.length > 0) {
+        const stationNumbers = new Set(
+          data.nodeData.map((node) => node.sta_num)
+        );
+        setApiStationNumbers(stationNumbers);
+      }
     },
     [filters.line, defaultLinks]
   );
@@ -110,17 +121,6 @@ export default function NetworkLinePage() {
     }
   }, [filters, refetch, hasSearched]);
 
-  // 모든 필터가 설정되면 자동으로 조회 실행
-  useEffect(() => {
-    if (filters.network && filters.agency && filters.line && !hasSearched) {
-      setHasSearched(true);
-    }
-    // 필터가 초기화된 경우 hasSearched도 초기화
-    if ((!filters.network || !filters.agency || !filters.line) && hasSearched) {
-      setHasSearched(false);
-    }
-  }, [filters.network, filters.agency, filters.line, hasSearched]);
-
   const handleFilterChangeWithLine = useCallback(
     (values: NetworkMapFilters) => {
       handleFilterChange(values);
@@ -135,6 +135,17 @@ export default function NetworkLinePage() {
     [handleFilterChange]
   );
 
+  // 모든 필터가 설정되면 자동으로 조회 실행
+  useEffect(() => {
+    if (filters.network && filters.agency && filters.line && !hasSearched) {
+      setHasSearched(true);
+    }
+    // 필터가 초기화된 경우 hasSearched도 초기화
+    if ((!filters.network || !filters.agency || !filters.line) && hasSearched) {
+      setHasSearched(false);
+    }
+  }, [filters.network, filters.agency, filters.line, hasSearched]);
+
   const handleSearchWithLine = useCallback(
     (values: NetworkMapFilters) => {
       handleSearch(values);
@@ -147,11 +158,14 @@ export default function NetworkLinePage() {
     if (!activeLine) return [];
 
     const lineNames = activeLine.split(",");
-    return lineNames.map((lineName) => ({
+
+    const result = lineNames.map((lineName) => ({
       type: "line" as const,
       value: lineName.trim(),
     }));
-  }, [activeLine]);
+
+    return result;
+  }, [activeLine, apiStationNumbers]);
 
   const mapConfig = useMemo(() => NETWORK_MAP_CONFIGS.line, []);
 
@@ -216,6 +230,7 @@ export default function NetworkLinePage() {
               svgText={svgText}
               config={mapConfig}
               highlights={highlights}
+              apiStationNumbers={apiStationNumbers}
             />
           )}
         </div>

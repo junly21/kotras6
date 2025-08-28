@@ -15,6 +15,8 @@ export interface HighlightState {
   linkColors: Map<string, string>; // 링크 ID -> RGB 색상
   pathNodes: Map<string, Set<string>>; // 경로 ID -> 노드 ID들
   pathLinks: Map<string, Set<string>>; // 경로 ID -> 링크 ID들
+  // API 응답 필터링을 위한 필드 추가
+  apiStationNumbers?: Set<string>; // API 응답에 있는 sta_num들
 }
 
 /**
@@ -23,12 +25,14 @@ export interface HighlightState {
  * @param highlights 하이라이트 설정 배열
  * @param nodes 노드 데이터
  * @param links 링크 데이터
+ * @param apiStationNumbers API 응답에 있는 sta_num들 (선택사항)
  * @returns 계산된 하이라이트 상태
  */
 export function calculateHighlightState(
   highlights: NetworkMapHighlight[],
   nodes: Node[],
-  links: Link[]
+  links: Link[],
+  apiStationNumbers?: Set<string>
 ): HighlightState {
   const highlightedNodes = new Set<string>();
   const highlightedLinks = new Set<string>();
@@ -58,7 +62,11 @@ export function calculateHighlightState(
       activeLines.add(line);
 
       nodes.forEach((node) => {
-        if (node.line === line) {
+        // API 응답에 있는 sta_num만 하이라이트 (필터링)
+        if (
+          node.line === line &&
+          (!apiStationNumbers || apiStationNumbers.has(node.id))
+        ) {
           highlightedNodes.add(node.id);
           if (isSelected) {
             selectedNodes.add(node.id);
@@ -76,7 +84,13 @@ export function calculateHighlightState(
       });
 
       links.forEach((link) => {
-        if (link.line === line) {
+        // API 응답에 있는 sta_num으로 구성된 링크만 하이라이트 (필터링)
+        if (
+          link.line === line &&
+          (!apiStationNumbers ||
+            (apiStationNumbers.has(link.source) &&
+              apiStationNumbers.has(link.target)))
+        ) {
           const linkId1 = `${link.source}-${link.target}`;
           const linkId2 = `${link.target}-${link.source}`;
           highlightedLinks.add(linkId1);
@@ -162,6 +176,7 @@ export function calculateHighlightState(
     linkColors,
     pathNodes,
     pathLinks,
+    apiStationNumbers,
   };
 }
 
@@ -189,6 +204,7 @@ export function calculateOpacity(
     selectedLinks,
     otherNodes,
     otherLinks,
+    apiStationNumbers,
   } = highlightState;
 
   // OD별 정산 등 단일 path 하이라이트일 때는 무조건 1.0
@@ -218,9 +234,25 @@ export function calculateOpacity(
     }
   }
 
+  // activeLines 기반 하이라이트 (API 응답 필터링 우선 적용)
   if (activeLines.size > 0) {
     if (line && activeLines.has(line)) {
-      return 1;
+      // API 응답 필터링이 있는 경우: 해당 요소만 하이라이트
+      if (apiStationNumbers && apiStationNumbers.size > 0) {
+        if (isNode) {
+          // 노드: API 응답에 있는 sta_num만 하이라이트
+          return apiStationNumbers.has(id) ? 1 : 0.1;
+        } else {
+          // 링크: API 응답에 있는 sta_num으로 구성된 링크만 하이라이트
+          const [src, dst] = id.split("-");
+          return apiStationNumbers.has(src) && apiStationNumbers.has(dst)
+            ? 1
+            : 0.1;
+        }
+      } else {
+        // API 응답 필터링이 없는 경우: 기존 로직
+        return 1;
+      }
     }
     return 0.1;
   }

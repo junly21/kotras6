@@ -21,6 +21,7 @@ export function NetworkMap({
   tooltips,
   onNodeClick,
   onLinkClick,
+  apiStationNumbers, // API 응답의 sta_num들 추가
 }: NetworkMapProps) {
   const {
     showZoomControls = true,
@@ -43,8 +44,8 @@ export function NetworkMap({
 
   // 하이라이트 상태 계산
   const highlightState = useMemo(() => {
-    return calculateHighlightState(highlights, nodes, links);
-  }, [highlights, nodes, links]);
+    return calculateHighlightState(highlights, nodes, links, apiStationNumbers);
+  }, [highlights, nodes, links, apiStationNumbers]);
 
   // SVG 파싱 및 렌더링
   useEffect(() => {
@@ -59,23 +60,10 @@ export function NetworkMap({
         // 하이라이트가 있는 경우 렌더링 순서를 조정
         if (highlights.length > 0) {
           // SVG 구조를 하이라이트 상태에 따라 재구성
-          console.log(
-            "Applying SVG reordering for",
-            highlights.length,
-            "highlights"
-          );
           const reorderedSvgJson = reorderSvgForHighlightPriority(
             svgJson,
             highlightState
           );
-          console.log("SVG reordering completed");
-
-          // 디버깅: 하이라이트 상태 확인
-          console.log("Highlight state:", {
-            activeLines: Array.from(highlightState.activeLines),
-            highlightedNodes: highlightState.highlightedNodes.size,
-            highlightedLinks: highlightState.highlightedLinks.size,
-          });
 
           setSvgReactTree(
             renderSvgNode(
@@ -85,13 +73,12 @@ export function NetworkMap({
               onNodeClick,
               onLinkClick,
               undefined,
-              highlightState,
+              highlightState, // 이미 계산된 highlightState 사용
               showTooltips,
               tooltips
             )
           );
         } else {
-          console.log("No highlights, using original SVG structure");
           setSvgReactTree(
             renderSvgNode(
               svgJson,
@@ -100,7 +87,7 @@ export function NetworkMap({
               onNodeClick,
               onLinkClick,
               undefined,
-              highlightState,
+              highlightState, // 이미 계산된 highlightState 사용
               showTooltips,
               tooltips
             )
@@ -118,8 +105,7 @@ export function NetworkMap({
     svgText,
     nodes,
     links,
-    highlights,
-    highlightState,
+    highlightState, // highlightState만 의존성으로 유지
     onNodeClick,
     onLinkClick,
     showTooltips,

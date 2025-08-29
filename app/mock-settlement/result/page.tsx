@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useRef, useEffect } from "react";
+import { useState, useCallback, useRef } from "react";
 import { FilterForm } from "@/components/ui/FilterForm";
 import {
   mockSettlementResultFilterConfig,
@@ -46,7 +46,6 @@ export default function MockSettlementResultPage() {
     SettlementResultData[]
   >([]);
   const [hasSearched, setHasSearched] = useState(false);
-  const [isFilterFormHidden, setIsFilterFormHidden] = useState(false);
 
   // AG Grid refs
   const mockSettlementGridRef = useRef<AgGridReact>(null);
@@ -72,39 +71,6 @@ export default function MockSettlementResultPage() {
     message: "",
     type: "info",
   });
-
-  // 정산명 목록을 가져와서 첫 번째 항목을 자동으로 선택하고 조회하는 함수
-  const initializeAndSearch = useCallback(async () => {
-    try {
-      const response = await fetch(
-        "/api/mock-settlement/settlement-names-select"
-      );
-      const data = await response.json();
-
-      if (data.options && data.options.length > 0) {
-        const firstSettlementName = data.options[0].value;
-        const newFilters = {
-          ...defaultValues,
-          settlementName: firstSettlementName,
-        };
-        setFilters(newFilters);
-
-        // 자동으로 조회 실행
-        await handleSearchSubmit(newFilters);
-
-        // 조회 완료 후 필터폼 숨김
-        setIsFilterFormHidden(true);
-      }
-    } catch (error) {
-      console.error("정산명 목록 조회 실패:", error);
-      setError("정산명 목록을 가져오는데 실패했습니다.");
-    }
-  }, []);
-
-  // 컴포넌트 마운트 시 자동 초기화 및 조회
-  useEffect(() => {
-    initializeAndSearch();
-  }, [initializeAndSearch]);
 
   // 필터 변경 핸들러
   const handleFilterChange = (values: MockSettlementResultFilters) => {
@@ -190,21 +156,6 @@ export default function MockSettlementResultPage() {
       }
     },
     []
-  );
-
-  // 필터폼 숨기기 핸들러 (수동 검색 후)
-  const handleHideFilterForm = () => {
-    setIsFilterFormHidden(true);
-  };
-
-  // 수동 검색 핸들러 (필터폼에서 검색 버튼 클릭 시)
-  const handleManualSearch = useCallback(
-    async (values: MockSettlementResultFilters) => {
-      await handleSearchSubmit(values);
-      // 수동 검색 후 필터폼 숨김
-      handleHideFilterForm();
-    },
-    [handleSearchSubmit]
   );
 
   // 상단 그리드 컬럼 정의 (모의정산 등록 페이지와 동일)
@@ -403,16 +354,14 @@ export default function MockSettlementResultPage() {
       )}
 
       {/* 필터 폼 */}
-      {!isFilterFormHidden && !isLoading && (
-        <FilterForm
-          fields={mockSettlementResultFilterConfig}
-          defaultValues={defaultValues}
-          schema={mockSettlementResultSchema}
-          values={filters}
-          onChange={handleFilterChange}
-          onSearch={handleManualSearch}
-        />
-      )}
+      <FilterForm
+        fields={mockSettlementResultFilterConfig}
+        defaultValues={defaultValues}
+        schema={mockSettlementResultSchema}
+        values={filters}
+        onChange={handleFilterChange}
+        onSearch={handleSearchSubmit}
+      />
 
       {/* 상단: 모의정산 결과 그리드 */}
       {!hasSearched && (
@@ -430,7 +379,6 @@ export default function MockSettlementResultPage() {
         <div className="space-y-2">
           {!isLoading && mockSettlementResults.length > 0 && (
             <>
-              <h3 className="text-lg font-semibold mb-4">모의정산 정보</h3>
               <div className="bg-white border border-gray-200 rounded-[24px] p-2">
                 <div className="h-32">
                   <TestGrid
@@ -485,7 +433,7 @@ export default function MockSettlementResultPage() {
           </div>
         )}
         <div className="bg-white border border-gray-200 rounded-[24px] p-4">
-          <div className="h-[550px]">
+          <div className="h-[500px]">
             <TestGrid
               rowData={settlementRowData}
               columnDefs={settlementColumnDefs}

@@ -173,10 +173,10 @@ export default function MockSettlementByInstitutionPage() {
     {
       headerName: "기관명",
       field: "대상기관",
-      minWidth: 200,
+      minWidth: 120,
       flex: 1,
       resizable: false,
-      cellStyle: (params: any) => {
+      cellStyle: (params: { node: { rowPinned?: string } }) => {
         if (params.node.rowPinned === "bottom") {
           return {
             fontWeight: "bold",
@@ -196,7 +196,7 @@ export default function MockSettlementByInstitutionPage() {
       valueFormatter: (params: { value: number }) => {
         return params.value.toLocaleString();
       },
-      cellStyle: (params: any) => {
+      cellStyle: (params: { node: { rowPinned?: string } }) => {
         const baseStyle = { textAlign: "right" };
         if (params.node.rowPinned === "bottom") {
           return {
@@ -218,7 +218,7 @@ export default function MockSettlementByInstitutionPage() {
       valueFormatter: (params: { value: number }) => {
         return params.value.toLocaleString();
       },
-      cellStyle: (params: any) => {
+      cellStyle: (params: { node: { rowPinned?: string } }) => {
         const baseStyle = { textAlign: "right" };
         if (params.node.rowPinned === "bottom") {
           return {
@@ -240,7 +240,7 @@ export default function MockSettlementByInstitutionPage() {
       valueFormatter: (params: { value: number }) => {
         return params.value.toLocaleString();
       },
-      cellStyle: (params: any) => {
+      cellStyle: (params: { node: { rowPinned?: string } }) => {
         const baseStyle = { textAlign: "right" };
         if (params.node.rowPinned === "bottom") {
           return {
@@ -283,9 +283,21 @@ export default function MockSettlementByInstitutionPage() {
   // 그리드용 단위변환된 데이터
   const byInstitutionRowData = byInstitutionData.map((item) => ({
     ...item,
-    지급액: unit === "원" ? item.지급액 : item.지급액 / 100000000,
-    수급액: unit === "원" ? item.수급액 : item.수급액 / 100000000,
-    차액: unit === "원" ? item.차액 : item.차액 / 100000000,
+    지급액:
+      unit === "원"
+        ? item.지급액
+        : item.지급액 /
+          (unit === "천" ? 1000 : unit === "백만" ? 1000000 : 100000000),
+    수급액:
+      unit === "원"
+        ? item.수급액
+        : item.수급액 /
+          (unit === "천" ? 1000 : unit === "백만" ? 1000000 : 100000000),
+    차액:
+      unit === "원"
+        ? item.차액
+        : item.차액 /
+          (unit === "천" ? 1000 : unit === "백만" ? 1000000 : 100000000),
   }));
 
   // 하단 고정 행 데이터 (총계)
@@ -306,7 +318,14 @@ export default function MockSettlementByInstitutionPage() {
     );
 
     // 단위변환 적용
-    const unitMultiplier = unit === "원" ? 1 : 1 / 100000000;
+    const unitMultiplier =
+      unit === "원"
+        ? 1
+        : unit === "천"
+        ? 1 / 1000
+        : unit === "백만"
+        ? 1 / 1000000
+        : 1 / 100000000;
 
     return [
       {
@@ -315,22 +334,28 @@ export default function MockSettlementByInstitutionPage() {
           unit === "원"
             ? "원"
             : unit === "천"
-            ? "천원"
+            ? "천"
             : unit === "백만"
-            ? "백만원"
-            : "억원"
+            ? "백만"
+            : "억"
         }`,
         수급액: `${(totalReceipt * unitMultiplier).toLocaleString()}${
-          unit === "천" ? "천원" : unit === "백만" ? "백만원" : "억원"
+          unit === "원"
+            ? "원"
+            : unit === "천"
+            ? "천"
+            : unit === "백만"
+            ? "백만"
+            : "억"
         }`,
         차액: `${(totalDifference * unitMultiplier).toLocaleString()}${
           unit === "원"
             ? "원"
             : unit === "천"
-            ? "천원"
+            ? "천"
             : unit === "백만"
-            ? "백만원"
-            : "억원"
+            ? "백만"
+            : "억"
         }`,
       },
     ];
@@ -433,10 +458,10 @@ export default function MockSettlementByInstitutionPage() {
         </div>
 
         {/* 좌우 그리드 레이아웃 */}
-        <div className="grid grid-cols-2 gap-6 h-[450px]">
+        <div className="grid grid-cols-2 gap-6 h-[500px]">
           {/* 왼쪽: 기관별 조회 결과 그리드 */}
           <div className="flex flex-col h-full ]">
-            <div className="relative flex-1 h-full max-h-[425px]">
+            <div className="relative flex-1 h-full max-h-[475px]">
               {hasSearched && isLoading && (
                 <div className="absolute inset-0 h-100vh flex items-center justify-center bg-white/80 z-10">
                   <Spinner />
@@ -462,7 +487,7 @@ export default function MockSettlementByInstitutionPage() {
           <div className="flex flex-col h-full ">
             <div className="relative flex-1 h-full  ">
               {!hasSearched ? (
-                <div className="h-full max-h-[425px] flex items-center justify-center bg-gray-50 border-2 border-dashed border-gray-300 rounded">
+                <div className="h-full max-h-[475px] flex items-center justify-center bg-gray-50 border-2 border-dashed border-gray-300 rounded">
                   <div className="text-center text-gray-500">
                     <p className="text-lg font-medium">
                       조회 버튼을 눌러주세요

@@ -111,73 +111,134 @@ export default function SettlementByInstitutionPage() {
   const rowData =
     apiData?.map((item) => ({
       ...item,
-      지급액: unit === "원" ? item.지급액 : item.지급액 / 100000000,
-      수급액: unit === "원" ? item.수급액 : item.수급액 / 100000000,
-      차액: unit === "원" ? item.차액 : item.차액 / 100000000,
+      지급액:
+        unit === "원"
+          ? item.지급액
+          : item.지급액 /
+            (unit === "천" ? 1000 : unit === "백만" ? 1000000 : 100000000),
+      수급액:
+        unit === "원"
+          ? item.수급액
+          : item.수급액 /
+            (unit === "천" ? 1000 : unit === "백만" ? 1000000 : 100000000),
+      차액:
+        unit === "원"
+          ? item.차액
+          : item.차액 /
+            (unit === "천" ? 1000 : unit === "백만" ? 1000000 : 100000000),
     })) || [];
 
   // 하단 고정 행 데이터 (총계)
   const pinnedBottomRowData = useMemo(() => {
     if (!apiData || apiData.length === 0) return [];
 
+    // 디버깅을 위한 로그 추가
+    console.log("원 단위일 때 총계 계산:", {
+      unit,
+      sampleData: apiData[0],
+      지급액Type: typeof apiData[0]?.지급액,
+      수급액Type: typeof apiData[0]?.수급액,
+      차액Type: typeof apiData[0]?.차액,
+    });
+
     const totalPayment = apiData.reduce(
-      (sum, item) => sum + Number(item.지급액),
+      (sum, item) => sum + (Number(item.지급액) || 0),
       0
     );
     const totalReceipt = apiData.reduce(
-      (sum, item) => sum + Number(item.수급액),
+      (sum, item) => sum + (Number(item.수급액) || 0),
       0
     );
     const totalDifference = apiData.reduce(
-      (sum, item) => sum + Number(item.차액),
+      (sum, item) => sum + (Number(item.차액) || 0),
       0
     );
 
-    // 단위변환 적용
-    const unitMultiplier = unit === "원" ? 1 : 1 / 100000000;
+    console.log("총계 계산 결과:", {
+      totalPayment,
+      totalReceipt,
+      totalDifference,
+      unitMultiplier:
+        unit === "원"
+          ? 1
+          : unit === "천"
+          ? 1 / 1000
+          : unit === "백만"
+          ? 1 / 1000000
+          : 1 / 100000000,
+    });
 
-    return [
+    // 단위변환 적용
+    const unitMultiplier =
+      unit === "원"
+        ? 1
+        : unit === "천"
+        ? 1 / 1000
+        : unit === "백만"
+        ? 1 / 1000000
+        : 1 / 100000000;
+
+    // 원 단위일 때는 정수로, 다른 단위는 소수점 포함
+    const formatValue = (value: number) => {
+      if (unit === "원") {
+        return Math.round(value * unitMultiplier).toLocaleString();
+      }
+      return (value * unitMultiplier).toLocaleString();
+    };
+
+    const result = [
       {
         대상기관: `총 ${apiData.length}개`,
-        지급액: `${(totalPayment * unitMultiplier).toLocaleString()}${
+        지급액: `${formatValue(totalPayment)}${
           unit === "원"
             ? "원"
             : unit === "천"
-            ? "천원"
+            ? "천"
             : unit === "백만"
-            ? "백만원"
-            : "억원"
+            ? "백만"
+            : "억"
         }`,
-        수급액: `${(totalReceipt * unitMultiplier).toLocaleString()}${
+        수급액: `${formatValue(totalReceipt)}${
           unit === "원"
             ? "원"
             : unit === "천"
-            ? "천원"
+            ? "천"
             : unit === "백만"
-            ? "백만원"
-            : "억원"
+            ? "백만"
+            : "억"
         }`,
-        차액: `${(totalDifference * unitMultiplier).toLocaleString()}${
+        차액: `${formatValue(totalDifference)}${
           unit === "원"
             ? "원"
             : unit === "천"
-            ? "천원"
+            ? "천"
             : unit === "백만"
-            ? "백만원"
-            : "억원"
+            ? "백만"
+            : "억"
         }`,
       },
     ];
+
+    console.log("pinnedBottomRowData 최종 결과:", result);
+    return result;
   }, [apiData, unit]);
+
+  // pinnedBottomRowData 변경 시 디버깅
+  useEffect(() => {
+    console.log("pinnedBottomRowData 변경됨:", pinnedBottomRowData);
+    if (gridRef.current && pinnedBottomRowData.length > 0) {
+      console.log("그리드에 pinnedBottomRowData 적용 시도");
+    }
+  }, [pinnedBottomRowData]);
 
   const colDefs = [
     {
       headerName: "기관명",
       field: "대상기관",
-      minWidth: 200,
+      minWidth: 120,
       flex: 1,
       resizable: false,
-      cellStyle: (params: any) => {
+      cellStyle: (params: { node: { rowPinned?: string } }) => {
         if (params.node.rowPinned === "bottom") {
           return {
             fontWeight: "bold",
@@ -195,9 +256,10 @@ export default function SettlementByInstitutionPage() {
       flex: 1,
       resizable: false,
       valueFormatter: (params: { value: number }) => {
+        // 모든 단위에서 소수점을 포함한 정확한 값 표시
         return params.value.toLocaleString();
       },
-      cellStyle: (params: any) => {
+      cellStyle: (params: { node: { rowPinned?: string } }) => {
         const baseStyle = { textAlign: "right" };
         if (params.node.rowPinned === "bottom") {
           return {
@@ -217,9 +279,10 @@ export default function SettlementByInstitutionPage() {
       flex: 1,
       resizable: false,
       valueFormatter: (params: { value: number }) => {
+        // 모든 단위에서 소수점을 포함한 정확한 값 표시
         return params.value.toLocaleString();
       },
-      cellStyle: (params: any) => {
+      cellStyle: (params: { node: { rowPinned?: string } }) => {
         const baseStyle = { textAlign: "right" };
         if (params.node.rowPinned === "bottom") {
           return {
@@ -239,9 +302,10 @@ export default function SettlementByInstitutionPage() {
       flex: 1,
       resizable: false,
       valueFormatter: (params: { value: number }) => {
+        // 모든 단위에서 소수점을 포함한 정확한 값 표시
         return params.value.toLocaleString();
       },
-      cellStyle: (params: any) => {
+      cellStyle: (params: { node: { rowPinned?: string } }) => {
         const baseStyle = { textAlign: "right" };
         if (params.node.rowPinned === "bottom") {
           return {

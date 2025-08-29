@@ -113,17 +113,17 @@ export default function SettlementByInstitutionPage() {
       ...item,
       지급액:
         unit === "원"
-          ? item.지급액
+          ? Math.round(item.지급액)
           : item.지급액 /
             (unit === "천" ? 1000 : unit === "백만" ? 1000000 : 100000000),
       수급액:
         unit === "원"
-          ? item.수급액
+          ? Math.round(item.수급액)
           : item.수급액 /
             (unit === "천" ? 1000 : unit === "백만" ? 1000000 : 100000000),
       차액:
         unit === "원"
-          ? item.차액
+          ? Math.round(item.차액)
           : item.차액 /
             (unit === "천" ? 1000 : unit === "백만" ? 1000000 : 100000000),
     })) || [];

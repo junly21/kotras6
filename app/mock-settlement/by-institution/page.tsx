@@ -320,17 +320,17 @@ export default function MockSettlementByInstitutionPage() {
     ...item,
     지급액:
       unit === "원"
-        ? item.지급액
+        ? Math.round(item.지급액)
         : item.지급액 /
           (unit === "천" ? 1000 : unit === "백만" ? 1000000 : 100000000),
     수급액:
       unit === "원"
-        ? item.수급액
+        ? Math.round(item.수급액)
         : item.수급액 /
           (unit === "천" ? 1000 : unit === "백만" ? 1000000 : 100000000),
     차액:
       unit === "원"
-        ? item.차액
+        ? Math.round(item.차액)
         : item.차액 /
           (unit === "천" ? 1000 : unit === "백만" ? 1000000 : 100000000),
   }));
@@ -362,10 +362,18 @@ export default function MockSettlementByInstitutionPage() {
         ? 1 / 1000000
         : 1 / 100000000;
 
+    // 원 단위일 때는 정수로, 다른 단위는 소수점 포함
+    const formatValue = (value: number) => {
+      if (unit === "원") {
+        return Math.round(value * unitMultiplier).toLocaleString();
+      }
+      return (value * unitMultiplier).toLocaleString();
+    };
+
     return [
       {
         대상기관: `총 ${byInstitutionData.length}개`,
-        지급액: `${(totalPayment * unitMultiplier).toLocaleString()}${
+        지급액: `${formatValue(totalPayment)}${
           unit === "원"
             ? "원"
             : unit === "천"
@@ -374,7 +382,7 @@ export default function MockSettlementByInstitutionPage() {
             ? "백만"
             : "억"
         }`,
-        수급액: `${(totalReceipt * unitMultiplier).toLocaleString()}${
+        수급액: `${formatValue(totalReceipt)}${
           unit === "원"
             ? "원"
             : unit === "천"
@@ -383,7 +391,7 @@ export default function MockSettlementByInstitutionPage() {
             ? "백만"
             : "억"
         }`,
-        차액: `${(totalDifference * unitMultiplier).toLocaleString()}${
+        차액: `${formatValue(totalDifference)}${
           unit === "원"
             ? "원"
             : unit === "천"

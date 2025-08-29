@@ -176,12 +176,29 @@ export default function SettlementByStationPage() {
             const value = item[key];
             return sum + (typeof value === "number" ? value : 0);
           }, 0);
-          footerRow[key] = `${total.toLocaleString()}원`;
+          // 소수점 제거하고 정수로 표시
+          footerRow[key] = `${Math.round(total).toLocaleString()}원`;
         }
       });
     }
 
     return [footerRow];
+  }, [searchResults]);
+
+  // 소수점 제거된 그리드 데이터
+  const processedRowData = useMemo(() => {
+    return searchResults.map((item) => {
+      const processedItem: Record<string, unknown> = { ...item };
+
+      // 모든 숫자 필드에서 소수점 제거
+      Object.keys(processedItem).forEach((key) => {
+        if (key !== "stn_nm" && typeof processedItem[key] === "number") {
+          processedItem[key] = Math.round(processedItem[key] as number);
+        }
+      });
+
+      return processedItem;
+    });
   }, [searchResults]);
 
   // 필터 변경 핸들러
@@ -324,9 +341,9 @@ export default function SettlementByStationPage() {
                 )}
               </div>
               <div className="bg-white border border-gray-200 rounded-[24px] p-4">
-                <div className="h-[490px]">
+                <div className="h-[600px]">
                   <TestGrid
-                    rowData={searchResults}
+                    rowData={processedRowData}
                     columnDefs={columnDefs}
                     gridRef={gridRef}
                     gridOptions={{

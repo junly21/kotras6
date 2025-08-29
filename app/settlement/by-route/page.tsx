@@ -62,12 +62,29 @@ export default function SettlementByRoutePage() {
             const value = item[key];
             return sum + (typeof value === "number" ? value : 0);
           }, 0);
-          footerRow[key] = `${total.toLocaleString()}원`;
+          // 소수점 제거하고 정수로 표시
+          footerRow[key] = `${Math.round(total).toLocaleString()}`;
         }
       });
     }
 
     return [footerRow];
+  }, [data]);
+
+  // 소수점 제거된 그리드 데이터
+  const processedRowData = useMemo(() => {
+    return data.map((item) => {
+      const processedItem: Record<string, string | number> = { ...item };
+
+      // 모든 숫자 필드에서 소수점 제거
+      Object.keys(processedItem).forEach((key) => {
+        if (key !== "line_nm" && typeof processedItem[key] === "number") {
+          processedItem[key] = Math.round(processedItem[key] as number);
+        }
+      });
+
+      return processedItem;
+    });
   }, [data]);
 
   const handleSearch = useCallback(async (values: SettlementByRouteFilters) => {
@@ -123,7 +140,7 @@ export default function SettlementByRoutePage() {
 
       {/* 결과 영역 */}
       {!hasSearched && (
-        <div className="bg-gray-50 flex flex-col justify-center items-center h-[590px] border-2 border-dashed border-gray-300 rounded-lg p-16">
+        <div className="bg-gray-50 flex flex-col justify-center items-center h-[700px] border-2 border-dashed border-gray-300 rounded-lg p-16">
           <div className="text-center text-gray-500">
             <p className="text-lg font-medium">조회 결과</p>
             <p className="text-sm">
@@ -148,9 +165,9 @@ export default function SettlementByRoutePage() {
                 )}
               </div>
               <div className="bg-white border border-gray-200 rounded-[24px] p-4">
-                <div className="h-[490px]">
+                <div className="h-[650px]">
                   <TestGrid
-                    rowData={data}
+                    rowData={processedRowData}
                     columnDefs={columnDefs}
                     gridRef={gridRef}
                     gridOptions={{

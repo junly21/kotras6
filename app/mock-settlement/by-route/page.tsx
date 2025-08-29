@@ -215,7 +215,8 @@ export default function MockSettlementByRoutePage() {
             const value = item[key];
             return sum + (typeof value === "number" ? value : 0);
           }, 0);
-          footerRow[key] = `${total.toLocaleString()}원`;
+          // 소수점 제거하고 정수로 표시
+          footerRow[key] = `${Math.round(total).toLocaleString()}`;
         }
       });
     }
@@ -249,7 +250,20 @@ export default function MockSettlementByRoutePage() {
   }, []);
 
   // 원단위 변환은 그리드 컬럼 설정에서 처리
-  const byRouteRowData = byRouteData;
+  const byRouteRowData = useMemo(() => {
+    return byRouteData.map((item) => {
+      const processedItem: any = { ...item };
+
+      // 모든 숫자 필드에서 소수점 제거
+      Object.keys(processedItem).forEach((key) => {
+        if (key !== "line_nm" && typeof processedItem[key] === "number") {
+          processedItem[key] = Math.round(processedItem[key]);
+        }
+      });
+
+      return processedItem;
+    });
+  }, [byRouteData]);
 
   return (
     <div className="space-y-6">
@@ -348,7 +362,7 @@ export default function MockSettlementByRoutePage() {
         </div>
 
         <div className="bg-white border border-gray-200 rounded-[24px] p-4">
-          <div className="h-[400px]">
+          <div className="h-[450px]">
             <TestGrid
               rowData={byRouteRowData}
               columnDefs={byRouteColumnDefs}

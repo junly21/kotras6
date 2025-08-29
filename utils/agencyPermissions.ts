@@ -115,11 +115,11 @@ export function getDetailedPermissions(
         },
       };
 
-    case "SERVICE": // 한국철도공사, 서울교통공사, 인천교통공사
+    case "SERVICE": //  서울교통공사, 인천교통공사
       return {
         transaction: {
           analysis: true, // 내역 분석 - 모든 기관
-          detail: false, // 상세 조회 - 대광위만
+          detail: true, // 상세 조회 - 대광위만 - 서교공 인교공 대광위요청으로 추가
         },
         settlement: {
           overview: true, // 정산 결과 - 모든 기관

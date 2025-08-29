@@ -27,12 +27,14 @@ export function BackgroundTaskStatus() {
   return (
     <div className="fixed bottom-4 left-4 z-[9998] bg-white border border-gray-200 rounded-lg shadow-lg p-4 max-w-md">
       <div className="flex items-center justify-between mb-3">
-        <h3 className="text-sm font-semibold text-gray-700">백그라운드 작업</h3>
+        <h3 className="text-sm font-semibold text-gray-700">
+          모의정산 등록 상태
+        </h3>
         {completedTasks.length > 0 && (
           <button
             onClick={clearCompletedTasks}
             className="text-xs text-gray-500 hover:text-gray-700">
-            완료된 작업 정리
+            닫기
           </button>
         )}
       </div>

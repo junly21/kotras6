@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useRef, useMemo } from "react";
+import { useState, useCallback, useRef, useMemo, useEffect } from "react";
 import { FilterForm } from "@/components/ui/FilterForm";
 import { Toast } from "@/components/ui/Toast";
 import TestGrid from "@/components/TestGrid";
@@ -9,10 +9,7 @@ import CsvExportButton from "@/components/CsvExportButton";
 import { MockSettlementByRouteService } from "@/services/mockSettlementByRouteService";
 import { MockSettlementResultService } from "@/services/mockSettlementResultService";
 import { MockSettlementControlService } from "@/services/mockSettlementControlService";
-import {
-  mockSettlementByRouteFilterConfig,
-  mockSettlementByRouteSchema,
-} from "@/features/mockSettlementByRoute/filterConfig";
+import { mockSettlementByRouteFilterConfig } from "@/features/mockSettlementByRoute/filterConfig";
 import { createMockSettlementByRouteColDefs } from "@/features/mockSettlementByRoute/gridConfig";
 import type {
   MockSettlementByRouteFilters,
@@ -24,6 +21,7 @@ import { AgGridReact } from "ag-grid-react";
 import { UnitRadioGroup, type Unit } from "@/components/ui/UnitRadioGroup";
 import { MockSettlementConfirmDialog } from "@/components/MockSettlementConfirmDialog";
 import { MockSettlementDetailModal } from "@/components/MockSettlementDetailModal";
+import { z } from "zod";
 
 // Register all Community features
 ModuleRegistry.registerModules([AllCommunityModule]);
@@ -35,6 +33,10 @@ export default function MockSettlementByRoutePage() {
   const [hasSearched, setHasSearched] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [filters, setFilters] = useState<MockSettlementByRouteFilters>({
+    settlementName: "",
+    agency: "",
+  });
   const [mockSettlementData, setMockSettlementData] = useState<
     MockSettlementResultData[]
   >([]);
@@ -66,6 +68,33 @@ export default function MockSettlementByRoutePage() {
   // 모의정산 실행여부 체크 관련 상태
   const [isConfirmDialogOpen, setIsConfirmDialogOpen] = useState(false);
   const [pendingAction, setPendingAction] = useState<(() => void) | null>(null);
+
+  // 정산명 목록을 가져와서 첫 번째 항목을 자동으로 선택하는 함수
+  const initializeSettlementName = useCallback(async () => {
+    try {
+      const response = await fetch(
+        "/api/mock-settlement/settlement-names-select"
+      );
+      const data = await response.json();
+
+      if (data.options && data.options.length > 0) {
+        const firstSettlementName = data.options[0].value;
+        // 정산명만 자동으로 설정하고, 조회는 실행하지 않음
+        setFilters((prev) => ({
+          ...prev,
+          settlementName: firstSettlementName,
+        }));
+      }
+    } catch (error) {
+      console.error("정산명 목록 조회 실패:", error);
+      setError("정산명 목록을 가져오는데 실패했습니다.");
+    }
+  }, []);
+
+  // 컴포넌트 마운트 시 정산명만 자동으로 설정
+  useEffect(() => {
+    initializeSettlementName();
+  }, [initializeSettlementName]);
 
   // 실제 검색 실행 함수
   const executeSearch = useCallback(
@@ -139,6 +168,21 @@ export default function MockSettlementByRoutePage() {
       executeSearch(values);
     },
     [executeSearch]
+  );
+
+  // 수동 검색 핸들러 (필터폼에서 검색 버튼 클릭 시)
+  const handleManualSearch = useCallback(
+    async (values: { agency: string }) => {
+      // 정산명은 자동으로 설정된 값을 사용하고, 노선명은 사용자가 선택한 값 사용
+      const searchValues = {
+        settlementName: filters.settlementName,
+        agency: values.agency,
+      };
+
+      await handleSearch(searchValues);
+      // 필터폼은 계속 보이도록 유지 (노선 변경 후 재조회 가능)
+    },
+    [filters.settlementName, handleSearch]
   );
 
   // 상단 그리드 컬럼 정의 (모의정산 정보)
@@ -252,12 +296,12 @@ export default function MockSettlementByRoutePage() {
   // 원단위 변환은 그리드 컬럼 설정에서 처리
   const byRouteRowData = useMemo(() => {
     return byRouteData.map((item) => {
-      const processedItem: any = { ...item };
+      const processedItem = { ...item } as Record<string, string | number>;
 
       // 모든 숫자 필드에서 소수점 제거
       Object.keys(processedItem).forEach((key) => {
         if (key !== "line_nm" && typeof processedItem[key] === "number") {
-          processedItem[key] = Math.round(processedItem[key]);
+          processedItem[key] = Math.round(processedItem[key] as number);
         }
       });
 
@@ -269,11 +313,16 @@ export default function MockSettlementByRoutePage() {
     <div className="space-y-6">
       <h1 className="text-2xl font-bold">모의정산 노선별 조회</h1>
 
-      <FilterForm<MockSettlementByRouteFilters>
-        fields={mockSettlementByRouteFilterConfig}
-        defaultValues={{ settlementName: "", agency: "" }}
-        schema={mockSettlementByRouteSchema}
-        onSearch={handleSearch}
+      {/* 필터 폼 */}
+      <FilterForm<{ agency: string }>
+        fields={mockSettlementByRouteFilterConfig.filter(
+          (field) => field.name !== "settlementName"
+        )}
+        defaultValues={{ agency: "" }}
+        schema={z.object({
+          agency: z.string().min(1, "보관기관을 선택해주세요"),
+        })}
+        onSearch={handleManualSearch}
       />
 
       {/* 전체 페이지 로딩 스피너 */}

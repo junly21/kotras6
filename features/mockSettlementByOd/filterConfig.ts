@@ -15,7 +15,7 @@ export const mockSettlementByOdFilterConfig: FieldConfig[] = [
     type: "combobox",
     placeholder: "출발역을 선택하세요",
     required: true,
-    optionsEndpoint: "/api/selectNetWorkNodeList",
+    optionsEndpoint: "/api/selectNetWorkNodeSelectBox?NET_DT=LATEST",
   },
   {
     name: "STN_ID2",
@@ -23,6 +23,6 @@ export const mockSettlementByOdFilterConfig: FieldConfig[] = [
     type: "combobox",
     placeholder: "도착역을 선택하세요",
     required: true,
-    optionsEndpoint: "/api/selectNetWorkNodeList",
+    optionsEndpoint: "/api/selectNetWorkNodeSelectBox?NET_DT=LATEST",
   },
 ];

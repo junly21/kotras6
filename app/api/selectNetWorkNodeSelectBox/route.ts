@@ -14,9 +14,17 @@ export async function GET(request: NextRequest) {
       console.warn("ext_sid 쿠키가 없습니다. 세션을 먼저 생성해주세요.");
     }
 
+    // 쿼리 파라미터에서 NET_DT 추출
+    const url = new URL(request.url);
+    const netDt = url.searchParams.get("NET_DT");
+    console.log("GET 요청에서 추출한 NET_DT:", netDt);
+
+    // NET_DT가 없으면 기본값 사용 (LATEST 또는 현재 날짜)
+    const requestBody = netDt ? { NET_DT: netDt } : { NET_DT: "LATEST" };
+
     const { data } = await callExternalApi("selectNetWorkNodeSelectBox.do", {
       method: "POST",
-      body: {},
+      body: requestBody,
       sessionId: extSid, // 세션 ID 전달
     });
 
@@ -55,7 +63,7 @@ export async function GET(request: NextRequest) {
   }
 }
 
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
   try {
     console.log("selectNetWorkNodeSelectBox API 호출됨 (POST)");
 

@@ -24,35 +24,10 @@ export async function POST(request: NextRequest) {
 
     console.log("외부 API 모의정산 정보 결과:", data);
 
-    // 응답 데이터 변환
+    // 응답 데이터 변환 - 원본 데이터 그대로 전달
     if (Array.isArray(data) && data.length > 0) {
-      const firstItem = data[0];
-
-      const formatDate = (ts: number | string | undefined): string => {
-        if (!ts) return "-";
-        if (typeof ts === "string") return ts;
-        const date = new Date(ts);
-        return date.toLocaleDateString("ko-KR");
-      };
-
-      const mockSettlementInfo = [
-        {
-          settlementName: firstItem.stmt_nm || "-",
-          transactionDate: formatDate(firstItem.card_dt),
-          tagAgency: firstItem.tag_oper_prop
-            ? `${firstItem.tag_oper_prop}%`
-            : "-",
-          initialLine: firstItem.start_oper_prop
-            ? `${firstItem.start_oper_prop}%`
-            : "-",
-          lineSection: firstItem.km_prop ? `${firstItem.km_prop}%` : "-",
-          distanceKm: firstItem.km_prop || 0,
-          weightRatio: firstItem.km_wght || "-",
-          registrationDate: firstItem.to_char || "-",
-        },
-      ];
-
-      return NextResponse.json(mockSettlementInfo, {
+      // 원본 데이터 그대로 반환 (가공하지 않음)
+      return NextResponse.json(data, {
         headers: createCorsHeaders(),
       });
     }

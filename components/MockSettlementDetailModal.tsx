@@ -21,6 +21,14 @@ interface MockSettlementDetailData {
   weightRatio: string;
   registrationDate: string;
   status: "대기" | "완료";
+  // 가중치 필드들 추가
+  basicUndergroundWeight: number;
+  basicElevatedWeight: number;
+  basicWeightRatio: string;
+  urbanUndergroundWeight: number;
+  urbanElevatedWeight: number;
+  urbanWeightRatio: string;
+  operPoints: Array<{ oper_id: string; oper_nm: string; point: number }>;
 }
 
 interface MockSettlementDetailModalProps {
@@ -75,9 +83,94 @@ export function MockSettlementDetailModal({
 
     try {
       console.log("MockSettlementDetailModal - fetchDetailData 호출됨");
+      console.log("MockSettlementDetailModal - gridData:", gridData);
 
-      if (gridData) {
-        // 그리드에서 받은 실제 데이터 사용
+      // 1. settlement-info API 호출
+      console.log("MockSettlementDetailModal - settlement-info API 호출 시작");
+      const apiResponse = await fetch("/api/mock-settlement/settlement-info", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ simStmtGrpId }),
+      });
+
+      const apiData = await apiResponse.json();
+      console.log(
+        "MockSettlementDetailModal - settlement-info API 응답:",
+        apiData
+      );
+
+      if (apiResponse.ok && Array.isArray(apiData) && apiData.length > 0) {
+        // 2. API 응답 데이터 가공 (원본 데이터 직접 처리)
+        const apiItem = apiData[0];
+        console.log(
+          "MockSettlementDetailModal - API 응답 첫 번째 아이템 (원본):",
+          apiItem
+        );
+
+        // 가중치 비율 파싱
+        const parseWeightRatio = (weightStr: string) => {
+          if (!weightStr || typeof weightStr !== "string") return "1:1:1";
+          return weightStr;
+        };
+
+        // 수송기여도 파싱
+        const parseOperPoints = (operPointsStr: string) => {
+          try {
+            if (operPointsStr && typeof operPointsStr === "string") {
+              const parsed = JSON.parse(operPointsStr);
+              return Array.isArray(parsed) ? parsed : [];
+            }
+          } catch (error) {
+            console.error("수송기여도 파싱 오류:", error);
+          }
+          return [];
+        };
+
+        // 날짜 포맷팅
+        const formatDate = (ts: number | string | undefined): string => {
+          if (!ts) return "-";
+          if (typeof ts === "string") return ts;
+          const date = new Date(ts);
+          return date.toLocaleDateString("ko-KR");
+        };
+
+        const processedData: MockSettlementDetailData = {
+          simStmtGrpId: simStmtGrpId,
+          settlementName: apiItem.stmt_nm || "-",
+          transactionDate: formatDate(apiItem.card_dt),
+          tagAgency: apiItem.tag_oper_prop ? `${apiItem.tag_oper_prop}%` : "-",
+          initialLine: apiItem.start_oper_prop
+            ? `${apiItem.start_oper_prop}%`
+            : "-",
+          lineSection: apiItem.equal_prop ? `${apiItem.equal_prop}%` : "-",
+          distanceKm: apiItem.km_prop || 0,
+          weightRatio: parseWeightRatio(apiItem.km_wght),
+          registrationDate: "", // 등록일자 삭제
+          status: apiItem.status || "완료",
+          // 가중치 필드들 추가
+          basicUndergroundWeight: apiItem.km_ung_wght || 1,
+          basicElevatedWeight: apiItem.km_elev_wght || 1,
+          basicWeightRatio: parseWeightRatio(apiItem.km_wght),
+          urbanUndergroundWeight: apiItem.u_km_ung_wght || 1,
+          urbanElevatedWeight: apiItem.u_km_elev_wght || 1,
+          urbanWeightRatio: parseWeightRatio(apiItem.u_km_wght),
+          operPoints: parseOperPoints(
+            apiItem.oper_points?.value || apiItem.oper_points
+          ),
+        };
+
+        console.log(
+          "MockSettlementDetailModal - 가공된 데이터:",
+          processedData
+        );
+        setDetailData(processedData);
+      } else if (gridData) {
+        // 3. API 응답이 실패한 경우 그리드 데이터 사용 (fallback)
+        console.log(
+          "MockSettlementDetailModal - API 응답 실패, 그리드 데이터 사용"
+        );
         const actualData: MockSettlementDetailData = {
           simStmtGrpId:
             "simStmtGrpId" in gridData
@@ -91,19 +184,26 @@ export function MockSettlementDetailModal({
           distanceKm: gridData.distanceKm,
           weightRatio:
             "weightRatio" in gridData ? gridData.weightRatio : "1:1:1",
-          registrationDate:
-            "registrationDate" in gridData ? gridData.registrationDate : "N/A",
+          registrationDate: "", // 등록일자 삭제
           status: "status" in gridData ? gridData.status : "완료",
+          // 가중치 필드들 추가 (fallback)
+          basicUndergroundWeight: 1,
+          basicElevatedWeight: 1,
+          basicWeightRatio: "1:1:1",
+          urbanUndergroundWeight: 1,
+          urbanElevatedWeight: 1,
+          urbanWeightRatio: "1:1:1",
+          operPoints: [],
         };
 
-        setDetailData(actualData);
         console.log(
-          "MockSettlementDetailModal - 실제 데이터 설정:",
+          "MockSettlementDetailModal - 그리드 데이터로 생성된 데이터:",
           actualData
         );
+        setDetailData(actualData);
       } else {
-        // gridData가 없는 경우 에러
-        setError("그리드 데이터를 찾을 수 없습니다.");
+        // 4. 둘 다 없는 경우 에러
+        setError("상세 데이터를 찾을 수 없습니다.");
       }
     } catch (error) {
       console.error("모의정산 상세 데이터 조회 에러:", error);
@@ -161,10 +261,6 @@ export function MockSettlementDetailModal({
                   <span className={labelCx}>거래일자 *</span>
                   <div className={valueCx}>{detailData.transactionDate}</div>
                 </div>
-                <div className={fieldRow}>
-                  <span className={labelCx}>등록일자</span>
-                  <div className={valueCx}>{detailData.registrationDate}</div>
-                </div>
               </div>
             </div>
 
@@ -201,15 +297,15 @@ export function MockSettlementDetailModal({
               <div className={sectionCols}>
                 <div className={fieldRow}>
                   <span className={labelCx}>지하 가중치</span>
-                  <div className={valueCx}>1</div>
+                  <div className={valueCx}>
+                    {detailData.basicUndergroundWeight}
+                  </div>
                 </div>
                 <div className={fieldRow}>
                   <span className={labelCx}>고가 가중치</span>
-                  <div className={valueCx}>1</div>
-                </div>
-                <div className={fieldRow}>
-                  <span className={labelCx}>가중치 비율</span>
-                  <div className={valueCx}>{detailData.weightRatio}</div>
+                  <div className={valueCx}>
+                    {detailData.basicElevatedWeight}
+                  </div>
                 </div>
               </div>
             </div>
@@ -222,15 +318,15 @@ export function MockSettlementDetailModal({
               <div className={sectionCols}>
                 <div className={fieldRow}>
                   <span className={labelCx}>도시철도 지하 가중치</span>
-                  <div className={valueCx}>1</div>
+                  <div className={valueCx}>
+                    {detailData.urbanUndergroundWeight}
+                  </div>
                 </div>
                 <div className={fieldRow}>
                   <span className={labelCx}>도시철도 고가 가중치</span>
-                  <div className={valueCx}>1</div>
-                </div>
-                <div className={fieldRow}>
-                  <span className={labelCx}>도시철도 가중치 비율</span>
-                  <div className={valueCx}>1:1:1</div>
+                  <div className={valueCx}>
+                    {detailData.urbanElevatedWeight}
+                  </div>
                 </div>
               </div>
             </div>
@@ -241,26 +337,40 @@ export function MockSettlementDetailModal({
                 수송기여도
               </h3>
               <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
-                {[
-                  "한국철도공사",
-                  "서울교통공사",
-                  "인천교통공사",
-                  "공항철도",
-                  "서울시메트로9호선",
-                  "신분당선",
-                  "의정부경전철",
-                  "용인경전철",
-                  "경기철도",
-                  "우이신설경전철",
-                  "김포시청",
-                  "신림선",
-                  "새서울철도",
-                ].map((agency) => (
-                  <div key={agency} className={fieldRow}>
-                    <span className={labelCx}>{agency}</span>
-                    <div className={valueCx}>1.0</div>
-                  </div>
-                ))}
+                {detailData.operPoints && detailData.operPoints.length > 0
+                  ? detailData.operPoints.map((point, index) => (
+                      <div key={index} className={fieldRow}>
+                        <span className={labelCx}>
+                          {typeof point === "object" ? point.oper_nm : point}
+                        </span>
+                        <div className={valueCx}>
+                          {typeof point === "object" && point.point
+                            ? point.point.toFixed(2)
+                            : "1.0"}
+                        </div>
+                      </div>
+                    ))
+                  : // API 데이터가 없는 경우 기본값 표시
+                    [
+                      "한국철도공사",
+                      "서울교통공사",
+                      "인천교통공사",
+                      "공항철도",
+                      "서울시메트로9호선",
+                      "신분당선",
+                      "의정부경전철",
+                      "용인경전철",
+                      "경기철도",
+                      "우이신설경전철",
+                      "김포시청",
+                      "신림선",
+                      "새서울철도",
+                    ].map((agency) => (
+                      <div key={agency} className={fieldRow}>
+                        <span className={labelCx}>{agency}</span>
+                        <div className={valueCx}>1.0</div>
+                      </div>
+                    ))}
               </div>
             </div>
           </div>

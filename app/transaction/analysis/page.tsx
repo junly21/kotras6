@@ -216,7 +216,7 @@ export default function TransactionAnalysisPage() {
       )}
 
       {/* 그리드 */}
-      <div className="relative h-[525px] overflow-y-auto">
+      <div className="relative h-[700px] overflow-y-auto">
         {hasSearched && loading && (
           <div className="absolute inset-0 flex items-center justify-center bg-white/80 z-10">
             <Spinner />

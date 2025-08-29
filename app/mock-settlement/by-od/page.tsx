@@ -15,7 +15,6 @@ import { MockSettlementControlService } from "@/services/mockSettlementControlSe
 import { createMockSettlementByOdColDefs } from "@/features/mockSettlementByOd/gridConfig";
 import { createMockSettlementByOdDetailColDefs } from "@/features/mockSettlementByOd/detailGridConfig";
 import TestGrid from "@/components/TestGrid";
-import CsvExportButton from "@/components/CsvExportButton";
 import Spinner from "@/components/Spinner";
 import { NetworkMap } from "@/components/NetworkMap/NetworkMap";
 import {
@@ -35,7 +34,6 @@ ModuleRegistry.registerModules([AllCommunityModule]);
 // 검증 스키마
 const mockSettlementByOdSchema = z
   .object({
-    settlementName: z.string().min(1, "정산명을 선택해주세요"),
     STN_ID1: z.string().min(1, "출발역을 선택해주세요"),
     STN_ID2: z.string().min(1, "도착역을 선택해주세요"),
   })
@@ -45,15 +43,17 @@ const mockSettlementByOdSchema = z
   });
 
 // 기본값
-const defaultValues: MockSettlementByOdFilters = {
-  settlementName: "",
+const defaultValues = {
   STN_ID1: "",
   STN_ID2: "",
 };
 
 export default function MockSettlementByOdPage() {
-  const [filters, setFilters] =
-    useState<MockSettlementByOdFilters>(defaultValues);
+  const [filters, setFilters] = useState<MockSettlementByOdFilters>({
+    settlementName: "",
+    STN_ID1: "",
+    STN_ID2: "",
+  });
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [searchResults, setSearchResults] = useState<MockSettlementByOdData[]>(
@@ -102,8 +102,32 @@ export default function MockSettlementByOdPage() {
   const detailGridRef = useRef(null);
   const infoGridRef = useRef(null);
 
-  // 선택된 행 상태 추가
-  const [selectedRowIndex, setSelectedRowIndex] = useState<number | null>(null);
+  // 정산명 목록을 가져와서 첫 번째 항목을 자동으로 선택하는 함수
+  const initializeSettlementName = useCallback(async () => {
+    try {
+      const response = await fetch(
+        "/api/mock-settlement/settlement-names-select"
+      );
+      const data = await response.json();
+
+      if (data.options && data.options.length > 0) {
+        const firstSettlementName = data.options[0].value;
+        // 정산명만 자동으로 설정하고, 조회는 실행하지 않음
+        setFilters((prev) => ({
+          ...prev,
+          settlementName: firstSettlementName,
+        }));
+      }
+    } catch (error) {
+      console.error("정산명 목록 조회 실패:", error);
+      setError("정산명 목록을 가져오는데 실패했습니다.");
+    }
+  }, []);
+
+  // 컴포넌트 마운트 시 정산명만 자동으로 설정
+  useEffect(() => {
+    initializeSettlementName();
+  }, [initializeSettlementName]);
 
   // 그룹별 배경색 계산
   const getGroupBackgroundColor = useCallback(
@@ -131,8 +155,14 @@ export default function MockSettlementByOdPage() {
 
   // 선택된 행 스타일 적용 함수
   const getRowStyle = useCallback(
-    (params: any) => {
-      let style: any = {};
+    (params: { data: MockSettlementByOdData; rowIndex: number }) => {
+      const style: {
+        backgroundColor?: string;
+        cursor?: string;
+        border?: string;
+        borderRadius?: string;
+        boxShadow?: string;
+      } = {};
 
       // 그룹별 배경색 적용 (소계 행 포함)
       const groupColor = getGroupBackgroundColor(params.rowIndex);
@@ -167,7 +197,7 @@ export default function MockSettlementByOdPage() {
 
   // 경유지 상세정보 그리드 행 스타일 함수
   const getDetailRowStyle = useCallback(
-    (params: any) => {
+    (params: { rowIndex: number }) => {
       // 마지막 행인 경우 footer 스타일 적용
       if (params.rowIndex === detailData.length - 1) {
         return {
@@ -332,11 +362,6 @@ export default function MockSettlementByOdPage() {
     return createMockSettlementByOdDetailColDefs();
   }, []);
 
-  // 필터 변경 핸들러
-  const handleFilterChange = (values: MockSettlementByOdFilters) => {
-    setFilters(values);
-  };
-
   // 경유지 상세정보 조회 핸들러
   const fetchDetailData = useCallback(
     async (pathKey: string, pathId: string) => {
@@ -390,7 +415,7 @@ export default function MockSettlementByOdPage() {
 
   // 행 클릭 핸들러
   const handleRowClick = useCallback(
-    (rowData: MockSettlementByOdData, rowIndex: number) => {
+    (rowData: MockSettlementByOdData) => {
       console.log("행 클릭된 데이터:", rowData);
       setSelectedRow(rowData);
       // 소계 행이 아닌 경우에만 상세정보 조회 및 경로 ID 설정
@@ -420,9 +445,15 @@ export default function MockSettlementByOdPage() {
 
   // 실제 검색 실행 함수
   const executeSearch = useCallback(
-    async (values: MockSettlementByOdFilters) => {
+    async (values: { STN_ID1: string; STN_ID2: string }) => {
       setHasSearched(true);
-      setFilters(values);
+      // 정산명은 자동으로 설정된 값을 사용하고, 역 정보는 사용자가 선택한 값 사용
+      const searchValues = {
+        settlementName: filters.settlementName,
+        STN_ID1: values.STN_ID1,
+        STN_ID2: values.STN_ID2,
+      };
+      setFilters(searchValues);
       setIsLoading(true);
       setError(null);
 
@@ -430,9 +461,9 @@ export default function MockSettlementByOdPage() {
         // 두 개의 API 호출로 각각 데이터 조회 (다른 페이지들과 동일한 방식)
         const [mockResponse, byOdResponse] = await Promise.all([
           MockSettlementResultService.getMockSettlementInfoData(
-            values.settlementName
+            searchValues.settlementName
           ),
-          MockSettlementByOdService.getSettlementData(values),
+          MockSettlementByOdService.getSettlementData(searchValues),
         ]);
 
         if (mockResponse.success && mockResponse.data) {
@@ -487,12 +518,12 @@ export default function MockSettlementByOdPage() {
         setIsLoading(false);
       }
     },
-    [fetchDetailData]
+    [filters.settlementName, fetchDetailData]
   );
 
   // 검색 핸들러
   const handleSearchSubmit = useCallback(
-    async (values: MockSettlementByOdFilters) => {
+    async (values: { STN_ID1: string; STN_ID2: string }) => {
       // 모의정산 실행여부 체크
       const isRunningResponse =
         await MockSettlementControlService.checkIsRunning();
@@ -559,12 +590,14 @@ export default function MockSettlementByOdPage() {
       )}
 
       {/* 필터 폼 */}
-      <FilterForm
-        fields={mockSettlementByOdFilterConfig}
+      <FilterForm<{ STN_ID1: string; STN_ID2: string }>
+        fields={mockSettlementByOdFilterConfig.filter(
+          (field) => field.name !== "settlementName"
+        )}
         defaultValues={defaultValues}
         schema={mockSettlementByOdSchema}
-        values={filters}
-        onChange={handleFilterChange}
+        values={{ STN_ID1: filters.STN_ID1, STN_ID2: filters.STN_ID2 }}
+        onChange={(values) => setFilters((prev) => ({ ...prev, ...values }))}
         onSearch={handleSearchSubmit}
       />
 
@@ -663,7 +696,7 @@ export default function MockSettlementByOdPage() {
                         if (event.data.path_detail === "-") {
                           return;
                         }
-                        handleRowClick(event.data, event.rowIndex);
+                        handleRowClick(event.data);
                       },
                       getRowStyle: getRowStyle, // 행 클릭 시 스타일 적용
                     }}

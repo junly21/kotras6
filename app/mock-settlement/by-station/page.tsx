@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useMemo, useRef } from "react";
+import { useState, useCallback, useMemo, useRef, useEffect } from "react";
 import { z } from "zod";
 import { FilterForm } from "@/components/ui/FilterForm";
 import { Toast } from "@/components/ui/Toast";
@@ -24,10 +24,9 @@ import { MockSettlementDetailModal } from "@/components/MockSettlementDetailModa
 // Register all Community features
 ModuleRegistry.registerModules([AllCommunityModule]);
 
-// 검증 스키마 (정산명과 첫 번째 역은 필수, 나머지 역은 선택사항)
+// 검증 스키마 (첫 번째 역은 필수, 나머지 역은 선택사항)
 const mockSettlementByStationSchema = z
   .object({
-    settlementName: z.string().min(1, "정산명을 선택해주세요"),
     STN_ID1: z.string().min(1, "첫 번째 역을 선택해주세요"),
     STN_ID2: z.string().optional(),
     STN_ID3: z.string().optional(),
@@ -113,9 +112,42 @@ export default function MockSettlementByStationPage() {
     [key: string]: string;
   }>({});
 
+  // 정산명 목록을 가져와서 첫 번째 항목을 자동으로 선택하는 함수
+  const initializeSettlementName = useCallback(async () => {
+    try {
+      const response = await fetch(
+        "/api/mock-settlement/settlement-names-select"
+      );
+      const data = await response.json();
+
+      if (data.options && data.options.length > 0) {
+        const firstSettlementName = data.options[0].value;
+        // 정산명만 자동으로 설정하고, 조회는 실행하지 않음
+        setFilters((prev) => ({
+          ...prev,
+          settlementName: firstSettlementName,
+        }));
+      }
+    } catch (error) {
+      console.error("정산명 목록 조회 실패:", error);
+      setError("정산명 목록을 가져오는데 실패했습니다.");
+    }
+  }, []);
+
+  // 컴포넌트 마운트 시 정산명만 자동으로 설정
+  useEffect(() => {
+    initializeSettlementName();
+  }, [initializeSettlementName]);
+
   // 중복된 역 검증 함수
   const validateStations = useCallback(
-    (values: MockSettlementByStationFilters) => {
+    (values: {
+      STN_ID1: string;
+      STN_ID2?: string;
+      STN_ID3?: string;
+      STN_ID4?: string;
+      STN_ID5?: string;
+    }) => {
       const selectedStations = [
         values.STN_ID1,
         values.STN_ID2,
@@ -133,7 +165,7 @@ export default function MockSettlementByStationPage() {
         const seen = new Set<string>();
 
         Object.entries(values).forEach(([key, value]) => {
-          if (key !== "settlementName" && value && value.trim() !== "") {
+          if (value && value.trim() !== "") {
             if (seen.has(value)) {
               errors[key] = "중복된 역입니다";
             } else {
@@ -154,9 +186,24 @@ export default function MockSettlementByStationPage() {
 
   // 실제 검색 실행 함수
   const executeSearch = useCallback(
-    async (values: MockSettlementByStationFilters) => {
+    async (values: {
+      STN_ID1: string;
+      STN_ID2?: string;
+      STN_ID3?: string;
+      STN_ID4?: string;
+      STN_ID5?: string;
+    }) => {
       setHasSearched(true);
-      setFilters(values); // filters 상태 업데이트 추가
+      // 정산명은 자동으로 설정된 값을 사용하고, 역 정보는 사용자가 선택한 값 사용
+      const searchValues = {
+        settlementName: filters.settlementName,
+        STN_ID1: values.STN_ID1,
+        STN_ID2: values.STN_ID2 || "",
+        STN_ID3: values.STN_ID3 || "",
+        STN_ID4: values.STN_ID4 || "",
+        STN_ID5: values.STN_ID5 || "",
+      };
+      setFilters(searchValues);
       setIsLoading(true);
       setError(null);
 
@@ -164,9 +211,11 @@ export default function MockSettlementByStationPage() {
         // 두 개의 API 호출로 각각 데이터 조회
         const [mockResponse, byStationResponse] = await Promise.all([
           MockSettlementResultService.getMockSettlementInfoData(
-            values.settlementName
+            searchValues.settlementName
           ),
-          MockSettlementByStationService.getMockSettlementByStationData(values),
+          MockSettlementByStationService.getMockSettlementByStationData(
+            searchValues
+          ),
         ]);
 
         if (mockResponse.success && mockResponse.data) {
@@ -208,11 +257,17 @@ export default function MockSettlementByStationPage() {
         setIsLoading(false);
       }
     },
-    []
+    [filters.settlementName]
   );
 
   const handleSearch = useCallback(
-    async (values: MockSettlementByStationFilters) => {
+    async (values: {
+      STN_ID1: string;
+      STN_ID2?: string;
+      STN_ID3?: string;
+      STN_ID4?: string;
+      STN_ID5?: string;
+    }) => {
       // 중복 검증
       if (!validateStations(values)) {
         setError("중복된 역을 선택했습니다. 다른 역을 선택해주세요.");
@@ -408,17 +463,33 @@ export default function MockSettlementByStationPage() {
 
   // 필터 설정에 validationErrors 전달
   const filterConfigWithErrors = useMemo(() => {
-    return mockSettlementByStationFilterConfig.map((field) => ({
-      ...field,
-      error: validationErrors[field.name] || undefined,
-      className: validationErrors[field.name] ? "border-red-500" : undefined,
-    }));
+    return mockSettlementByStationFilterConfig
+      .filter((field) => field.name !== "settlementName")
+      .map((field) => ({
+        ...field,
+        error: validationErrors[field.name] || undefined,
+        className: validationErrors[field.name] ? "border-red-500" : undefined,
+      }));
   }, [validationErrors]);
 
   // 필터 변경 핸들러 추가
   const handleFilterChange = useCallback(
-    (values: MockSettlementByStationFilters) => {
-      setFilters(values);
+    (values: {
+      STN_ID1: string;
+      STN_ID2?: string;
+      STN_ID3?: string;
+      STN_ID4?: string;
+      STN_ID5?: string;
+    }) => {
+      // 정산명은 자동으로 설정된 값을 유지하고, 역 정보만 업데이트
+      setFilters((prev) => ({
+        ...prev,
+        STN_ID1: values.STN_ID1,
+        STN_ID2: values.STN_ID2 || "",
+        STN_ID3: values.STN_ID3 || "",
+        STN_ID4: values.STN_ID4 || "",
+        STN_ID5: values.STN_ID5 || "",
+      }));
       // 필터 변경 시 중복 검증
       validateStations(values);
     },
@@ -429,10 +500,15 @@ export default function MockSettlementByStationPage() {
     <div className="space-y-6">
       <h1 className="text-2xl font-bold">모의정산 역사별 조회</h1>
 
-      <FilterForm<MockSettlementByStationFilters>
+      <FilterForm<{
+        STN_ID1: string;
+        STN_ID2?: string;
+        STN_ID3?: string;
+        STN_ID4?: string;
+        STN_ID5?: string;
+      }>
         fields={filterConfigWithErrors}
         defaultValues={{
-          settlementName: "",
           STN_ID1: "",
           STN_ID2: "",
           STN_ID3: "",
@@ -440,7 +516,6 @@ export default function MockSettlementByStationPage() {
           STN_ID5: "",
         }}
         schema={mockSettlementByStationSchema}
-        values={filters}
         onChange={handleFilterChange}
         onSearch={handleSearch}
       />

@@ -7,7 +7,7 @@ import { Toast } from "@/components/ui/Toast";
 import { AllCommunityModule, ModuleRegistry } from "ag-grid-community";
 import { MockSettlementByInstitutionService } from "@/services/mockSettlementByInstitutionService";
 import { MockSettlementResultService } from "@/services/mockSettlementResultService";
-import { useCallback, useRef, useState, useMemo } from "react";
+import { useCallback, useRef, useState, useMemo, useEffect } from "react";
 import { AgGridReact } from "ag-grid-react";
 import { MockSettlementDetailModal } from "@/components/MockSettlementDetailModal";
 import {
@@ -15,12 +15,10 @@ import {
   MockSettlementByInstitutionData,
 } from "@/types/mockSettlementByInstitution";
 import { MockSettlementResultData } from "@/types/mockSettlementResult";
-import {
-  mockSettlementByInstitutionFilterConfig,
-  mockSettlementByInstitutionSchema,
-} from "@/features/mockSettlementByInstitution/filterConfig";
+import { mockSettlementByInstitutionFilterConfig } from "@/features/mockSettlementByInstitution/filterConfig";
 import { UnitRadioGroup, type Unit } from "@/components/ui/UnitRadioGroup";
 import { InstitutionChart } from "@/components/charts/InstitutionChart";
+import { z } from "zod";
 
 // Register all Community features
 ModuleRegistry.registerModules([AllCommunityModule]);
@@ -33,6 +31,10 @@ export default function MockSettlementByInstitutionPage() {
   const [hasSearched, setHasSearched] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [filters, setFilters] = useState<MockSettlementByInstitutionFilters>({
+    settlementName: "",
+    agency: "",
+  });
   const [mockSettlementData, setMockSettlementData] = useState<
     MockSettlementResultData[]
   >([]);
@@ -61,20 +63,53 @@ export default function MockSettlementByInstitutionPage() {
     type: "info",
   });
 
+  // 정산명 목록을 가져와서 첫 번째 항목을 자동으로 선택하는 함수
+  const initializeSettlementName = useCallback(async () => {
+    try {
+      const response = await fetch(
+        "/api/mock-settlement/settlement-names-select"
+      );
+      const data = await response.json();
+
+      if (data.options && data.options.length > 0) {
+        const firstSettlementName = data.options[0].value;
+        // 정산명만 자동으로 설정하고, 조회는 실행하지 않음
+        setFilters((prev) => ({
+          ...prev,
+          settlementName: firstSettlementName,
+        }));
+      }
+    } catch (error) {
+      console.error("정산명 목록 조회 실패:", error);
+      setError("정산명 목록을 가져오는데 실패했습니다.");
+    }
+  }, []);
+
+  // 컴포넌트 마운트 시 정산명만 자동으로 설정
+  useEffect(() => {
+    initializeSettlementName();
+  }, [initializeSettlementName]);
+
   const handleSearch = useCallback(
-    async (values: MockSettlementByInstitutionFilters) => {
+    async (values: { agency: string }) => {
       setHasSearched(true);
       setIsLoading(true);
       setError(null);
+
+      // 정산명은 자동으로 설정된 값을 사용하고, 기관명은 사용자가 선택한 값 사용
+      const searchValues = {
+        settlementName: filters.settlementName,
+        agency: values.agency,
+      };
 
       try {
         // 두 개의 API 호출로 각각 데이터 조회
         const [mockResponse, byInstitutionResponse] = await Promise.all([
           MockSettlementResultService.getMockSettlementInfoData(
-            values.settlementName
+            searchValues.settlementName
           ),
           MockSettlementByInstitutionService.getMockSettlementByInstitutionData(
-            values
+            searchValues
           ),
         ]);
 
@@ -115,7 +150,7 @@ export default function MockSettlementByInstitutionPage() {
         setIsLoading(false);
       }
     },
-    []
+    [filters.settlementName]
   );
 
   // 상단 그리드 컬럼 정의 (모의정산 정보)
@@ -365,10 +400,14 @@ export default function MockSettlementByInstitutionPage() {
     <div className="space-y-6">
       <h1 className="text-2xl font-bold">모의정산 기관별 조회</h1>
 
-      <FilterForm<MockSettlementByInstitutionFilters>
-        fields={mockSettlementByInstitutionFilterConfig}
-        defaultValues={{ settlementName: "", agency: "" }}
-        schema={mockSettlementByInstitutionSchema}
+      <FilterForm<{ agency: string }>
+        fields={mockSettlementByInstitutionFilterConfig.filter(
+          (field) => field.name !== "settlementName"
+        )}
+        defaultValues={{ agency: "" }}
+        schema={z.object({
+          agency: z.string().min(1, "보관기관을 선택해주세요"),
+        })}
         onSearch={handleSearch}
       />
 

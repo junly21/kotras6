@@ -258,6 +258,13 @@ export default function SettlementByOdPage() {
         style.backgroundColor = groupColor;
       }
 
+      // 소계 행인 경우 클릭 불가능함을 시각적으로 표시
+      if (params.data?.path_detail === "-") {
+        style.cursor = "not-allowed";
+      } else {
+        style.cursor = "pointer";
+      }
+
       // selectedRow가 있고, 현재 행이 선택된 행과 동일한 경우 파란색 배경과 테두리 적용
       if (
         params.data &&
@@ -441,6 +448,10 @@ export default function SettlementByOdPage() {
                         data: SettlementByOdData;
                         rowIndex: number;
                       }) => {
+                        // 소계 행(path_detail이 "-")은 클릭 비활성화
+                        if (event.data.path_detail === "-") {
+                          return;
+                        }
                         handleRowClick(event.data, event.rowIndex);
                       },
                       getRowStyle: getRowStyle, // 행 클릭 시 스타일 적용

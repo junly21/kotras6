@@ -112,10 +112,9 @@ export function createSettlementByOdColDefs(): ColDef<SettlementByOdData>[] {
         return "";
       },
       cellStyle: (params: any) => {
-        // 소계 행인 경우 배경색 변경
+        // 소계 행인 경우 bold체와 우측 정렬만 적용
         if (params.data?.path_detail === "-") {
           return {
-            backgroundColor: "#F3F4F6",
             fontWeight: "bold",
             textAlign: "right",
           };

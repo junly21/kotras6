@@ -219,10 +219,10 @@ export default function TestGridPage() {
           rowData={loading ? null : rowData}
           columnDefs={colDefs}
           gridRef={gridRef}
-          height={750}
+          height={680}
           enableNumberColoring={true}
           gridOptions={{
-            rowHeight: 48,
+            rowHeight: 44,
             defaultColDef: { cellClass: "v-center" },
           }}
         />

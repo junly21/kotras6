@@ -176,8 +176,8 @@ export default function SettlementByStationPage() {
             const value = item[key];
             return sum + (typeof value === "number" ? value : 0);
           }, 0);
-          // 소수점 제거하고 정수로 표시
-          footerRow[key] = `${Math.round(total).toLocaleString()}원`;
+          // 소수점 제거하고 정수로 표시 (단위 제거)
+          footerRow[key] = Math.round(total).toLocaleString();
         }
       });
     }
@@ -341,7 +341,7 @@ export default function SettlementByStationPage() {
                 )}
               </div>
               <div className="bg-white border border-gray-200 rounded-[24px] p-4">
-                <div className="h-[600px]">
+                <div className="h-[500px]">
                   <TestGrid
                     rowData={processedRowData}
                     columnDefs={columnDefs}

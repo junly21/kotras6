@@ -140,7 +140,7 @@ export default function SettlementByRoutePage() {
 
       {/* 결과 영역 */}
       {!hasSearched && (
-        <div className="bg-gray-50 flex flex-col justify-center items-center h-[700px] border-2 border-dashed border-gray-300 rounded-lg p-16">
+        <div className="bg-gray-50 flex flex-col justify-center items-center h-[600px] border-2 border-dashed border-gray-300 rounded-lg p-16">
           <div className="text-center text-gray-500">
             <p className="text-lg font-medium">조회 결과</p>
             <p className="text-sm">
@@ -165,7 +165,7 @@ export default function SettlementByRoutePage() {
                 )}
               </div>
               <div className="bg-white border border-gray-200 rounded-[24px] p-4">
-                <div className="h-[650px]">
+                <div className="h-[550px]">
                   <TestGrid
                     rowData={processedRowData}
                     columnDefs={columnDefs}

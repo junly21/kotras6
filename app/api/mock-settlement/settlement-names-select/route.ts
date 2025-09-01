@@ -15,9 +15,14 @@ export async function GET() {
     // 응답 데이터를 selectBox 형식으로 변환
     const options = Array.isArray(data)
       ? data.map(
-          (item: { stmt_nm?: string; label?: string; value?: string }) => ({
+          (item: {
+            stmt_nm?: string;
+            sim_stmt_grp_id?: string;
+            label?: string;
+            value?: string;
+          }) => ({
             label: item?.stmt_nm || item?.label || "",
-            value: item?.stmt_nm || item?.value || "",
+            value: item?.sim_stmt_grp_id || item?.value || item?.stmt_nm || "",
           })
         )
       : [];
@@ -49,9 +54,14 @@ export async function POST() {
     // 응답 데이터를 selectBox 형식으로 변환
     const options = Array.isArray(data)
       ? data.map(
-          (item: { stmt_nm?: string; label?: string; value?: string }) => ({
+          (item: {
+            stmt_nm?: string;
+            sim_stmt_grp_id?: string;
+            label?: string;
+            value?: string;
+          }) => ({
             label: item?.stmt_nm || item?.label || "",
-            value: item?.stmt_nm || item?.value || "",
+            value: item?.sim_stmt_grp_id || item?.value || item?.stmt_nm || "",
           })
         )
       : [];

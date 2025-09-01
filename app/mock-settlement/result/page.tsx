@@ -82,10 +82,10 @@ export default function MockSettlementResultPage() {
     (event: { data: MockSettlementResultData }) => {
       console.log("행 더블클릭 이벤트 발생:", event);
       const { data } = event;
-      if (data && data.settlementName) {
+      if (data && (data.simStmtGrpId || data.settlementName)) {
         console.log("선택된 데이터:", data);
         setSelectedSettlement({
-          simStmtGrpId: data.settlementName, // settlementName을 simStmtGrpId로 사용
+          simStmtGrpId: data.simStmtGrpId || data.settlementName,
           data: data,
         });
         setIsDetailModalOpen(true);
@@ -180,6 +180,7 @@ export default function MockSettlementResultPage() {
       flex: 1,
       minWidth: 180,
       resizable: false,
+      cellStyle: { textAlign: "right" },
     },
     {
       headerName: "초승노선",
@@ -187,6 +188,7 @@ export default function MockSettlementResultPage() {
       flex: 1,
       minWidth: 180,
       resizable: false,
+      cellStyle: { textAlign: "right" },
     },
     {
       headerName: "노선동등",
@@ -194,6 +196,7 @@ export default function MockSettlementResultPage() {
       flex: 1,
       minWidth: 180,
       resizable: false,
+      cellStyle: { textAlign: "right" },
     },
     {
       headerName: "인.km",
@@ -202,6 +205,7 @@ export default function MockSettlementResultPage() {
       minWidth: 180,
       resizable: false,
       valueFormatter: (params: { value: number }) => {
+        if (params.value == null) return "";
         return params.value.toLocaleString();
       },
       cellStyle: { textAlign: "right" },

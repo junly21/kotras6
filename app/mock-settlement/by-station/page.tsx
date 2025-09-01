@@ -353,10 +353,10 @@ export default function MockSettlementByStationPage() {
     (event: { data: MockSettlementResultData }) => {
       console.log("행 더블클릭 이벤트 발생:", event);
       const { data } = event;
-      if (data && data.settlementName) {
+      if (data && (data.simStmtGrpId || data.settlementName)) {
         console.log("선택된 데이터:", data);
         setSelectedSettlement({
-          simStmtGrpId: data.settlementName,
+          simStmtGrpId: data.simStmtGrpId || data.settlementName,
           data: data,
         });
         setIsDetailModalOpen(true);

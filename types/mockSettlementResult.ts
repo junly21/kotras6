@@ -5,6 +5,7 @@ export interface MockSettlementResultFilters {
 
 // 모의정산 결과 데이터 타입 (상단 그리드용)
 export interface MockSettlementResultData {
+  simStmtGrpId?: string; // 상세 조회용 ID
   settlementName: string; // 정산명
   transactionDate: string; // 거래일자
   tagAgency: string; // 태그기관

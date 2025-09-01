@@ -393,10 +393,11 @@ export default function MockSettlementByOdPage() {
     (event: { data: MockSettlementInfo }) => {
       console.log("모의정산 정보 행 더블클릭 이벤트 발생:", event);
       const { data } = event;
-      if (data && data.settlementName) {
+      if (data && (data.simStmtGrpId || data.settlementName)) {
         console.log("선택된 모의정산 정보:", data);
         setSelectedSettlement({
-          simStmtGrpId: data.settlementName,
+          simStmtGrpId:
+            (data as any).simStmtGrpId || (data as any).settlementName,
           data: data,
         });
         setIsDetailModalOpen(true);

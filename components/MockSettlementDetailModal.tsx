@@ -341,7 +341,7 @@ export function MockSettlementDetailModal({
                         </span>
                         <div className={valueCx}>
                           {typeof point === "object" && point.point
-                            ? point.point.toFixed(2)
+                            ? point.point.toString()
                             : "1.0"}
                         </div>
                       </div>

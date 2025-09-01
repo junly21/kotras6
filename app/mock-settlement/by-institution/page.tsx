@@ -61,6 +61,14 @@ export default function MockSettlementByInstitutionPage() {
     type: "info",
   });
 
+  // 값 포맷 안전 가드
+  const formatLocaleValue = (value: unknown) => {
+    if (value == null) return "";
+    if (typeof value === "number") return value.toLocaleString();
+    if (typeof value === "string") return value;
+    return String(value);
+  };
+
   const handleSearch = useCallback(
     async (values: MockSettlementByInstitutionFilters) => {
       setHasSearched(true);
@@ -140,6 +148,7 @@ export default function MockSettlementByInstitutionPage() {
       flex: 1,
       minWidth: 120,
       resizable: false,
+      cellStyle: { textAlign: "right" },
     },
     {
       headerName: "초승노선",
@@ -147,6 +156,7 @@ export default function MockSettlementByInstitutionPage() {
       flex: 1,
       minWidth: 120,
       resizable: false,
+      cellStyle: { textAlign: "right" },
     },
     {
       headerName: "노선동등",
@@ -154,6 +164,7 @@ export default function MockSettlementByInstitutionPage() {
       flex: 1,
       minWidth: 120,
       resizable: false,
+      cellStyle: { textAlign: "right" },
     },
     {
       headerName: "인.km",
@@ -161,9 +172,8 @@ export default function MockSettlementByInstitutionPage() {
       flex: 1,
       minWidth: 100,
       resizable: false,
-      valueFormatter: (params: { value: number }) => {
-        return params.value.toLocaleString();
-      },
+      valueFormatter: (params: { value: number | string | null | undefined }) =>
+        formatLocaleValue(params?.value),
       cellStyle: { textAlign: "right" },
     },
   ];
@@ -193,9 +203,8 @@ export default function MockSettlementByInstitutionPage() {
       minWidth: 200,
       flex: 1,
       resizable: false,
-      valueFormatter: (params: { value: number }) => {
-        return params.value.toLocaleString();
-      },
+      valueFormatter: (params: { value: number | string | null | undefined }) =>
+        formatLocaleValue(params?.value),
       cellStyle: (params: { node: { rowPinned?: string } }) => {
         const baseStyle = { textAlign: "right" };
         if (params.node.rowPinned === "bottom") {
@@ -215,9 +224,8 @@ export default function MockSettlementByInstitutionPage() {
       minWidth: 200,
       flex: 1,
       resizable: false,
-      valueFormatter: (params: { value: number }) => {
-        return params.value.toLocaleString();
-      },
+      valueFormatter: (params: { value: number | string | null | undefined }) =>
+        formatLocaleValue(params?.value),
       cellStyle: (params: { node: { rowPinned?: string } }) => {
         const baseStyle = { textAlign: "right" };
         if (params.node.rowPinned === "bottom") {
@@ -237,9 +245,8 @@ export default function MockSettlementByInstitutionPage() {
       flex: 1,
       minWidth: 200,
       resizable: false,
-      valueFormatter: (params: { value: number }) => {
-        return params.value.toLocaleString();
-      },
+      valueFormatter: (params: { value: number | string | null | undefined }) =>
+        formatLocaleValue(params?.value),
       cellStyle: (params: { node: { rowPinned?: string } }) => {
         const baseStyle = { textAlign: "right" };
         if (params.node.rowPinned === "bottom") {
@@ -260,10 +267,10 @@ export default function MockSettlementByInstitutionPage() {
     (event: { data: MockSettlementResultData }) => {
       console.log("행 더블클릭 이벤트 발생:", event);
       const { data } = event;
-      if (data && data.settlementName) {
+      if (data && (data.simStmtGrpId || data.settlementName)) {
         console.log("선택된 데이터:", data);
         setSelectedSettlement({
-          simStmtGrpId: data.settlementName,
+          simStmtGrpId: data.simStmtGrpId || data.settlementName,
           data: data,
         });
         setIsDetailModalOpen(true);

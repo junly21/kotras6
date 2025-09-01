@@ -90,7 +90,7 @@ export default function TestGridPage() {
       headerName: "#",
       valueGetter: (params: ValueGetterParams) =>
         params.node?.rowPinned ? "Total" : (params.node?.rowIndex ?? 0) + 1,
-      width: 60,
+      width: 45,
       pinned: "left",
       cellStyle: { textAlign: "center" },
     },
@@ -98,13 +98,15 @@ export default function TestGridPage() {
       headerName: "기관",
       field: "pay_oper",
       pinned: "left",
-      width: 120,
+      width: 150,
     },
     {
       headerName: `총계 (${unit})`,
       field: "total",
       cellStyle: getNumberCellStyle,
       valueFormatter: getNumberFormatter,
+      width: 150,
+      pinned: "left",
     },
     {
       headerName: "한국철도공사",
@@ -221,6 +223,7 @@ export default function TestGridPage() {
           enableNumberColoring={true}
           gridOptions={{
             rowHeight: 48,
+            defaultColDef: { cellClass: "v-center" },
           }}
         />
       </div>

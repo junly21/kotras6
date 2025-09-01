@@ -155,11 +155,15 @@
   background: #f1f1f1;
 }
 
-.ag-header-cell, .ag-header-group-cell, .ag-theme-alpine .ag-cell {
-  border-right: 1px solid #E9E9E9;
+.ag-header-cell,
+.ag-header-group-cell,
+.ag-theme-alpine .ag-cell {
+  border-right: 1px solid #e9e9e9;
 }
 
-.ag-header-cell:last-child, .ag-header-group-cell:last-child, .ag-theme-alpine .ag-cell:last-child {
+.ag-header-cell:last-child,
+.ag-header-group-cell:last-child,
+.ag-theme-alpine .ag-cell:last-child {
   border-right: 0;
 }
 
@@ -219,4 +223,9 @@ footer::before {
   .ag-cell[col-id="대상기관"] {
   color: #059669 !important;
   font-weight: bold !important;
+}
+
+.ag-theme-alpine .ag-cell.v-center {
+  display: flex;
+  align-items: center; /* 세로 중앙 */
 }

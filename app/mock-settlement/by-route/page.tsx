@@ -9,7 +9,10 @@ import CsvExportButton from "@/components/CsvExportButton";
 import { MockSettlementByRouteService } from "@/services/mockSettlementByRouteService";
 import { MockSettlementResultService } from "@/services/mockSettlementResultService";
 import { MockSettlementControlService } from "@/services/mockSettlementControlService";
-import { mockSettlementByRouteFilterConfig } from "@/features/mockSettlementByRoute/filterConfig";
+import {
+  mockSettlementByRouteFilterConfig,
+  mockSettlementByRouteSchema,
+} from "@/features/mockSettlementByRoute/filterConfig";
 import { createMockSettlementByRouteColDefs } from "@/features/mockSettlementByRoute/gridConfig";
 import type {
   MockSettlementByRouteFilters,
@@ -169,17 +172,11 @@ export default function MockSettlementByRoutePage() {
 
   // 수동 검색 핸들러 (필터폼에서 검색 버튼 클릭 시)
   const handleManualSearch = useCallback(
-    async (values: { agency: string }) => {
-      // 정산명은 자동으로 설정된 값을 사용하고, 노선명은 사용자가 선택한 값 사용
-      const searchValues = {
-        settlementName: filters.settlementName,
-        agency: values.agency,
-      };
-
-      await handleSearch(searchValues);
+    async (values: MockSettlementByRouteFilters) => {
+      await handleSearch(values);
       // 필터폼은 계속 보이도록 유지 (노선 변경 후 재조회 가능)
     },
-    [filters.settlementName, handleSearch]
+    [handleSearch]
   );
 
   // 상단 그리드 컬럼 정의 (모의정산 정보)
@@ -314,14 +311,13 @@ export default function MockSettlementByRoutePage() {
       <h1 className="text-2xl font-bold">모의정산 노선별 조회</h1>
 
       {/* 필터 폼 */}
-      <FilterForm<{ agency: string }>
-        fields={mockSettlementByRouteFilterConfig.filter(
-          (field) => field.name !== "settlementName"
+      <FilterForm<MockSettlementByRouteFilters>
+        fields={mockSettlementByRouteFilterConfig.map((field) =>
+          field.name === "settlementName" ? { ...field, disabled: true } : field
         )}
-        defaultValues={{ agency: "" }}
-        schema={z.object({
-          agency: z.string().min(1, "보관기관을 선택해주세요"),
-        })}
+        defaultValues={filters}
+        values={filters}
+        schema={mockSettlementByRouteSchema}
         onSearch={handleManualSearch}
       />
 

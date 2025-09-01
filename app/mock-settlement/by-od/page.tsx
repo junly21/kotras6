@@ -449,15 +449,9 @@ export default function MockSettlementByOdPage() {
 
   // 실제 검색 실행 함수
   const executeSearch = useCallback(
-    async (values: { STN_ID1: string; STN_ID2: string }) => {
+    async (values: MockSettlementByOdFilters) => {
       setHasSearched(true);
-      // 정산명은 자동으로 설정된 값을 사용하고, 역 정보는 사용자가 선택한 값 사용
-      const searchValues = {
-        settlementName: filters.settlementName,
-        STN_ID1: values.STN_ID1,
-        STN_ID2: values.STN_ID2,
-      };
-      setFilters(searchValues);
+      setFilters(values);
       setIsLoading(true);
       setError(null);
 
@@ -465,9 +459,9 @@ export default function MockSettlementByOdPage() {
         // 두 개의 API 호출로 각각 데이터 조회 (다른 페이지들과 동일한 방식)
         const [mockResponse, byOdResponse] = await Promise.all([
           MockSettlementResultService.getMockSettlementInfoData(
-            searchValues.settlementName
+            values.settlementName
           ),
-          MockSettlementByOdService.getSettlementData(searchValues),
+          MockSettlementByOdService.getSettlementData(values),
         ]);
 
         if (mockResponse.success && mockResponse.data) {
@@ -527,7 +521,7 @@ export default function MockSettlementByOdPage() {
 
   // 검색 핸들러
   const handleSearchSubmit = useCallback(
-    async (values: { STN_ID1: string; STN_ID2: string }) => {
+    async (values: MockSettlementByOdFilters) => {
       // 모의정산 실행여부 체크
       const isRunningResponse =
         await MockSettlementControlService.checkIsRunning();
@@ -594,13 +588,21 @@ export default function MockSettlementByOdPage() {
       )}
 
       {/* 필터 폼 */}
-      <FilterForm<{ STN_ID1: string; STN_ID2: string }>
-        fields={mockSettlementByOdFilterConfig.filter(
-          (field) => field.name !== "settlementName"
+      <FilterForm<MockSettlementByOdFilters>
+        fields={mockSettlementByOdFilterConfig.map((field) =>
+          field.name === "settlementName" ? { ...field, disabled: true } : field
         )}
-        defaultValues={defaultValues}
-        schema={mockSettlementByOdSchema}
-        values={{ STN_ID1: filters.STN_ID1, STN_ID2: filters.STN_ID2 }}
+        defaultValues={filters}
+        schema={z
+          .object({
+            STN_ID1: z.string().min(1, "출발역을 선택해주세요"),
+            STN_ID2: z.string().min(1, "도착역을 선택해주세요"),
+          })
+          .refine((data) => data.STN_ID1 !== data.STN_ID2, {
+            message: "출발역과 도착역은 같을 수 없습니다.",
+            path: ["STN_ID2"],
+          })}
+        values={filters}
         onChange={(values) => setFilters((prev) => ({ ...prev, ...values }))}
         onSearch={handleSearchSubmit}
       />

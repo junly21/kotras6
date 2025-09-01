@@ -401,7 +401,6 @@ export default function MockSettlementByRoutePage() {
         <div className="flex justify-between items-center">
           <h3 className="text-lg font-semibold">노선별 조회 결과</h3>
           <div className="flex items-center gap-4">
-            <UnitRadioGroup value={unit} onChange={setUnit} />
             <CsvExportButton
               gridRef={byRouteGridRef}
               fileName="mock_settlement_by_route_data.csv"
@@ -411,7 +410,7 @@ export default function MockSettlementByRoutePage() {
         </div>
 
         <div className="bg-white border border-gray-200 rounded-[24px] p-4">
-          <div className="h-[450px]">
+          <div className="h-[350px]">
             <TestGrid
               rowData={byRouteRowData}
               columnDefs={byRouteColumnDefs}

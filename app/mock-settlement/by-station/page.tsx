@@ -652,7 +652,7 @@ export default function MockSettlementByStationPage() {
         </div>
 
         <div className="bg-white border border-gray-200 rounded-[24px] p-4">
-          <div className="h-[500px]">
+          <div className="h-[300px]">
             <TestGrid
               rowData={processedByStationData}
               columnDefs={byStationColumnDefs}

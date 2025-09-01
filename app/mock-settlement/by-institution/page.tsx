@@ -473,10 +473,10 @@ export default function MockSettlementByInstitutionPage() {
         </div>
 
         {/* 좌우 그리드 레이아웃 */}
-        <div className="grid grid-cols-2 gap-6 h-[500px]">
+        <div className="grid grid-cols-2 gap-6 h-[400px]">
           {/* 왼쪽: 기관별 조회 결과 그리드 */}
           <div className="flex flex-col h-full ]">
-            <div className="relative flex-1 h-full max-h-[475px]">
+            <div className="relative flex-1 h-full max-h-[375px]">
               {hasSearched && isLoading && (
                 <div className="absolute inset-0 h-100vh flex items-center justify-center bg-white/80 z-10">
                   <Spinner />
@@ -502,7 +502,7 @@ export default function MockSettlementByInstitutionPage() {
           <div className="flex flex-col h-full ">
             <div className="relative flex-1 h-full  ">
               {!hasSearched ? (
-                <div className="h-full max-h-[475px] flex items-center justify-center bg-gray-50 border-2 border-dashed border-gray-300 rounded">
+                <div className="h-full max-h-[375px] flex items-center justify-center bg-gray-50 border-2 border-dashed border-gray-300 rounded">
                   <div className="text-center text-gray-500">
                     <p className="text-lg font-medium">
                       조회 버튼을 눌러주세요

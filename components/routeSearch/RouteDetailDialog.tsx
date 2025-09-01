@@ -36,6 +36,30 @@ export function RouteDetailDialog({
 
   const uniqueOperators = getUniqueOperators(route.oper_list);
 
+  // 환승역 중복 제거 처리
+  const getUniqueTransfers = (transferList: string): string[] => {
+    if (!transferList || transferList === "[]") return [];
+
+    try {
+      const transfers = JSON.parse(transferList);
+      const uniqueTransfers = [
+        ...new Set(
+          transfers.map((transfer: string) => {
+            const stationName = transfer.match(
+              /\([^)]+\)[^_]*_([^(]+)\([^)]+\)/
+            )?.[1];
+            return stationName || transfer;
+          })
+        ),
+      ];
+      return uniqueTransfers as string[];
+    } catch {
+      return [];
+    }
+  };
+
+  const uniqueTransfers = getUniqueTransfers(route.transfer_list);
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
@@ -61,7 +85,7 @@ export function RouteDetailDialog({
                 시간비용
               </h3>
               <p className="text-lg font-semibold">
-                {route.cost?.toLocaleString()}원
+                {route.cost?.toLocaleString()}
               </p>
             </div>
             <div>
@@ -100,22 +124,15 @@ export function RouteDetailDialog({
           <div className="mb-6">
             <h3 className="text-sm font-medium text-gray-500 mb-2">환승역</h3>
             <div className="bg-gray-50 p-4 rounded-lg">
-              {route.transfer_list && route.transfer_list !== "[]" ? (
+              {uniqueTransfers.length > 0 ? (
                 <div className="flex flex-wrap gap-2">
-                  {JSON.parse(route.transfer_list).map(
-                    (transfer: string, index: number) => {
-                      const stationName = transfer.match(
-                        /\([^)]+\)[^_]*_([^(]+)\([^)]+\)/
-                      )?.[1];
-                      return (
-                        <span
-                          key={index}
-                          className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm">
-                          {stationName || transfer}
-                        </span>
-                      );
-                    }
-                  )}
+                  {uniqueTransfers.map((stationName, index) => (
+                    <span
+                      key={index}
+                      className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm">
+                      {stationName}
+                    </span>
+                  ))}
                 </div>
               ) : (
                 <p className="text-sm text-gray-500">환승역 없음</p>

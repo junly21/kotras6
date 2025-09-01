@@ -369,7 +369,7 @@ export default function RouteSearchResultPage() {
                   showZoomControls: true,
                   showTooltips: true,
                   defaultZoom: 0.25,
-                  defaultPan: { x: -800, y: -1000 },
+                  defaultPan: { x: 100, y: -650 },
                 }}
               />
             )}

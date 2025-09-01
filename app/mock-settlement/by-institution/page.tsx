@@ -345,33 +345,9 @@ export default function MockSettlementByInstitutionPage() {
     return [
       {
         대상기관: `총 ${byInstitutionData.length}개`,
-        지급액: `${formatValue(totalPayment)}${
-          unit === "원"
-            ? "원"
-            : unit === "천"
-            ? "천"
-            : unit === "백만"
-            ? "백만"
-            : "억"
-        }`,
-        수급액: `${formatValue(totalReceipt)}${
-          unit === "원"
-            ? "원"
-            : unit === "천"
-            ? "천"
-            : unit === "백만"
-            ? "백만"
-            : "억"
-        }`,
-        차액: `${formatValue(totalDifference)}${
-          unit === "원"
-            ? "원"
-            : unit === "천"
-            ? "천"
-            : unit === "백만"
-            ? "백만"
-            : "억"
-        }`,
+        지급액: formatValue(totalPayment),
+        수급액: formatValue(totalReceipt),
+        차액: formatValue(totalDifference),
       },
     ];
   }, [byInstitutionData, unit]);

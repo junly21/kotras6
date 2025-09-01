@@ -18,7 +18,7 @@ import type {
 import { MockSettlementResultData } from "@/types/mockSettlementResult";
 import { AllCommunityModule, ModuleRegistry } from "ag-grid-community";
 import { AgGridReact } from "ag-grid-react";
-import { UnitRadioGroup, type Unit } from "@/components/ui/UnitRadioGroup";
+
 import { MockSettlementConfirmDialog } from "@/components/MockSettlementConfirmDialog";
 import { MockSettlementDetailModal } from "@/components/MockSettlementDetailModal";
 import { z } from "zod";
@@ -43,9 +43,6 @@ export default function MockSettlementByRoutePage() {
   const [byRouteData, setByRouteData] = useState<MockSettlementByRouteData[]>(
     []
   );
-
-  // 원단위 상태 추가
-  const [unit, setUnit] = useState<Unit>("원");
 
   // 토스트 상태
   const [toast, setToast] = useState<{
@@ -237,8 +234,8 @@ export default function MockSettlementByRoutePage() {
 
   // 하단 그리드 컬럼 정의 (노선별 조회 결과) - 동적 그룹핑 컬럼 사용
   const byRouteColumnDefs = useMemo(() => {
-    return createMockSettlementByRouteColDefs(byRouteData, unit);
-  }, [byRouteData, unit]);
+    return createMockSettlementByRouteColDefs(byRouteData);
+  }, [byRouteData]);
 
   // 푸터 행 데이터 생성
   const footerRowData = useMemo(() => {

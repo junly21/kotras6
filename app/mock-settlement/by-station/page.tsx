@@ -436,8 +436,8 @@ export default function MockSettlementByStationPage() {
             const value = item[key];
             return sum + (typeof value === "number" ? value : 0);
           }, 0);
-          // 소수점 제거하고 정수로 표시
-          footerRow[key] = `${Math.round(total).toLocaleString()}원`;
+          // 소수점 제거하고 정수로 표시 (단위 제거)
+          footerRow[key] = Math.round(total).toLocaleString();
         }
       });
     }

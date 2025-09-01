@@ -3,8 +3,7 @@ import type { MockSettlementByRouteData } from "@/types/mockSettlementByRoute";
 
 // 동적으로 컬럼을 생성하는 함수 (그룹핑 포함) - 정산결과 노선별 조회와 동일한 로직
 export function createMockSettlementByRouteColDefs(
-  data: MockSettlementByRouteData[],
-  unit: string = "원"
+  data: MockSettlementByRouteData[]
 ): (
   | ColDef<MockSettlementByRouteData>
   | ColGroupDef<MockSettlementByRouteData>
@@ -117,11 +116,7 @@ export function createMockSettlementByRouteColDefs(
         type: "numericColumn",
         valueFormatter: (params) => {
           if (params.value != null && typeof params.value === "number") {
-            if (unit === "원") {
-              return params.value.toLocaleString() + "원";
-            } else {
-              return params.value.toLocaleString() + unit;
-            }
+            return params.value.toLocaleString();
           }
           return params.value || "";
         },
@@ -152,11 +147,7 @@ export function createMockSettlementByRouteColDefs(
         valueFormatter: isNumber
           ? (params) => {
               if (params.value != null && typeof params.value === "number") {
-                if (unit === "원") {
-                  return params.value.toLocaleString() + "원";
-                } else {
-                  return params.value.toLocaleString() + unit;
-                }
+                return params.value.toLocaleString();
               }
               return params.value || "";
             }

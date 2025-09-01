@@ -383,6 +383,7 @@ export default function MockSettlementResultPage() {
         <div className="space-y-2">
           {!isLoading && mockSettlementResults.length > 0 && (
             <>
+              <h3 className="text-lg font-semibold mb-4">모의정산 정보</h3>
               <div className="bg-white border border-gray-200 rounded-[24px] p-2">
                 <div className="h-32">
                   <TestGrid
@@ -424,17 +425,19 @@ export default function MockSettlementResultPage() {
 
       <div className="space-y-4">
         {hasSearched && (
-          <div className="flex justify-between items-center">
-            <h3 className="text-lg font-semibold">정산결과 조회</h3>
-            <div className="flex items-center gap-4">
-              <UnitRadioGroup value={unit} onChange={setUnit} />
-              <CsvExportButton
-                gridRef={settlementGridRef}
-                fileName="settlement_result_data.csv"
-                className="shadow-lg bg-accent-500"
-              />
+          <>
+            <div className="flex justify-between items-center">
+              <h3 className="text-lg font-semibold">정산결과 조회</h3>
+              <div className="flex items-center gap-4">
+                <UnitRadioGroup value={unit} onChange={setUnit} />
+                <CsvExportButton
+                  gridRef={settlementGridRef}
+                  fileName="settlement_result_data.csv"
+                  className="shadow-lg bg-accent-500"
+                />
+              </div>
             </div>
-          </div>
+          </>
         )}
         <div className="bg-white border border-gray-200 rounded-[24px] p-4">
           <div className="h-[530px]">

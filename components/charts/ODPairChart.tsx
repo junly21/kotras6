@@ -111,10 +111,6 @@ export function ODPairChart({ data }: Props) {
   return (
     <div className="w-full h-full flex flex-col">
       {/* 차트 제목과 단위 */}
-      <div className="flex justify-between items-center px-2 mb-2">
-        <span className="text-sm text-gray-500">건</span>
-      </div>
-
       {/* 차트 영역 */}
       <div className="flex-1">
         <ResponsiveContainer width="100%" height="100%">

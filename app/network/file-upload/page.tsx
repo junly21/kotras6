@@ -10,7 +10,8 @@ import {
   networkFileUploadFields,
   networkFileUploadSchema,
 } from "@/features/networkFileUpload/filterConfig";
-import { networkFileUploadColDefs } from "@/features/networkFileUpload/gridConfig";
+// 기존 네트워크 파일 목록 그리드 컬럼 정의 제거
+// import { networkFileUploadColDefs } from "@/features/networkFileUpload/gridConfig";
 import {
   nodeColDefs,
   linkColDefs,
@@ -23,17 +24,23 @@ import { AgGridReact } from "ag-grid-react";
 import {
   AllCommunityModule,
   ModuleRegistry,
-  CellClickedEvent,
+  // CellClickedEvent 제거 (더 이상 필요 없음)
 } from "ag-grid-community";
 import { NetworkFileUploadService } from "@/services/networkFileUploadService";
 import ProtectedRoute from "@/components/ProtectedRoute";
+import { NodeData, LinkData, PlatformData } from "@/types/networkDetail";
 
 // Register all Community features
 ModuleRegistry.registerModules([AllCommunityModule]);
 
 export default function NetworkFileUploadPage() {
-  const gridRef = useRef<AgGridReact>(null);
-  const detailGridRef = useRef<AgGridReact>(null);
+  // 기존 그리드 ref 제거
+  // const gridRef = useRef<AgGridReact>(null);
+
+  // 각 그리드별 ref 추가
+  const nodeGridRef = useRef<AgGridReact>(null);
+  const linkGridRef = useRef<AgGridReact>(null);
+  const platformGridRef = useRef<AgGridReact>(null);
 
   // 모달 상태
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -44,20 +51,31 @@ export default function NetworkFileUploadPage() {
     filters,
     hasSearched,
     networkOptions,
-    rowData,
-    detailData,
-    rawDetailData, // 원본 API 데이터 추가
-    detailTitle,
-    showDetailGrid,
+    // 기존 상태들 제거
+    // rowData,
+    // detailData,
+    // rawDetailData,
+    // detailTitle,
+    // showDetailGrid,
+
+    // 새로운 상태들
+    nodeData,
+    linkData,
+    platformData,
+    rawNodeData,
+    rawLinkData,
+    rawPlatformData,
+
     loading,
     toast,
 
     // 핸들러
     handleFilterChange,
     handleSearch,
-    handleNodeView,
-    handleLineView,
-    handlePlatformView,
+    // 기존 핸들러들 제거
+    // handleNodeView,
+    // handleLineView,
+    // handlePlatformView,
     loadNetworkOptions,
     closeToast,
   } = useNetworkFileUpload();
@@ -67,129 +85,121 @@ export default function NetworkFileUploadPage() {
     loadNetworkOptions();
   }, [loadNetworkOptions]);
 
-  // 상세 그리드 컬럼 정의 선택
-  const getDetailColDefs = () => {
-    if (detailTitle === "노드 목록") return nodeColDefs;
-    if (detailTitle === "링크 목록") return linkColDefs;
-    if (detailTitle === "플랫폼 목록") return platformColDefs;
-    return [];
+  // 다운로드 파일명 생성 함수들
+  const getNodeDownloadFileName = () => {
+    const currentDate = new Date().toISOString().split("T")[0];
+    return `node_${currentDate}.csv`;
   };
 
-  // 다운로드 파일명 생성
-  const getDownloadFileName = () => {
-    if (!showDetailGrid || !detailTitle) return "data.csv";
+  const getLinkDownloadFileName = () => {
+    const currentDate = new Date().toISOString().split("T")[0];
+    return `link_${currentDate}.csv`;
+  };
 
-    const currentDate = new Date().toISOString().split("T")[0]; // YYYY-MM-DD 형식
-    const type = detailTitle.includes("노드")
-      ? "node"
-      : detailTitle.includes("링크")
-      ? "link"
-      : detailTitle.includes("플랫폼")
-      ? "platform"
-      : "data";
-
-    return `${type}_${currentDate}.csv`;
+  const getPlatformDownloadFileName = () => {
+    const currentDate = new Date().toISOString().split("T")[0];
+    return `platform_${currentDate}.csv`;
   };
 
   // 각 목록별 칼럼 순서 정의 (CSV 내보내기용 - 모든 필드 포함)
-  const getColumnOrder = () => {
-    if (detailTitle === "노드 목록") {
-      return [
-        "seq",
-        "sta_nm",
-        "sta_num",
-        "x",
-        "y",
-        "kscc",
-        "subway",
-        "transfer",
-        "transfer_cd",
-        "open_date",
-        "gate_chk",
-        "oper",
-        "remarks",
-        "consign_oper",
-        "avg_stay",
-        "avg_stay_new",
-      ];
-    } else if (detailTitle === "링크 목록") {
-      return [
-        "seq",
-        "from_sta_nm",
-        "from_sta_num",
-        "to_sta_nm",
-        "to_sta_num",
-        "link_cd",
-        "sta_pass_sec",
-        "trans_mv_sec",
-        "trans_sty_sec",
-        "cost",
-        "km",
-        "subway",
-        "open_date",
-        "start_x",
-        "start_y",
-        "end_x",
-        "end_y",
-        "km_g",
-        "km_ung",
-        "start_oper",
-        "end_oper",
-        "geom",
-        "direction",
-        "oper",
-        "oper_line",
-        "consign_oper",
-        "elev_tot",
-        "elev_ung",
-        "elev",
-        "elev_g",
-      ];
-    } else if (detailTitle === "플랫폼 목록") {
-      return [
-        "seq",
-        "link_seq",
-        "link_cd",
-        "from_sta_nm",
-        "from_dic",
-        "from_dic_sub",
-        "from_sta_num",
-        "to_sta_nm",
-        "to_dic",
-        "to_dic_sub",
-        "to_sta_num",
-        "tot_mv_m",
-        "tot_mv_sec",
-        "flat_mv_m",
-        "tot_step_up",
-        "tot_step_down",
-        "only_step_up",
-        "only_step_up_m",
-        "only_step_down",
-        "only_step_down_m",
-        "step_esc_up_step",
-        "step_esc_up_yn",
-        "step_esc_up_m",
-        "step_esc_down_step",
-        "step_esc_down_yn",
-        "step_esc_down_m",
-        "only_esc_up_yn",
-        "only_esc_up_m",
-        "only_esc_down_yn",
-        "only_esc_down_m",
-        "tot_sty_sec",
-        "trans_cnt",
-      ];
-    }
-    return [];
+  const getNodeColumnOrder = () => {
+    return [
+      "seq",
+      "sta_nm",
+      "sta_num",
+      "x",
+      "y",
+      "kscc",
+      "subway",
+      "transfer",
+      "transfer_cd",
+      "open_date",
+      "gate_chk",
+      "oper",
+      "remarks",
+      "consign_oper",
+      "avg_stay",
+      "avg_stay_new",
+    ];
   };
 
-  // 기존 날짜 목록 추출 (중복 제거)
+  const getLinkColumnOrder = () => {
+    return [
+      "seq",
+      "from_sta_nm",
+      "from_sta_num",
+      "to_sta_nm",
+      "to_sta_num",
+      "link_cd",
+      "sta_pass_sec",
+      "trans_mv_sec",
+      "trans_sty_sec",
+      "cost",
+      "km",
+      "subway",
+      "open_date",
+      "start_x",
+      "start_y",
+      "end_x",
+      "end_y",
+      "km_g",
+      "km_ung",
+      "start_oper",
+      "end_oper",
+      "geom",
+      "direction",
+      "oper",
+      "oper_line",
+      "consign_oper",
+      "elev_tot",
+      "elev_ung",
+      "elev",
+      "elev_g",
+    ];
+  };
+
+  const getPlatformColumnOrder = () => {
+    return [
+      "seq",
+      "link_seq",
+      "link_cd",
+      "from_sta_nm",
+      "from_dic",
+      "from_dic_sub",
+      "from_sta_num",
+      "to_sta_nm",
+      "to_dic",
+      "to_dic_sub",
+      "to_sta_num",
+      "tot_mv_m",
+      "tot_mv_sec",
+      "flat_mv_m",
+      "tot_step_up",
+      "tot_step_down",
+      "only_step_up",
+      "only_step_up_m",
+      "only_step_down",
+      "only_step_down_m",
+      "step_esc_up_step",
+      "step_esc_up_yn",
+      "step_esc_up_m",
+      "step_esc_down_step",
+      "step_esc_down_yn",
+      "step_esc_down_m",
+      "only_esc_up_yn",
+      "only_esc_up_m",
+      "only_esc_down_yn",
+      "only_esc_down_m",
+      "tot_sty_sec",
+      "trans_cnt",
+    ];
+  };
+
+  // 기존 날짜 목록 추출 (중복 제거) - 네트워크 옵션에서 추출
   const existingDates = useMemo(() => {
-    if (!rowData || rowData.length === 0) return [];
-    const dates = rowData.map((item) => item.net_dt).filter(Boolean);
-    return [...new Set(dates)]; // 중복 제거
-  }, [rowData]);
+    if (!networkOptions || networkOptions.length === 0) return [];
+    return networkOptions.map((option) => option.value);
+  }, [networkOptions]);
 
   // 네트워크 옵션이 로드되면 필터 필드 업데이트
   const updatedFields = networkFileUploadFields.map((field) => {
@@ -199,42 +209,12 @@ export default function NetworkFileUploadPage() {
     return field;
   });
 
-  // ag-Grid 컨텍스트 설정
-  const gridOptions = {
-    context: {
-      onNodeView: handleNodeView,
-      onLineView: handleLineView,
-      onPlatformView: handlePlatformView,
-    },
-    onCellClicked: (params: CellClickedEvent) => {
-      const { column, data } = params;
-      if (!data) return;
-
-      // 컬럼에 따라 다른 핸들러 호출
-      switch (column.getColId()) {
-        case "노드":
-          handleNodeView(data.net_dt);
-          break;
-        case "링크":
-          handleLineView(data.net_dt);
-          break;
-        case "플랫폼":
-          handlePlatformView(data.net_dt);
-          break;
-      }
-    },
-  };
-
-  // 상세 그리드용 하단 고정 행 데이터 (총계)
-  const getDetailPinnedBottomRowData = (data: any[], title: string) => {
+  // 각 그리드용 하단 고정 행 데이터 (총계) - 타입 수정
+  const getNodePinnedBottomRowData = (data: NodeData[]) => {
     if (!data || data.length === 0) return [];
 
-    // 각 그리드 타입별로 첫 번째 컬럼에 총 건수 표시
-    let result: any = {};
-
-    if (title === "노드 목록") {
-      // 노드 목록: sta_nm(역명)에 총 건수 표시
-      result = {
+    return [
+      {
         seq: undefined,
         sta_nm: `총 ${data.length}건`,
         sta_num: undefined,
@@ -251,10 +231,15 @@ export default function NetworkFileUploadPage() {
         consign_oper: undefined,
         avg_stay: undefined,
         avg_stay_new: undefined,
-      };
-    } else if (title === "링크 목록") {
-      // 링크 목록: link_cd(링크코드)에 총 건수 표시
-      result = {
+      },
+    ];
+  };
+
+  const getLinkPinnedBottomRowData = (data: LinkData[]) => {
+    if (!data || data.length === 0) return [];
+
+    return [
+      {
         seq: undefined,
         from_sta_nm: undefined,
         from_sta_num: undefined,
@@ -285,10 +270,15 @@ export default function NetworkFileUploadPage() {
         elev_ung: undefined,
         elev: undefined,
         elev_g: undefined,
-      };
-    } else if (title === "플랫폼 목록") {
-      // 플랫폼 목록: link_cd(링크코드)에 총 건수 표시
-      result = {
+      },
+    ];
+  };
+
+  const getPlatformPinnedBottomRowData = (data: PlatformData[]) => {
+    if (!data || data.length === 0) return [];
+
+    return [
+      {
         seq: undefined,
         link_seq: undefined,
         link_cd: `총 ${data.length}건`,
@@ -321,10 +311,8 @@ export default function NetworkFileUploadPage() {
         only_esc_down_m: undefined,
         tot_sty_sec: undefined,
         trans_cnt: undefined,
-      };
-    }
-
-    return [result];
+      },
+    ];
   };
 
   // 상세 그리드용 하단 고정 행 스타일
@@ -402,34 +390,32 @@ export default function NetworkFileUploadPage() {
         <div className="space-y-6">
           <h1 className="text-2xl font-bold">네트워크 파일등록</h1>
 
-          <FilterForm
-            fields={updatedFields}
-            defaultValues={filters}
-            schema={networkFileUploadSchema}
-            values={filters}
-            onChange={handleFilterChange}
-            onSearch={handleSearch}
-          />
+          {/* 필터폼을 상대 위치로 감싸고 등록 버튼을 절대 위치로 배치 */}
+          <div className="relative">
+            <FilterForm
+              fields={updatedFields}
+              defaultValues={filters}
+              schema={networkFileUploadSchema}
+              values={filters}
+              onChange={handleFilterChange}
+              onSearch={handleSearch}
+            />
+
+            {/* 네트워크 파일 등록 버튼을 필터폼 내부 오른쪽에 절대 위치로 배치 */}
+            <div className="absolute top-4 left-96">
+              <Button
+                onClick={handleAddClick}
+                className="bg-blue-600 hover:bg-blue-700 text-white">
+                네트워크 파일 등록
+              </Button>
+            </div>
+          </div>
 
           {/* 등록 버튼 */}
           <div className="space-y-4">
-            <div className="flex justify-between">
-              <h2 className="text-lg font-semibold">네트워크 파일 목록</h2>
-              <Button onClick={handleAddClick}>등록</Button>
-            </div>
-            {/* 결과 영역 */}
-            {hasSearched && (
-              <TestGrid
-                rowData={rowData}
-                columnDefs={networkFileUploadColDefs}
-                gridRef={gridRef}
-                gridOptions={gridOptions}
-                height={160}
-              />
-            )}
-
+            {/* 조회 결과가 없을 때 안내 메시지 */}
             {!hasSearched && !loading && (
-              <div className="bg-gray-50 flex flex-col justify-center items-center h-[590px] border-2 border-dashed border-gray-300 rounded-lg p-16">
+              <div className="bg-gray-50 flex flex-col justify-center items-center h-[200px] border-2 border-dashed border-gray-300 rounded-lg p-16">
                 <div className="text-center text-gray-500">
                   <p className="text-lg font-medium">조회 결과</p>
                   <p className="text-sm">
@@ -440,35 +426,87 @@ export default function NetworkFileUploadPage() {
             )}
           </div>
 
-          {/* CSV Export 버튼을 상단 그리드와 하단 그리드 사이에 배치 */}
-
-          {/* 상세 그리드 영역 */}
-          {showDetailGrid && (
+          {/* 노드 그리드 영역 */}
+          {hasSearched && (
             <div className="space-y-4">
               <div className="flex justify-between">
-                <h2 className="text-lg font-semibold">{detailTitle}</h2>
-                {showDetailGrid && (
-                  <div className="flex justify-end">
-                    <RawDataCsvExportButton
-                      fileName={getDownloadFileName()}
-                      className="bg-green-500 hover:bg-green-600"
-                      columnOrder={getColumnOrder()}
-                      rawData={rawDetailData}
-                    />
-                  </div>
-                )}
+                <h2 className="text-lg font-semibold">노드 목록</h2>
+                <div className="flex justify-end">
+                  <RawDataCsvExportButton
+                    fileName={getNodeDownloadFileName()}
+                    className="bg-green-500 hover:bg-green-600"
+                    columnOrder={getNodeColumnOrder()}
+                    rawData={rawNodeData}
+                  />
+                </div>
               </div>
               <div className="rounded-lg overflow-hidden">
                 <TestGrid
-                  rowData={detailData}
-                  columnDefs={getDetailColDefs()}
-                  gridRef={detailGridRef}
+                  rowData={nodeData}
+                  columnDefs={nodeColDefs}
+                  gridRef={nodeGridRef}
                   height={300}
                   gridOptions={{
-                    pinnedBottomRowData: getDetailPinnedBottomRowData(
-                      detailData,
-                      detailTitle
-                    ),
+                    pinnedBottomRowData: getNodePinnedBottomRowData(nodeData),
+                    getRowStyle: getDetailRowStyle,
+                  }}
+                />
+              </div>
+            </div>
+          )}
+
+          {/* 링크 그리드 영역 */}
+          {hasSearched && (
+            <div className="space-y-4">
+              <div className="flex justify-between">
+                <h2 className="text-lg font-semibold">링크 목록</h2>
+                <div className="flex justify-end">
+                  <RawDataCsvExportButton
+                    fileName={getLinkDownloadFileName()}
+                    className="bg-green-500 hover:bg-green-600"
+                    columnOrder={getLinkColumnOrder()}
+                    rawData={rawLinkData}
+                  />
+                </div>
+              </div>
+              <div className="rounded-lg overflow-hidden">
+                <TestGrid
+                  rowData={linkData}
+                  columnDefs={linkColDefs}
+                  gridRef={linkGridRef}
+                  height={300}
+                  gridOptions={{
+                    pinnedBottomRowData: getLinkPinnedBottomRowData(linkData),
+                    getRowStyle: getDetailRowStyle,
+                  }}
+                />
+              </div>
+            </div>
+          )}
+
+          {/* 플랫폼 그리드 영역 */}
+          {hasSearched && (
+            <div className="space-y-4">
+              <div className="flex justify-between">
+                <h2 className="text-lg font-semibold">플랫폼 목록</h2>
+                <div className="flex justify-end">
+                  <RawDataCsvExportButton
+                    fileName={getPlatformDownloadFileName()}
+                    className="bg-green-500 hover:bg-green-600"
+                    columnOrder={getPlatformColumnOrder()}
+                    rawData={rawPlatformData}
+                  />
+                </div>
+              </div>
+              <div className="rounded-lg overflow-hidden">
+                <TestGrid
+                  rowData={platformData}
+                  columnDefs={platformColDefs}
+                  gridRef={platformGridRef}
+                  height={300}
+                  gridOptions={{
+                    pinnedBottomRowData:
+                      getPlatformPinnedBottomRowData(platformData),
                     getRowStyle: getDetailRowStyle,
                   }}
                 />

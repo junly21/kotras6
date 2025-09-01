@@ -22,15 +22,28 @@ export const useNetworkFileUpload = () => {
   const [networkOptions, setNetworkOptions] = useState<
     Array<{ value: string; label: string }>
   >([]);
-  const [rowData, setRowData] = useState<NetworkFileUploadData[]>([]);
-  const [detailData, setDetailData] = useState<
-    NodeData[] | LinkData[] | PlatformData[]
+
+  // 기존 네트워크 파일 목록 관련 상태 제거
+  // const [rowData, setRowData] = useState<NetworkFileUploadData[]>([]);
+
+  // 각 데이터 타입별 상태 추가
+  const [nodeData, setNodeData] = useState<NodeData[]>([]);
+  const [linkData, setLinkData] = useState<LinkData[]>([]);
+  const [platformData, setPlatformData] = useState<PlatformData[]>([]);
+
+  // 원본 데이터 저장
+  const [rawNodeData, setRawNodeData] = useState<Record<string, unknown>[]>([]);
+  const [rawLinkData, setRawLinkData] = useState<Record<string, unknown>[]>([]);
+  const [rawPlatformData, setRawPlatformData] = useState<
+    Record<string, unknown>[]
   >([]);
-  const [rawDetailData, setRawDetailData] = useState<Record<string, unknown>[]>(
-    []
-  ); // 원본 API 데이터 저장
-  const [detailTitle, setDetailTitle] = useState<string>("");
-  const [showDetailGrid, setShowDetailGrid] = useState(false);
+
+  // 기존 상세 그리드 관련 상태 제거 (더 이상 필요 없음)
+  // const [detailData, setDetailData] = useState<NodeData[] | LinkData[] | PlatformData[]>([]);
+  // const [rawDetailData, setRawDetailData] = useState<Record<string, unknown>[]>([]);
+  // const [detailTitle, setDetailTitle] = useState<string>("");
+  // const [showDetailGrid, setShowDetailGrid] = useState(false);
+
   const [loading, setLoading] = useState(false);
   const [toast, setToast] = useState<ToastState>({
     isVisible: false,
@@ -43,164 +56,112 @@ export const useNetworkFileUpload = () => {
     setFilters(values);
   }, []);
 
-  // 검색 핸들러
+  // 검색 핸들러 - 네트워크 조회 시 모든 데이터를 한 번에 가져옴
   const handleSearch = useCallback(async (values: NetworkFileUploadFilters) => {
     setHasSearched(true);
     setFilters(values);
-    setShowDetailGrid(false);
+    setLoading(true);
 
     try {
-      console.log("네트워크 파일 목록 조회 시작:", values);
-      const response = await NetworkFileUploadService.getNetworkFileList(
-        values
-      );
+      console.log("네트워크 데이터 조회 시작:", values);
 
-      if (response.success) {
-        console.log("네트워크 파일 목록 조회 성공:", response.data);
-        const networkData = response.data as NetworkFileUploadData[];
-        setRowData(networkData);
-
-        // 첫 번째 데이터가 있으면 노드를 자동으로 조회
-        if (networkData.length > 0) {
-          const firstNetwork = networkData[0];
-          console.log(
-            "첫 번째 네트워크의 노드 자동 조회:",
-            firstNetwork.net_dt
-          );
-          await handleNodeView(firstNetwork.net_dt);
-        }
-
+      // 네트워크 선택된 경우에만 조회
+      if (!values.network) {
         setToast({
           isVisible: true,
-          message: "네트워크 파일 목록을 성공적으로 받았습니다.",
-          type: "success",
-        });
-      } else {
-        console.error("네트워크 파일 목록 조회 실패:", response.error);
-        setRowData([]);
-        setToast({
-          isVisible: true,
-          message: `조회 실패: ${response.error}`,
+          message: "네트워크를 선택해주세요.",
           type: "error",
         });
+        return;
       }
+
+      // 모든 데이터를 병렬로 조회
+      const [nodeResponse, linkResponse, platformResponse] = await Promise.all([
+        NetworkFileUploadService.getNetworkNodeList(values.network),
+        NetworkFileUploadService.getNetworkLineList(values.network),
+        NetworkFileUploadService.getNetworkPlatformList(values.network),
+      ]);
+
+      // 노드 데이터 처리
+      if (nodeResponse.success) {
+        const nodes = Array.isArray(nodeResponse.data) ? nodeResponse.data : [];
+        setNodeData(nodes as NodeData[]);
+        setRawNodeData(nodeResponse.data as Record<string, unknown>[]);
+      } else {
+        setNodeData([]);
+        setRawNodeData([]);
+        console.error("노드 데이터 조회 실패:", nodeResponse.error);
+      }
+
+      // 링크 데이터 처리
+      if (linkResponse.success) {
+        const links = Array.isArray(linkResponse.data) ? linkResponse.data : [];
+        setLinkData(links as LinkData[]);
+        setRawLinkData(linkResponse.data as Record<string, unknown>[]);
+      } else {
+        setLinkData([]);
+        setRawLinkData([]);
+        console.error("링크 데이터 조회 실패:", linkResponse.error);
+      }
+
+      // 플랫폼 데이터 처리
+      if (platformResponse.success) {
+        const platforms = Array.isArray(platformResponse.data)
+          ? platformResponse.data
+          : [];
+        setPlatformData(platforms as PlatformData[]);
+        setRawPlatformData(platformResponse.data as Record<string, unknown>[]);
+      } else {
+        setPlatformData([]);
+        setRawPlatformData([]);
+        console.error("플랫폼 데이터 조회 실패:", platformResponse.error);
+      }
+
+      // 성공 메시지 표시
+      const totalCount =
+        (nodeResponse.success
+          ? Array.isArray(nodeResponse.data)
+            ? nodeResponse.data.length
+            : 0
+          : 0) +
+        (linkResponse.success
+          ? Array.isArray(linkResponse.data)
+            ? linkResponse.data.length
+            : 0
+          : 0) +
+        (platformResponse.success
+          ? Array.isArray(platformResponse.data)
+            ? platformResponse.data.length
+            : 0
+          : 0);
+
+      setToast({
+        isVisible: true,
+        message: `네트워크 데이터를 성공적으로 로드했습니다. (총 ${totalCount}건)`,
+        type: "success",
+      });
     } catch (error) {
-      console.error("네트워크 파일 목록 조회 중 오류:", error);
-      setRowData([]);
+      console.error("네트워크 데이터 조회 중 오류:", error);
+      setNodeData([]);
+      setLinkData([]);
+      setPlatformData([]);
+      setRawNodeData([]);
+      setRawLinkData([]);
+      setRawPlatformData([]);
       setToast({
         isVisible: true,
         message: `조회 중 오류 발생: ${error}`,
         type: "error",
       });
+    } finally {
+      setLoading(false);
     }
   }, []);
 
-  // 노드 조회 핸들러
-  const handleNodeView = useCallback(async (netDt: string) => {
-    try {
-      console.log("노드 조회 시작:", netDt);
-      const response = await NetworkFileUploadService.getNetworkNodeList(netDt);
-      // console.log("노드 조회 결과:", response.data);
-
-      if (response.success) {
-        const nodeData = Array.isArray(response.data) ? response.data : [];
-        setDetailData(nodeData as NodeData[]);
-        setRawDetailData(response.data as Record<string, unknown>[]); // 원본 데이터 저장
-        setDetailTitle("노드 목록");
-        setShowDetailGrid(true);
-        setToast({
-          isVisible: true,
-          message: `노드 ${nodeData.length}개를 성공적으로 로드했습니다.`,
-          type: "success",
-        });
-      } else {
-        setToast({
-          isVisible: true,
-          message: `노드 조회 실패: ${response.error}`,
-          type: "error",
-        });
-      }
-    } catch (error) {
-      console.error("노드 조회 중 오류:", error);
-      setToast({
-        isVisible: true,
-        message: `노드 조회 중 오류 발생: ${error}`,
-        type: "error",
-      });
-    }
-  }, []);
-
-  // 링크 조회 핸들러
-  const handleLineView = useCallback(async (netDt: string) => {
-    try {
-      console.log("링크 조회 시작:", netDt);
-      const response = await NetworkFileUploadService.getNetworkLineList(netDt);
-      console.log("링크 조회 결과:", response.data);
-
-      if (response.success) {
-        const linkData = Array.isArray(response.data) ? response.data : [];
-        setDetailData(linkData as LinkData[]);
-        setRawDetailData(response.data as Record<string, unknown>[]); // 원본 데이터 저장
-        setDetailTitle("링크 목록");
-        setShowDetailGrid(true);
-        setToast({
-          isVisible: true,
-          message: `링크 ${linkData.length}개를 성공적으로 로드했습니다.`,
-          type: "success",
-        });
-      } else {
-        setToast({
-          isVisible: true,
-          message: `링크 조회 실패: ${response.error}`,
-          type: "error",
-        });
-      }
-    } catch (error) {
-      console.error("링크 조회 중 오류:", error);
-      setToast({
-        isVisible: true,
-        message: `링크 조회 중 오류 발생: ${error}`,
-        type: "error",
-      });
-    }
-  }, []);
-
-  // 플랫폼 조회 핸들러
-  const handlePlatformView = useCallback(async (netDt: string) => {
-    try {
-      console.log("플랫폼 조회 시작:", netDt);
-      const response = await NetworkFileUploadService.getNetworkPlatformList(
-        netDt
-      );
-      console.log("플랫폼 조회 결과:", response.data);
-
-      if (response.success) {
-        const platformData = Array.isArray(response.data) ? response.data : [];
-        setDetailData(platformData as PlatformData[]);
-        setRawDetailData(response.data as Record<string, unknown>[]); // 원본 데이터 저장
-        setDetailTitle("플랫폼 목록");
-        setShowDetailGrid(true);
-        setToast({
-          isVisible: true,
-          message: `플랫폼 ${platformData.length}개를 성공적으로 로드했습니다.`,
-          type: "success",
-        });
-      } else {
-        setToast({
-          isVisible: true,
-          message: `플랫폼 조회 실패: ${response.error}`,
-          type: "error",
-        });
-      }
-    } catch (error) {
-      console.error("플랫폼 조회 중 오류:", error);
-      setToast({
-        isVisible: true,
-        message: `플랫폼 조회 중 오류 발생: ${error}`,
-        type: "error",
-      });
-    }
-  }, []);
+  // 기존 개별 조회 핸들러들은 제거 (더 이상 필요 없음)
+  // const handleNodeView = useCallback(async (netDt: string) => { ... });
+  // const handleLineView = useCallback(async (netDt: string) => { ... });
+  // const handlePlatformView = useCallback(async (netDt: string) => { ... });
 
   // 네트워크 옵션 로드 및 자동 조회
   const loadNetworkOptions = useCallback(async () => {
@@ -220,7 +181,7 @@ export const useNetworkFileUpload = () => {
           const newFilters = { network: firstOption.value };
           setFilters(newFilters);
 
-          // 자동 조회 실행 (네트워크 파일 목록 조회)
+          // 자동 조회 실행 (모든 데이터 조회)
           await handleSearch(newFilters);
         }
       } else {
@@ -248,32 +209,38 @@ export const useNetworkFileUpload = () => {
     setToast((prev) => ({ ...prev, isVisible: false }));
   }, []);
 
-  // 상세 그리드 닫기
-  const closeDetailGrid = useCallback(() => {
-    setShowDetailGrid(false);
-  }, []);
-
   return {
     // 상태
     filters,
     hasSearched,
     networkOptions,
-    rowData,
-    detailData,
-    rawDetailData, // 원본 API 데이터 추가
-    detailTitle,
-    showDetailGrid,
+    // 기존 네트워크 파일 목록 관련 상태 제거
+    // rowData,
+    // detailData,
+    // rawDetailData,
+    // detailTitle,
+    // showDetailGrid,
+
+    // 새로운 데이터 상태들
+    nodeData,
+    linkData,
+    platformData,
+    rawNodeData,
+    rawLinkData,
+    rawPlatformData,
+
     loading,
     toast,
 
     // 핸들러
     handleFilterChange,
     handleSearch,
-    handleNodeView,
-    handleLineView,
-    handlePlatformView,
+    // 기존 개별 조회 핸들러들 제거
+    // handleNodeView,
+    // handleLineView,
+    // handlePlatformView,
     loadNetworkOptions,
     closeToast,
-    closeDetailGrid,
+    // closeDetailGrid,
   };
 };

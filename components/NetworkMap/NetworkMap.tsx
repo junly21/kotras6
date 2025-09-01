@@ -28,7 +28,7 @@ export function NetworkMap({
     showTooltips = true,
     showLegend = true, // 범례 표시 여부
     defaultZoom = 0.25,
-    defaultPan = { x: -1000, y: -1200 },
+    defaultPan = { x: 100, y: -650 },
     minZoom = 0.1,
     maxZoom = 1.0,
     zoomSensitivity = 0.05,
@@ -42,6 +42,33 @@ export function NetworkMap({
 
   const svgRef = useRef<SVGSVGElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+
+  // 앵커 고정 줌 유틸 (버튼/휠 모두 공용)
+  const applyZoomAt = useCallback(
+    (newScale: number, anchorX: number, anchorY: number) => {
+      const s = scale;
+      const { x: tx, y: ty } = pan;
+
+      // 화면(anchor) → 월드 좌표
+      const wx = (anchorX - tx) / s;
+      const wy = (anchorY - ty) / s;
+
+      // anchor가 화면에서 '고정'되도록 새 pan 계산
+      const newTx = anchorX - wx * newScale;
+      const newTy = anchorY - wy * newScale;
+
+      setScale(newScale);
+      setPan({ x: newTx, y: newTy });
+    },
+    [scale, pan]
+  );
+
+  // 컨테이너 중앙 앵커 도우미
+  const getContainerCenter = useCallback(() => {
+    const el = containerRef.current!;
+    const r = el.getBoundingClientRect();
+    return { x: r.width / 2, y: r.height / 2 };
+  }, []);
 
   // 하이라이트 상태 계산
   const highlightState = useMemo(() => {
@@ -140,29 +167,20 @@ export function NetworkMap({
     [isDragging, dragStart]
   );
 
-  // 확대/축소 핸들러
+  // 확대/축소 핸들러 (컨테이너 중앙 기준)
   const handleZoom = useCallback(
     (delta: number) => {
       if (!containerRef.current) return;
-
-      const container = containerRef.current;
-      const rect = container.getBoundingClientRect();
-      const centerX = rect.width / 2;
-      const centerY = rect.height / 2;
-
-      const newScale = Math.max(
+      const next = Math.max(
         minZoom,
         Math.min(maxZoom, scale + delta * zoomSensitivity)
       );
-      const scaleRatio = newScale / scale;
+      if (next === scale) return;
 
-      const newPanX = centerX - (centerX - pan.x) * scaleRatio;
-      const newPanY = centerY - (centerY - pan.y) * scaleRatio;
-
-      setScale(newScale);
-      setPan({ x: newPanX, y: newPanY });
+      const { x, y } = getContainerCenter(); // 중앙 기준(쏠림 방지)
+      applyZoomAt(next, x, y);
     },
-    [scale, pan, minZoom, maxZoom, zoomSensitivity]
+    [scale, minZoom, maxZoom, zoomSensitivity, applyZoomAt, getContainerCenter]
   );
 
   const handleReset = useCallback(() => {
@@ -172,55 +190,42 @@ export function NetworkMap({
 
   // wheel 이벤트 리스너
   useEffect(() => {
-    const container = containerRef.current;
-    if (!container) return;
+    const el = containerRef.current;
+    if (!el) return;
 
-    const handleWheelEvent = (e: WheelEvent) => {
-      // 줌 (Ctrl + 휠 또는 트랙패드 줌)
-      if (e.ctrlKey || Math.abs(e.deltaY) > Math.abs(e.deltaX)) {
-        e.preventDefault();
+    const onWheel = (e: WheelEvent) => {
+      const isZoom = e.ctrlKey || Math.abs(e.deltaY) > Math.abs(e.deltaX);
+      if (!isZoom) return;
 
-        // 트랙패드 감도 향상: deltaY 값을 더 민감하게 처리
-        const delta = e.deltaY > 0 ? -1 : 1;
-        const sensitivity =
-          Math.abs(e.deltaY) > 50 ? zoomSensitivity * 2 : zoomSensitivity;
-        const newScale = Math.max(
-          minZoom,
-          Math.min(maxZoom, scale + delta * sensitivity)
-        );
+      e.preventDefault();
+      const delta = e.deltaY > 0 ? -1 : 1;
+      const sensitivity =
+        Math.abs(e.deltaY) > 50 ? zoomSensitivity * 2 : zoomSensitivity;
 
-        if (newScale !== scale) {
-          const rect = container.getBoundingClientRect();
-          const centerX = rect.width / 2;
-          const centerY = rect.height / 2;
-          const scaleRatio = newScale / scale;
+      const next = Math.max(
+        minZoom,
+        Math.min(maxZoom, scale + delta * sensitivity)
+      );
+      if (next === scale) return;
 
-          const newPanX = centerX - (centerX - pan.x) * scaleRatio;
-          const newPanY = centerY - (centerY - pan.y) * scaleRatio;
-
-          setScale(newScale);
-          setPan({ x: newPanX, y: newPanY });
-        }
-      }
-      // 팬 (트랙패드 드래그)
-      else if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) {
-        e.preventDefault();
-
-        // 트랙패드 팬 감도 향상 (맥 전용)
-        const panSensitivity = 4.0; // 1.5 → 3.0으로 증가
-        const newPanX = pan.x - e.deltaX * panSensitivity;
-        const newPanY = pan.y - e.deltaY * panSensitivity;
-
-        setPan({ x: newPanX, y: newPanY });
-      }
+      // ✅ '항상 같은 기준점'이면 쏠림 없음: 컨테이너 중앙
+      //  마우스 위치 기준으로 바꾸고 싶으면 아래 두 줄 대신
+      //  const rect = el.getBoundingClientRect();
+      //  const x = e.clientX - rect.left, y = e.clientY - rect.top;
+      const { x, y } = getContainerCenter();
+      applyZoomAt(next, x, y);
     };
 
-    container.addEventListener("wheel", handleWheelEvent, { passive: false });
-
-    return () => {
-      container.removeEventListener("wheel", handleWheelEvent);
-    };
-  }, [scale, pan, minZoom, maxZoom, zoomSensitivity]);
+    el.addEventListener("wheel", onWheel, { passive: false });
+    return () => el.removeEventListener("wheel", onWheel);
+  }, [
+    scale,
+    minZoom,
+    maxZoom,
+    zoomSensitivity,
+    applyZoomAt,
+    getContainerCenter,
+  ]);
 
   // 데이터가 없으면 로딩 상태 표시
   if (!svgText || !nodes.length || !links.length) {
@@ -325,13 +330,8 @@ export function NetworkMap({
           height="100%"
           viewBox="0 0 2721 1747"
           style={{ display: "block" }}>
-          <g
-            transform={`translate(${pan.x},${pan.y}) scale(${scale})`}
-            style={{
-              transition: "transform 0.3s ease-out",
-              transformOrigin: "center",
-            }}>
-            {svgReactTree}
+          <g transform={`translate(${pan.x},${pan.y})`}>
+            <g transform={`scale(${scale})`}>{svgReactTree}</g>
           </g>
         </svg>
       </div>

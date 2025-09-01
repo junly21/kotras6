@@ -39,7 +39,7 @@ interface MockSettlementDetailModalProps {
 }
 
 /** =============================
- *  레이아웃 유틸 클래스 (MockSettlementModal과 동일)
+ *  레이아웃 유틸 클래스 (MockSettlementModal과 완전 동일)
  *  ============================= */
 // 섹션: 반응형 그리드 (FHD에서 4열)
 const sectionCols =
@@ -47,12 +47,10 @@ const sectionCols =
 // 필드(한 줄): 라벨 고정폭 + 값 가변폭
 const fieldRow =
   "grid grid-cols-[var(--label-w)_minmax(0,1fr)] items-center gap-3";
-// 라벨: 한 줄 유지
-const labelCx =
-  "text-sm font-medium whitespace-nowrap leading-tight text-gray-500";
-// 값: 입력칸과 동일한 스타일
-const valueCx =
-  "text-base bg-gray-50 px-3 py-2 rounded-md border border-gray-200";
+// 라벨: 한 줄 유지 (MockSettlementModal과 동일)
+const labelCx = "text-sm font-medium whitespace-nowrap leading-tight";
+// 값: 입력칸과 동일한 스타일 (MockSettlementModal의 Input과 동일)
+const valueCx = "bg-white px-3 py-2 rounded-md border border-input text-sm";
 
 export function MockSettlementDetailModal({
   isOpen,
@@ -226,12 +224,10 @@ export function MockSettlementDetailModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      {/* MockSettlementModal과 동일한 폭 + 스크롤 */}
-      <DialogContent className="w-[1600px] max-w-[95vw] 2xl:w-[1760px] max-h-[90vh] overflow-y-auto">
+      {/* MockSettlementModal과 완전 동일한 폭 + 스크롤 */}
+      <DialogContent className="w-[1600px] max-w-[95vw] 2xl:w-[1760px] max-h-[95vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="text-xl font-bold">
-            모의정산 상세 정보
-          </DialogTitle>
+          <DialogTitle>모의정산 상세 정보</DialogTitle>
         </DialogHeader>
 
         {isLoading && (
@@ -376,7 +372,8 @@ export function MockSettlementDetailModal({
           </div>
         )}
 
-        <div className="flex justify-end pt-4 border-t">
+        {/* 액션 - MockSettlementModal과 동일한 스타일 */}
+        <div className="flex justify-end gap-2 pt-4 border-t">
           <Button onClick={handleClose} disabled={isLoading}>
             닫기
           </Button>

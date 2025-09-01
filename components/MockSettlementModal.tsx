@@ -163,7 +163,7 @@ export function MockSettlementModal({
   return (
     <Dialog open={isOpen} onOpenChange={loading ? undefined : handleClose}>
       {/* FHD 기준 폭 확장 + 스크롤 */}
-      <DialogContent className="w-[1600px] max-w-[95vw] 2xl:w-[1760px] max-h-[90vh] overflow-y-auto">
+      <DialogContent className="w-[1600px] max-w-[95vw] 2xl:w-[1760px] max-h-[95vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>모의정산 등록</DialogTitle>
         </DialogHeader>
@@ -188,7 +188,11 @@ export function MockSettlementModal({
                     <FormItem className={fieldRow}>
                       <FormLabel className={labelCx}>정산명 *</FormLabel>
                       <FormControl>
-                        <Input {...field} placeholder="정산명을 입력하세요" className="bg-white" />
+                        <Input
+                          {...field}
+                          placeholder="정산명을 입력하세요"
+                          className="bg-white text-foreground focus:text-foreground"
+                        />
                       </FormControl>
                       <FormMessage className={msgCx} showErrorMessages />
                     </FormItem>
@@ -249,6 +253,7 @@ export function MockSettlementModal({
                           onChange={(e) =>
                             field.onChange(Number(e.target.value))
                           }
+                          className="bg-white text-foreground focus:text-foreground"
                         />
                       </FormControl>
                       <FormMessage className={msgCx} showErrorMessages />
@@ -272,6 +277,7 @@ export function MockSettlementModal({
                           onChange={(e) =>
                             field.onChange(Number(e.target.value))
                           }
+                          className="bg-white text-foreground focus:text-foreground"
                         />
                       </FormControl>
                       <FormMessage className={msgCx} showErrorMessages />
@@ -295,6 +301,7 @@ export function MockSettlementModal({
                           onChange={(e) =>
                             field.onChange(Number(e.target.value))
                           }
+                          className="bg-white text-foreground focus:text-foreground"
                         />
                       </FormControl>
                       <FormMessage className={msgCx} showErrorMessages />
@@ -316,6 +323,7 @@ export function MockSettlementModal({
                           onChange={(e) =>
                             field.onChange(Number(e.target.value))
                           }
+                          className="bg-white text-foreground focus:text-foreground"
                         />
                       </FormControl>
                       <FormMessage className={msgCx} showErrorMessages />
@@ -347,6 +355,7 @@ export function MockSettlementModal({
                           onChange={(e) =>
                             field.onChange(Number(e.target.value))
                           }
+                          className="bg-white text-foreground focus:text-foreground"
                         />
                       </FormControl>
                       <FormMessage className={msgCx} showErrorMessages />
@@ -368,6 +377,7 @@ export function MockSettlementModal({
                           onChange={(e) =>
                             field.onChange(Number(e.target.value))
                           }
+                          className="bg-white text-foreground focus:text-foreground"
                         />
                       </FormControl>
                       <FormMessage className={msgCx} showErrorMessages />
@@ -401,6 +411,7 @@ export function MockSettlementModal({
                           onChange={(e) =>
                             field.onChange(Number(e.target.value))
                           }
+                          className="bg-white text-foreground focus:text-foreground"
                         />
                       </FormControl>
                       <FormMessage className={msgCx} showErrorMessages />
@@ -424,6 +435,7 @@ export function MockSettlementModal({
                           onChange={(e) =>
                             field.onChange(Number(e.target.value))
                           }
+                          className="bg-white text-foreground focus:text-foreground"
                         />
                       </FormControl>
                       <FormMessage className={msgCx} showErrorMessages />
@@ -456,6 +468,7 @@ export function MockSettlementModal({
                             onChange={(e) =>
                               field.onChange(Number(e.target.value))
                             }
+                            className="bg-white text-foreground focus:text-foreground"
                           />
                         </FormControl>
                         <FormMessage className={msgCx} showErrorMessages />

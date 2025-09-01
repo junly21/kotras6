@@ -204,7 +204,7 @@ export default function TransactionAnalysisPage() {
       {/* CSV 내보내기 버튼 */}
       {hasSearched && apiData && apiData.length > 0 && (
         <div className="flex justify-between items-center mb-4">
-          <h3 className="text-lg font-semibold">거래내역 분석결과</h3>
+          <h3 className="text-lg font-semibold">상위 거래내역 분석결과</h3>
           <div className="flex items-center gap-4">
             <CsvExportButton
               gridRef={gridRef}
@@ -216,7 +216,7 @@ export default function TransactionAnalysisPage() {
       )}
 
       {/* 그리드 */}
-      <div className="relative h-[700px] overflow-y-auto">
+      <div className="relative h-[calc(100vh-370px)] overflow-y-auto">
         {hasSearched && loading && (
           <div className="absolute inset-0 flex items-center justify-center bg-white/80 z-10">
             <Spinner />

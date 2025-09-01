@@ -73,7 +73,7 @@ export default function TransactionDetailPage() {
     );
 
     return {
-      trcr_no: "총계",
+      trcr_no: `총 ${data.length}건`,
       ride_dtm: "",
       algh_dtm: "",
       ride_nm: "",
@@ -313,7 +313,7 @@ export default function TransactionDetailPage() {
             rowData={hasSearched ? apiData ?? [] : []} // ✅ 모든 데이터 렌더링
             columnDefs={colDefs}
             gridRef={gridRef}
-            height={465}
+            height={540}
             pinnedBottomRowData={
               hasSearched && apiData.length > 0
                 ? [calculateTotals(apiData)]

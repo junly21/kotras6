@@ -74,7 +74,7 @@ export function StationSelectionModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl max-h-[80vh] flex flex-col">
+      <DialogContent className="w-[600px] max-h-[80vh] flex flex-col">
         <DialogHeader>
           <DialogTitle className="flex items-center justify-between">
             <span>{title}</span>
@@ -156,35 +156,33 @@ export function StationSelectionModal({
           </div>
 
           {/* 선택된 역 미리보기 */}
-          {selectedCount > 0 && (
-            <div className="border-t pt-4">
-              <h4 className="text-sm font-medium mb-2">
-                선택된 역 ({selectedCount}개)
-              </h4>
-              <div className="flex flex-wrap gap-2 max-h-20 overflow-y-auto">
-                {selectedStations.map((stationValue) => {
-                  const station = options.find(
-                    (opt) => String(opt.value) === stationValue
-                  );
-                  return (
-                    <div
-                      key={stationValue}
-                      className="flex items-center gap-1 bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs">
-                      <span>{station?.label}</span>
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleToggleStation(stationValue);
-                        }}
-                        className="ml-1 hover:bg-blue-200 rounded-full p-0.5">
-                        <X className="w-3 h-3" />
-                      </button>
-                    </div>
-                  );
-                })}
-              </div>
+          <div className="border-t pt-4">
+            <h4 className="text-sm font-medium mb-2">
+              선택된 역 ({selectedCount}개)
+            </h4>
+            <div className="flex flex-wrap gap-2 min-h-[32px] max-h-16 overflow-y-auto">
+              {selectedStations.map((stationValue) => {
+                const station = options.find(
+                  (opt) => String(opt.value) === stationValue
+                );
+                return (
+                  <div
+                    key={stationValue}
+                    className="flex items-center gap-1 bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs">
+                    <span>{station?.label}</span>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleToggleStation(stationValue);
+                      }}
+                      className="ml-1 hover:bg-blue-200 rounded-full p-0.5">
+                      <X className="w-3 h-3" />
+                    </button>
+                  </div>
+                );
+              })}
             </div>
-          )}
+          </div>
         </div>
 
         <DialogFooter>

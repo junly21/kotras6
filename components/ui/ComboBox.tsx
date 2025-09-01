@@ -56,7 +56,7 @@ export function ComboBox({
           {value ? options.find((o) => o.value === value)?.label : placeholder}
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-36 p-0">
+      <PopoverContent className="w-54 p-0">
         <Command shouldFilter={false}>
           <CommandInput
             placeholder="검색..."

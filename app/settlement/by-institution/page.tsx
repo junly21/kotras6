@@ -320,7 +320,17 @@ export default function SettlementByInstitutionPage() {
       <div className="grid grid-cols-2 gap-6 h-[650px]">
         {/* 왼쪽: 정산결과 그리드 */}
         <div className="flex flex-col h-full">
-          <h2 className="text-lg font-semibold">기관별 조회 결과</h2>
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-lg font-semibold">기관별 조회 결과</h2>
+            <div className="flex items-center gap-4">
+              <UnitRadioGroup value={unit} onChange={setUnit} />
+              <CsvExportButton
+                gridRef={gridRef}
+                fileName="settlement_by_institution_data.csv"
+                className="shadow-lg bg-accent-500"
+              />
+            </div>
+          </div>
           <div className="relative flex-1 h-full">
             {hasSearched && loading && (
               <div className="absolute inset-0 flex items-center justify-center bg-white/80 z-10">
@@ -346,16 +356,7 @@ export default function SettlementByInstitutionPage() {
 
         {/* 오른쪽: 차트 영역 */}
         <div className="flex flex-col h-full">
-          <div className="flex justify-end items-center mb-4">
-            <div className="flex items-center gap-4">
-              <UnitRadioGroup value={unit} onChange={setUnit} />
-              <CsvExportButton
-                gridRef={gridRef}
-                fileName="settlement_by_institution_data.csv"
-                className="shadow-lg bg-accent-500"
-              />
-            </div>
-          </div>
+          <div className="mb-4 h-[40px]"></div>
           <div className="relative flex-1 h-full">
             {!hasSearched ? (
               <div className="h-full flex items-center justify-center bg-gray-50 border-2 border-dashed border-gray-300 rounded">

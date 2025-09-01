@@ -436,23 +436,22 @@ export default function MockSettlementByInstitutionPage() {
 
       {/* 하단: 기관별 조회 결과 그리드 */}
       <div className="space-y-2">
-        <div className="flex justify-between items-center">
-          <h3 className="text-lg font-semibold">기관별 조회 결과</h3>
-          <div className="flex items-center gap-4">
-            <UnitRadioGroup value={unit} onChange={setUnit} />
-            <CsvExportButton
-              gridRef={byInstitutionGridRef}
-              fileName="mock_settlement_by_institution_data.csv"
-              className="shadow-lg bg-accent-500"
-            />
-          </div>
-        </div>
-
         {/* 좌우 그리드 레이아웃 */}
-        <div className="grid grid-cols-2 gap-6 h-[400px]">
+        <div className="grid grid-cols-2 gap-6 h-[450px]">
           {/* 왼쪽: 기관별 조회 결과 그리드 */}
-          <div className="flex flex-col h-full ]">
-            <div className="relative flex-1 h-full max-h-[375px]">
+          <div className="flex flex-col h-full">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-semibold">기관별 조회 결과</h3>
+              <div className="flex items-center gap-4">
+                <UnitRadioGroup value={unit} onChange={setUnit} />
+                <CsvExportButton
+                  gridRef={byInstitutionGridRef}
+                  fileName="mock_settlement_by_institution_data.csv"
+                  className="shadow-lg bg-accent-500"
+                />
+              </div>
+            </div>
+            <div className="relative flex-1 h-full max-h-[425px]">
               {hasSearched && isLoading && (
                 <div className="absolute inset-0 h-100vh flex items-center justify-center bg-white/80 z-10">
                   <Spinner />
@@ -475,10 +474,11 @@ export default function MockSettlementByInstitutionPage() {
           </div>
 
           {/* 오른쪽: 차트 영역 */}
-          <div className="flex flex-col h-full ">
-            <div className="relative flex-1 h-full  ">
+          <div className="flex flex-col h-full">
+            <div className="mb-4 h-[40px]"></div>
+            <div className="relative flex-1 h-full">
               {!hasSearched ? (
-                <div className="h-full max-h-[375px] flex items-center justify-center bg-gray-50 border-2 border-dashed border-gray-300 rounded">
+                <div className="h-full max-h-[425px] flex items-center justify-center bg-gray-50 border-2 border-dashed border-gray-300 rounded">
                   <div className="text-center text-gray-500">
                     <p className="text-lg font-medium">
                       조회 버튼을 눌러주세요

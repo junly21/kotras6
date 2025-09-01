@@ -776,6 +776,7 @@ export default function MockSettlementByOdPage() {
                         config={{
                           width: "100%",
                           height: "100%",
+                          showLegend: true,
                         }}
                         highlights={pathHighlights}
                         tooltips={customTooltips}

@@ -26,6 +26,7 @@ export function NetworkMap({
   const {
     showZoomControls = true,
     showTooltips = true,
+    showLegend = true, // 범례 표시 여부
     defaultZoom = 0.25,
     defaultPan = { x: -1000, y: -1200 },
     minZoom = 0.1,
@@ -263,6 +264,48 @@ export function NetworkMap({
           </Button>
         </div>
       )}
+
+      {/* 범례 이미지 - 우측 상단 고정 */}
+      {showLegend && (
+        <div
+          className="absolute top-4 right-4 z-100"
+          style={{
+            pointerEvents: "auto", // 스크롤을 위해 auto로 변경
+            width: "120px",
+            height: "600px",
+            overflowY: "auto", // 세로 스크롤 추가
+            overflowX: "hidden", // 가로 스크롤 숨김
+            // 스크롤바 스타일링
+            scrollbarWidth: "thin",
+            scrollbarColor: "rgba(0, 0, 0, 0.3) transparent",
+          }}
+          onMouseDown={(e) => {
+            // 범례 영역에서 마우스 이벤트 전파 중단
+            e.stopPropagation();
+          }}
+          onMouseMove={(e) => {
+            // 범례 영역에서 마우스 이벤트 전파 중단
+            e.stopPropagation();
+          }}
+          onMouseUp={(e) => {
+            // 범례 영역에서 마우스 이벤트 전파 중단
+            e.stopPropagation();
+          }}>
+          <img
+            src="/line_legend.png" // 올바른 파일명으로 수정
+            alt="범례"
+            className="w-full h-auto object-contain"
+            style={{
+              filter: "drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1))",
+              backgroundColor: "rgba(255, 255, 255, 0.9)",
+              borderRadius: "8px",
+              padding: "4px",
+              pointerEvents: "none", // 이미지는 클릭 방지
+            }}
+          />
+        </div>
+      )}
+
       <div
         ref={containerRef}
         className="flex-1"

@@ -141,6 +141,7 @@ export interface NetworkMapConfig {
   height?: number | string;
   showZoomControls?: boolean;
   showTooltips?: boolean;
+  showLegend?: boolean; // 범례 표시 여부
   defaultZoom?: number;
   defaultPan?: { x: number; y: number };
   minZoom?: number;

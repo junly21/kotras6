@@ -534,6 +534,7 @@ export default function SettlementByOdPage() {
                           height: "100%",
                           showZoomControls: true,
                           showTooltips: true,
+                          showLegend: true,
                         }}
                         highlights={pathHighlights}
                         tooltips={customTooltips}

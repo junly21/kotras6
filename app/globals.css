@@ -155,6 +155,14 @@
   background: #f1f1f1;
 }
 
+.ag-header-cell, .ag-header-group-cell, .ag-theme-alpine .ag-cell {
+  border-right: 1px solid #E9E9E9;
+}
+
+.ag-header-cell:last-child, .ag-header-group-cell:last-child, .ag-theme-alpine .ag-cell:last-child {
+  border-right: 0;
+}
+
 /*  */
 .text-destructive {
   position: absolute;

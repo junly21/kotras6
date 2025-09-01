@@ -204,6 +204,7 @@ export default function MockSettlementByRoutePage() {
       flex: 1,
       minWidth: 120,
       resizable: false,
+      cellStyle: { textAlign: "right" },
     },
     {
       headerName: "초승노선",
@@ -211,6 +212,7 @@ export default function MockSettlementByRoutePage() {
       flex: 1,
       minWidth: 120,
       resizable: false,
+      cellStyle: { textAlign: "right" },
     },
     {
       headerName: "노선동등",
@@ -218,6 +220,7 @@ export default function MockSettlementByRoutePage() {
       flex: 1,
       minWidth: 120,
       resizable: false,
+      cellStyle: { textAlign: "right" },
     },
     {
       headerName: "인.km",

@@ -86,19 +86,42 @@ function renderNodeElement(
 
   const textElement = (
     <text
-      x={textPos.x}
-      y={textPos.y}
+      x={(() => {
+        const raw = nodeData.name.split("_")[1] || nodeData.name;
+        const idx = raw.indexOf("(");
+        const stationName = idx > -1 ? raw.slice(0, idx) : raw;
+        if (stationName.length >= 8) return textPos.x - 50;
+        return textPos.x - 2;
+      })()}
+      y={(() => {
+        const raw = nodeData.name.split("_")[1] || nodeData.name;
+        const idx = raw.indexOf("(");
+        const stationName = idx > -1 ? raw.slice(0, idx) : raw;
+        if (stationName.length >= 8) return textPos.y + 20;
+        if (stationName.length >= 6) return textPos.y + 10;
+        return textPos.y + 3;
+      })()}
       fontSize={(() => {
         const raw = nodeData.name.split("_")[1] || nodeData.name;
         const idx = raw.indexOf("(");
         const stationName = idx > -1 ? raw.slice(0, idx) : raw;
-        if (stationName.length >= 8) return 16;
+        if (stationName.length >= 8) return 22;
         if (stationName.length >= 6) return 20;
-        return 24;
+        if (stationName.length >= 5) return 22;
+        if (stationName.length >= 4) return 28;
+        if (stationName.length >= 3) return 32;
+        return 36;
       })()}
       fontFamily="Arial, sans-serif"
-      fill="#374151"
-      pointerEvents="none">
+      fill="#000000"
+      fontWeight="bold"
+      pointerEvents="none"
+      dominantBaseline="middle"
+      textAnchor="start"
+      stroke="white"
+      strokeWidth="0.5"
+      paintOrder="stroke fill"
+      style={{ opacity }}>
       {(() => {
         const raw = nodeData.name.split("_")[1] || nodeData.name;
         const idx = raw.indexOf("(");
@@ -113,34 +136,45 @@ function renderNodeElement(
   // 하이라이트 상태에 따라 z-index 조정 (하이라이트된 요소를 최상위로)
   const zIndex = shouldShowTooltip ? 10 : 1;
 
+  // 텍스트 요소를 별도로 반환하여 최상위에서 렌더링되도록 함
+  const textElementWithKey = React.cloneElement(textElement, {
+    key: `text-${id}`,
+  });
+
   if (showTooltips && shouldShowTooltip && tooltips?.node) {
     return (
-      <g key={id} style={{ opacity, zIndex }}>
-        <Tooltip>
-          <TooltipTrigger asChild>{nodeElement}</TooltipTrigger>
-          <RadixTooltipContent>{tooltips.node(nodeData)}</RadixTooltipContent>
-        </Tooltip>
-        {textElement}
-      </g>
+      <>
+        <g key={id} style={{ opacity, zIndex }}>
+          <Tooltip>
+            <TooltipTrigger asChild>{nodeElement}</TooltipTrigger>
+            <RadixTooltipContent>{tooltips.node(nodeData)}</RadixTooltipContent>
+          </Tooltip>
+        </g>
+        {textElementWithKey}
+      </>
     );
   } else if (showTooltips && shouldShowTooltip) {
     return (
-      <g key={id} style={{ opacity, zIndex }}>
-        <Tooltip>
-          <TooltipTrigger asChild>{nodeElement}</TooltipTrigger>
-          <RadixTooltipContent>
-            <DefaultNodeTooltip node={nodeData} />
-          </RadixTooltipContent>
-        </Tooltip>
-        {textElement}
-      </g>
+      <>
+        <g key={id} style={{ opacity, zIndex }}>
+          <Tooltip>
+            <TooltipTrigger asChild>{nodeElement}</TooltipTrigger>
+            <RadixTooltipContent>
+              <DefaultNodeTooltip node={nodeData} />
+            </RadixTooltipContent>
+          </Tooltip>
+        </g>
+        {textElementWithKey}
+      </>
     );
   } else {
     return (
-      <g key={id} style={{ opacity, zIndex }}>
-        {nodeElement}
-        {textElement}
-      </g>
+      <>
+        <g key={id} style={{ opacity, zIndex }}>
+          {nodeElement}
+        </g>
+        {textElementWithKey}
+      </>
     );
   }
 }
@@ -196,7 +230,7 @@ function renderLinkElement(
  * @param highlightState 하이라이트 상태
  * @param showTooltips 툴팁 표시 여부
  * @param tooltips 커스텀 툴팁
- * @returns 렌더링된 React 노드
+ * @returns 렌더링된 React 노드와 텍스트 요소들
  */
 export function renderSvgNode(
   node: INode,
@@ -210,11 +244,14 @@ export function renderSvgNode(
   tooltips?: {
     node?: (node: Node) => React.ReactNode;
   }
-): React.ReactNode {
+): { pathElements: React.ReactNode[]; textElements: React.ReactNode[] } {
+  const pathElements: React.ReactNode[] = [];
+  const textElements: React.ReactNode[] = [];
+
   // 1) 역(Station): id가 숫자만
   if (node.name === "path" && /^\d+$/.test(node.attributes.id)) {
     const nodeData = nodesData.find((n) => n.id === node.attributes.id);
-    if (!nodeData) return null;
+    if (!nodeData) return { pathElements: [], textElements: [] };
 
     // 하이라이트 상태 확인 - 하이라이트되지 않은 요소는 pointer-events: none 적용
     if (highlightState) {
@@ -233,7 +270,7 @@ export function renderSvgNode(
             pointerEvents: "none",
           },
         };
-        return renderNodeElement(
+        const result = renderNodeElement(
           disabledNode,
           nodeData,
           highlightState!,
@@ -241,10 +278,35 @@ export function renderSvgNode(
           showTooltips,
           tooltips
         );
+
+        // 결과에서 텍스트 요소와 경로 요소 분리
+        if (result && typeof result === "object" && "props" in result) {
+          const props = result.props as { children?: React.ReactNode[] };
+          if (props.children && Array.isArray(props.children)) {
+            props.children.forEach((child: React.ReactNode) => {
+              if (
+                child &&
+                typeof child === "object" &&
+                "type" in child &&
+                child.type === "text"
+              ) {
+                textElements.push(child);
+              } else {
+                pathElements.push(child);
+              }
+            });
+          } else {
+            pathElements.push(result);
+          }
+        } else {
+          pathElements.push(result);
+        }
+
+        return { pathElements, textElements };
       }
     }
 
-    return renderNodeElement(
+    const result = renderNodeElement(
       node,
       nodeData,
       highlightState!,
@@ -252,6 +314,31 @@ export function renderSvgNode(
       showTooltips,
       tooltips
     );
+
+    // 결과에서 텍스트 요소와 경로 요소 분리
+    if (result && typeof result === "object" && "props" in result) {
+      const props = result.props as { children?: React.ReactNode[] };
+      if (props.children && Array.isArray(props.children)) {
+        props.children.forEach((child: React.ReactNode) => {
+          if (
+            child &&
+            typeof child === "object" &&
+            "type" in child &&
+            child.type === "text"
+          ) {
+            textElements.push(child);
+          } else {
+            pathElements.push(child);
+          }
+        });
+      } else {
+        pathElements.push(result);
+      }
+    } else {
+      pathElements.push(result);
+    }
+
+    return { pathElements, textElements };
   }
 
   // 2) 간선(Link): id가 "숫자-숫자"
@@ -264,17 +351,17 @@ export function renderSvgNode(
         (l.source === dst && l.target === src)
     );
 
-    if (!link) return null;
+    if (!link) return { pathElements: [], textElements: [] };
 
-    return renderLinkElement(node, link, highlightState!, onLinkClick);
+    const result = renderLinkElement(node, link, highlightState!, onLinkClick);
+    pathElements.push(result);
+    return { pathElements, textElements };
   }
 
   // 3) 나머지 원소들은 그대로 재귀
-  return React.createElement(
-    node.name,
-    { ...toCamelCaseAttrs(node.attributes), key: key || node.attributes.id },
-    node.children?.map((child: INode, i: number) =>
-      renderSvgNode(
+  if (node.children && node.children.length > 0) {
+    node.children.forEach((child: INode, i: number) => {
+      const childResult = renderSvgNode(
         child,
         nodesData,
         linksData,
@@ -284,9 +371,13 @@ export function renderSvgNode(
         highlightState,
         showTooltips,
         tooltips
-      )
-    )
-  );
+      );
+      pathElements.push(...childResult.pathElements);
+      textElements.push(...childResult.textElements);
+    });
+  }
+
+  return { pathElements, textElements };
 }
 
 /**
@@ -301,7 +392,7 @@ export function reorderSvgForHighlightPriority(
     return svgNode;
   }
 
-  // 하이라이트된 요소와 하이라이트되지 않은 요소를 분리
+  // 요소들을 카테고리별로 분리
   const highlightedElements: INode[] = [];
   const normalElements: INode[] = [];
 
@@ -358,7 +449,7 @@ export function reorderSvgForHighlightPriority(
     }
   });
 
-  // 하이라이트되지 않은 요소를 먼저, 하이라이트된 요소를 나중에 배치
+  // 렌더링 순서: 일반 요소 → 하이라이트된 요소
   return {
     ...svgNode,
     children: [...normalElements, ...highlightedElements],

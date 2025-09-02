@@ -34,7 +34,10 @@ export function NetworkMap({
     zoomSensitivity = 0.05,
   } = config;
 
-  const [svgReactTree, setSvgReactTree] = useState<React.ReactNode>(null);
+  const [svgReactTree, setSvgReactTree] = useState<{
+    pathElements: React.ReactNode[];
+    textElements: React.ReactNode[];
+  } | null>(null);
   const [scale, setScale] = useState(defaultZoom);
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
@@ -133,6 +136,7 @@ export function NetworkMap({
     svgText,
     nodes,
     links,
+    highlights.length, // highlights.length를 의존성으로 추가
     highlightState, // highlightState만 의존성으로 유지
     onNodeClick,
     onLinkClick,
@@ -331,7 +335,10 @@ export function NetworkMap({
           viewBox="0 0 2721 1747"
           style={{ display: "block" }}>
           <g transform={`translate(${pan.x},${pan.y})`}>
-            <g transform={`scale(${scale})`}>{svgReactTree}</g>
+            {/* 경로 요소들 먼저 렌더링 */}
+            <g transform={`scale(${scale})`}>{svgReactTree.pathElements}</g>
+            {/* 텍스트 요소들을 별도 그룹으로 최상위에 렌더링 (하이라이트 상태 반영) */}
+            <g transform={`scale(${scale})`}>{svgReactTree.textElements}</g>
           </g>
         </svg>
       </div>

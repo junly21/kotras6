@@ -76,7 +76,7 @@ export async function POST(request: NextRequest) {
     const { data } = await callExternalApi("selectSimPayRecvInfo.do", {
       method: "POST",
       body: {
-        STMT_NM: stmtNm,
+        SIM_STMT_GRP_ID: stmtNm,
         CARD_DT: cardDt || "ALL",
       },
     });

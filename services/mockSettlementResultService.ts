@@ -1,6 +1,5 @@
 import { ApiResponse } from "./apiClient";
 import {
-  MockSettlementResultFilters,
   MockSettlementResultData,
   SettlementResultData,
 } from "@/types/mockSettlementResult";
@@ -8,7 +7,7 @@ import {
 export class MockSettlementResultService {
   // 모의정산 정보 데이터 조회
   static async getMockSettlementInfoData(
-    simStmtGrpId: string
+    settlementName: string
   ): Promise<ApiResponse<MockSettlementResultData[]>> {
     try {
       const response = await fetch("/api/mock-settlement/settlement-info", {
@@ -16,7 +15,7 @@ export class MockSettlementResultService {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ simStmtGrpId }),
+        body: JSON.stringify({ simStmtGrpId: settlementName }),
       });
 
       if (!response.ok) {
@@ -27,12 +26,12 @@ export class MockSettlementResultService {
 
       // 외부 응답 필드를 그리드에서 기대하는 필드로 매핑
       const mapped: MockSettlementResultData[] = Array.isArray(raw)
-        ? raw.map((item: any) => {
+        ? raw.map((item: Record<string, unknown>) => {
             const toIsoDate = (ms: unknown) => {
               if (typeof ms === "number") {
                 try {
                   return new Date(ms).toISOString().slice(0, 10);
-                } catch (_e) {
+                } catch {
                   return "";
                 }
               }
@@ -41,9 +40,10 @@ export class MockSettlementResultService {
 
             return {
               // 정산명(표시용)
-              settlementName: item?.stmt_nm ?? "",
+              settlementName: (item?.stmt_nm as string) ?? "",
               // 거래일자: 우선 문자열 날짜, 없으면 타임스탬프 포맷
-              transactionDate: item?.to_char ?? toIsoDate(item?.card_dt),
+              transactionDate:
+                (item?.to_char as string) ?? toIsoDate(item?.card_dt),
               // 태그기관/초승노선/노선동등/인.km 매핑
               tagAgency:
                 item?.tag_oper_prop != null ? String(item.tag_oper_prop) : "-",
@@ -58,7 +58,7 @@ export class MockSettlementResultService {
                   ? item.km_prop
                   : Number(item?.km_prop) || 0,
               // 상세 조회용 ID 보존
-              simStmtGrpId: item?.sim_stmt_grp_id ?? "",
+              simStmtGrpId: (item?.sim_stmt_grp_id as string) ?? "",
             };
           })
         : [];

@@ -12,12 +12,15 @@ export class MockSettlementByOdService {
     settlementName: string
   ): Promise<ApiResponse<MockSettlementInfo[]>> {
     try {
+      console.log("MockSettlementByOdService.getSettlementInfo 호출:", {
+        settlementName,
+      });
       const response = await fetch("/api/mock-settlement/settlement-info", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ settlementName }),
+        body: JSON.stringify({ simStmtGrpId: settlementName }),
       });
 
       if (!response.ok) {

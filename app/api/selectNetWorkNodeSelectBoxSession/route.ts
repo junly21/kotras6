@@ -20,7 +20,7 @@ export async function GET(request: NextRequest) {
       }
     );
 
-    console.log("외부 API 응답:", data);
+    // console.log("외부 API 응답:", data);
 
     // 외부 API 응답을 그대로 반환
     return NextResponse.json(
@@ -59,7 +59,7 @@ export async function POST(request: Request) {
       }
     );
 
-    console.log("외부 API 응답:", data);
+    // console.log("외부 API 응답:", data);
 
     // 외부 API 응답을 그대로 반환
     return NextResponse.json(

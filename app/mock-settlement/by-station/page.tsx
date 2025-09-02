@@ -27,6 +27,7 @@ ModuleRegistry.registerModules([AllCommunityModule]);
 // 검증 스키마 (첫 번째 역은 필수, 나머지 역은 선택사항)
 const mockSettlementByStationSchema = z
   .object({
+    settlementName: z.string().optional(),
     STN_ID1: z.string().min(1, "첫 번째 역을 선택해주세요"),
     STN_ID2: z.string().optional(),
     STN_ID3: z.string().optional(),
@@ -188,12 +189,16 @@ export default function MockSettlementByStationPage() {
 
       try {
         // 두 개의 API 호출로 각각 데이터 조회
+        console.log("by-station 검색 시작:", values);
         const [mockResponse, byStationResponse] = await Promise.all([
           MockSettlementResultService.getMockSettlementInfoData(
             values.settlementName
           ),
           MockSettlementByStationService.getMockSettlementByStationData(values),
         ]);
+
+        console.log("by-station 모의정산 정보 응답:", mockResponse);
+        console.log("by-station 역사별 조회 응답:", byStationResponse);
 
         if (mockResponse.success && mockResponse.data) {
           setMockSettlementData(mockResponse.data);
@@ -328,17 +333,21 @@ export default function MockSettlementByStationPage() {
   // 행 더블클릭 핸들러
   const handleRowDoubleClick = useCallback(
     (event: { data: MockSettlementResultData }) => {
-      console.log("행 더블클릭 이벤트 발생:", event);
+      console.log("by-station 모의정산 정보 행 더블클릭 이벤트 발생:", event);
       const { data } = event;
+      console.log("by-station 더블클릭된 데이터:", data);
+      console.log("by-station 데이터의 simStmtGrpId:", data?.simStmtGrpId);
+      console.log("by-station 데이터의 settlementName:", data?.settlementName);
+
       if (data && (data.simStmtGrpId || data.settlementName)) {
-        console.log("선택된 데이터:", data);
+        console.log("by-station 선택된 모의정산 정보:", data);
         setSelectedSettlement({
           simStmtGrpId: data.simStmtGrpId || data.settlementName,
           data: data,
         });
         setIsDetailModalOpen(true);
       } else {
-        console.log("settlementName이 없습니다:", data);
+        console.log("by-station settlementName이 없습니다:", data);
       }
     },
     []

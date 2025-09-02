@@ -8,8 +8,8 @@ import {
   MockSettlementByOdFilters,
   MockSettlementByOdData,
   MockSettlementByOdDetailData,
-  MockSettlementInfo,
 } from "@/types/mockSettlementByOd";
+import { MockSettlementResultData } from "@/types/mockSettlementResult";
 import { MockSettlementByOdService } from "@/services/mockSettlementByOdService";
 import { MockSettlementControlService } from "@/services/mockSettlementControlService";
 import { createMockSettlementByOdColDefs } from "@/features/mockSettlementByOd/gridConfig";
@@ -62,9 +62,9 @@ export default function MockSettlementByOdPage() {
   const [hasSearched, setHasSearched] = useState(false);
 
   // 모의정산 정보 상태
-  const [settlementInfo, setSettlementInfo] = useState<MockSettlementInfo[]>(
-    []
-  );
+  const [settlementInfo, setSettlementInfo] = useState<
+    MockSettlementResultData[]
+  >([]);
 
   // 경유지 상세정보 상태
   const [detailData, setDetailData] = useState<MockSettlementByOdDetailData[]>(
@@ -80,7 +80,7 @@ export default function MockSettlementByOdPage() {
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   const [selectedSettlement, setSelectedSettlement] = useState<{
     simStmtGrpId: string;
-    data: MockSettlementInfo;
+    data: MockSettlementResultData;
   } | null>(null);
 
   // 모의정산 실행여부 체크 관련 상태
@@ -393,19 +393,22 @@ export default function MockSettlementByOdPage() {
 
   // 모의정산 정보 행 더블클릭 핸들러
   const handleInfoRowDoubleClick = useCallback(
-    (event: { data: MockSettlementInfo }) => {
-      console.log("모의정산 정보 행 더블클릭 이벤트 발생:", event);
+    (event: { data: MockSettlementResultData }) => {
+      console.log("by-od 모의정산 정보 행 더블클릭 이벤트 발생:", event);
       const { data } = event;
+      console.log("by-od 더블클릭된 데이터:", data);
+      console.log("by-od 데이터의 simStmtGrpId:", data?.simStmtGrpId);
+      console.log("by-od 데이터의 settlementName:", data?.settlementName);
+
       if (data && (data.simStmtGrpId || data.settlementName)) {
-        console.log("선택된 모의정산 정보:", data);
+        console.log("by-od 선택된 모의정산 정보:", data);
         setSelectedSettlement({
-          simStmtGrpId:
-            (data as any).simStmtGrpId || (data as any).settlementName,
+          simStmtGrpId: data.simStmtGrpId || data.settlementName,
           data: data,
         });
         setIsDetailModalOpen(true);
       } else {
-        console.log("settlementName이 없습니다:", data);
+        console.log("by-od settlementName이 없습니다:", data);
       }
     },
     []
@@ -457,12 +460,16 @@ export default function MockSettlementByOdPage() {
 
       try {
         // 두 개의 API 호출로 각각 데이터 조회 (다른 페이지들과 동일한 방식)
+        console.log("by-od 검색 시작:", values);
         const [mockResponse, byOdResponse] = await Promise.all([
           MockSettlementResultService.getMockSettlementInfoData(
             values.settlementName
           ),
           MockSettlementByOdService.getSettlementData(values),
         ]);
+
+        console.log("by-od 모의정산 정보 응답:", mockResponse);
+        console.log("by-od OD별 조회 응답:", byOdResponse);
 
         if (mockResponse.success && mockResponse.data) {
           setSettlementInfo(mockResponse.data);
@@ -595,6 +602,7 @@ export default function MockSettlementByOdPage() {
         defaultValues={filters}
         schema={z
           .object({
+            settlementName: z.string().optional(),
             STN_ID1: z.string().min(1, "출발역을 선택해주세요"),
             STN_ID2: z.string().min(1, "도착역을 선택해주세요"),
           })

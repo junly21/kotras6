@@ -28,7 +28,7 @@ export async function GET(request: NextRequest) {
       sessionId: extSid, // 세션 ID 전달
     });
 
-    console.log("외부 API 응답:", data);
+    // console.log("외부 API 응답:", data);
 
     // 응답 데이터를 StationOption 형태로 변환
     const stationOptions: StationOption[] = Array.isArray(data)
@@ -45,7 +45,7 @@ export async function GET(request: NextRequest) {
         )
       : [];
 
-    console.log("변환된 역 옵션:", stationOptions);
+    // console.log("변환된 역 옵션:", stationOptions);
 
     return NextResponse.json(
       { options: stationOptions },
@@ -83,7 +83,7 @@ export async function POST(request: NextRequest) {
       sessionId: extSid, // 세션 ID 전달
     });
 
-    console.log("외부 API 응답:", data);
+    // console.log("외부 API 응답:", data);
 
     // 응답 데이터를 StationOption 형태로 변환
     const stationOptions: StationOption[] = Array.isArray(data)
@@ -100,7 +100,7 @@ export async function POST(request: NextRequest) {
         )
       : [];
 
-    console.log("변환된 역 옵션:", stationOptions);
+    // console.log("변환된 역 옵션:", stationOptions);
 
     return NextResponse.json(
       { options: stationOptions },

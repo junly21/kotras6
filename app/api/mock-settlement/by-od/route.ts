@@ -5,9 +5,13 @@ export async function POST(request: NextRequest) {
   try {
     const { settlementName, STN_ID1, STN_ID2 } = await request.json();
 
-    if (!settlementName || !STN_ID1 || !STN_ID2) {
+    // settlementName이 없으면 빈 문자열로 기본값 설정
+    const finalSettlementName = settlementName || "";
+
+    // 출발역과 도착역은 여전히 필수
+    if (!STN_ID1 || !STN_ID2) {
       return NextResponse.json(
-        { error: "정산명, 출발역, 도착역이 모두 필요합니다." },
+        { error: "출발역과 도착역이 모두 필요합니다." },
         { status: 400, headers: createCorsHeaders() }
       );
     }
@@ -22,13 +26,13 @@ export async function POST(request: NextRequest) {
     const { data } = await callExternalApi("selectSimPayRecvOD.do", {
       method: "POST",
       body: {
-        SIM_STMT_GRP_ID: settlementName,
+        SIM_STMT_GRP_ID: finalSettlementName,
         RIDE_STN_ID: STN_ID1,
         ALGH_STN_ID: STN_ID2,
       },
     });
 
-    console.log("외부 API 모의정산 OD별 조회 결과:", data);
+    console.log("by-od 외부 API 응답:", data?.length || 0, "개");
 
     return NextResponse.json(data || [], { headers: createCorsHeaders() });
   } catch (error) {

@@ -1,9 +1,26 @@
+// undici 전역 디스패처 설정 (5분 타임아웃 해결)
+import "@/lib/undici-dispatcher";
+
 import { NextRequest, NextResponse } from "next/server";
 import { callExternalApi, createCorsHeaders } from "../../utils/externalApi";
 import { MockSettlementRegisterFormData } from "@/types/mockSettlementRegister";
 
+// API 라우트 타임아웃 설정 (30분)
+export const maxDuration = 1800;
+
+// Node.js 런타임 사용 (Edge Runtime 금지 - undici Dispatcher 사용을 위해)
+export const runtime = "nodejs";
+
 export async function POST(request: NextRequest) {
   try {
+    // undici Dispatcher 설정 확인
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const { getGlobalDispatcher } = require("undici");
+    console.log(
+      "[undici] Dispatcher 상태:",
+      typeof getGlobalDispatcher === "function" ? "활성화됨" : "비활성화됨"
+    );
+
     const body = await request.json();
     console.log("모의정산 등록 API 호출됨");
     console.log("Body:", body);

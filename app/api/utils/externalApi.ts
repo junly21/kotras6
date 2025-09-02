@@ -48,7 +48,7 @@ export async function callExternalApi(
     body,
     params = {},
     sessionId,
-    timeout = 30 * 60 * 1000,
+    timeout = 30 * 60 * 1000, // 30분 타임아웃
   } = config;
 
   // 세션 쿠키 설정 (매개변수로 받은 sessionId 사용)

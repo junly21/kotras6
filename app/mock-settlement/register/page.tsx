@@ -109,7 +109,7 @@ export default function MockSettlementRegisterPage() {
       try {
         const response =
           await MockSettlementRegisterService.getMockSettlementData({
-            settlementName: "",
+            settlementName: "ALL",
             transactionDate: "ALL",
           });
         if (response.success && response.data) {

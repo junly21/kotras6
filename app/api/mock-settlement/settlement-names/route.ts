@@ -23,8 +23,11 @@ export async function GET() {
       ? responseData
       : [];
 
+    // "전체" 옵션을 맨 앞에 추가
+    const optionsWithAll = [{ value: "ALL", label: "전체" }, ...options];
+
     return NextResponse.json(
-      { options },
+      { options: optionsWithAll },
       {
         headers: createCorsHeaders(),
       }

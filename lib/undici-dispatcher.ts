@@ -8,6 +8,8 @@ if (typeof window === "undefined") {
     headersTimeout: 40 * 60 * 1000, // 40분
     // 본문 수신까지 허용 시간
     bodyTimeout: 40 * 60 * 1000, // 40분
+    // 읽기 타임아웃 (ETIMEDOUT 해결)
+    connectTimeout: 40 * 60 * 1000, // 40분
     // keep-alive 관련 (인프라 상황에 맞게 조정)
     keepAliveTimeout: 60_000,
     keepAliveMaxTimeout: 60_000,

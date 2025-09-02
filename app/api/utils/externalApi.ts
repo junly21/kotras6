@@ -2,17 +2,17 @@
 const isDevelopment = process.env.NODE_ENV === "development";
 
 // 개발 환경: 8080, 5001 포트 / 프로덕션 환경: 28480, 28482 포트
-export const EXTERNAL_BASE_URL = isDevelopment
-  ? "http://192.168.111.152:8080/kotras6"
-  : "http://192.168.110.21:28480/kotras6";
+// export const EXTERNAL_BASE_URL = isDevelopment
+//   ? "http://192.168.111.152:8080/kotras6"
+//   : "http://192.168.110.21:28480/kotras6";
 
-export const OPTIMAL_ROUTE_BASE_URL = isDevelopment
-  ? "http://192.168.111.152:5001"
-  : "http://192.168.110.21:28482";
+// export const OPTIMAL_ROUTE_BASE_URL = isDevelopment
+//   ? "http://192.168.111.152:5001"
+//   : "http://192.168.110.21:28482";
 
-// export const EXTERNAL_BASE_URL = "http://192.168.110.21:28480/kotras6";
+export const EXTERNAL_BASE_URL = "http://192.168.110.21:28480/kotras6";
 
-// export const OPTIMAL_ROUTE_BASE_URL = "http://192.168.110.21:28482";
+export const OPTIMAL_ROUTE_BASE_URL = "http://192.168.110.21:28482";
 // 환경 정보 로깅 (개발 시에만)
 if (isDevelopment) {
   console.log("🔧 개발 환경 설정:", {
@@ -124,7 +124,11 @@ export async function callExternalApi(
     let data;
     if (contentType && contentType.includes("application/json")) {
       data = await response.json();
-      console.log("외부 API JSON 응답 데이터:", data);
+      // console.log("외부 API JSON 응답 데이터:", data);
+      console.log(
+        "외부 API JSON 응답 데이터:",
+        JSON.stringify(data).substring(0, 300) + "..."
+      );
     } else {
       const textData = await response.text();
       console.log(

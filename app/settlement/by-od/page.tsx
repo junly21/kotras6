@@ -13,7 +13,7 @@ import { SettlementByOdService } from "@/services/settlementByOdService";
 import { createSettlementByOdColDefs } from "@/features/settlementByOd/gridConfig";
 import { createSettlementByOdDetailColDefs } from "@/features/settlementByOd/detailGridConfig";
 import TestGrid from "@/components/TestGrid";
-import CsvExportButton from "@/components/CsvExportButton";
+
 import Spinner from "@/components/Spinner";
 import { NetworkMap } from "@/components/NetworkMap/NetworkMap";
 import {
@@ -21,6 +21,7 @@ import {
   SettlementLinkTooltip,
 } from "@/components/NetworkMap/DefaultTooltips";
 import { useNetworkData } from "@/hooks/useNetworkData";
+import { useDestinationOptions } from "@/hooks/useDestinationOptions";
 import type { NetworkMapHighlight, Node, Link } from "@/types/network";
 import { AllCommunityModule, ModuleRegistry } from "ag-grid-community";
 
@@ -69,12 +70,16 @@ export default function SettlementByOdPage() {
     findNodeIdsByStationName,
   } = useNetworkData();
 
+  // 도착역 옵션 관리
+  const {
+    destinationOptions,
+    fetchDestinationOptions,
+    clearDestinationOptions,
+  } = useDestinationOptions();
+
   // AG Grid refs
   const gridRef = useRef(null);
   const detailGridRef = useRef(null);
-
-  // 선택된 행 상태 추가
-  const [selectedRowIndex, setSelectedRowIndex] = useState<number | null>(null);
 
   // 경로 하이라이트 계산
   const pathHighlights = useMemo((): NetworkMapHighlight[] => {
@@ -157,6 +162,19 @@ export default function SettlementByOdPage() {
     return calculatedHeight;
   }, [searchResults]);
 
+  // 동적 필터 설정 (도착역 옵션 포함)
+  const dynamicFilterConfig = useMemo(() => {
+    return settlementByOdFilterConfig.map((field) => {
+      if (field.name === "STN_ID2") {
+        return {
+          ...field,
+          options: destinationOptions, // 페이지에서 관리하는 도착역 옵션
+        };
+      }
+      return field;
+    });
+  }, [destinationOptions]);
+
   // 컬럼 정의
   const columnDefs = useMemo(() => {
     return createSettlementByOdColDefs();
@@ -167,9 +185,21 @@ export default function SettlementByOdPage() {
   }, []);
 
   // 필터 변경 핸들러
-  const handleFilterChange = (values: SettlementByOdFilters) => {
-    setFilters(values);
-  };
+  const handleFilterChange = useCallback(
+    (values: SettlementByOdFilters) => {
+      setFilters(values);
+
+      // 승차역이 변경되었을 때 도착역 옵션 재조회
+      if (values.STN_ID1 !== filters.STN_ID1) {
+        if (values.STN_ID1) {
+          fetchDestinationOptions(values.STN_ID1);
+        } else {
+          clearDestinationOptions();
+        }
+      }
+    },
+    [filters.STN_ID1, fetchDestinationOptions, clearDestinationOptions]
+  );
 
   // 경유지 상세정보 조회 핸들러
   const fetchDetailData = useCallback(
@@ -198,9 +228,8 @@ export default function SettlementByOdPage() {
 
   // 행 클릭 핸들러
   const handleRowClick = useCallback(
-    (rowData: SettlementByOdData, rowIndex: number) => {
+    (rowData: SettlementByOdData) => {
       setSelectedRow(rowData);
-      setSelectedRowIndex(rowIndex);
       // 소계 행이 아닌 경우에만 상세정보 조회 및 경로 ID 설정
       if (rowData.path_detail !== "-") {
         fetchDetailData(rowData.path_key, rowData.path_id);
@@ -249,8 +278,8 @@ export default function SettlementByOdPage() {
 
   // 선택된 행 스타일 적용 함수
   const getRowStyle = useCallback(
-    (params: any) => {
-      let style: any = {};
+    (params: { rowIndex: number; data: SettlementByOdData }) => {
+      const style: React.CSSProperties = {};
 
       // 그룹별 배경색 적용 (소계 행 포함)
       const groupColor = getGroupBackgroundColor(params.rowIndex);
@@ -285,7 +314,7 @@ export default function SettlementByOdPage() {
 
   // 경유지 상세정보 그리드 행 스타일 함수
   const getDetailRowStyle = useCallback(
-    (params: any) => {
+    (params: { rowIndex: number }) => {
       // 마지막 행인 경우 footer 스타일 적용
       if (params.rowIndex === detailData.length - 1) {
         return {
@@ -397,7 +426,7 @@ export default function SettlementByOdPage() {
 
       {/* 필터 폼 */}
       <FilterForm
-        fields={settlementByOdFilterConfig}
+        fields={dynamicFilterConfig}
         defaultValues={defaultValues}
         schema={settlementByOdSchema}
         values={filters}
@@ -452,7 +481,7 @@ export default function SettlementByOdPage() {
                         if (event.data.path_detail === "-") {
                           return;
                         }
-                        handleRowClick(event.data, event.rowIndex);
+                        handleRowClick(event.data);
                       },
                       getRowStyle: getRowStyle, // 행 클릭 시 스타일 적용
                     }}

@@ -1,15 +1,23 @@
-import React, { ReactNode } from "react";
+"use client";
+
+import React, { ReactNode, useEffect } from "react";
 import Header from "./Header";
 import SideBar from "./SideBar";
 import Footer from "./Footer";
 import { GlobalToastManager } from "./GlobalToastManager";
 import { BackgroundTaskStatus } from "./BackgroundTaskStatus";
+import { BackgroundTaskService } from "@/services/backgroundTaskService";
 
 interface LayoutProps {
   children: ReactNode;
 }
 
 export default function Layout({ children }: LayoutProps) {
+  // 앱 초기화 시 백그라운드 작업 복구
+  useEffect(() => {
+    BackgroundTaskService.initialize();
+  }, []);
+
   return (
     <div className="min-h-screen flex flex-col">
       {/* 헤더 */}

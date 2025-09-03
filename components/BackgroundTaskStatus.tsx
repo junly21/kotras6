@@ -4,23 +4,18 @@ import { useBackgroundTaskStore } from "@/store/backgroundTaskStore";
 import { useEffect, useState } from "react";
 
 export function BackgroundTaskStatus() {
-  const { getAllTasks, clearCompletedTasks } = useBackgroundTaskStore();
   const [isVisible, setIsVisible] = useState(false);
 
-  // 진행 중인 작업이 있는지 확인
-  const activeTasks = getAllTasks().filter(
-    (task) => task.status === "pending" || task.status === "processing"
+  // 현재 작업 가져오기 (스토어에서 직접 구독)
+  const currentTask = useBackgroundTaskStore((state) => state.currentTask);
+  const clearCurrentTask = useBackgroundTaskStore(
+    (state) => state.clearCurrentTask
   );
 
-  // 완료된 작업이 있는지 확인
-  const completedTasks = getAllTasks().filter(
-    (task) => task.status === "success" || task.status === "error"
-  );
-
-  // 진행 중인 작업이 있으면 자동으로 표시
+  // 작업이 있으면 자동으로 표시
   useEffect(() => {
-    setIsVisible(activeTasks.length > 0 || completedTasks.length > 0);
-  }, [activeTasks.length, completedTasks.length]);
+    setIsVisible(!!currentTask);
+  }, [currentTask]);
 
   if (!isVisible) return null;
 
@@ -30,65 +25,65 @@ export function BackgroundTaskStatus() {
         <h3 className="text-sm font-semibold text-gray-700">
           모의정산 등록 상태
         </h3>
-        {completedTasks.length > 0 && (
-          <button
-            onClick={clearCompletedTasks}
-            className="text-xs text-gray-500 hover:text-gray-700">
-            닫기
-          </button>
-        )}
+        <button
+          onClick={clearCurrentTask}
+          className="text-xs text-gray-500 hover:text-gray-700">
+          X
+        </button>
       </div>
 
-      <div className="space-y-2 max-h-40 overflow-y-auto">
-        {/* 진행 중인 작업 */}
-        {activeTasks.map((task) => (
+      <div className="space-y-2">
+        {currentTask && (
           <div
-            key={task.id}
-            className="flex items-center space-x-2 p-2 bg-blue-50 rounded">
-            <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
-            <div className="flex-1 min-w-0">
-              <p className="text-xs text-blue-700 font-medium truncate">
-                {task.type === "mockSettlementRegister"
-                  ? "모의정산 등록"
-                  : task.type}
-              </p>
-              <p className="text-xs text-blue-600 truncate">
-                {task.message || "진행 중..."}
-              </p>
-            </div>
-          </div>
-        ))}
-
-        {/* 완료된 작업 */}
-        {completedTasks.map((task) => (
-          <div
-            key={task.id}
             className={`flex items-center space-x-2 p-2 rounded ${
-              task.status === "success" ? "bg-green-50" : "bg-red-50"
+              currentTask.status === "pending" ||
+              currentTask.status === "processing"
+                ? "bg-blue-50"
+                : currentTask.status === "success"
+                ? "bg-green-50"
+                : "bg-red-50"
             }`}>
             <div
               className={`w-2 h-2 rounded-full ${
-                task.status === "success" ? "bg-green-500" : "bg-red-500"
+                currentTask.status === "pending" ||
+                currentTask.status === "processing"
+                  ? "bg-blue-500 animate-pulse"
+                  : currentTask.status === "success"
+                  ? "bg-green-500"
+                  : "bg-red-500"
               }`}></div>
             <div className="flex-1 min-w-0">
               <p
                 className={`text-xs font-medium truncate ${
-                  task.status === "success" ? "text-green-700" : "text-red-700"
+                  currentTask.status === "pending" ||
+                  currentTask.status === "processing"
+                    ? "text-blue-700"
+                    : currentTask.status === "success"
+                    ? "text-green-700"
+                    : "text-red-700"
                 }`}>
-                {task.type === "mockSettlementRegister"
-                  ? "모의정산 등록"
-                  : task.type}
+                모의정산 등록
               </p>
               <p
                 className={`text-xs truncate ${
-                  task.status === "success" ? "text-green-600" : "text-red-600"
+                  currentTask.status === "pending" ||
+                  currentTask.status === "processing"
+                    ? "text-blue-600"
+                    : currentTask.status === "success"
+                    ? "text-green-600"
+                    : "text-red-600"
                 }`}>
-                {task.message ||
-                  (task.status === "success" ? "완료됨" : "실패함")}
+                {currentTask.status === "pending"
+                  ? "진행 중..."
+                  : currentTask.status === "processing"
+                  ? "진행 중..."
+                  : currentTask.status === "success"
+                  ? "완료됨"
+                  : "실패함"}
               </p>
             </div>
           </div>
-        ))}
+        )}
       </div>
     </div>
   );

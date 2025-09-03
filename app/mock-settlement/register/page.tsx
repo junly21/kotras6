@@ -14,6 +14,7 @@ import {
 import { MockSettlementRegisterService } from "@/services/mockSettlementRegisterService";
 import { MockSettlementControlService } from "@/services/mockSettlementControlService";
 import { BackgroundTaskService } from "@/services/backgroundTaskService";
+import { useGlobalToastStore } from "@/store/globalToastStore";
 import TestGrid from "@/components/TestGrid";
 import Spinner from "@/components/Spinner";
 import { MockSettlementModal } from "@/components/MockSettlementModal";
@@ -174,7 +175,7 @@ export default function MockSettlementRegisterPage() {
 
       // 등록 요청 시작 토스트 표시
       setToast({
-        message: "모의정산 등록이 백그라운드에서 시작되었습니다.",
+        message: "모의정산 등록이 시작되었습니다.",
         type: "info",
         isVisible: true,
       });
@@ -203,7 +204,7 @@ export default function MockSettlementRegisterPage() {
         );
       }
     },
-    [filters, handleSearchSubmit]
+    []
   );
 
   // 모의정산 등록 모달 제출 핸들러
@@ -256,8 +257,13 @@ export default function MockSettlementRegisterPage() {
       // 모의정산 강제종료
       const stopResponse = await MockSettlementControlService.stopSimulation();
       if (stopResponse.success) {
-        // 강제종료 성공 시 pending action 실행
-        pendingAction();
+        // 강제종료 성공 시 토스트 메시지 표시
+        useGlobalToastStore.getState().showToast({
+          message: "모의정산이 강제종료되었습니다.",
+          type: "info",
+          duration: 3000,
+        });
+        // pending action은 실행하지 않음 - 사용자가 다시 등록 버튼을 클릭하도록 함
       } else {
         setError("모의정산 강제종료에 실패했습니다: " + stopResponse.error);
       }

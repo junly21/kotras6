@@ -75,12 +75,18 @@ export async function POST(request: NextRequest) {
 
       console.log("외부 API 모의정산 등록 결과:", data);
 
+      // 백엔드 응답의 status 필드 확인
+      const isSuccess = data.status !== "error";
+      const message = isSuccess
+        ? "모의정산 등록이 완료되었습니다."
+        : data.message || "모의정산 등록에 실패했습니다.";
+
       // 응답 형식을 통일하여 success 필드 포함
       return NextResponse.json(
         {
-          success: true,
+          success: isSuccess,
           data: data,
-          message: "모의정산 등록이 완료되었습니다.",
+          message: message,
         },
         { headers: createCorsHeaders() }
       );

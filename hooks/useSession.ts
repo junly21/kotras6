@@ -277,7 +277,7 @@ export function useSession(): UseSessionReturn {
       clearTimeout(activityTimerRef.current);
     }
 
-    // 1분마다 활동 상태 체크
+    // 5분마다 활동 상태 체크
     activityTimerRef.current = setInterval(() => {
       const now = Date.now();
       const timeSinceLastActivity = now - session.lastActivity;
@@ -286,7 +286,7 @@ export function useSession(): UseSessionReturn {
       if (timeSinceLastActivity > SESSION_TIMEOUT) {
         refreshSession();
       }
-    }, 60000); // 1분마다 체크
+    }, 300000); // 5분마다 체크
   }, [session.lastActivity, refreshSession]);
 
   // 사용자 활동 감지

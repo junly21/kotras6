@@ -11,70 +11,58 @@ export interface BackgroundTask {
 }
 
 interface BackgroundTaskState {
-  tasks: Map<string, BackgroundTask>;
+  currentTask: BackgroundTask | null;
 
   // 액션들
-  addTask: (task: BackgroundTask) => void;
-  updateTaskStatus: (id: string, status: string, message?: string) => void;
-  removeTask: (id: string) => void;
-  getTask: (id: string) => BackgroundTask | undefined;
-  getAllTasks: () => BackgroundTask[];
-  clearCompletedTasks: () => void;
+  setCurrentTask: (task: BackgroundTask | null) => void;
+  updateTaskStatus: (status: string, message?: string) => void;
+  clearCurrentTask: () => void;
+  getCurrentTask: () => BackgroundTask | null;
 }
 
 export const useBackgroundTaskStore = create<BackgroundTaskState>(
   (set, get) => ({
-    tasks: new Map(),
+    currentTask: null,
 
-    addTask: (task: BackgroundTask) => {
-      set((state) => {
-        const newTasks = new Map(state.tasks);
-        newTasks.set(task.id, task);
-        return { tasks: newTasks };
-      });
+    setCurrentTask: (task: BackgroundTask | null) => {
+      console.log("setCurrentTask 호출됨:", task);
+      set({ currentTask: task });
+
+      // localStorage에 직접 저장/삭제
+      if (task) {
+        localStorage.setItem("mock-settlement-task", JSON.stringify(task));
+        console.log("localStorage에 작업 저장됨");
+      } else {
+        localStorage.removeItem("mock-settlement-task");
+        console.log("localStorage에서 작업 삭제됨");
+      }
     },
 
-    updateTaskStatus: (id: string, status: string, message?: string) => {
-      set((state) => {
-        const newTasks = new Map(state.tasks);
-        const task = newTasks.get(id);
-        if (task) {
-          newTasks.set(id, {
-            ...task,
-            status: status as BackgroundTask["status"],
-            message,
-          });
-        }
-        return { tasks: newTasks };
-      });
+    updateTaskStatus: (status: string, message?: string) => {
+      const currentTask = get().currentTask;
+      if (currentTask) {
+        const updatedTask = {
+          ...currentTask,
+          status: status as BackgroundTask["status"],
+          message,
+        };
+        set({ currentTask: updatedTask });
+
+        // localStorage 업데이트
+        localStorage.setItem(
+          "mock-settlement-task",
+          JSON.stringify(updatedTask)
+        );
+      }
     },
 
-    removeTask: (id: string) => {
-      set((state) => {
-        const newTasks = new Map(state.tasks);
-        newTasks.delete(id);
-        return { tasks: newTasks };
-      });
+    clearCurrentTask: () => {
+      set({ currentTask: null });
+      localStorage.removeItem("mock-settlement-task");
     },
 
-    getTask: (id: string) => {
-      return get().tasks.get(id);
-    },
-
-    getAllTasks: () => {
-      return Array.from(get().tasks.values());
-    },
-
-    clearCompletedTasks: () => {
-      set((state) => {
-        const newTasks = new Map(state.tasks);
-        for (const [id, task] of newTasks.entries()) {
-          if (task.status === "success" || task.status === "error") {
-            newTasks.delete(id);
-          }
-        }
-        return { tasks: newTasks };
-      });
+    getCurrentTask: () => {
+      return get().currentTask;
     },
   })
 );

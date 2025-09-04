@@ -91,14 +91,16 @@ function renderNodeElement(
         const idx = raw.indexOf("(");
         const stationName = idx > -1 ? raw.slice(0, idx) : raw;
         if (stationName.length >= 8) return textPos.x - 50;
+        if (stationName.length >= 6) return textPos.x - 35;
+        if (stationName.length >= 5) return textPos.x - 25;
         return textPos.x - 2;
       })()}
       y={(() => {
         const raw = nodeData.name.split("_")[1] || nodeData.name;
         const idx = raw.indexOf("(");
         const stationName = idx > -1 ? raw.slice(0, idx) : raw;
-        if (stationName.length >= 8) return textPos.y + 20;
-        if (stationName.length >= 6) return textPos.y + 10;
+        if (stationName.length >= 5) return textPos.y + 20;
+        if (stationName.length >= 4) return textPos.y + 10;
         return textPos.y + 3;
       })()}
       fontSize={(() => {
@@ -106,11 +108,11 @@ function renderNodeElement(
         const idx = raw.indexOf("(");
         const stationName = idx > -1 ? raw.slice(0, idx) : raw;
         if (stationName.length >= 8) return 22;
-        if (stationName.length >= 6) return 20;
-        if (stationName.length >= 5) return 22;
+        if (stationName.length >= 6) return 24;
+        if (stationName.length >= 5) return 26;
         if (stationName.length >= 4) return 28;
-        if (stationName.length >= 3) return 32;
-        return 36;
+        if (stationName.length >= 3) return 36;
+        return 40;
       })()}
       fontFamily="Arial, sans-serif"
       fill="#000000"

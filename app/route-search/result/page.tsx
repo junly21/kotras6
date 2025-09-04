@@ -115,11 +115,18 @@ export default function RouteSearchResultPage() {
   // 검색 핸들러 - useCallback으로 최적화
   const handleSearchSubmit = useCallback(
     (values: RouteSearchFilter) => {
-      handleSearch(values);
+      // 현재 filters 상태를 사용 (PATH_GRP_ID가 확실히 포함됨)
+      const searchData = {
+        PATH_GRP_ID: filters.PATH_GRP_ID,
+        RIDE_STN_ID: values.RIDE_STN_ID || filters.RIDE_STN_ID,
+        ALGH_STN_ID: values.ALGH_STN_ID || filters.ALGH_STN_ID,
+      };
+
+      handleSearch(searchData);
       setSelectedPaths([]);
       setHasSearched(true);
     },
-    [handleSearch]
+    [handleSearch, filters]
   );
 
   // 체크박스 변경 핸들러 - useCallback으로 최적화

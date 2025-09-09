@@ -151,8 +151,8 @@ export default function TestGridPage() {
       valueFormatter: getNumberFormatter,
     },
     {
-      headerName: "용인경전철",
-      field: "용인경전철",
+      headerName: "용인경량전철",
+      field: "용인경량전철",
       cellStyle: getNumberCellStyle,
       valueFormatter: getNumberFormatter,
     },
@@ -175,8 +175,8 @@ export default function TestGridPage() {
       valueFormatter: getNumberFormatter,
     },
     {
-      headerName: "신림선",
-      field: "신림선",
+      headerName: "남서울경전철",
+      field: "남서울경전철",
       cellStyle: getNumberCellStyle,
       valueFormatter: getNumberFormatter,
     },

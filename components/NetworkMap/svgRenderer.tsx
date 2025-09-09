@@ -56,6 +56,15 @@ function renderNodeElement(
   }
   // RGB 색상이 설정되지 않은 경우 원본 stroke 색상 유지
 
+  // 중복 역 이름 통합 함수 (렌더링용)
+  const getUnifiedStationName = (nodeName: string): string => {
+    // 7_이수를 총신대입구(이수)로 통합 표시
+    if (nodeName === "7_이수") {
+      return "4_총신대입구(이수)";
+    }
+    return nodeName;
+  };
+
   // 텍스트 위치 계산
   let textPos = { x: 0, y: 0 };
   const d = node.attributes.d || "";
@@ -87,7 +96,8 @@ function renderNodeElement(
   const textElement = (
     <text
       x={(() => {
-        const raw = nodeData.name.split("_")[1] || nodeData.name;
+        const unifiedName = getUnifiedStationName(nodeData.name);
+        const raw = unifiedName.split("_")[1] || unifiedName;
         const idx = raw.indexOf("(");
         const stationName = idx > -1 ? raw.slice(0, idx) : raw;
         if (stationName.length >= 8) return textPos.x - 50;
@@ -96,7 +106,8 @@ function renderNodeElement(
         return textPos.x - 2;
       })()}
       y={(() => {
-        const raw = nodeData.name.split("_")[1] || nodeData.name;
+        const unifiedName = getUnifiedStationName(nodeData.name);
+        const raw = unifiedName.split("_")[1] || unifiedName;
         const idx = raw.indexOf("(");
         const stationName = idx > -1 ? raw.slice(0, idx) : raw;
         if (stationName.length >= 5) return textPos.y + 20;
@@ -104,7 +115,8 @@ function renderNodeElement(
         return textPos.y + 3;
       })()}
       fontSize={(() => {
-        const raw = nodeData.name.split("_")[1] || nodeData.name;
+        const unifiedName = getUnifiedStationName(nodeData.name);
+        const raw = unifiedName.split("_")[1] || unifiedName;
         const idx = raw.indexOf("(");
         const stationName = idx > -1 ? raw.slice(0, idx) : raw;
         if (stationName.length >= 8) return 22;
@@ -125,7 +137,8 @@ function renderNodeElement(
       paintOrder="stroke fill"
       style={{ opacity }}>
       {(() => {
-        const raw = nodeData.name.split("_")[1] || nodeData.name;
+        const unifiedName = getUnifiedStationName(nodeData.name);
+        const raw = unifiedName.split("_")[1] || unifiedName;
         const idx = raw.indexOf("(");
         return idx > -1 ? raw.slice(0, idx) : raw;
       })()}

@@ -89,10 +89,10 @@ export function SettlementLinkTooltip({ link }: { link: Link }) {
           <b>노선명:</b> {link.line}
         </div>
         <div>
-          <b>운영사:</b> {link.operator}
+          <b>운영사:</b> {link.oper || "정보 없음"}
         </div>
         <div>
-          <b>거리:</b> {link.distance?.toFixed(1)}km
+          <b>거리:</b> {link.km?.toFixed(1) || "정보 없음"}km
         </div>
       </div>
     </div>
@@ -101,9 +101,19 @@ export function SettlementLinkTooltip({ link }: { link: Link }) {
 
 // 메인페이지용 간소화된 노드 툴팁 (역명만 표시, n_ 프리픽스 제거)
 export function MainPageNodeTooltip({ node }: { node: Node }) {
-  // n_ 프리픽스 제거하고 역명만 추출
+  // 중복 역 이름 통합 함수 (렌더링용)
+  const getUnifiedStationName = (nodeName: string): string => {
+    // 7_이수를 총신대입구(이수)로 통합 표시
+    if (nodeName === "7_이수") {
+      return "4_총신대입구(이수)";
+    }
+    return nodeName;
+  };
+
+  // 통합된 역명에서 n_ 프리픽스 제거하고 역명만 추출
   const stationName = (() => {
-    const raw = node.name.split("_")[1] || node.name;
+    const unifiedName = getUnifiedStationName(node.name);
+    const raw = unifiedName.split("_")[1] || unifiedName;
     const idx = raw.indexOf("(");
     return idx > -1 ? raw.slice(0, idx) : raw;
   })();

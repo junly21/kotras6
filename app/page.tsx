@@ -122,7 +122,13 @@ export default function Home() {
   }, [isInitialized]);
 
   // 메모이제이션된 값들
-  const mapConfig = useMemo(() => NETWORK_MAP_CONFIGS.main, []);
+  const mapConfig = useMemo(
+    () => ({
+      ...NETWORK_MAP_CONFIGS.main,
+      tooltipMode: "main" as const, // 메인페이지용 간소화된 툴팁 사용
+    }),
+    []
+  );
 
   // 하이라이트 설정 (line/page.tsx와 동일한 로직)
   const highlights = useMemo(() => {

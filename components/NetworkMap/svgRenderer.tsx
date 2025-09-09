@@ -246,14 +246,48 @@ export function renderSvgNode(
   tooltips?: {
     node?: (node: Node) => React.ReactNode;
   }
-): { pathElements: React.ReactNode[]; textElements: React.ReactNode[] } {
+): {
+  pathElements: React.ReactNode[];
+  textElements: React.ReactNode[];
+  defsElements: React.ReactNode[];
+} {
   const pathElements: React.ReactNode[] = [];
   const textElements: React.ReactNode[] = [];
+  const defsElements: React.ReactNode[] = [];
+
+  // 0) defs 태그 처리
+  if (node.name === "defs") {
+    if (node.children && node.children.length > 0) {
+      node.children.forEach((child: INode, i: number) => {
+        if (child.name === "pattern") {
+          defsElements.push(
+            <pattern
+              key={`pattern-${i}`}
+              {...toCamelCaseAttrs(child.attributes)}>
+              {child.children?.map((patternChild: INode, j: number) => {
+                if (patternChild.name === "image") {
+                  return (
+                    <image
+                      key={`image-${j}`}
+                      {...toCamelCaseAttrs(patternChild.attributes)}
+                    />
+                  );
+                }
+                return null;
+              })}
+            </pattern>
+          );
+        }
+      });
+    }
+    return { pathElements, textElements, defsElements };
+  }
 
   // 1) 역(Station): id가 숫자만
   if (node.name === "path" && /^\d+$/.test(node.attributes.id)) {
     const nodeData = nodesData.find((n) => n.id === node.attributes.id);
-    if (!nodeData) return { pathElements: [], textElements: [] };
+    if (!nodeData)
+      return { pathElements: [], textElements: [], defsElements: [] };
 
     // 하이라이트 상태 확인 - 하이라이트되지 않은 요소는 pointer-events: none 적용
     if (highlightState) {
@@ -304,7 +338,7 @@ export function renderSvgNode(
           pathElements.push(result);
         }
 
-        return { pathElements, textElements };
+        return { pathElements, textElements, defsElements };
       }
     }
 
@@ -340,7 +374,7 @@ export function renderSvgNode(
       pathElements.push(result);
     }
 
-    return { pathElements, textElements };
+    return { pathElements, textElements, defsElements };
   }
 
   // 2) 간선(Link): id가 "숫자-숫자"
@@ -353,11 +387,11 @@ export function renderSvgNode(
         (l.source === dst && l.target === src)
     );
 
-    if (!link) return { pathElements: [], textElements: [] };
+    if (!link) return { pathElements: [], textElements: [], defsElements: [] };
 
     const result = renderLinkElement(node, link, highlightState!, onLinkClick);
     pathElements.push(result);
-    return { pathElements, textElements };
+    return { pathElements, textElements, defsElements };
   }
 
   // 3) 나머지 원소들은 그대로 재귀
@@ -376,10 +410,11 @@ export function renderSvgNode(
       );
       pathElements.push(...childResult.pathElements);
       textElements.push(...childResult.textElements);
+      defsElements.push(...childResult.defsElements);
     });
   }
 
-  return { pathElements, textElements };
+  return { pathElements, textElements, defsElements };
 }
 
 /**
@@ -397,8 +432,14 @@ export function reorderSvgForHighlightPriority(
   // 요소들을 카테고리별로 분리
   const highlightedElements: INode[] = [];
   const normalElements: INode[] = [];
+  const defsElements: INode[] = [];
 
   svgNode.children.forEach((child) => {
+    // defs 요소는 그대로 유지
+    if (child.name === "defs") {
+      defsElements.push(child);
+      return;
+    }
     if (child.name === "path") {
       const id = child.attributes.id;
       if (id && /^\d+$/.test(id)) {
@@ -451,9 +492,9 @@ export function reorderSvgForHighlightPriority(
     }
   });
 
-  // 렌더링 순서: 일반 요소 → 하이라이트된 요소
+  // 렌더링 순서: defs 요소 → 일반 요소 → 하이라이트된 요소
   return {
     ...svgNode,
-    children: [...normalElements, ...highlightedElements],
+    children: [...defsElements, ...normalElements, ...highlightedElements],
   };
 }

@@ -98,3 +98,23 @@ export function SettlementLinkTooltip({ link }: { link: Link }) {
     </div>
   );
 }
+
+// 메인페이지용 간소화된 노드 툴팁 (역명만 표시, n_ 프리픽스 제거)
+export function MainPageNodeTooltip({ node }: { node: Node }) {
+  // n_ 프리픽스 제거하고 역명만 추출
+  const stationName = (() => {
+    const raw = node.name.split("_")[1] || node.name;
+    const idx = raw.indexOf("(");
+    return idx > -1 ? raw.slice(0, idx) : raw;
+  })();
+
+  return (
+    <div>
+      <div style={{ fontSize: 14, lineHeight: 1.7 }}>
+        <div>
+          <b>{stationName}</b>
+        </div>
+      </div>
+    </div>
+  );
+}

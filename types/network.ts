@@ -147,6 +147,7 @@ export interface NetworkMapConfig {
   minZoom?: number;
   maxZoom?: number;
   zoomSensitivity?: number;
+  tooltipMode?: "default" | "main"; // 툴팁 모드: 기본 또는 메인페이지용
 }
 
 export interface NetworkMapHighlight {

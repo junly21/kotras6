@@ -11,6 +11,7 @@ import { Button } from "../ui/button";
 
 import { calculateHighlightState } from "./highlightUtils";
 import { renderSvgNode, reorderSvgForHighlightPriority } from "./svgRenderer";
+import { MainPageNodeTooltip } from "./DefaultTooltips";
 
 export function NetworkMap({
   nodes,
@@ -32,11 +33,13 @@ export function NetworkMap({
     minZoom = 0.1,
     maxZoom = 1.0,
     zoomSensitivity = 0.05,
+    tooltipMode = "default", // 툴팁 모드 기본값
   } = config;
 
   const [svgReactTree, setSvgReactTree] = useState<{
     pathElements: React.ReactNode[];
     textElements: React.ReactNode[];
+    defsElements: React.ReactNode[];
   } | null>(null);
   const [scale, setScale] = useState(defaultZoom);
   const [isDragging, setIsDragging] = useState(false);
@@ -78,6 +81,16 @@ export function NetworkMap({
     return calculateHighlightState(highlights, nodes, links, apiStationNumbers);
   }, [highlights, nodes, links, apiStationNumbers]);
 
+  // 툴팁 모드에 따른 툴팁 설정
+  const effectiveTooltips = useMemo(() => {
+    if (tooltipMode === "main") {
+      return {
+        node: (node: any) => <MainPageNodeTooltip node={node} />,
+      };
+    }
+    return tooltips;
+  }, [tooltipMode, tooltips]);
+
   // SVG 파싱 및 렌더링
   useEffect(() => {
     if (!svgText || !nodes.length || !links.length) return;
@@ -106,7 +119,7 @@ export function NetworkMap({
               undefined,
               highlightState, // 이미 계산된 highlightState 사용
               showTooltips,
-              tooltips
+              effectiveTooltips
             )
           );
         } else {
@@ -120,7 +133,7 @@ export function NetworkMap({
               undefined,
               highlightState, // 이미 계산된 highlightState 사용
               showTooltips,
-              tooltips
+              effectiveTooltips
             )
           );
         }
@@ -141,7 +154,7 @@ export function NetworkMap({
     onNodeClick,
     onLinkClick,
     showTooltips,
-    tooltips,
+    effectiveTooltips, // tooltips 대신 effectiveTooltips 사용
   ]);
 
   // 이벤트 핸들러들 - 모든 Hook을 조건부 return 이전에 호출
@@ -334,6 +347,8 @@ export function NetworkMap({
           height="100%"
           viewBox="0 0 2721 1747"
           style={{ display: "block" }}>
+          {/* defs 요소들을 먼저 렌더링 */}
+          <defs>{svgReactTree.defsElements}</defs>
           <g transform={`translate(${pan.x},${pan.y})`}>
             {/* 경로 요소들 먼저 렌더링 */}
             <g transform={`scale(${scale})`}>{svgReactTree.pathElements}</g>

@@ -29,7 +29,7 @@ export function processRouteSearchResults(
     }
 
     // 경로 구성: 출발역 + 환승역 + 도착역
-    const pathComponents = [];
+    const pathComponents: string[] = [];
 
     // 출발역
     if (result.start_node) {
@@ -59,6 +59,11 @@ export function processRouteSearchResults(
       }
     }
 
+    // 중복 제거: 연속된 같은 역을 제거
+    const uniquePathComponents = pathComponents.filter((station, index) => {
+      return index === 0 || station !== pathComponents[index - 1];
+    });
+
     return {
       id: result.id || index,
       rank: result.rn || index + 1,
@@ -68,7 +73,7 @@ export function processRouteSearchResults(
       endStation: result.end_node
         ? result.end_node.match(/\([^)]+\)[^_]*_([^(]+)\([^)]+\)/)?.[1] || ""
         : "",
-      path: pathComponents.join(" → "),
+      path: uniquePathComponents.join(" → "),
       transferCount: result.transfer_cnt || 0,
       isSelected: selectedPaths.some((path) => path.id === result.id),
       originalData: result,

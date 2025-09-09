@@ -223,7 +223,6 @@ export default function TestGridPage() {
           enableNumberColoring={true}
           gridOptions={{
             rowHeight: 44,
-            defaultColDef: { cellClass: "v-center" },
           }}
         />
       </div>

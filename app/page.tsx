@@ -20,6 +20,9 @@ export default function Home() {
   // 노선도 하이라이트 관련 상태
   const [activeLine, setActiveLine] = useState<string | null>(null);
   const [isNetworkDataLoading, setIsNetworkDataLoading] = useState(true);
+  const [apiStationNumbers, setApiStationNumbers] = useState<Set<string>>(
+    new Set()
+  );
 
   // 세션 상태 확인
   const { isInitialized, isLoading: isSessionLoading } = useSessionContext();
@@ -91,7 +94,15 @@ export default function Home() {
 
         if (response.success && response.data) {
           // 3. 하이라이트 처리 (line/page.tsx와 동일한 로직)
-          const { lineData } = response.data;
+          const { nodeData, lineData } = response.data;
+
+          // API 응답의 sta_num들을 Set으로 저장
+          if (nodeData && nodeData.length > 0) {
+            const stationNumbers = new Set(
+              nodeData.map((node: { sta_num: string }) => node.sta_num)
+            );
+            setApiStationNumbers(stationNumbers);
+          }
 
           if (lineData && Array.isArray(lineData)) {
             const apiLineNames = lineData
@@ -194,6 +205,7 @@ export default function Home() {
                 svgText={svgText}
                 config={mapConfig}
                 highlights={highlights}
+                apiStationNumbers={apiStationNumbers}
               />
             </div>
           )}

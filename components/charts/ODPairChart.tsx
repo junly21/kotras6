@@ -56,6 +56,41 @@ export function ODPairChart({ data }: Props) {
     return sorted;
   }, [data]);
 
+  // Y축 최대값과 틱 간격 계산
+  const yAxisConfig = useMemo(() => {
+    if (!topData || topData.length === 0) {
+      return { maxValue: 100, tickInterval: 20 };
+    }
+
+    const maxValue = Math.max(...topData.map((item) => item.cnt));
+
+    // 최대값을 깔끔하게 올림
+    let roundedMax: number;
+    let tickInterval: number;
+
+    if (maxValue <= 1000) {
+      tickInterval = 100;
+      roundedMax = Math.ceil(maxValue / 100) * 100;
+    } else if (maxValue <= 10000) {
+      tickInterval = 1000;
+      roundedMax = Math.ceil(maxValue / 1000) * 1000;
+    } else if (maxValue <= 50000) {
+      tickInterval = 5000;
+      roundedMax = Math.ceil(maxValue / 5000) * 5000;
+    } else if (maxValue <= 200000) {
+      tickInterval = 40000;
+      roundedMax = Math.ceil(maxValue / 20000) * 20000;
+    } else if (maxValue <= 1000000) {
+      tickInterval = 100000;
+      roundedMax = Math.ceil(maxValue / 100000) * 100000;
+    } else {
+      tickInterval = 200000;
+      roundedMax = Math.ceil(maxValue / 200000) * 200000;
+    }
+
+    return { maxValue: roundedMax, tickInterval };
+  }, [topData]);
+
   // x축 텍스트 정리 함수 (transition 제거, (~~~) 제거)
   const cleanXAxisText = useMemo(() => {
     return (text: string) => {
@@ -140,10 +175,22 @@ export function ODPairChart({ data }: Props) {
             {/* Y축 (숫자) */}
             <YAxis
               type="number"
-              domain={[0, (dataMax: number) => dataMax * 1.1]}
+              domain={[0, yAxisConfig.maxValue]}
               tickFormatter={formatValue}
               tick={{ fontSize: 11, fill: "#666" }}
               width={80}
+              // 동적으로 계산된 틱 간격으로 깔끔한 Y축 설정
+              ticks={(() => {
+                const ticks = [];
+                for (
+                  let i = 0;
+                  i <= yAxisConfig.maxValue;
+                  i += yAxisConfig.tickInterval
+                ) {
+                  ticks.push(i);
+                }
+                return ticks;
+              })()}
             />
 
             {/* 툴팁 */}

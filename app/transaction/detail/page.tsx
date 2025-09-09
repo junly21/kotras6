@@ -253,7 +253,7 @@ export default function TransactionDetailPage() {
     {
       headerName: "도시철도부가사용금 (원)",
       field: "ubrw_adtn_use_amt",
-      minWidth: 200,
+      minWidth: 220,
       flex: 1,
       valueFormatter: (params: { value: number | null | undefined }) =>
         (params.value || 0).toLocaleString(),

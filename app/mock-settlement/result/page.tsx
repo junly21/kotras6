@@ -241,7 +241,7 @@ export default function MockSettlementResultPage() {
       headerName: "#",
       valueGetter: (params: ValueGetterParams) =>
         params.node?.rowPinned ? "Total" : (params.node?.rowIndex ?? 0) + 1,
-      width: 45,
+      width: 50,
       pinned: "left",
       cellStyle: { textAlign: "center" },
     },

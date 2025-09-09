@@ -141,6 +141,20 @@ export default function RouteSearchResultPage() {
     []
   );
 
+  // 전체선택/전체해제 핸들러 - useCallback으로 최적화
+  const handleSelectAllChange = useCallback(
+    (checked: boolean) => {
+      if (checked) {
+        // 전체 선택
+        setSelectedPaths([...searchResults]);
+      } else {
+        // 전체 해제
+        setSelectedPaths([]);
+      }
+    },
+    [searchResults]
+  );
+
   // 상세 정보 Dialog 열기 - useCallback으로 최적화
   const handleDetailClick = useCallback((route: RouteSearchResult) => {
     setSelectedRouteForDetail(route);
@@ -195,10 +209,36 @@ export default function RouteSearchResultPage() {
     return processRouteSearchResults(searchResults, selectedPaths);
   }, [searchResults, selectedPaths]);
 
+  // 전체선택 상태 계산 - useMemo로 최적화
+  const selectAllState = useMemo(() => {
+    if (processedResults.length === 0) {
+      return { isAllSelected: false, isIndeterminate: false };
+    }
+
+    const selectedCount = selectedPaths.length;
+    const totalCount = processedResults.length;
+
+    return {
+      isAllSelected: selectedCount === totalCount,
+      isIndeterminate: selectedCount > 0 && selectedCount < totalCount,
+    };
+  }, [selectedPaths.length, processedResults.length]);
+
   // 그리드 컬럼 정의 - useMemo로 최적화
   const colDefs = useMemo(() => {
-    return createRouteSearchColDefs(handleCheckboxChange, handleDetailClick);
-  }, [handleCheckboxChange, handleDetailClick]);
+    return createRouteSearchColDefs(
+      handleCheckboxChange,
+      handleDetailClick,
+      handleSelectAllChange,
+      selectAllState.isAllSelected,
+      selectAllState.isIndeterminate
+    );
+  }, [
+    handleCheckboxChange,
+    handleDetailClick,
+    handleSelectAllChange,
+    selectAllState,
+  ]);
 
   // 그리드 높이 동적 계산 - useMemo로 최적화
   const gridHeight = useMemo(() => {
@@ -211,7 +251,7 @@ export default function RouteSearchResultPage() {
     if (processedResults.length <= 2) {
       // 1-2개 행: 기본 높이
       calculatedHeight = baseHeight;
-    } else if (processedResults.length <= 9) {
+    } else if (processedResults.length <= 8) {
       // 3-9개 행: 기본 높이의 2배
       calculatedHeight = baseHeight * 1.5;
     } else {
@@ -322,6 +362,7 @@ export default function RouteSearchResultPage() {
               gridOptions={{
                 onRowClicked: onRowClicked,
                 rowSelection: "none", // 체크박스 사용하므로 단일 선택 비활성화
+                suppressScrollOnNewData: true, // 데이터 변경 시 스크롤 위치 유지
               }}
             />
           </>

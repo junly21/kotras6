@@ -15,7 +15,10 @@ interface RouteSearchGridData {
 
 export function createRouteSearchColDefs(
   onCheckboxChange: (route: RouteSearchResult, checked: boolean) => void,
-  onDetailClick: (route: RouteSearchResult) => void
+  onDetailClick: (route: RouteSearchResult) => void,
+  onSelectAllChange: (checked: boolean) => void,
+  isAllSelected: boolean,
+  isIndeterminate: boolean
 ): ColDef<RouteSearchGridData>[] {
   return [
     {
@@ -24,6 +27,33 @@ export function createRouteSearchColDefs(
       field: "isSelected",
       width: 100,
       sortable: false,
+      headerComponent: () => {
+        return React.createElement(
+          "div",
+          {
+            style: {
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              height: "100%",
+              width: "100%",
+            },
+          },
+          React.createElement("input", {
+            type: "checkbox",
+            checked: isAllSelected,
+            ref: (input: HTMLInputElement) => {
+              if (input) {
+                input.indeterminate = isIndeterminate;
+              }
+            },
+            onChange: (e: React.ChangeEvent<HTMLInputElement>) =>
+              onSelectAllChange(e.target.checked),
+            onClick: (e: React.MouseEvent) => e.stopPropagation(),
+            className: "w-4 h-4",
+          })
+        );
+      },
       cellRenderer: (params: {
         value: boolean;
         data: { originalData: RouteSearchResult };
@@ -145,7 +175,7 @@ export function createRouteSearchColDefs(
     {
       headerName: "상세정보",
       resizable: false,
-      field: "detail",
+      field: "originalData",
       minWidth: 150,
       flex: 1,
       sortable: false,

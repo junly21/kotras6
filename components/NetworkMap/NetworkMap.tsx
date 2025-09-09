@@ -290,7 +290,7 @@ export function NetworkMap({
       {/* 범례 이미지 - 우측 상단 고정 */}
       {showLegend && (
         <div
-          className="absolute top-4 right-4 z-100"
+          className="absolute top-4 right-4 z-10"
           style={{
             pointerEvents: "auto", // 스크롤을 위해 auto로 변경
             width: "120px",

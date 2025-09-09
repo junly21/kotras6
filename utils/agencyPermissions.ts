@@ -92,7 +92,7 @@ export function getDetailedPermissions(
           byInstitution: true, // 기관별 조회 - 모든 기관
           byRoute: true, // 노선별 조회 - 대광위 + SERVICE
           byStation: true, // 역사별 조회 - 대광위 + SERVICE
-          byOd: true, // OD별 조회 - 대광위 + SERVICE
+          byOd: true, // OD별 조회 - 대광위만
         },
         mockSettlement: {
           register: true, // 정산 등록 - 대광위만
@@ -126,7 +126,7 @@ export function getDetailedPermissions(
           byInstitution: true, // 기관별 조회 - 모든 기관
           byRoute: true, // 노선별 조회 - 대광위 + SERVICE
           byStation: true, // 역사별 조회 - 대광위 + SERVICE
-          byOd: true, // OD별 조회 - 대광위 + SERVICE
+          byOd: false, // OD별 조회 - 대광위만
         },
         mockSettlement: {
           register: false, // 정산 등록 - 대광위만
@@ -137,7 +137,7 @@ export function getDetailedPermissions(
           byOd: false, // OD별 조회 - 대광위만
         },
         network: {
-          map: true, // 지도 조회 - 모든 기관
+          map: false, // 지도 조회 - 대광위만
           line: true, // 노선도 조회 - 모든 기관
           optimalRoute: true, // 최적경로 - 모든 기관
           fileUpload: false, // 파일등록 - 대광위만
@@ -160,7 +160,7 @@ export function getDetailedPermissions(
           byInstitution: true, // 기관별 조회 - 모든 기관
           byRoute: false, // 노선별 조회 - 대광위 + SERVICE
           byStation: false, // 역사별 조회 - 대광위 + SERVICE
-          byOd: false, // OD별 조회 - 대광위 + SERVICE
+          byOd: false, // OD별 조회 - 대광위만
         },
         mockSettlement: {
           register: false, // 정산 등록 - 대광위만
@@ -171,7 +171,7 @@ export function getDetailedPermissions(
           byOd: false, // OD별 조회 - 대광위만
         },
         network: {
-          map: true, // 지도 조회 - 모든 기관
+          map: false, // 지도 조회 - 대광위만
           line: true, // 노선도 조회 - 모든 기관
           optimalRoute: true, // 최적경로 - 모든 기관
           fileUpload: false, // 파일등록 - 대광위만

@@ -218,12 +218,12 @@ export default function Home() {
         <div className="flex gap-4">
           <div className="w-3/10">
             <h2 className="text-lg font-semibold text-gray-900">
-              권종별 통행수
+              표본기간 권종별 통행량(건)
             </h2>
           </div>
           <div className="w-7/10">
             <h2 className="text-lg font-semibold text-gray-900">
-              상위 OD Pair (건)
+              표본기간 상위 OD Pair(건)
             </h2>
           </div>
         </div>

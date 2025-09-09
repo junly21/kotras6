@@ -96,7 +96,7 @@ export function PieChart({ data }: Props) {
               {payload[0].payload.name}
             </p>
             <p className="text-blue-600 font-semibold">
-              {formatValue(payload[0].value)} 통행수
+              {formatValue(payload[0].value)}
             </p>
             <p className="text-gray-500 text-sm">
               {(

@@ -115,8 +115,8 @@ export function ODPairChart({ data }: Props) {
         return (
           <div className="bg-white border border-gray-200 rounded-lg shadow-lg p-3">
             <p className="text-gray-900 font-medium mb-1">{label}</p>
-            <p className="text-blue-600 font-semibold">
-              통행수: {formatValue(payload[0].value)}
+            <p className="text-blue-600 font-semibold flex justify-center">
+              {formatValue(payload[0].value)}
             </p>
           </div>
         );

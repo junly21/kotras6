@@ -1,6 +1,6 @@
-import { RouteSearchResult } from "@/types/routeSearch";
+import { RouteSearchTestResult } from "@/types/routeSearch";
 
-interface RouteSearchGridData {
+interface RouteSearchTestGridData {
   id: number;
   confirmedPath: string;
   groupNo: number;
@@ -8,30 +8,30 @@ interface RouteSearchGridData {
   mainStations: string;
   detailedPath: string;
   isSelected: boolean;
-  originalData: RouteSearchResult;
+  originalData: RouteSearchTestResult;
 }
 
-export function processRouteSearchResults(
-  searchResults: RouteSearchResult[],
-  selectedPaths: RouteSearchResult[]
-): RouteSearchGridData[] {
+export function processRouteSearchTestResults(
+  searchResults: RouteSearchTestResult[],
+  selectedPaths: RouteSearchTestResult[]
+): RouteSearchTestGridData[] {
   if (!searchResults || searchResults.length === 0) return [];
 
-  // API 응답에서 group_no를 사용하거나, 없으면 path_key별로 그룹화
+  // path_key별로 그룹화 (테스트 페이지는 path_key 기준으로만 그룹화)
   const pathKeyGroups = new Map<string, number>();
   let groupCounter = 1;
 
-  // 먼저 path_key별로 그룹 번호 할당 (API에서 group_no가 없는 경우를 대비)
+  // path_key별로 그룹 번호 할당
   searchResults.forEach((result) => {
     if (result.path_key && !pathKeyGroups.has(result.path_key)) {
       pathKeyGroups.set(result.path_key, groupCounter++);
     }
   });
 
-  // 먼저 그룹별로 정렬
+  // path_key 기준으로 정렬
   const sortedResults = [...searchResults].sort((a, b) => {
-    const groupA = a.group_no || pathKeyGroups.get(a.path_key || "") || 0;
-    const groupB = b.group_no || pathKeyGroups.get(b.path_key || "") || 0;
+    const groupA = pathKeyGroups.get(a.path_key || "") || 0;
+    const groupB = pathKeyGroups.get(b.path_key || "") || 0;
     return groupA - groupB;
   });
 
@@ -82,15 +82,7 @@ export function processRouteSearchResults(
       return index === 0 || station !== pathComponents[index - 1];
     });
 
-    const currentGroupNo =
-      result.group_no || pathKeyGroups.get(result.path_key || "") || 0;
-
-    // 그룹 표시: 같은 그룹의 첫 번째 행에만 그룹 번호 표시
-    const isFirstInGroup =
-      index === 0 ||
-      (sortedResults[index - 1].group_no ||
-        pathKeyGroups.get(sortedResults[index - 1].path_key || "") ||
-        0) !== currentGroupNo;
+    const currentGroupNo = pathKeyGroups.get(result.path_key || "") || 0;
 
     // 상세경로 처리: path_nm에서 역명만 추출하여 정리
     let cleanedDetailedPath = "";
@@ -118,7 +110,7 @@ export function processRouteSearchResults(
       id: result.id || index,
       confirmedPath: result.confirmed_path || "N",
       groupNo: currentGroupNo,
-      groupDisplay: isFirstInGroup ? currentGroupNo : null,
+      groupDisplay: null, // 그룹 표시 제거
       mainStations: uniquePathComponents.join(" → "),
       detailedPath: cleanedDetailedPath || result.path_nm || "",
       isSelected: selectedPaths.some((path) => path.id === result.id),

@@ -12,7 +12,7 @@ import { Button } from "../ui/button";
 import { calculateHighlightState } from "./highlightUtils";
 import { renderSvgNode, reorderSvgForHighlightPriority } from "./svgRenderer";
 import { MainPageNodeTooltip } from "./DefaultTooltips";
-import { StationIcon, calculateStationIconPosition } from "../StationIcon";
+import { StationIcon } from "../StationIcon";
 
 // SVG에서 노드의 실제 위치를 계산하는 함수 (svgRenderer.tsx와 동일한 로직)
 function parseMatrix(transform: string): number[] | null {
@@ -44,10 +44,19 @@ function getNodePositionFromSvg(
   if (!match) return null;
 
   const d = match[1];
-  const m = d.match(/M\s*([-\d.]+)[ ,]?([-\d.]+)/);
-  if (!m) return null;
 
-  let [x, y] = [parseFloat(m[1]), parseFloat(m[2])];
+  // 원의 중심점을 정확히 계산 (svgRenderer.tsx와 동일한 로직)
+  const coordMatches = d.match(/([-\d.]+)/g);
+  if (!coordMatches || coordMatches.length < 4) return null;
+
+  const coords = coordMatches.map(parseFloat);
+
+  // 원의 중심점을 찾기 위해 x, y 좌표의 중간값을 계산
+  const xCoords = coords.filter((_, i) => i % 2 === 0); // 짝수 인덱스 (x 좌표)
+  const yCoords = coords.filter((_, i) => i % 2 === 1); // 홀수 인덱스 (y 좌표)
+
+  let centerX = (Math.min(...xCoords) + Math.max(...xCoords)) / 2;
+  let centerY = (Math.min(...yCoords) + Math.max(...yCoords)) / 2;
 
   // transform 매트릭스가 있는지 확인
   const transformMatch = svgText.match(
@@ -56,13 +65,13 @@ function getNodePositionFromSvg(
   if (transformMatch && transformMatch[1].includes("matrix")) {
     const mat = parseMatrix(transformMatch[1]);
     if (mat) {
-      const pt = applyMatrixToPoint(x, y, mat);
-      x = pt.x;
-      y = pt.y;
+      const pt = applyMatrixToPoint(centerX, centerY, mat);
+      centerX = pt.x;
+      centerY = pt.y;
     }
   }
 
-  return { x, y };
+  return { x: centerX, y: centerY };
 }
 
 export function NetworkMap({
@@ -403,7 +412,7 @@ export function NetworkMap({
       {/* 범례 이미지 - 우측 상단 고정 */}
       {showLegend && (
         <div
-          className="absolute top-4 right-4 z-10"
+          className="absolute top-4 right-4 z-10  border-gray-300 shadow-xl"
           style={{
             pointerEvents: "auto", // 스크롤을 위해 auto로 변경
             width: "120px",
@@ -435,6 +444,8 @@ export function NetworkMap({
               backgroundColor: "rgba(255, 255, 255, 0.9)",
               borderRadius: "8px",
               padding: "4px",
+              border: "2px solid #DDDDDD",
+
               pointerEvents: "none", // 이미지는 클릭 방지
             }}
           />

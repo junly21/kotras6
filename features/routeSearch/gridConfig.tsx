@@ -85,7 +85,7 @@ export function createRouteSearchColDefs(
           return React.createElement(
             "span",
             {
-              style: { color: "#059669", fontWeight: "bold" },
+              style: { color: "#000000", fontWeight: "bold" },
             },
             "포함"
           );
@@ -93,7 +93,7 @@ export function createRouteSearchColDefs(
           return React.createElement(
             "span",
             {
-              style: { color: "#DC2626", fontWeight: "bold" },
+              style: { color: "#000000", fontWeight: "bold" },
             },
             "미포함"
           );

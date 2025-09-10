@@ -30,7 +30,7 @@ export function RouteSummary({ route }: RouteSummaryProps) {
             <span className="ml-2">{route.km.toFixed(3)}km</span>
           </div>
           <div className="flex items-center">
-            <span className="text-blue-600 font-medium">소요시간:</span>
+            <span className="text-blue-600 font-medium">소요 시간:</span>
             <span className="ml-2">
               {Math.floor(route.sta_pass_sec / 60)}분
             </span>
@@ -40,11 +40,11 @@ export function RouteSummary({ route }: RouteSummaryProps) {
             <span className="ml-2">{route.transfers_cnt}회</span>
           </div>
           <div className="flex items-center">
-            <span className="text-blue-600 font-medium">환승이동시간:</span>
+            <span className="text-blue-600 font-medium">환승 이동 시간:</span>
             <span className="ml-2">{formatTime(route.trans_mv_sec)}</span>
           </div>
           <div className="flex items-center">
-            <span className="text-blue-600 font-medium">환승대기시간:</span>
+            <span className="text-blue-600 font-medium">환승 대기 시간:</span>
             <span className="ml-2">{formatTime(route.trans_sty_sec)}</span>
           </div>
           <div className="flex items-center">

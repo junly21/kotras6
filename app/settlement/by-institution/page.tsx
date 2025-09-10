@@ -272,7 +272,7 @@ export default function SettlementByInstitutionPage() {
       },
     },
     {
-      headerName: `계 (${unit})`,
+      headerName: `계(${unit})`,
       field: "차액",
       minWidth: 200,
       flex: 1,

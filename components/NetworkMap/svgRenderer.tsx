@@ -65,21 +65,33 @@ function renderNodeElement(
     return nodeName;
   };
 
-  // 텍스트 위치 계산
+  // 텍스트 위치 계산 - 노드의 실제 중심점을 기준으로 계산
   let textPos = { x: 0, y: 0 };
   const d = node.attributes.d || "";
-  const m = d.match(/M\s*([-\d.]+)[ ,]?([-\d.]+)/);
-  if (m) {
-    let [x, y] = [parseFloat(m[1]), parseFloat(m[2])];
+
+  // 원의 중심점을 정확히 계산
+  const coordMatches = d.match(/([-\d.]+)/g);
+  if (coordMatches && coordMatches.length >= 4) {
+    const coords = coordMatches.map(parseFloat);
+
+    // 원의 중심점을 찾기 위해 x, y 좌표의 중간값을 계산
+    const xCoords = coords.filter((_, i) => i % 2 === 0); // 짝수 인덱스 (x 좌표)
+    const yCoords = coords.filter((_, i) => i % 2 === 1); // 홀수 인덱스 (y 좌표)
+
+    let centerX = (Math.min(...xCoords) + Math.max(...xCoords)) / 2;
+    let centerY = (Math.min(...yCoords) + Math.max(...yCoords)) / 2;
+
     if (node.attributes.transform?.includes("matrix")) {
       const mat = parseMatrix(node.attributes.transform);
       if (mat) {
-        const pt = applyMatrixToPoint(x, y, mat);
-        x = pt.x;
-        y = pt.y;
+        const pt = applyMatrixToPoint(centerX, centerY, mat);
+        centerX = pt.x;
+        centerY = pt.y;
       }
     }
-    textPos = { x: x + 40, y: y + 5 };
+
+    // 모든 노드에 대해 일관되게 우하단에 텍스트 배치
+    textPos = { x: centerX + 40, y: centerY + 35 };
   }
 
   const nodeElement = (

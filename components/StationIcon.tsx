@@ -20,7 +20,7 @@ export function StationIcon({ type, x, y, scale = 1 }: StationIconProps) {
   const iconHeight = Math.max(minSize * 1.4, 34 * scale);
 
   // 아이콘을 노드 중심에 정확히 배치
-  const adjustedY = y - iconHeight / 2 - 75;
+  const adjustedY = y - iconHeight / 2 - 50;
 
   // SVG 아이콘을 인라인으로 정의
   const StartIcon = () => (
@@ -73,6 +73,57 @@ export function StationIcon({ type, x, y, scale = 1 }: StationIconProps) {
       {type === "start" ? <StartIcon /> : <EndIcon />}
     </g>
   );
+}
+
+/**
+ * SVG path에서 노드의 중심점을 계산하는 함수 (svgRenderer.tsx와 동일한 로직)
+ */
+function parseMatrix(transform: string): number[] | null {
+  const match = transform.match(/matrix\(([^)]+)\)/);
+  if (!match) return null;
+  return match[1].replace(/,/g, " ").split(/\s+/).map(Number);
+}
+
+function applyMatrixToPoint(cx: number, cy: number, m: number[]) {
+  return {
+    x: m[0] * cx + m[2] * cy + m[4],
+    y: m[1] * cx + m[3] * cy + m[5],
+  };
+}
+
+/**
+ * SVG path에서 노드의 중심점을 계산하는 함수
+ * svgRenderer.tsx와 동일한 로직 사용
+ */
+export function calculateNodeCenterFromPath(
+  pathData: string,
+  transform?: string
+): { x: number; y: number } {
+  // 원의 중심점을 정확히 계산
+  const coordMatches = pathData.match(/([-\d.]+)/g);
+  if (coordMatches && coordMatches.length >= 4) {
+    const coords = coordMatches.map(parseFloat);
+
+    // 원의 중심점을 찾기 위해 x, y 좌표의 중간값을 계산
+    const xCoords = coords.filter((_, i) => i % 2 === 0); // 짝수 인덱스 (x 좌표)
+    const yCoords = coords.filter((_, i) => i % 2 === 1); // 홀수 인덱스 (y 좌표)
+
+    let centerX = (Math.min(...xCoords) + Math.max(...xCoords)) / 2;
+    let centerY = (Math.min(...yCoords) + Math.max(...yCoords)) / 2;
+
+    if (transform?.includes("matrix")) {
+      const mat = parseMatrix(transform);
+      if (mat) {
+        const pt = applyMatrixToPoint(centerX, centerY, mat);
+        centerX = pt.x;
+        centerY = pt.y;
+      }
+    }
+
+    return { x: centerX, y: centerY };
+  }
+
+  return { x: 0, y: 0 };
 }
 
 /**

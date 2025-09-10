@@ -165,6 +165,7 @@ export default function RouteSearchResultPage() {
   const onRowClicked = useCallback(
     (event: { data: { originalData: RouteSearchResult } }) => {
       console.log("행 클릭 이벤트 (비활성화):", event);
+      console.log("path_key:", event.data.originalData.path_key);
     },
     []
   );

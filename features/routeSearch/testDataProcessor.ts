@@ -84,27 +84,8 @@ export function processRouteSearchTestResults(
 
     const currentGroupNo = pathKeyGroups.get(result.path_key || "") || 0;
 
-    // 상세경로 처리: path_nm에서 역명만 추출하여 정리
-    let cleanedDetailedPath = "";
-    if (result.path_nm) {
-      // path_nm을 공백으로 분할하고 각 부분에서 역명만 추출
-      const pathParts = result.path_nm
-        .split(/\s+/)
-        .filter((part) => part.trim());
-      const cleanedParts = pathParts
-        .map((part) => {
-          const match = part.match(/\([^)]+\)[^_]*_([^(]+)\([^)]+\)/);
-          return match ? match[1] : part;
-        })
-        .filter((part) => part && part.trim());
-
-      // 중복 제거: 연속된 같은 역을 제거
-      const uniqueCleanedParts = cleanedParts.filter((station, index) => {
-        return index === 0 || station !== cleanedParts[index - 1];
-      });
-
-      cleanedDetailedPath = uniqueCleanedParts.join(" → ");
-    }
+    // 상세경로 처리: path_nm을 그대로 사용 (중복역 포함)
+    let cleanedDetailedPath = result.path_nm || "";
 
     return {
       id: result.id || index,
@@ -112,7 +93,7 @@ export function processRouteSearchTestResults(
       groupNo: currentGroupNo,
       groupDisplay: null, // 그룹 표시 제거
       mainStations: uniquePathComponents.join(" → "),
-      detailedPath: cleanedDetailedPath || result.path_nm || "",
+      detailedPath: cleanedDetailedPath,
       isSelected: selectedPaths.some((path) => path.id === result.id),
       originalData: result,
     };

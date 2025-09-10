@@ -95,7 +95,7 @@ export function createRouteSearchTestColDefs(
       field: "mainStations",
       width: 400,
       flex: 2,
-      sortable: true,
+      sortable: false,
       cellStyle: {
         display: "flex",
         alignItems: "center",
@@ -139,7 +139,7 @@ export function createRouteSearchTestColDefs(
       cellRenderer: (params: { value: string }) => {
         if (!params.value) return "-";
 
-        // 컴마를 화살표로 변환하고 역명만 추출
+        // 컴마를 화살표로 변환하고 역명만 추출 (중복역 제거 없음)
         const stations = params.value
           .split(",")
           .map((station: string) => station.trim());

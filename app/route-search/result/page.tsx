@@ -468,6 +468,8 @@ export default function RouteSearchResultPage() {
                 links={links}
                 svgText={svgText}
                 highlights={routeHighlights}
+                startStationId={filters.RIDE_STN_ID}
+                endStationId={filters.ALGH_STN_ID}
                 config={{
                   width: "100%",
                   height: 600,

@@ -794,6 +794,8 @@ export default function MockSettlementByOdPage() {
                         }}
                         highlights={pathHighlights}
                         tooltips={customTooltips}
+                        startStationId={filters.STN_ID1}
+                        endStationId={filters.STN_ID2}
                       />
                     </div>
                   )}

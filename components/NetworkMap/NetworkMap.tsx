@@ -12,6 +12,58 @@ import { Button } from "../ui/button";
 import { calculateHighlightState } from "./highlightUtils";
 import { renderSvgNode, reorderSvgForHighlightPriority } from "./svgRenderer";
 import { MainPageNodeTooltip } from "./DefaultTooltips";
+import { StationIcon, calculateStationIconPosition } from "../StationIcon";
+
+// SVG에서 노드의 실제 위치를 계산하는 함수 (svgRenderer.tsx와 동일한 로직)
+function parseMatrix(transform: string): number[] | null {
+  const match = transform.match(/matrix\(([^)]+)\)/);
+  if (!match) return null;
+  return match[1]
+    .replace(/,/g, " ")
+    .split(/\s+/)
+    .map(Number)
+    .filter((n) => !isNaN(n));
+}
+
+function applyMatrixToPoint(cx: number, cy: number, m: number[]) {
+  const [a, b, c, d, e, f] = m;
+  return { x: a * cx + c * cy + e, y: b * cx + d * cy + f };
+}
+
+function getNodePositionFromSvg(
+  nodeId: string,
+  svgText: string
+): { x: number; y: number } | null {
+  // SVG 텍스트에서 해당 노드의 path 요소를 찾기
+  const pathRegex = new RegExp(
+    `<path[^>]*id="${nodeId}"[^>]*d="([^"]*)"[^>]*>`,
+    "i"
+  );
+  const match = svgText.match(pathRegex);
+
+  if (!match) return null;
+
+  const d = match[1];
+  const m = d.match(/M\s*([-\d.]+)[ ,]?([-\d.]+)/);
+  if (!m) return null;
+
+  let [x, y] = [parseFloat(m[1]), parseFloat(m[2])];
+
+  // transform 매트릭스가 있는지 확인
+  const transformMatch = svgText.match(
+    new RegExp(`<path[^>]*id="${nodeId}"[^>]*transform="([^"]*)"[^>]*>`, "i")
+  );
+  if (transformMatch && transformMatch[1].includes("matrix")) {
+    const mat = parseMatrix(transformMatch[1]);
+    if (mat) {
+      const pt = applyMatrixToPoint(x, y, mat);
+      x = pt.x;
+      y = pt.y;
+    }
+  }
+
+  return { x, y };
+}
 
 export function NetworkMap({
   nodes,
@@ -23,6 +75,8 @@ export function NetworkMap({
   onNodeClick,
   onLinkClick,
   apiStationNumbers, // API 응답의 sta_num들 추가
+  startStationId, // 출발역 ID
+  endStationId, // 도착역 ID
 }: NetworkMapProps) {
   const {
     showZoomControls = true,
@@ -90,6 +144,65 @@ export function NetworkMap({
     }
     return tooltips;
   }, [tooltipMode, tooltips]);
+
+  // 출발역/도착역 아이콘 렌더링을 위한 계산
+  const stationIcons = useMemo(() => {
+    const icons: React.ReactNode[] = [];
+
+    if (startStationId && svgText) {
+      const startNode = nodes.find((node) => node.id === startStationId);
+      if (startNode) {
+        // SVG에서 실제 노드 위치 계산
+        const svgPos = getNodePositionFromSvg(startStationId, svgText);
+        console.log("출발역 아이콘 위치 계산:", {
+          startStationId,
+          startNode: startNode.name,
+          svgPos,
+          scale,
+        });
+        if (svgPos) {
+          // 노드의 실제 중심점에 아이콘 배치
+          icons.push(
+            <StationIcon
+              key={`start-${startStationId}`}
+              type="start"
+              x={svgPos.x}
+              y={svgPos.y}
+              scale={scale}
+            />
+          );
+        }
+      }
+    }
+
+    if (endStationId && svgText) {
+      const endNode = nodes.find((node) => node.id === endStationId);
+      if (endNode) {
+        // SVG에서 실제 노드 위치 계산
+        const svgPos = getNodePositionFromSvg(endStationId, svgText);
+        console.log("도착역 아이콘 위치 계산:", {
+          endStationId,
+          endNode: endNode.name,
+          svgPos,
+          scale,
+        });
+        if (svgPos) {
+          // 노드의 실제 중심점에 아이콘 배치
+          icons.push(
+            <StationIcon
+              key={`end-${endStationId}`}
+              type="end"
+              x={svgPos.x}
+              y={svgPos.y}
+              scale={scale}
+            />
+          );
+        }
+      }
+    }
+
+    return icons;
+  }, [startStationId, endStationId, nodes, svgText, scale]);
 
   // SVG 파싱 및 렌더링
   useEffect(() => {
@@ -354,6 +467,8 @@ export function NetworkMap({
             <g transform={`scale(${scale})`}>{svgReactTree.pathElements}</g>
             {/* 텍스트 요소들을 별도 그룹으로 최상위에 렌더링 (하이라이트 상태 반영) */}
             <g transform={`scale(${scale})`}>{svgReactTree.textElements}</g>
+            {/* 출발역/도착역 아이콘을 최상위에 렌더링 */}
+            <g transform={`scale(${scale})`}>{stationIcons}</g>
           </g>
         </svg>
       </div>

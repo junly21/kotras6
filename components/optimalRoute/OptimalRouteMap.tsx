@@ -5,9 +5,15 @@ import { OptimalRouteItem } from "@/types/optimalRoute";
 
 interface OptimalRouteMapProps {
   route: OptimalRouteItem;
+  startStationId?: string;
+  endStationId?: string;
 }
 
-export function OptimalRouteMap({ route }: OptimalRouteMapProps) {
+export function OptimalRouteMap({
+  route,
+  startStationId: filterStartStationId,
+  endStationId: filterEndStationId,
+}: OptimalRouteMapProps) {
   const {
     nodes,
     links,
@@ -26,6 +32,11 @@ export function OptimalRouteMap({ route }: OptimalRouteMapProps) {
         },
       ]
     : [];
+
+  // 출발역/도착역 ID 추출
+  // 필터에서 선택한 역 ID가 있으면 그것을 사용, 없으면 route의 노드 ID 사용
+  const startStationId = filterStartStationId || route?.start_node;
+  const endStationId = filterEndStationId || route?.end_node;
 
   return (
     <div className="bg-white border border-gray-200 rounded-lg p-4">
@@ -46,6 +57,8 @@ export function OptimalRouteMap({ route }: OptimalRouteMapProps) {
             links={links}
             svgText={svgText}
             highlights={routeHighlights}
+            startStationId={startStationId}
+            endStationId={endStationId}
             config={{
               width: "100%",
               height: "100%",

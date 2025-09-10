@@ -321,7 +321,11 @@ export default function NetworkOptimalRoutePage() {
               </div>
 
               {/* 하단: 노선도 */}
-              <OptimalRouteMap route={bestRoute} />
+              <OptimalRouteMap
+                route={bestRoute}
+                startStationId={filters.startStation}
+                endStationId={filters.endStation}
+              />
             </div>
           ) : (
             <div className="bg-gray-50 rounded-lg border border-gray-200 p-6 text-center text-gray-500">

@@ -224,6 +224,51 @@ export default function RouteSearchResultPage() {
     };
   }, [selectedPaths.length, processedResults.length]);
 
+  // 그룹별 배경색 계산 - OD별 조회 페이지 로직 참고
+  const getGroupBackgroundColor = useCallback(
+    (rowIndex: number) => {
+      if (!processedResults || processedResults.length === 0) return "";
+
+      let groupIndex = 0;
+      let currentGroupNo = -1;
+
+      for (let i = 0; i <= rowIndex; i++) {
+        if (processedResults[i].groupNo !== currentGroupNo) {
+          currentGroupNo = processedResults[i].groupNo;
+          groupIndex++;
+        }
+      }
+
+      // 그룹별로 다른 배경색 적용 (3가지 옅은 색상)
+      const groupColors = [
+        "#f0f8f0", // 옅은 초록색
+        "#fff8f0", // 옅은 주황색
+        "#f8f0f8", // 옅은 보라색
+        "#f0f0f8", // 옅은 파란색
+        "#f8f8f0", // 옅은 노란색
+      ];
+
+      return groupColors[groupIndex % groupColors.length];
+    },
+    [processedResults]
+  );
+
+  // 행 스타일 적용 함수
+  const getRowStyle = useCallback(
+    (params: { rowIndex: number; data: { groupNo: number } }) => {
+      const style: React.CSSProperties = {};
+
+      // 그룹별 배경색 적용
+      const groupColor = getGroupBackgroundColor(params.rowIndex);
+      if (groupColor) {
+        style.backgroundColor = groupColor;
+      }
+
+      return style;
+    },
+    [getGroupBackgroundColor]
+  );
+
   // 그리드 컬럼 정의 - useMemo로 최적화
   const colDefs = useMemo(() => {
     return createRouteSearchColDefs(
@@ -363,6 +408,7 @@ export default function RouteSearchResultPage() {
                 onRowClicked: onRowClicked,
                 rowSelection: "none", // 체크박스 사용하므로 단일 선택 비활성화
                 suppressScrollOnNewData: true, // 데이터 변경 시 스크롤 위치 유지
+                getRowStyle: getRowStyle, // 그룹별 배경색 적용
               }}
             />
           </>

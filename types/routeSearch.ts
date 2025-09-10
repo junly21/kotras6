@@ -39,6 +39,8 @@ export interface RouteSearchResult {
   km_elev_operline_list: string; // 엘리베이터 노선별 거리
   path_value: number; // 경로 값
   created_at: number; // 생성 시간
+  confirmed_path: string; // 확정경로 포함 여부 (Y/N)
+  group_no: number; // 그룹 번호
 }
 
 export interface RouteSegment {

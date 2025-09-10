@@ -60,6 +60,27 @@ export function RouteDetailDialog({
 
   const uniqueTransfers = getUniqueTransfers(route.transfer_list);
 
+  // 경로 표시를 위한 포맷팅 함수
+  const formatPath = (pathNm: string) => {
+    if (!pathNm) return "-";
+
+    // 컴마를 화살표로 변환하고 노선별로 줄바꿈 추가
+    const stations = pathNm.split(",").map((station) => station.trim());
+    const formattedStations: string[] = [];
+
+    stations.forEach((station, index) => {
+      // 첫 번째 역이 아니면 화살표 추가
+      if (index > 0) {
+        formattedStations.push(" → ");
+      }
+
+      // 원본 역 정보 그대로 추가
+      formattedStations.push(station);
+    });
+
+    return formattedStations.join("");
+  };
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
@@ -67,7 +88,7 @@ export function RouteDetailDialog({
           <DialogTitle>상세 경로 정보</DialogTitle>
         </DialogHeader>
         <div className="space-y-6">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-6">
+          <div className="grid  grid-cols-2 md:grid-cols-3 gap-6 mb-6">
             <div>
               <h3 className="text-sm font-medium text-gray-500 mb-1">거리</h3>
               <p className="text-lg font-semibold">{route.km?.toFixed(1)}km</p>
@@ -88,15 +109,8 @@ export function RouteDetailDialog({
                 {route.cost?.toLocaleString()}
               </p>
             </div>
-            <div>
-              <h3 className="text-sm font-medium text-gray-500 mb-1">환승</h3>
-              <p className="text-lg font-semibold">
-                {route.transfer_cnt || 0}회
-              </p>
-            </div>
           </div>
-
-          {/* 운영사 정보 - 중복 제거 및 '환승' 제외 */}
+          {/* 운영사 정보 - 중복 제거 및 '환승' 제외
           {uniqueOperators.length > 0 && (
             <div className="mb-6">
               <h3 className="text-sm font-medium text-gray-500 mb-2">운영사</h3>
@@ -110,18 +124,18 @@ export function RouteDetailDialog({
                 ))}
               </div>
             </div>
-          )}
-
+          )} */}
           <div className="mb-6">
             <h3 className="text-sm font-medium text-gray-500 mb-2">
               전체 경로
             </h3>
             <div className="bg-gray-50 p-4 rounded-lg">
-              <p className="text-sm leading-relaxed">{route.path_nm || "-"}</p>
+              <pre className="text-sm leading-relaxed whitespace-pre-wrap font-sans">
+                {formatPath(route.path_nm)}
+              </pre>
             </div>
           </div>
-
-          <div className="mb-6">
+          {/* <div className="mb-6">
             <h3 className="text-sm font-medium text-gray-500 mb-2">환승역</h3>
             <div className="bg-gray-50 p-4 rounded-lg">
               {uniqueTransfers.length > 0 ? (
@@ -138,7 +152,7 @@ export function RouteDetailDialog({
                 <p className="text-sm text-gray-500">환승역 없음</p>
               )}
             </div>
-          </div>
+          </div> */}
         </div>
       </DialogContent>
     </Dialog>

@@ -4,11 +4,10 @@ import { RouteSearchResult } from "@/types/routeSearch";
 
 interface RouteSearchGridData {
   id: number;
-  rank: number;
-  startStation: string;
-  endStation: string;
-  path: string;
-  transferCount: number;
+  confirmedPath: string;
+  groupNo: number;
+  mainStations: string;
+  detailedPath: string;
   isSelected: boolean;
   originalData: RouteSearchResult;
 }
@@ -25,7 +24,7 @@ export function createRouteSearchColDefs(
       headerName: "선택",
       resizable: false,
       field: "isSelected",
-      width: 100,
+      width: 50,
       sortable: false,
       headerComponent: () => {
         return React.createElement(
@@ -75,49 +74,59 @@ export function createRouteSearchColDefs(
       },
     },
     {
-      headerName: "순번",
+      headerName: "확정경로",
       resizable: false,
-      field: "rank",
-      width: 100,
+      field: "confirmedPath",
+      width: 120,
+      sortable: false,
+      cellRenderer: (params: { value: string }) => {
+        const value = params.value;
+        if (value === "Y") {
+          return React.createElement(
+            "span",
+            {
+              style: { color: "#059669", fontWeight: "bold" },
+            },
+            "포함"
+          );
+        } else if (value === "N") {
+          return React.createElement(
+            "span",
+            {
+              style: { color: "#DC2626", fontWeight: "bold" },
+            },
+            "미포함"
+          );
+        }
+        return value;
+      },
+      cellStyle: {
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        height: "100%",
+      },
+    },
+    {
+      headerName: "그룹",
+      resizable: false,
+      field: "groupNo",
+      width: 90,
       sortable: true,
       cellStyle: {
         fontWeight: "bold",
         display: "flex",
         alignItems: "center",
+        justifyContent: "center",
         height: "100%",
       },
     },
     {
-      headerName: "출발역",
+      headerName: "주요경유지",
       resizable: false,
-      field: "startStation",
-      minWidth: 150,
-      flex: 1,
-      sortable: true,
-      cellStyle: {
-        display: "flex",
-        alignItems: "center",
-        height: "100%",
-      },
-    },
-    {
-      headerName: "도착역",
-      resizable: false,
-      field: "endStation",
-      minWidth: 150,
-      flex: 1,
-      sortable: true,
-      cellStyle: {
-        display: "flex",
-        alignItems: "center",
-        height: "100%",
-      },
-    },
-    {
-      headerName: "경로",
-      resizable: false,
-      field: "path",
+      field: "mainStations",
       minWidth: 400,
+      maxWidth: 400,
       flex: 2,
       sortable: true,
       cellStyle: {
@@ -149,34 +158,58 @@ export function createRouteSearchColDefs(
       },
     },
     {
-      headerName: "환승",
+      headerName: "상세경로",
       resizable: false,
-      field: "transferCount",
-      minWidth: 200,
-      flex: 1,
-      sortable: true,
+      field: "detailedPath",
+      minWidth: 500,
+      flex: 3,
+      sortable: false,
       cellStyle: {
         display: "flex",
         alignItems: "center",
         height: "100%",
       },
-      cellRenderer: (params: { value: number }) => {
-        const count = params.value;
-        const className = `px-2 py-1 rounded text-xs font-medium ${
-          count === 0
-            ? "bg-green-100 text-green-800"
-            : count <= 2
-            ? "bg-yellow-100 text-yellow-800"
-            : "bg-red-100 text-red-800"
-        }`;
-        return React.createElement("span", { className }, `${count}회`);
+      cellRenderer: (params: { value: string }) => {
+        if (!params.value) return "-";
+
+        // 컴마를 화살표로 변환하고 역명만 추출
+        const stations = params.value
+          .split(",")
+          .map((station: string) => station.trim());
+        const formattedStations: string[] = [];
+
+        stations.forEach((station: string, index: number) => {
+          // 첫 번째 역이 아니면 화살표 추가
+          if (index > 0) {
+            formattedStations.push(" → ");
+          }
+
+          // (노선)번호_역명(역번호) 형태에서 역명만 추출
+          const stationMatch = station.match(/\([^)]+\)\d+_([^(]+)\(/);
+          const stationName = stationMatch ? stationMatch[1] : station;
+          formattedStations.push(stationName);
+        });
+
+        return React.createElement(
+          "div",
+          {
+            className: "truncate",
+            style: {
+              whiteSpace: "nowrap",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+            },
+            title: formattedStations.join(""), // 전체 텍스트를 툴팁으로 표시
+          },
+          formattedStations.join("")
+        );
       },
     },
     {
       headerName: "상세정보",
       resizable: false,
       field: "originalData",
-      minWidth: 150,
+      maxWidth: 120,
       flex: 1,
       sortable: false,
       cellRenderer: (params: { data: { originalData: RouteSearchResult } }) => {

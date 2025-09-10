@@ -298,7 +298,7 @@ export default function MockSettlementByOdPage() {
       resizable: false,
     },
     {
-      headerName: "태그기관 비율",
+      headerName: "태그기관 비율(%)",
       field: "tagAgency",
       flex: 1,
       minWidth: 120,
@@ -306,7 +306,7 @@ export default function MockSettlementByOdPage() {
       cellStyle: { textAlign: "right" },
     },
     {
-      headerName: "초승노선",
+      headerName: "초승노선 비율(%)",
       field: "initialLine",
       flex: 1,
       minWidth: 120,
@@ -314,7 +314,7 @@ export default function MockSettlementByOdPage() {
       cellStyle: { textAlign: "right" },
     },
     {
-      headerName: "노선동등",
+      headerName: "노선동등 비율(%)",
       field: "lineSection",
       flex: 1,
       minWidth: 120,
@@ -322,7 +322,7 @@ export default function MockSettlementByOdPage() {
       cellStyle: { textAlign: "right" },
     },
     {
-      headerName: "인.km",
+      headerName: "인.km 비율(%)",
       field: "distanceKm",
       flex: 1,
       minWidth: 100,

@@ -334,7 +334,7 @@ export default function MockSettlementRegisterPage() {
       headerName: "등록일자",
       field: "registrationDate",
       flex: 1,
-      minWidth: 120,
+      minWidth: 100,
       resizable: false,
     },
   ];

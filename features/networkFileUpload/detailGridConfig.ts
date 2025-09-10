@@ -3,13 +3,14 @@ import { NodeData, LinkData, PlatformData } from "@/types/networkDetail";
 
 // 노드 컬럼 정의
 export const nodeColDefs: ColDef<NodeData>[] = [
-  { headerName: "역명", field: "sta_nm", width: 150, resizable: false },
   { headerName: "역번호", field: "sta_num", width: 120, resizable: false },
-  { headerName: "노선", field: "subway", width: 100, resizable: false },
+  { headerName: "역명", field: "sta_nm", width: 150, resizable: false },
+
+  { headerName: "노선명", field: "subway", width: 150, resizable: false },
   { headerName: "운영기관", field: "oper", width: 150, resizable: false },
   { headerName: "KSCC", field: "kscc", width: 120, resizable: false },
   {
-    headerName: "평균체류시간",
+    headerName: "평균 체류시간(초)",
     field: "avg_stay",
     minWidth: 100,
     flex: 1,
@@ -33,7 +34,7 @@ export const nodeColDefs: ColDef<NodeData>[] = [
   {
     headerName: "환승코드",
     field: "transfer_cd",
-    minWidth: 150,
+    minWidth: 100,
     flex: 1,
     resizable: false,
   },
@@ -44,21 +45,31 @@ export const linkColDefs: ColDef<LinkData>[] = [
   { headerName: "링크코드", field: "link_cd", width: 120, resizable: false },
   { headerName: "출발역", field: "from_sta_nm", width: 150, resizable: false },
   { headerName: "도착역", field: "to_sta_nm", width: 150, resizable: false },
-  { headerName: "노선", field: "subway", width: 100, resizable: false },
+  { headerName: "노선명", field: "subway", width: 110, resizable: false },
   { headerName: "운영기관", field: "oper", width: 150, resizable: false },
   { headerName: "방향", field: "direction", width: 100, resizable: false },
-  { headerName: "거리(km)", field: "km", width: 120, resizable: false },
+  { headerName: "거리(km)", field: "km", width: 130, resizable: false },
   {
     headerName: "소요시간(초)",
     field: "sta_pass_sec",
     width: 150,
     resizable: false,
   },
-  { headerName: "비용", field: "cost", width: 100, resizable: false },
-  { headerName: "시작X", field: "start_x", width: 120, resizable: false },
-  { headerName: "시작Y", field: "start_y", width: 120, resizable: false },
-  { headerName: "종료X", field: "end_x", width: 120, resizable: false },
-  { headerName: "종료Y", field: "end_y", width: 120, resizable: false },
+  { headerName: "시간비용(초)", field: "cost", width: 150, resizable: false },
+  {
+    headerName: "출발역 X좌표",
+    field: "start_x",
+    width: 170,
+    resizable: false,
+  },
+  {
+    headerName: "출발역 Y좌표",
+    field: "start_y",
+    width: 170,
+    resizable: false,
+  },
+  { headerName: "도착역 X좌표", field: "end_x", width: 170, resizable: false },
+  { headerName: "도착역 Y좌표", field: "end_y", width: 170, resizable: false },
 ];
 
 // 플랫폼 컬럼 정의 (그리드용 - 간소화된 버전)
@@ -69,31 +80,31 @@ export const platformColDefs: ColDef<PlatformData>[] = [
   { headerName: "출발방향", field: "from_dic", width: 150, resizable: false },
   { headerName: "도착방향", field: "to_dic", width: 150, resizable: false },
   {
-    headerName: "총이동거리",
+    headerName: "총 이동거리(km)",
     field: "tot_mv_m",
-    width: 150,
+    width: 170,
     resizable: false,
   },
   {
-    headerName: "평면이동거리",
+    headerName: "평면 이동거리(km)",
     field: "flat_mv_m",
-    width: 150,
+    width: 180,
     resizable: false,
   },
   {
-    headerName: "총이동시간",
+    headerName: "총 이동시간(초)",
     field: "tot_mv_sec",
-    width: 140,
+    width: 170,
     resizable: false,
   },
   {
-    headerName: "총체류시간",
+    headerName: "총 체류시간(초)",
     field: "tot_sty_sec",
-    width: 140,
+    width: 170,
     resizable: false,
   },
   {
-    headerName: "총계단수",
+    headerName: "총 계단수",
     field: "tot_step_down",
     width: 120,
     resizable: false,

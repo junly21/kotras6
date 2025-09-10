@@ -133,7 +133,7 @@ export default function TransactionDetailPage() {
       },
     },
     {
-      headerName: "승차시간",
+      headerName: "승차시각",
       field: "ride_dtm",
       minWidth: 180,
       flex: 1,
@@ -154,7 +154,7 @@ export default function TransactionDetailPage() {
       resizable: false,
     },
     {
-      headerName: "하차시간",
+      headerName: "하차시각",
       field: "algh_dtm",
       minWidth: 180,
       flex: 1,
@@ -209,7 +209,7 @@ export default function TransactionDetailPage() {
       resizable: false,
     },
     {
-      headerName: "총배분금 (원)",
+      headerName: "총배분금(원)",
       field: "fnl_dist_amt",
       minWidth: 150,
       flex: 1,
@@ -230,7 +230,7 @@ export default function TransactionDetailPage() {
       resizable: false,
     },
     {
-      headerName: "기본배분금 (원)",
+      headerName: "기본배분금(원)",
       field: "base_dist_amt",
       minWidth: 150,
       flex: 1,
@@ -251,7 +251,7 @@ export default function TransactionDetailPage() {
       resizable: false,
     },
     {
-      headerName: "도시철도부가사용금 (원)",
+      headerName: "도시철도부가사용금(원)",
       field: "ubrw_adtn_use_amt",
       minWidth: 220,
       flex: 1,

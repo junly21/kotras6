@@ -139,7 +139,7 @@ export default function TransactionAnalysisPage() {
       resizable: false,
     },
     {
-      headerName: "데이터 건수",
+      headerName: "데이터(건)",
       field: "cnt",
       minWidth: 220,
       flex: 1,

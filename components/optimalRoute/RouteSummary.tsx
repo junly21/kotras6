@@ -26,7 +26,7 @@ export function RouteSummary({ route }: RouteSummaryProps) {
             <span className="ml-2">{route.end_node}</span>
           </div>
           <div className="flex items-center">
-            <span className="text-blue-600 font-medium">거리:</span>
+            <span className="text-blue-600 font-medium">이동 거리:</span>
             <span className="ml-2">{route.km.toFixed(3)}km</span>
           </div>
           <div className="flex items-center">
@@ -36,7 +36,7 @@ export function RouteSummary({ route }: RouteSummaryProps) {
             </span>
           </div>
           <div className="flex items-center">
-            <span className="text-blue-600 font-medium">환승:</span>
+            <span className="text-blue-600 font-medium">환승 횟수:</span>
             <span className="ml-2">{route.transfers_cnt}회</span>
           </div>
           <div className="flex items-center">

@@ -216,8 +216,8 @@ export default function NetworkFileUploadPage() {
     return [
       {
         seq: undefined,
-        sta_nm: `총 ${data.length}건`,
-        sta_num: undefined,
+        sta_nm: undefined,
+        sta_num: `총 ${data.length}건`,
         x: undefined,
         y: undefined,
         kscc: undefined,

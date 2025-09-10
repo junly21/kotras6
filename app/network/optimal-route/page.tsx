@@ -231,7 +231,9 @@ export default function NetworkOptimalRoutePage() {
                       <span className="ml-2 text-gray-400">-</span>
                     </div>
                     <div className="flex items-center">
-                      <span className="text-blue-600 font-medium">거리:</span>
+                      <span className="text-blue-600 font-medium">
+                        이동 거리:
+                      </span>
                       <span className="ml-2 text-gray-400">-</span>
                     </div>
                     <div className="flex items-center">
@@ -241,7 +243,9 @@ export default function NetworkOptimalRoutePage() {
                       <span className="ml-2 text-gray-400">-</span>
                     </div>
                     <div className="flex items-center">
-                      <span className="text-blue-600 font-medium">환승:</span>
+                      <span className="text-blue-600 font-medium">
+                        환승 횟수:
+                      </span>
                       <span className="ml-2 text-gray-400">-</span>
                     </div>
                     <div className="flex items-center">

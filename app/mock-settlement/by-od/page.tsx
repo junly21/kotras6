@@ -298,7 +298,7 @@ export default function MockSettlementByOdPage() {
       resizable: false,
     },
     {
-      headerName: "태그기관",
+      headerName: "태그기관 비율",
       field: "tagAgency",
       flex: 1,
       minWidth: 120,

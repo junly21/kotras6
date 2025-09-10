@@ -11,7 +11,7 @@ export default function Header() {
   return (
     <header className="flex justify-between bg-[#363636] text-white px-6 py-4 shadow-md">
       <h1 className="text-2xl font-bold">
-        <Link href="/">Kotra6</Link>
+        <Link href="/">Kotras6</Link>
       </h1>
       <div className="flex items-center gap-4">
         <div className="flex items-center gap-2">
@@ -19,7 +19,7 @@ export default function Header() {
           {getDisplayName()}
         </div>
         <Button className="border border-white font-bold bg-[#363636]">
-          메뉴얼
+          매뉴얼
         </Button>
       </div>
     </header>

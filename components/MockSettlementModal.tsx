@@ -242,7 +242,7 @@ export function MockSettlementModal({
                   render={({ field }) => (
                     <FormItem className={fieldRow}>
                       <FormLabel className={labelCx}>
-                        태그기관 비율 (%)
+                        태그기관 비율(%)
                       </FormLabel>
                       <FormControl>
                         <Input
@@ -266,7 +266,7 @@ export function MockSettlementModal({
                   render={({ field }) => (
                     <FormItem className={fieldRow}>
                       <FormLabel className={labelCx}>
-                        초승노선 비율 (%)
+                        초승노선 비율(%)
                       </FormLabel>
                       <FormControl>
                         <Input
@@ -290,7 +290,7 @@ export function MockSettlementModal({
                   render={({ field }) => (
                     <FormItem className={fieldRow}>
                       <FormLabel className={labelCx}>
-                        노선동등 비율 (%)
+                        노선동등 비율(%)
                       </FormLabel>
                       <FormControl>
                         <Input
@@ -313,7 +313,7 @@ export function MockSettlementModal({
                   name="distanceKmRatio"
                   render={({ field }) => (
                     <FormItem className={fieldRow}>
-                      <FormLabel className={labelCx}>인·km 비율 (%)</FormLabel>
+                      <FormLabel className={labelCx}>인·km 비율(%)</FormLabel>
                       <FormControl>
                         <Input
                           {...field}

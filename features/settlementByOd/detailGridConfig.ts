@@ -4,7 +4,7 @@ import { SettlementByOdDetailData } from "@/types/settlementByOd";
 export function createSettlementByOdDetailColDefs(): ColDef<SettlementByOdDetailData>[] {
   return [
     {
-      headerName: "기관",
+      headerName: "기관명",
       field: "recv_oper",
       flex: 1,
       minWidth: 200,
@@ -12,7 +12,7 @@ export function createSettlementByOdDetailColDefs(): ColDef<SettlementByOdDetail
       filter: false,
     },
     {
-      headerName: "노선",
+      headerName: "노선명",
       field: "recv_line",
       flex: 1,
       minWidth: 200,
@@ -28,7 +28,7 @@ export function createSettlementByOdDetailColDefs(): ColDef<SettlementByOdDetail
       filter: false,
     },
     {
-      headerName: "기본배분금",
+      headerName: "기본배분금(원)",
       field: "base_amt",
       flex: 1,
       minWidth: 200,
@@ -36,14 +36,14 @@ export function createSettlementByOdDetailColDefs(): ColDef<SettlementByOdDetail
       filter: false,
       valueFormatter: (params) => {
         if (params.value != null) {
-          return params.value.toLocaleString() + "원";
+          return params.value.toLocaleString();
         }
         return "";
       },
       cellStyle: { textAlign: "right" },
     },
     {
-      headerName: "도시철도부가사용금",
+      headerName: "도시철도부가사용금(원)",
       field: "ubrw_amt",
       flex: 1,
       minWidth: 250,
@@ -51,14 +51,14 @@ export function createSettlementByOdDetailColDefs(): ColDef<SettlementByOdDetail
       filter: false,
       valueFormatter: (params) => {
         if (params.value != null) {
-          return params.value.toLocaleString() + "원";
+          return params.value.toLocaleString();
         }
         return "";
       },
       cellStyle: { textAlign: "right" },
     },
     {
-      headerName: "인.km",
+      headerName: "구간거리(km)",
       field: "km",
       flex: 1,
       minWidth: 200,

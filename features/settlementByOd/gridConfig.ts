@@ -46,9 +46,9 @@ export function createSettlementByOdColDefs(): ColDef<SettlementByOdData>[] {
       cellStyle: (params: any) => {
         const value = params.value;
         if (value === "O") {
-          return { color: "#059669", fontWeight: "bold" }; // 초록색
+          return { color: "#000000", fontWeight: "bold" }; // 초록색
         } else if (value === "X") {
-          return { color: "#DC2626", fontWeight: "bold" }; // 빨간색
+          return { color: "#000000", fontWeight: "bold" }; // 빨간색
         } else if (value === "계") {
           return { color: "#1F2937", fontWeight: "bold" }; // 회색
         }
@@ -78,7 +78,7 @@ export function createSettlementByOdColDefs(): ColDef<SettlementByOdData>[] {
       },
     },
     {
-      headerName: "경로 선택 확률",
+      headerName: "경로 선택 확률(%)",
       field: "path_prob",
       flex: 1,
       minWidth: 150,
@@ -99,7 +99,7 @@ export function createSettlementByOdColDefs(): ColDef<SettlementByOdData>[] {
       },
     },
     {
-      headerName: "배분금",
+      headerName: "배분금(원)",
       field: "amt",
       flex: 1,
       minWidth: 150,
@@ -107,7 +107,7 @@ export function createSettlementByOdColDefs(): ColDef<SettlementByOdData>[] {
       filter: false,
       valueFormatter: (params) => {
         if (params.value != null) {
-          return params.value.toLocaleString() + "원";
+          return params.value.toLocaleString();
         }
         return "";
       },

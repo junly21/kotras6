@@ -252,7 +252,7 @@ export default function MockSettlementResultPage() {
       width: 150,
     },
     {
-      headerName: `총계 (${unit})`,
+      headerName: `총계(${unit})`,
       field: "total",
       cellStyle: getNumberCellStyle,
       valueFormatter: getNumberFormatter,

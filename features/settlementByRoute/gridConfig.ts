@@ -15,14 +15,14 @@ export function createSettlementByRouteColDefs(
         pinned: "left",
       },
       {
-        headerName: "수급액",
+        headerName: "수급액(원)",
         field: "receiveAmount",
         width: 120,
         resizable: false,
         type: "numericColumn",
       },
       {
-        headerName: "지급액",
+        headerName: "지급액(원)",
         field: "payAmount",
         width: 120,
         resizable: false,
@@ -103,7 +103,7 @@ export function createSettlementByRouteColDefs(
 
       const group = groupMap.get(groupKey)!;
       group.columns.push({
-        headerName: type === "지급" ? "지급" : "수급",
+        headerName: type === "지급" ? "지급(원)" : "수급(원)",
         field: key,
         minWidth: 170,
         flex: 1,

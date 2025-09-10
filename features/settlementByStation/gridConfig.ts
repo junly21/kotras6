@@ -71,7 +71,7 @@ export function createSettlementByStationColDefs(
 
         const group = groupMap.get(stationName)!;
         group.columns.push({
-          headerName: type === "지급" ? "지급" : "수급",
+          headerName: type === "지급" ? "지급(원)" : "수급(원)",
           field: key,
           flex: 1,
           minWidth: 170,
@@ -113,7 +113,7 @@ export function createSettlementByStationColDefs(
 
         const group = groupMap.get(stationName)!;
         group.columns.push({
-          headerName: type === "지급" ? "지급" : "수급",
+          headerName: type === "지급" ? "지급(원)" : "수급(원)",
           field: key,
           flex: 1,
           minWidth: 170,

@@ -71,7 +71,7 @@ export function createMockSettlementByStationColDefs(
 
       const group = groupMap.get(stationName)!;
       group.columns.push({
-        headerName: type,
+        headerName: type === "지급" ? "지급(원)" : "수급(원)",
         field: key,
         flex: 1,
         minWidth: 120,
@@ -110,7 +110,7 @@ export function createMockSettlementByStationColDefs(
 
       const group = groupMap.get(stationName)!;
       group.columns.push({
-        headerName: type,
+        headerName: type === "지급" ? "지급(원)" : "수급(원)",
         field: key,
         flex: 1,
         minWidth: 120,

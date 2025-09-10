@@ -198,7 +198,7 @@ export default function MockSettlementByInstitutionPage() {
       },
     },
     {
-      headerName: `지급 (${unit})`,
+      headerName: `지급(${unit})`,
       field: "지급액",
       minWidth: 200,
       flex: 1,
@@ -219,7 +219,7 @@ export default function MockSettlementByInstitutionPage() {
       },
     },
     {
-      headerName: `수급 (${unit})`,
+      headerName: `수급(${unit})`,
       field: "수급액",
       minWidth: 200,
       flex: 1,

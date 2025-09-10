@@ -18,7 +18,7 @@ export function createMockSettlementByRouteColDefs(
         pinned: "left",
       },
       {
-        headerName: "수급액",
+        headerName: "수급액(원)",
         field: "receiveAmount",
         flex: 1,
         minWidth: 120,
@@ -26,7 +26,7 @@ export function createMockSettlementByRouteColDefs(
         type: "numericColumn",
       },
       {
-        headerName: "지급액",
+        headerName: "지급액(원)",
         field: "payAmount",
         flex: 1,
         minWidth: 120,
@@ -109,7 +109,7 @@ export function createMockSettlementByRouteColDefs(
 
       const group = groupMap.get(groupKey)!;
       group.columns.push({
-        headerName: type === "지급" ? "지급" : "수급",
+        headerName: type === "지급" ? "지급(원)" : "수급(원)",
         field: key,
         width: 170,
         resizable: false,

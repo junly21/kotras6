@@ -409,6 +409,17 @@ export default function RouteSearchResultPage() {
                 rowSelection: "none", // 체크박스 사용하므로 단일 선택 비활성화
                 suppressScrollOnNewData: true, // 데이터 변경 시 스크롤 위치 유지
                 getRowStyle: getRowStyle, // 그룹별 배경색 적용
+                // 셀 병합 기능 활성화
+                enableCellSpan: true,
+                // 셀 병합을 위한 추가 설정
+                suppressColumnVirtualisation: true,
+                suppressRowGroupHidesColumns: true,
+                defaultColDef: {
+                  // 모든 셀의 배경색을 부모 요소(행)로부터 상속받도록 설정
+                  cellStyle: {
+                    backgroundColor: "inherit",
+                  },
+                },
               }}
             />
           </>

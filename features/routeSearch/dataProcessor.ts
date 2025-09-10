@@ -4,6 +4,7 @@ interface RouteSearchGridData {
   id: number;
   confirmedPath: string;
   groupNo: number;
+  groupDisplay: string | number | null;
   mainStations: string;
   detailedPath: string;
   isSelected: boolean;
@@ -27,7 +28,14 @@ export function processRouteSearchResults(
     }
   });
 
-  return searchResults.map((result, index) => {
+  // 먼저 그룹별로 정렬
+  const sortedResults = [...searchResults].sort((a, b) => {
+    const groupA = a.group_no || pathKeyGroups.get(a.path_key || "") || 0;
+    const groupB = b.group_no || pathKeyGroups.get(b.path_key || "") || 0;
+    return groupA - groupB;
+  });
+
+  return sortedResults.map((result, index) => {
     // transfer_list 파싱 (JSON 문자열을 배열로 변환)
     let transferStations: string[] = [];
     try {
@@ -74,10 +82,21 @@ export function processRouteSearchResults(
       return index === 0 || station !== pathComponents[index - 1];
     });
 
+    const currentGroupNo =
+      result.group_no || pathKeyGroups.get(result.path_key || "") || 0;
+
+    // 그룹 표시: 같은 그룹의 첫 번째 행에만 그룹 번호 표시
+    const isFirstInGroup =
+      index === 0 ||
+      (sortedResults[index - 1].group_no ||
+        pathKeyGroups.get(sortedResults[index - 1].path_key || "") ||
+        0) !== currentGroupNo;
+
     return {
       id: result.id || index,
       confirmedPath: result.confirmed_path || "N",
-      groupNo: result.group_no || pathKeyGroups.get(result.path_key || "") || 0,
+      groupNo: currentGroupNo,
+      groupDisplay: isFirstInGroup ? currentGroupNo : null,
       mainStations: uniquePathComponents.join(" → "),
       detailedPath: result.path_nm || "",
       isSelected: selectedPaths.some((path) => path.id === result.id),

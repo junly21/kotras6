@@ -110,9 +110,10 @@ export function createRouteSearchColDefs(
     {
       headerName: "그룹",
       resizable: false,
-      field: "groupNo",
+      field: "groupDisplay",
       width: 90,
-      sortable: true,
+      sortable: false, // 정렬 비활성화
+      filter: false, // 필터 비활성화
       cellStyle: {
         fontWeight: "bold",
         display: "flex",
@@ -120,13 +121,16 @@ export function createRouteSearchColDefs(
         justifyContent: "center",
         height: "100%",
       },
+      valueFormatter: (params: any) => {
+        // null 값은 빈 문자열로 표시
+        return params.value !== null ? params.value : "";
+      },
     },
     {
       headerName: "주요경유지",
-      resizable: false,
+      resizable: true,
       field: "mainStations",
-      minWidth: 400,
-      maxWidth: 400,
+      width: 400,
       flex: 2,
       sortable: true,
       cellStyle: {
@@ -159,9 +163,9 @@ export function createRouteSearchColDefs(
     },
     {
       headerName: "상세경로",
-      resizable: false,
+      resizable: true,
       field: "detailedPath",
-      minWidth: 500,
+      width: 500,
       flex: 3,
       sortable: false,
       cellStyle: {

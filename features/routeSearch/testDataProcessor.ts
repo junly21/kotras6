@@ -9,6 +9,7 @@ interface RouteSearchTestGridData {
   detailedPath: string;
   isSelected: boolean;
   originalData: RouteSearchTestResult;
+  cnt: number;
 }
 
 export function processRouteSearchTestResults(
@@ -91,7 +92,7 @@ export function processRouteSearchTestResults(
         currentGroupNo;
 
     // 상세경로 처리: path_nm을 그대로 사용 (중복역 포함)
-    let cleanedDetailedPath = result.path_nm || "";
+    const cleanedDetailedPath = result.path_nm || "";
 
     return {
       id: result.id || index,
@@ -102,6 +103,7 @@ export function processRouteSearchTestResults(
       detailedPath: cleanedDetailedPath,
       isSelected: selectedPaths.some((path) => path.id === result.id),
       originalData: result,
+      cnt: result.cnt || 0, // API에서 cnt 필드가 추가될 예정
     };
   });
 }

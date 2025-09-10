@@ -2,18 +2,19 @@ import { useState, useCallback } from "react";
 import {
   RouteSearchTestFilter,
   RouteSearchTestResult,
-  RouteSearchResult,
 } from "@/types/routeSearch";
 
 interface UseRouteSearchTestReturn {
-  searchResults: RouteSearchResult[];
+  searchResults: RouteSearchTestResult[];
   searchLoading: boolean;
   searchError: string | null;
   handleSearch: (filters: RouteSearchTestFilter) => Promise<void>;
 }
 
 export const useRouteSearchTest = (): UseRouteSearchTestReturn => {
-  const [searchResults, setSearchResults] = useState<RouteSearchResult[]>([]);
+  const [searchResults, setSearchResults] = useState<RouteSearchTestResult[]>(
+    []
+  );
   const [searchLoading, setSearchLoading] = useState(false);
   const [searchError, setSearchError] = useState<string | null>(null);
 

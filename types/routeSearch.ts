@@ -41,6 +41,7 @@ export interface RouteSearchResult {
   created_at: number; // 생성 시간
   confirmed_path: string; // 확정경로 포함 여부 (Y/N)
   group_no: number; // 그룹 번호
+  cnt: number; // API에서 추가될 예정인 cnt 필드
 }
 
 export interface RouteSegment {
@@ -99,4 +100,5 @@ export interface RouteSearchTestResult {
   created_at: number;
   confirmed_path: string;
   group_no: number;
+  cnt: number; // API에서 추가될 예정인 cnt 필드
 }

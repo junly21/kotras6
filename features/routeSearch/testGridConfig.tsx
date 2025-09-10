@@ -11,6 +11,7 @@ interface RouteSearchTestGridData {
   detailedPath: string;
   isSelected: boolean;
   originalData: RouteSearchTestResult;
+  cnt: number;
 }
 
 export function createRouteSearchTestColDefs(
@@ -74,6 +75,20 @@ export function createRouteSearchTestColDefs(
         height: "100%",
       },
     },
+    {
+      headerName: "cnt",
+      resizable: true,
+      field: "cnt",
+      width: 100,
+      sortable: false,
+      cellStyle: {
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        height: "100%",
+      },
+    },
+
     {
       headerName: "경로키",
       resizable: true,

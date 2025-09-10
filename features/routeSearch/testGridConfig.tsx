@@ -77,7 +77,7 @@ export function createRouteSearchTestColDefs(
     {
       headerName: "경로키",
       resizable: true,
-      field: "originalData.path_key",
+      field: "groupDisplay",
       width: 150,
       sortable: true,
       cellStyle: {
@@ -87,6 +87,10 @@ export function createRouteSearchTestColDefs(
         justifyContent: "flex-start",
         height: "100%",
         paddingLeft: "8px",
+      },
+      valueFormatter: (params: any) => {
+        // null 값은 빈 문자열로 표시 (첫 번째 행이 아닌 경우)
+        return params.value !== null ? params.value : "";
       },
     },
     {
@@ -151,8 +155,8 @@ export function createRouteSearchTestColDefs(
             formattedStations.push(" → ");
           }
 
-          // (노선)호선_역명(역번호) 형태에서 역명만 추출 (호선이 숫자 또는 문자열 모두 가능)
-          const stationMatch = station.match(/\([^)]+\)[^_]*_([^(]+)\(/);
+          // (노선)번호_역명(역번호) 형태에서 역명만 추출
+          const stationMatch = station.match(/\([^)]+\)\d+_([^(]+)\(/);
           const stationName = stationMatch ? stationMatch[1] : station;
           formattedStations.push(stationName);
         });
@@ -189,7 +193,6 @@ export function createRouteSearchTestColDefs(
               e.stopPropagation();
               onDetailClick(params.data.originalData);
             },
-            "data-action": "detail",
             className:
               "px-3 py-1 bg-blue-500 text-white text-sm rounded hover:bg-blue-600 transition-colors",
           },

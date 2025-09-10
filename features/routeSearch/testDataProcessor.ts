@@ -84,6 +84,12 @@ export function processRouteSearchTestResults(
 
     const currentGroupNo = pathKeyGroups.get(result.path_key || "") || 0;
 
+    // 그룹 표시: 같은 그룹의 첫 번째 행에만 그룹 번호 표시
+    const isFirstInGroup =
+      index === 0 ||
+      pathKeyGroups.get(sortedResults[index - 1].path_key || "") !==
+        currentGroupNo;
+
     // 상세경로 처리: path_nm을 그대로 사용 (중복역 포함)
     let cleanedDetailedPath = result.path_nm || "";
 
@@ -91,7 +97,7 @@ export function processRouteSearchTestResults(
       id: result.id || index,
       confirmedPath: result.confirmed_path || "N",
       groupNo: currentGroupNo,
-      groupDisplay: null, // 그룹 표시 제거
+      groupDisplay: isFirstInGroup ? result.path_key : null,
       mainStations: uniquePathComponents.join(" → "),
       detailedPath: cleanedDetailedPath,
       isSelected: selectedPaths.some((path) => path.id === result.id),

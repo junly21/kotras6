@@ -151,8 +151,8 @@ export function createRouteSearchTestColDefs(
             formattedStations.push(" → ");
           }
 
-          // (노선)번호_역명(역번호) 형태에서 역명만 추출
-          const stationMatch = station.match(/\([^)]+\)\d+_([^(]+)\(/);
+          // (노선)호선_역명(역번호) 형태에서 역명만 추출 (호선이 숫자 또는 문자열 모두 가능)
+          const stationMatch = station.match(/\([^)]+\)[^_]*_([^(]+)\(/);
           const stationName = stationMatch ? stationMatch[1] : station;
           formattedStations.push(stationName);
         });
@@ -189,6 +189,7 @@ export function createRouteSearchTestColDefs(
               e.stopPropagation();
               onDetailClick(params.data.originalData);
             },
+            "data-action": "detail",
             className:
               "px-3 py-1 bg-blue-500 text-white text-sm rounded hover:bg-blue-600 transition-colors",
           },

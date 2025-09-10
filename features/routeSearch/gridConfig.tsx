@@ -188,8 +188,8 @@ export function createRouteSearchColDefs(
             formattedStations.push(" → ");
           }
 
-          // (노선)번호_역명(역번호) 형태에서 역명만 추출
-          const stationMatch = station.match(/\([^)]+\)\d+_([^(]+)\(/);
+          // (노선)호선_역명(역번호) 형태에서 역명만 추출 (호선이 숫자 또는 문자열 모두 가능)
+          const stationMatch = station.match(/\([^)]+\)[^_]*_([^(]+)\(/);
           const stationName = stationMatch ? stationMatch[1] : station;
           formattedStations.push(stationName);
         });

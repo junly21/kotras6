@@ -92,12 +92,23 @@ export default function RouteSearchTestPage() {
     setDetailDialogOpen(true);
   }, []);
 
-  // 행 클릭 핸들러 - useCallback으로 최적화
-  const onRowClicked = useCallback(
-    (event: { data: { originalData: RouteSearchResult } }) => {
-      console.log("행 클릭 이벤트 (비활성화):", event);
+  // 행 더블클릭 핸들러 - useCallback으로 최적화
+  const onRowDoubleClicked = useCallback(
+    (event: { data: { originalData: RouteSearchResult }; event: Event }) => {
+      // 상세정보 버튼 더블클릭 시에는 체크박스 토글하지 않음
+      const target = event.event.target as HTMLElement;
+      if (target.closest('button[data-action="detail"]')) {
+        return;
+      }
+
+      // 체크박스 토글
+      const route = event.data.originalData;
+      const isCurrentlySelected = selectedPaths.some(
+        (path) => path.id === route.id
+      );
+      handleCheckboxChange(route, !isCurrentlySelected);
     },
-    []
+    [selectedPaths, handleCheckboxChange]
   );
 
   // 네트워크 데이터 로드
@@ -317,7 +328,7 @@ export default function RouteSearchTestPage() {
               gridRef={gridRef}
               height={gridHeight}
               gridOptions={{
-                onRowClicked: onRowClicked,
+                onRowDoubleClicked: onRowDoubleClicked,
                 rowSelection: "none", // 체크박스 사용하므로 단일 선택 비활성화
                 suppressScrollOnNewData: true, // 데이터 변경 시 스크롤 위치 유지
                 getRowStyle: getRowStyle, // 그룹별 배경색 적용
@@ -332,6 +343,8 @@ export default function RouteSearchTestPage() {
                     backgroundColor: "inherit",
                   },
                 },
+                // 행 클릭 비활성화 (더블클릭만 사용)
+                suppressRowClickSelection: true,
               }}
             />
           </>

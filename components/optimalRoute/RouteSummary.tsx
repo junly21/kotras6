@@ -43,21 +43,19 @@ export function RouteSummary({ route }: RouteSummaryProps) {
             <span className="text-blue-600 font-medium">환승 이동 시간:</span>
             <span className="ml-2">{formatTime(route.trans_mv_sec)}</span>
           </div>
-          <div className="flex items-center">
+          <div className="flex items-top">
             <span className="text-blue-600 font-medium">환승 대기 시간:</span>
             <span className="ml-2">{formatTime(route.trans_sty_sec)}</span>
           </div>
-          <div className="flex items-center">
-            <span className="text-blue-600 font-medium">환승역:</span>
+          <div className="flex items-start">
+            <span className="text-blue-600 font-medium min-w-[40px]">
+              환승역:
+            </span>
             <span className="ml-2">
               {route.transfer_list && route.transfer_list.length > 0 ? (
                 <div className="flex flex-wrap gap-1">
                   {route.transfer_list.map((station, idx) => (
-                    <span
-                      key={idx}
-                      className="px-1.5 py-0.5 bg-blue-100 text-blue-800 rounded text-xs">
-                      {station}
-                    </span>
+                    <span key={idx}>{station},</span>
                   ))}
                 </div>
               ) : (

@@ -142,12 +142,12 @@ export const getMenuData = (): MenuItem[] => [
       },
       {
         id: "network-optimal-route",
-        label: "최적경로",
+        label: "최적 경로",
         path: "/network/optimal-route",
       },
       {
         id: "network-file-upload",
-        label: "파일등록",
+        label: "파일 등록",
         path: "/network/file-upload",
       },
     ],

@@ -458,6 +458,12 @@ export default function MockSettlementByOdPage() {
       setIsLoading(true);
       setError(null);
 
+      // 검색 시작 시 이전 데이터 초기화
+      setSearchResults([]);
+      setSelectedRow(null);
+      setDetailData([]);
+      setSelectedPathIds([]);
+
       try {
         // 두 개의 API 호출로 각각 데이터 조회 (다른 페이지들과 동일한 방식)
         console.log("by-od 검색 시작:", values);
@@ -514,11 +520,15 @@ export default function MockSettlementByOdPage() {
           }
         } else {
           setError(byOdResponse.error || "데이터 조회에 실패했습니다.");
+          // 데이터가 없을 때도 명시적으로 빈 배열로 설정
+          setSearchResults([]);
         }
       } catch (err) {
         setError(
           err instanceof Error ? err.message : "알 수 없는 오류가 발생했습니다."
         );
+        // 에러 발생 시에도 빈 배열로 설정
+        setSearchResults([]);
       } finally {
         setIsLoading(false);
       }
@@ -726,49 +736,52 @@ export default function MockSettlementByOdPage() {
             </div>
           )}
 
-          {/* 경유지 상세정보 영역 */}
-          {selectedRow && selectedRow.path_detail !== "-" && (
-            <>
-              <h3 className="text-lg font-semibold mb-4">경유지 상세정보</h3>
-              <div className="bg-white border border-gray-200 rounded-[24px] p-4">
-                {isDetailLoading ? (
-                  <div className="flex items-center justify-center h-32">
-                    <Spinner />
-                    <p className="ml-2 text-gray-600">
-                      상세정보를 조회하는 중...
-                    </p>
-                  </div>
-                ) : (
-                  <div className="h-[300px]">
-                    <TestGrid
-                      rowData={detailData}
-                      columnDefs={detailColumnDefs}
-                      gridRef={detailGridRef}
-                      gridOptions={{
-                        headerHeight: 40,
-                        suppressCellFocus: true,
-                        suppressMovableColumns: true,
-                        suppressMenuHide: true,
-                        rowSelection: {
-                          enableClickSelection: false,
-                        },
-                        defaultColDef: {
-                          sortable: false,
-                          filter: false,
-                          resizable: false,
-                          suppressMovable: true,
-                        },
-                        getRowStyle: getDetailRowStyle, // 마지막 행 스타일 적용
-                      }}
-                    />
-                  </div>
-                )}
-              </div>
-            </>
-          )}
+          {/* 경유지 상세정보 영역 - 데이터가 있고 선택된 행이 있을 때만 표시 */}
+          {searchResults.length > 0 &&
+            selectedRow &&
+            selectedRow.path_detail !== "-" && (
+              <>
+                <h3 className="text-lg font-semibold mb-4">경유지 상세정보</h3>
+                <div className="bg-white border border-gray-200 rounded-[24px] p-4">
+                  {isDetailLoading ? (
+                    <div className="flex items-center justify-center h-32">
+                      <Spinner />
+                      <p className="ml-2 text-gray-600">
+                        상세정보를 조회하는 중...
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="h-[300px]">
+                      <TestGrid
+                        rowData={detailData}
+                        columnDefs={detailColumnDefs}
+                        gridRef={detailGridRef}
+                        gridOptions={{
+                          headerHeight: 40,
+                          suppressCellFocus: true,
+                          suppressMovableColumns: true,
+                          suppressMenuHide: true,
+                          rowSelection: {
+                            enableClickSelection: false,
+                          },
+                          defaultColDef: {
+                            sortable: false,
+                            filter: false,
+                            resizable: false,
+                            suppressMovable: true,
+                          },
+                          getRowStyle: getDetailRowStyle, // 마지막 행 스타일 적용
+                        }}
+                      />
+                    </div>
+                  )}
+                </div>
+              </>
+            )}
 
-          {/* 네트워크 맵 영역 */}
-          {selectedRow &&
+          {/* 네트워크 맵 영역 - 데이터가 있고 선택된 행이 있을 때만 표시 */}
+          {searchResults.length > 0 &&
+            selectedRow &&
             selectedRow.path_detail !== "-" &&
             !isDetailLoading && (
               <>

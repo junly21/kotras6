@@ -2,17 +2,45 @@
 const isDevelopment = process.env.NODE_ENV === "development";
 
 // 개발 환경: 8080, 5001 포트 / 프로덕션 환경: 28480, 28482 포트
-export const EXTERNAL_BASE_URL = isDevelopment
-  ? "http://192.168.111.152:8080/kotras6"
-  : "http://192.168.110.21:28480/kotras6";
+// export const EXTERNAL_BASE_URL = isDevelopment
+//   ? "http://192.168.111.152:8080/kotras6"
+//   : "http://192.168.110.21:28480/kotras6";
 
-export const OPTIMAL_ROUTE_BASE_URL = isDevelopment
-  ? "http://192.168.111.152:5001"
-  : "http://192.168.110.21:28482";
+// export const OPTIMAL_ROUTE_BASE_URL = isDevelopment
+//   ? "http://192.168.111.152:5001"
+//   : "http://192.168.110.21:28482";
 
+// 0912 테스트용 포트 번호에 따라 API URL 자동 설정
+const getApiUrlByPort = () => {
+  const port = process.env.PORT || "3000";
+
+  // 포트별 API 서버 매핑
+  switch (port) {
+    case "3000":
+      return "http://192.168.111.152:8080/kotras6";
+    case "3001":
+      return "http://192.168.111.152:8081/kotras6";
+    default:
+      // 기본값 (개발 환경: 8080, 프로덕션 환경: 28480)
+      return isDevelopment
+        ? "http://192.168.111.152:8080/kotras6"
+        : "http://192.168.110.21:28480/kotras6";
+  }
+};
+
+export const EXTERNAL_BASE_URL = getApiUrlByPort();
+export const OPTIMAL_ROUTE_BASE_URL = "http://192.168.111.152:5001";
+
+//개발 중 서버로 돌리고싶을때
 // export const EXTERNAL_BASE_URL = "http://192.168.110.21:28480/kotras6";
 
 // export const OPTIMAL_ROUTE_BASE_URL = "http://192.168.110.21:28482";
+
+//도커용 url
+// export const EXTERNAL_BASE_URL = "http://java-api:8080/kotras6";
+
+// export const OPTIMAL_ROUTE_BASE_URL = "http://flask-api:5001";
+
 // 환경 정보 로깅 (개발 시에만)
 if (isDevelopment) {
   console.log("🔧 개발 환경 설정:", {
@@ -125,16 +153,17 @@ export async function callExternalApi(
     if (contentType && contentType.includes("application/json")) {
       data = await response.json();
       // console.log("외부 API JSON 응답 데이터:", data);
-      console.log(
-        "외부 API JSON 응답 데이터:",
-        JSON.stringify(data).substring(0, 300) + "..."
-      );
+      // console.log(
+      //   "외부 API JSON 응답 데이터:",
+      //   JSON.stringify(data).substring(0, 300) + "..."
+      // );
+      console.log(data);
     } else {
-      const textData = await response.text();
-      console.log(
-        "외부 API 텍스트 응답 데이터 (처음 500자):",
-        textData.substring(0, 500)
-      );
+      // const textData = await response.text();
+      // console.log(
+      //   "외부 API 텍스트 응답 데이터 (처음 500자):",
+      //   textData.substring(0, 500)
+      // );
 
       data = {
         type: "html",

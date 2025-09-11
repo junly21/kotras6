@@ -406,7 +406,7 @@ export default function NetworkFileUploadPage() {
               <Button
                 onClick={handleAddClick}
                 className="bg-blue-600 hover:bg-blue-700 text-white">
-                네트워크 파일 등록
+                네트워크 파일등록
               </Button>
             </div>
           </div>

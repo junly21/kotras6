@@ -3,6 +3,7 @@ import { RouteSearchResult } from "@/types/routeSearch";
 interface RouteSearchGridData {
   id: number;
   confirmedPath: string;
+  confirmedPathDisplay: string | null;
   groupNo: number;
   groupDisplay: string | number | null;
   mainStations: string;
@@ -92,12 +93,24 @@ export function processRouteSearchResults(
         pathKeyGroups.get(sortedResults[index - 1].path_key || "") ||
         0) !== currentGroupNo;
 
+    // 확정경로 포함 여부 표시: 같은 그룹 내에서 같은 값이 연속될 때 첫 번째에만 표시
+    const currentConfirmedPath = result.confirmed_path || "N";
+    const prevConfirmedPath =
+      index > 0 ? sortedResults[index - 1].confirmed_path || "N" : null;
+
+    const isFirstConfirmedPathInGroup =
+      isFirstInGroup || // 그룹의 첫 번째 행이거나
+      prevConfirmedPath !== currentConfirmedPath; // 이전 행과 확정경로 값이 다르면
+
     // 상세경로 처리: path_nm을 그대로 사용 (중복역 포함)
     let cleanedDetailedPath = result.path_nm || "";
 
     return {
       id: result.id || index,
-      confirmedPath: result.confirmed_path || "N",
+      confirmedPath: currentConfirmedPath,
+      confirmedPathDisplay: isFirstConfirmedPathInGroup
+        ? currentConfirmedPath
+        : null,
       groupNo: currentGroupNo,
       groupDisplay: isFirstInGroup ? currentGroupNo : null,
       mainStations: uniquePathComponents.join(" → "),

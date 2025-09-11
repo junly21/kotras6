@@ -5,7 +5,9 @@ import { RouteSearchResult } from "@/types/routeSearch";
 interface RouteSearchGridData {
   id: number;
   confirmedPath: string;
+  confirmedPathDisplay: string | null;
   groupNo: number;
+  groupDisplay: string | number | null;
   mainStations: string;
   detailedPath: string;
   isSelected: boolean;
@@ -76,10 +78,10 @@ export function createRouteSearchColDefs(
     {
       headerName: "확정경로",
       resizable: false,
-      field: "confirmedPath",
+      field: "confirmedPathDisplay",
       width: 120,
       sortable: false,
-      cellRenderer: (params: { value: string }) => {
+      cellRenderer: (params: { value: string | null }) => {
         const value = params.value;
         if (value === "Y") {
           return React.createElement(
@@ -98,7 +100,7 @@ export function createRouteSearchColDefs(
             "미포함"
           );
         }
-        return value;
+        return ""; // null 값은 빈 문자열로 표시
       },
       cellStyle: {
         display: "flex",
@@ -121,9 +123,9 @@ export function createRouteSearchColDefs(
         justifyContent: "center",
         height: "100%",
       },
-      valueFormatter: (params: any) => {
+      valueFormatter: (params: { value: string | number | null }) => {
         // null 값은 빈 문자열로 표시
-        return params.value !== null ? params.value : "";
+        return params.value !== null ? String(params.value) : "";
       },
     },
     {

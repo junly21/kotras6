@@ -175,6 +175,7 @@ export interface NetworkMapProps {
   // 출발역/도착역 아이콘 표시를 위한 props
   startStationId?: string; // 출발역 ID
   endStationId?: string; // 도착역 ID
+  focusNodeIds?: string[]; // 시야 이동할 노드 ID들
 }
 
 // 노드/링크 매칭 관련 타입

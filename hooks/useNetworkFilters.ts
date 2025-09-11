@@ -15,7 +15,7 @@ export const useNetworkFilters = (autoSearch?: boolean) => {
     Array<{ value: string; label: string }>
   >([]);
   const [agencyOptions, setAgencyOptions] = useState<
-    Array<{ value: string; label: string }>
+    Array<{ value: string; label: string; value2?: string }>
   >([]);
   const [lineOptions, setLineOptions] = useState<
     Array<{ value: string; label: string }>
@@ -54,14 +54,20 @@ export const useNetworkFilters = (autoSearch?: boolean) => {
       fetch("/api/common/agencies")
         .then((res) => res.json())
         .then((data) => {
-          const options: { value: string; label: string }[] = Array.isArray(
-            data.options
-          )
-            ? data.options.map((option: { value: string; label: string }) => ({
-                value: String(option.value),
-                label: String(option.label),
-              }))
-            : [];
+          const options: { value: string; label: string; value2?: string }[] =
+            Array.isArray(data.options)
+              ? data.options.map(
+                  (option: {
+                    value: string;
+                    label: string;
+                    value2?: string;
+                  }) => ({
+                    value: String(option.value),
+                    label: String(option.label),
+                    value2: option.value2 ? String(option.value2) : undefined,
+                  })
+                )
+              : [];
           setAgencyOptions(options);
           // 기관명 옵션이 로드되면 첫 번째 값으로 자동 설정
           if (options.length > 0) {
@@ -82,9 +88,12 @@ export const useNetworkFilters = (autoSearch?: boolean) => {
   useEffect(() => {
     // 네트워크, 기관명 모두 선택된 경우에만 노선 목록 요청
     if (filters.network && filters.agency) {
-      const agencyLabelRaw =
-        agencyOptions.find((a) => a.value === filters.agency)?.label || "";
-      const agencyLabel = agencyLabelRaw === "전체" ? "ALL" : agencyLabelRaw;
+      const selectedAgency = agencyOptions.find(
+        (a) => a.value === filters.agency
+      );
+      const agencyValue2 =
+        selectedAgency?.value2 || selectedAgency?.label || "";
+      const agencyLabel = agencyValue2 === "전체" ? "ALL" : agencyValue2;
       NetworkMapService.getLineList({
         network: filters.network,
         networkLabel: agencyLabel,

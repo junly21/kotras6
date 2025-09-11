@@ -58,9 +58,11 @@ export default function NetworkMapPage() {
   const vectorLayerRef = useRef<VectorLayer | null>(null);
 
   const apiCall = useCallback(() => {
-    const agencyLabelRaw =
-      agencyOptions.find((a) => a.value === filters.agency)?.label || "";
-    const agencyLabel = agencyLabelRaw === "전체" ? "ALL" : agencyLabelRaw;
+    const selectedAgency = agencyOptions.find(
+      (a) => a.value === filters.agency
+    );
+    const agencyValue2 = selectedAgency?.value2 || selectedAgency?.label || "";
+    const agencyLabel = agencyValue2 === "전체" ? "ALL" : agencyValue2;
     return NetworkMapService.getMapData({
       network: filters.network,
       agency: filters.agency,

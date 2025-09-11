@@ -368,7 +368,6 @@ export default function RouteSearchTestPage() {
                 links={links}
                 svgText={svgText}
                 highlights={routeHighlights}
-                focusNodeIds={focusNodeIds}
                 config={{
                   width: "100%",
                   height: 600,

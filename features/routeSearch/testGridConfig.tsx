@@ -16,10 +16,7 @@ interface RouteSearchTestGridData {
 
 export function createRouteSearchTestColDefs(
   onCheckboxChange: (route: RouteSearchTestResult, checked: boolean) => void,
-  onDetailClick: (route: RouteSearchTestResult) => void,
-  onSelectAllChange: (checked: boolean) => void,
-  isAllSelected: boolean,
-  isIndeterminate: boolean
+  onDetailClick: (route: RouteSearchTestResult) => void
 ): ColDef<RouteSearchTestGridData>[] {
   return [
     {
@@ -28,33 +25,6 @@ export function createRouteSearchTestColDefs(
       field: "isSelected",
       width: 50,
       sortable: false,
-      headerComponent: () => {
-        return React.createElement(
-          "div",
-          {
-            style: {
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              height: "100%",
-              width: "100%",
-            },
-          },
-          React.createElement("input", {
-            type: "checkbox",
-            checked: isAllSelected,
-            ref: (input: HTMLInputElement) => {
-              if (input) {
-                input.indeterminate = isIndeterminate;
-              }
-            },
-            onChange: (e: React.ChangeEvent<HTMLInputElement>) =>
-              onSelectAllChange(e.target.checked),
-            onClick: (e: React.MouseEvent) => e.stopPropagation(),
-            className: "w-4 h-4",
-          })
-        );
-      },
       cellRenderer: (params: {
         value: boolean;
         data: { originalData: RouteSearchTestResult };

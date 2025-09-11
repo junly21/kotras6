@@ -86,6 +86,7 @@ export function NetworkMap({
   apiStationNumbers, // API 응답의 sta_num들 추가
   startStationId, // 출발역 ID
   endStationId, // 도착역 ID
+  focusNodeIds, // 시야 이동할 노드 ID들
 }: NetworkMapProps) {
   const {
     showZoomControls = true,
@@ -138,6 +139,37 @@ export function NetworkMap({
     const r = el.getBoundingClientRect();
     return { x: r.width / 2, y: r.height / 2 };
   }, []);
+
+  // 특정 노드로 시야 이동하는 함수 (단일 노드 최적화)
+  const focusOnNodes = useCallback(
+    (nodeIds: string[]) => {
+      if (!nodeIds || nodeIds.length === 0 || !svgText) return;
+
+      // 첫 번째 노드 ID 사용 (path_key의 첫 번째 역번호)
+      const targetNodeId = nodeIds[0];
+      const nodePosition = getNodePositionFromSvg(targetNodeId, svgText);
+
+      if (!nodePosition) {
+        console.warn(`노드 위치를 찾을 수 없습니다: ${targetNodeId}`);
+        return;
+      }
+
+      // 해당 노드 위치로 시야 이동
+      const containerCenter = getContainerCenter();
+      const newPanX = containerCenter.x - nodePosition.x * scale;
+      const newPanY = containerCenter.y - nodePosition.y * scale;
+
+      setPan({ x: newPanX, y: newPanY });
+    },
+    [svgText, scale, getContainerCenter]
+  );
+
+  // focusNodeIds가 변경될 때 시야 이동
+  useEffect(() => {
+    if (focusNodeIds && focusNodeIds.length > 0) {
+      focusOnNodes(focusNodeIds);
+    }
+  }, [focusNodeIds, focusOnNodes]);
 
   // 하이라이트 상태 계산
   const highlightState = useMemo(() => {

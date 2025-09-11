@@ -44,6 +44,7 @@ export default function RouteSearchTestPage() {
   const [selectedRouteForDetail, setSelectedRouteForDetail] =
     useState<RouteSearchResult | null>(null);
   const [hasSearched, setHasSearched] = useState(false);
+  const [focusNodeIds, setFocusNodeIds] = useState<string[]>([]);
 
   // 필터 변경 핸들러 - useCallback으로 최적화
   const handleFilterChange = useCallback((values: RouteSearchTestFilter) => {
@@ -65,25 +66,23 @@ export default function RouteSearchTestPage() {
     (route: RouteSearchResult, checked: boolean) => {
       if (checked) {
         setSelectedPaths((prev) => [...prev, route]);
+
+        // 체크 시 해당 경로의 첫 번째 역번호로 시야 이동
+        if (route.path_key) {
+          // path_key에서 첫 번째 숫자(역번호) 추출
+          // 예: "123_456_789" -> "123"
+          const firstStationId = route.path_key.split("_")[0];
+          if (firstStationId && firstStationId.length > 0) {
+            setFocusNodeIds([firstStationId]);
+          }
+        }
       } else {
         setSelectedPaths((prev) => prev.filter((path) => path.id !== route.id));
+        // 체크 해제 시 시야 이동 초기화
+        setFocusNodeIds([]);
       }
     },
     []
-  );
-
-  // 전체선택/전체해제 핸들러 - useCallback으로 최적화
-  const handleSelectAllChange = useCallback(
-    (checked: boolean) => {
-      if (checked) {
-        // 전체 선택
-        setSelectedPaths([...searchResults]);
-      } else {
-        // 전체 해제
-        setSelectedPaths([]);
-      }
-    },
-    [searchResults]
   );
 
   // 상세 정보 Dialog 열기 - useCallback으로 최적화
@@ -151,21 +150,6 @@ export default function RouteSearchTestPage() {
     return processRouteSearchTestResults(searchResults, selectedPaths);
   }, [searchResults, selectedPaths]);
 
-  // 전체선택 상태 계산 - useMemo로 최적화
-  const selectAllState = useMemo(() => {
-    if (processedResults.length === 0) {
-      return { isAllSelected: false, isIndeterminate: false };
-    }
-
-    const selectedCount = selectedPaths.length;
-    const totalCount = processedResults.length;
-
-    return {
-      isAllSelected: selectedCount === totalCount,
-      isIndeterminate: selectedCount > 0 && selectedCount < totalCount,
-    };
-  }, [selectedPaths.length, processedResults.length]);
-
   // 그룹별 배경색 계산 - path_key 기준으로 그룹화
   const getGroupBackgroundColor = useCallback(
     (rowIndex: number) => {
@@ -216,38 +200,30 @@ export default function RouteSearchTestPage() {
   const colDefs = useMemo(() => {
     return createRouteSearchTestColDefs(
       handleCheckboxChange,
-      handleDetailClick,
-      handleSelectAllChange,
-      selectAllState.isAllSelected,
-      selectAllState.isIndeterminate
+      handleDetailClick
     );
-  }, [
-    handleCheckboxChange,
-    handleDetailClick,
-    handleSelectAllChange,
-    selectAllState,
-  ]);
+  }, [handleCheckboxChange, handleDetailClick]);
 
   // 그리드 높이 동적 계산 - useMemo로 최적화
   const gridHeight = useMemo(() => {
     if (!processedResults || processedResults.length === 0) return 200;
 
-    const baseHeight = 160; // 기본 높이 (1-2개 행일 때)
+    const baseHeight = 300; // 기본 높이 (1-2개 행일 때)
+    return baseHeight;
+    // let calculatedHeight: number;
 
-    let calculatedHeight: number;
+    // if (processedResults.length <= 2) {
+    //   // 1-2개 행: 기본 높이
+    //   calculatedHeight = baseHeight;
+    // } else if (processedResults.length <= 8) {
+    //   // 3-9개 행: 기본 높이의 2배
+    //   calculatedHeight = baseHeight * 1.5;
+    // } else {
+    //   // 9개 이상: 기본 높이의 2배의 2배 (4배)
+    //   calculatedHeight = baseHeight * 3;
+    // }
 
-    if (processedResults.length <= 2) {
-      // 1-2개 행: 기본 높이
-      calculatedHeight = baseHeight;
-    } else if (processedResults.length <= 8) {
-      // 3-9개 행: 기본 높이의 2배
-      calculatedHeight = baseHeight * 1.5;
-    } else {
-      // 9개 이상: 기본 높이의 2배의 2배 (4배)
-      calculatedHeight = baseHeight * 3;
-    }
-
-    return calculatedHeight;
+    // return calculatedHeight;
   }, [processedResults]);
 
   // 전체 로딩 상태
@@ -376,7 +352,6 @@ export default function RouteSearchTestPage() {
       {/* 네트워크 맵 */}
       {hasSearched && processedResults.length > 0 && (
         <div className="space-y-4">
-          <h2 className="text-xl font-semibold">지하철 노선도</h2>
           <div className="bg-white h-[700px] rounded-[24px] p-4">
             {isMapLoading ? (
               <div className="flex items-center justify-center h-64">
@@ -393,6 +368,7 @@ export default function RouteSearchTestPage() {
                 links={links}
                 svgText={svgText}
                 highlights={routeHighlights}
+                focusNodeIds={focusNodeIds}
                 config={{
                   width: "100%",
                   height: 600,

@@ -9,6 +9,7 @@ export type FieldType =
 export interface FieldOption {
   label: string;
   value: string | number;
+  value2?: string; // 기관명의 경우 OPER_NM으로 사용될 값
 }
 
 export interface FieldConfig {

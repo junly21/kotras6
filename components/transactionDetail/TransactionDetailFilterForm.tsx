@@ -85,15 +85,16 @@ export function TransactionDetailFilterForm({
   useEffect(() => {
     const subscription = form.watch((value, { name }) => {
       if (name === "agency" && value.agency) {
-        // 기관명의 label 값을 찾기
+        // 기관명의 value2 값을 찾기 (value2가 없으면 label 사용)
         const agencyOptions = dynamicOptions.agency || [];
         const selectedAgency = agencyOptions.find(
           (opt) => opt.value === value.agency
         );
-        const agencyLabel = selectedAgency?.label || value.agency;
+        const agencyValue2 =
+          selectedAgency?.value2 || selectedAgency?.label || value.agency;
 
-        // '전체' 선택 시에는 'ALL'로 전송, 그 외에는 label 값 사용
-        const agencyValue = agencyLabel === "전체" ? "ALL" : agencyLabel;
+        // '전체' 선택 시에는 'ALL'로 전송, 그 외에는 value2 값 사용
+        const agencyValue = agencyValue2 === "전체" ? "ALL" : agencyValue2;
 
         // 노선명 옵션 로드
         fetch("/api/transaction-detail/lines", {
@@ -154,7 +155,7 @@ export function TransactionDetailFilterForm({
   }, [form, dynamicOptions.line]);
 
   const handleSubmit = (values: TransactionDetailFilters) => {
-    // value를 label로 변환
+    // value를 value2로 변환 (value2가 없으면 label 사용)
     const agencyOptions = dynamicOptions.agency || [];
     const lineOptions = dynamicOptions.line || [];
 
@@ -163,9 +164,10 @@ export function TransactionDetailFilterForm({
     );
     const selectedLine = lineOptions.find((opt) => opt.value === values.line);
 
-    const agencyLabel = selectedAgency?.label || values.agency;
-    // '전체' 선택 시에는 'ALL'로 전송, 그 외에는 label 값 사용
-    const agencyValue = agencyLabel === "전체" ? "ALL" : agencyLabel;
+    const agencyValue2 =
+      selectedAgency?.value2 || selectedAgency?.label || values.agency;
+    // '전체' 선택 시에는 'ALL'로 전송, 그 외에는 value2 값 사용
+    const agencyValue = agencyValue2 === "전체" ? "ALL" : agencyValue2;
 
     const convertedValues = {
       ...values,

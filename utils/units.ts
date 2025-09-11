@@ -1,18 +1,18 @@
 // src/utils/unit.ts
 
-export type Unit = "억" | "백만" | "천" | "원";
+export type Unit = "억 원" | "백만 원" | "천 원" | "원";
 
 export const unitFactors: Record<Unit, number> = {
-  억: 100_000_000,
-  백만: 1_000_000,
-  천: 1_000,
+  "억 원": 100_000_000,
+  "백만 원": 1_000_000,
+  "천 원": 1_000,
   원: 1,
 };
 
 /**
  * 숫자 필드(숫자 타입 프로퍼티)들만 골라서 단위를 변경해 줍니다.
  */
-export function convertUnits<T extends Record<string, any>>(
+export function convertUnits<T extends Record<string, unknown>>(
   data: T[],
   unit: Unit
 ): T[] {

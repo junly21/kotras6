@@ -21,6 +21,7 @@ import {
 } from "@/features/mockSettlementByInstitution/filterConfig";
 import { UnitRadioGroup, type Unit } from "@/components/ui/UnitRadioGroup";
 import { InstitutionChart } from "@/components/charts/InstitutionChart";
+import { useUnitConversion } from "@/hooks/useUnitConversion";
 
 // Register all Community features
 ModuleRegistry.registerModules([AllCommunityModule]);
@@ -288,24 +289,7 @@ export default function MockSettlementByInstitutionPage() {
   }, []);
 
   // 그리드용 단위변환된 데이터
-  const byInstitutionRowData = byInstitutionData.map((item) => ({
-    ...item,
-    지급액:
-      unit === "원"
-        ? Math.round(item.지급액)
-        : item.지급액 /
-          (unit === "천" ? 1000 : unit === "백만" ? 1000000 : 100000000),
-    수급액:
-      unit === "원"
-        ? Math.round(item.수급액)
-        : item.수급액 /
-          (unit === "천" ? 1000 : unit === "백만" ? 1000000 : 100000000),
-    차액:
-      unit === "원"
-        ? Math.round(item.차액)
-        : item.차액 /
-          (unit === "천" ? 1000 : unit === "백만" ? 1000000 : 100000000),
-  }));
+  const byInstitutionRowData = useUnitConversion(byInstitutionData, unit);
 
   // 하단 고정 행 데이터 (총계)
   const pinnedBottomRowData = useMemo(() => {
@@ -328,9 +312,9 @@ export default function MockSettlementByInstitutionPage() {
     const unitMultiplier =
       unit === "원"
         ? 1
-        : unit === "천"
+        : unit === "천 원"
         ? 1 / 1000
-        : unit === "백만"
+        : unit === "백만 원"
         ? 1 / 1000000
         : 1 / 100000000;
 

@@ -1,6 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
 import { callExternalApi, createCorsHeaders } from "../../utils/externalApi";
 
+// 기관명 변환 함수
+function convertAgencyName(agencyName: string): string {
+  const nameMapping: Record<string, string> = {
+    용인경전철: "용인경량전철",
+    신림선: "남서울경전철",
+  };
+
+  return nameMapping[agencyName] || agencyName;
+}
+
 export async function GET(request: NextRequest) {
   try {
     console.log("PayRecvOperList GET API 호출됨");
@@ -10,7 +20,15 @@ export async function GET(request: NextRequest) {
       body: {}, // 빈 body로 요청
     });
 
-    return NextResponse.json(data, {
+    // pay_oper 필드 변환
+    const transformedData = Array.isArray(data)
+      ? data.map((item: any) => ({
+          ...item,
+          pay_oper: convertAgencyName(item.pay_oper || ""),
+        }))
+      : data;
+
+    return NextResponse.json(transformedData, {
       headers: createCorsHeaders(),
     });
   } catch (error) {
@@ -41,7 +59,15 @@ export async function POST(request: NextRequest) {
         body: {}, // 빈 body로 요청
       });
 
-      return NextResponse.json(data, {
+      // pay_oper 필드 변환
+      const transformedData = Array.isArray(data)
+        ? data.map((item: any) => ({
+            ...item,
+            pay_oper: convertAgencyName(item.pay_oper || ""),
+          }))
+        : data;
+
+      return NextResponse.json(transformedData, {
         headers: createCorsHeaders(),
       });
     } catch (externalApiError) {

@@ -10,6 +10,16 @@ import Spinner from "@/components/Spinner";
 import { MockSettlementRegisterData } from "@/types/mockSettlementRegister";
 import { MockSettlementResultData } from "@/types/mockSettlementResult";
 
+// 기관명 변환 함수
+function convertAgencyName(agencyName: string): string {
+  const nameMapping: Record<string, string> = {
+    용인경전철: "용인경량전철",
+    신림선: "남서울경전철",
+  };
+
+  return nameMapping[agencyName] || agencyName;
+}
+
 interface MockSettlementDetailData {
   simStmtGrpId: string;
   settlementName: string;
@@ -337,7 +347,9 @@ export function MockSettlementDetailModal({
                   ? detailData.operPoints.map((point, index) => (
                       <div key={index} className={fieldRow}>
                         <span className={labelCx}>
-                          {typeof point === "object" ? point.oper_nm : point}
+                          {typeof point === "object"
+                            ? convertAgencyName(point.oper_nm)
+                            : convertAgencyName(point)}
                         </span>
                         <div className={valueCx}>
                           {typeof point === "object" && point.point
@@ -363,7 +375,9 @@ export function MockSettlementDetailModal({
                       "새서울철도",
                     ].map((agency) => (
                       <div key={agency} className={fieldRow}>
-                        <span className={labelCx}>{agency}</span>
+                        <span className={labelCx}>
+                          {convertAgencyName(agency)}
+                        </span>
                         <div className={valueCx}>1.0</div>
                       </div>
                     ))}

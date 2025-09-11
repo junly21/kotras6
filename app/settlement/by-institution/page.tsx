@@ -20,6 +20,7 @@ import {
 } from "@/features/settlementByInstitution/filterConfig";
 import { UnitRadioGroup, type Unit } from "@/components/ui/UnitRadioGroup";
 import { InstitutionChart } from "@/components/charts/InstitutionChart";
+import { useUnitConversion } from "@/hooks/useUnitConversion";
 
 // Register all Community features
 ModuleRegistry.registerModules([AllCommunityModule]);
@@ -108,25 +109,7 @@ export default function SettlementByInstitutionPage() {
   }, []);
 
   // 그리드용 단위변환된 데이터
-  const rowData =
-    apiData?.map((item) => ({
-      ...item,
-      지급액:
-        unit === "원"
-          ? Math.round(item.지급액)
-          : item.지급액 /
-            (unit === "천" ? 1000 : unit === "백만" ? 1000000 : 100000000),
-      수급액:
-        unit === "원"
-          ? Math.round(item.수급액)
-          : item.수급액 /
-            (unit === "천" ? 1000 : unit === "백만" ? 1000000 : 100000000),
-      차액:
-        unit === "원"
-          ? Math.round(item.차액)
-          : item.차액 /
-            (unit === "천" ? 1000 : unit === "백만" ? 1000000 : 100000000),
-    })) || [];
+  const rowData = useUnitConversion(apiData, unit);
 
   // 하단 고정 행 데이터 (총계)
   const pinnedBottomRowData = useMemo(() => {
@@ -161,9 +144,9 @@ export default function SettlementByInstitutionPage() {
       unitMultiplier:
         unit === "원"
           ? 1
-          : unit === "천"
+          : unit === "천 원"
           ? 1 / 1000
-          : unit === "백만"
+          : unit === "백만 원"
           ? 1 / 1000000
           : 1 / 100000000,
     });
@@ -172,11 +155,11 @@ export default function SettlementByInstitutionPage() {
     const unitMultiplier =
       unit === "원"
         ? 1
-        : unit === "천"
+        : unit === "천 원"
         ? 1 / 1000
-        : unit === "백만"
+        : unit === "백만 원"
         ? 1 / 1000000
-        : 1 / 100000000;
+        : 1 / 100000000; // "억 원"
 
     // 원 단위일 때는 정수로, 다른 단위는 소수점 포함
     const formatValue = (value: number) => {

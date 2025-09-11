@@ -159,7 +159,7 @@ export function NetworkMap({
       const newPanX = containerCenter.x - nodePosition.x * scale;
       const newPanY = containerCenter.y - nodePosition.y * scale;
 
-      setPan({ x: newPanX, y: newPanY - 500 });
+      setPan({ x: newPanX, y: newPanY });
     },
     [svgText, scale, getContainerCenter]
   );

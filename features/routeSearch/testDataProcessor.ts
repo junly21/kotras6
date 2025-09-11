@@ -1,7 +1,8 @@
 import { RouteSearchTestResult } from "@/types/routeSearch";
+import { getRouteIdentifier } from "@/utils/routeIdentifier";
 
 interface RouteSearchTestGridData {
-  id: number;
+  id: string; // path_key + path_seq 조합으로 변경
   confirmedPath: string;
   groupNo: number;
   groupDisplay: string | number | null;
@@ -93,14 +94,21 @@ export function processRouteSearchTestResults(
 
     // 상세경로 처리: path_nm을 그대로 사용 (중복역 포함)
     const cleanedDetailedPath = result.path_nm || "";
+    // 고유 식별자 생성 (path_key + path_seq 조합)
+    const routeId = getRouteIdentifier(result) || `route_${index}`;
+
     return {
-      id: result.id || index,
+      id: routeId, // 문자열로 변경
       confirmedPath: result.confirmed_path || "N",
       groupNo: currentGroupNo,
       groupDisplay: isFirstInGroup ? result.path_key : null,
       mainStations: uniquePathComponents.join(" → "),
       detailedPath: cleanedDetailedPath,
-      isSelected: selectedPaths.some((path) => path.id === result.id),
+      isSelected: selectedPaths.some((path) => {
+        const pathId = getRouteIdentifier(path);
+        const resultId = getRouteIdentifier(result);
+        return pathId && resultId && pathId === resultId;
+      }),
       originalData: result,
       cnt: result.cnt || 0, // API에서 cnt 필드가 추가될 예정
     };

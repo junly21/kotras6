@@ -1,7 +1,8 @@
 import { RouteSearchResult } from "@/types/routeSearch";
+import { getRouteIdentifier } from "@/utils/routeIdentifier";
 
 interface RouteSearchGridData {
-  id: number;
+  id: string; // path_key + path_seq 조합으로 변경
   confirmedPath: string;
   confirmedPathDisplay: string | null;
   groupNo: number;
@@ -105,8 +106,11 @@ export function processRouteSearchResults(
     // 상세경로 처리: path_nm을 그대로 사용 (중복역 포함)
     let cleanedDetailedPath = result.path_nm || "";
 
+    // 고유 식별자 생성 (path_key + path_seq 조합)
+    const routeId = getRouteIdentifier(result) || `route_${index}`;
+
     return {
-      id: result.id || index,
+      id: routeId, // 문자열로 변경
       confirmedPath: currentConfirmedPath,
       confirmedPathDisplay: isFirstConfirmedPathInGroup
         ? currentConfirmedPath
@@ -115,7 +119,11 @@ export function processRouteSearchResults(
       groupDisplay: isFirstInGroup ? currentGroupNo : null,
       mainStations: uniquePathComponents.join(" → "),
       detailedPath: cleanedDetailedPath,
-      isSelected: selectedPaths.some((path) => path.id === result.id),
+      isSelected: selectedPaths.some((path) => {
+        const pathId = getRouteIdentifier(path);
+        const resultId = getRouteIdentifier(result);
+        return pathId && resultId && pathId === resultId;
+      }),
       originalData: result,
     };
   });

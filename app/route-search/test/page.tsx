@@ -16,6 +16,7 @@ import { NetworkMap } from "@/components/NetworkMap/NetworkMap";
 import { useNetworkData } from "@/hooks/useNetworkData";
 import type { NetworkMapHighlight } from "@/types/network";
 import { RouteDetailDialog } from "@/components/routeSearch/RouteDetailDialog";
+import { getRouteIdentifier } from "@/utils/routeIdentifier";
 
 // Register all Community features
 ModuleRegistry.registerModules([AllCommunityModule]);
@@ -77,7 +78,13 @@ export default function RouteSearchTestPage() {
           }
         }
       } else {
-        setSelectedPaths((prev) => prev.filter((path) => path.id !== route.id));
+        setSelectedPaths((prev) =>
+          prev.filter((path) => {
+            const pathId = getRouteIdentifier(path);
+            const routeId = getRouteIdentifier(route);
+            return !(pathId && routeId && pathId === routeId);
+          })
+        );
         // 체크 해제 시 시야 이동 초기화
         setFocusNodeIds([]);
       }
@@ -102,9 +109,11 @@ export default function RouteSearchTestPage() {
 
       // 체크박스 토글
       const route = event.data.originalData;
-      const isCurrentlySelected = selectedPaths.some(
-        (path) => path.id === route.id
-      );
+      const isCurrentlySelected = selectedPaths.some((path) => {
+        const pathId = getRouteIdentifier(path);
+        const routeId = getRouteIdentifier(route);
+        return pathId && routeId && pathId === routeId;
+      });
       handleCheckboxChange(route, !isCurrentlySelected);
     },
     [selectedPaths, handleCheckboxChange]
@@ -139,7 +148,7 @@ export default function RouteSearchTestPage() {
           value: nodeIds,
           priority: 1,
           rgb: route.rgb || "#3B82F6",
-          pathId: route.id.toString(),
+          pathId: getRouteIdentifier(route),
         };
       })
       .filter(Boolean) as NetworkMapHighlight[];

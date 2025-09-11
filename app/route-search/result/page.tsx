@@ -20,6 +20,7 @@ import { NetworkMap } from "@/components/NetworkMap/NetworkMap";
 import { useNetworkData } from "@/hooks/useNetworkData";
 import type { NetworkMapHighlight } from "@/types/network";
 import { RouteDetailDialog } from "@/components/routeSearch/RouteDetailDialog";
+import { getRouteIdentifier } from "@/utils/routeIdentifier";
 
 // Register all Community features
 ModuleRegistry.registerModules([AllCommunityModule]);
@@ -135,7 +136,13 @@ export default function RouteSearchResultPage() {
       if (checked) {
         setSelectedPaths((prev) => [...prev, route]);
       } else {
-        setSelectedPaths((prev) => prev.filter((path) => path.id !== route.id));
+        setSelectedPaths((prev) =>
+          prev.filter((path) => {
+            const pathId = getRouteIdentifier(path);
+            const routeId = getRouteIdentifier(route);
+            return !(pathId && routeId && pathId === routeId);
+          })
+        );
       }
     },
     []
@@ -199,7 +206,7 @@ export default function RouteSearchResultPage() {
           value: nodeIds,
           priority: 1,
           rgb: route.rgb || "#3B82F6",
-          pathId: route.id.toString(),
+          pathId: getRouteIdentifier(route),
         };
       })
       .filter(Boolean) as NetworkMapHighlight[];

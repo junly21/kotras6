@@ -86,6 +86,7 @@ export async function POST(request: Request) {
           created_at: item.created_at || Date.now(),
           confirmed_path: item.confirmed_path || "N",
           group_no: item.group_no || 1,
+          cnt: item.cnt || 0,
         }))
       : [];
 

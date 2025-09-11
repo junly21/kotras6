@@ -1,38 +1,38 @@
-import { RouteSearchTestResult } from "@/types/routeSearch";
+import { RouteSearchResult } from "@/types/routeSearch";
 
-interface RouteSearchTestGridData {
+interface PathKeyGridData {
   id: number;
   confirmedPath: string;
   groupNo: number;
   groupDisplay: string | number | null;
   mainStations: string;
-  detailedPath: string;
+  pathKey: string;
+  cnt: number | null;
   isSelected: boolean;
-  originalData: RouteSearchTestResult;
-  cnt: number;
+  originalData: RouteSearchResult;
 }
 
-export function processRouteSearchTestResults(
-  searchResults: RouteSearchTestResult[],
-  selectedPaths: RouteSearchTestResult[]
-): RouteSearchTestGridData[] {
+export function processPathKeyResults(
+  searchResults: RouteSearchResult[],
+  selectedPaths: RouteSearchResult[]
+): PathKeyGridData[] {
   if (!searchResults || searchResults.length === 0) return [];
 
-  // path_key별로 그룹화 (테스트 페이지는 path_key 기준으로만 그룹화)
+  // API 응답에서 group_no를 사용하거나, 없으면 path_key별로 그룹화
   const pathKeyGroups = new Map<string, number>();
   let groupCounter = 1;
 
-  // path_key별로 그룹 번호 할당
+  // 먼저 path_key별로 그룹 번호 할당 (API에서 group_no가 없는 경우를 대비)
   searchResults.forEach((result) => {
     if (result.path_key && !pathKeyGroups.has(result.path_key)) {
       pathKeyGroups.set(result.path_key, groupCounter++);
     }
   });
 
-  // path_key 기준으로 정렬
+  // 먼저 그룹별로 정렬
   const sortedResults = [...searchResults].sort((a, b) => {
-    const groupA = pathKeyGroups.get(a.path_key || "") || 0;
-    const groupB = pathKeyGroups.get(b.path_key || "") || 0;
+    const groupA = a.group_no || pathKeyGroups.get(a.path_key || "") || 0;
+    const groupB = b.group_no || pathKeyGroups.get(b.path_key || "") || 0;
     return groupA - groupB;
   });
 
@@ -83,26 +83,26 @@ export function processRouteSearchTestResults(
       return index === 0 || station !== pathComponents[index - 1];
     });
 
-    const currentGroupNo = pathKeyGroups.get(result.path_key || "") || 0;
+    const currentGroupNo =
+      result.group_no || pathKeyGroups.get(result.path_key || "") || 0;
 
     // 그룹 표시: 같은 그룹의 첫 번째 행에만 그룹 번호 표시
     const isFirstInGroup =
       index === 0 ||
-      pathKeyGroups.get(sortedResults[index - 1].path_key || "") !==
-        currentGroupNo;
+      (sortedResults[index - 1].group_no ||
+        pathKeyGroups.get(sortedResults[index - 1].path_key || "") ||
+        0) !== currentGroupNo;
 
-    // 상세경로 처리: path_nm을 그대로 사용 (중복역 포함)
-    const cleanedDetailedPath = result.path_nm || "";
     return {
       id: result.id || index,
-      confirmedPath: result.confirmed_path || "N",
+      confirmedPath: isFirstInGroup ? result.confirmed_path || "N" : "",
       groupNo: currentGroupNo,
-      groupDisplay: isFirstInGroup ? result.path_key : null,
+      groupDisplay: isFirstInGroup ? currentGroupNo : null,
       mainStations: uniquePathComponents.join(" → "),
-      detailedPath: cleanedDetailedPath,
+      pathKey: result.path_key || "",
+      cnt: isFirstInGroup ? result.cnt || 0 : null,
       isSelected: selectedPaths.some((path) => path.id === result.id),
       originalData: result,
-      cnt: result.cnt || 0, // API에서 cnt 필드가 추가될 예정
     };
   });
 }

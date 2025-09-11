@@ -38,4 +38,40 @@ export class RouteSearchService {
       };
     }
   }
+
+  static async getRouteSearchResultsPathKey(
+    filter: RouteSearchFilter
+  ): Promise<ApiResponse<RouteSearchResult[]>> {
+    try {
+      const response = await fetch("/api/route-search/path-key", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(filter),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json();
+      console.log("RouteSearchService - 경로탐색 결과 API 응답:", result);
+
+      if (result.error) {
+        return {
+          success: false,
+          error: result.error,
+        };
+      }
+
+      return { success: true, data: result || [] };
+    } catch (error) {
+      console.error("경로탐색 결과 조회 에러:", error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : String(error),
+      };
+    }
+  }
 }

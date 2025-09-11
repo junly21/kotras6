@@ -76,6 +76,25 @@ export function createRouteSearchColDefs(
       },
     },
     {
+      headerName: "번호",
+      resizable: false,
+      field: "groupDisplay",
+      width: 90,
+      sortable: false, // 정렬 비활성화
+      filter: false, // 필터 비활성화
+      cellStyle: {
+        fontWeight: "bold",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        height: "100%",
+      },
+      valueFormatter: (params: { value: string | number | null }) => {
+        // null 값은 빈 문자열로 표시
+        return params.value !== null ? String(params.value) : "";
+      },
+    },
+    {
       headerName: "확정경로",
       resizable: false,
       field: "confirmedPathDisplay",
@@ -109,25 +128,7 @@ export function createRouteSearchColDefs(
         height: "100%",
       },
     },
-    {
-      headerName: "그룹",
-      resizable: false,
-      field: "groupDisplay",
-      width: 90,
-      sortable: false, // 정렬 비활성화
-      filter: false, // 필터 비활성화
-      cellStyle: {
-        fontWeight: "bold",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        height: "100%",
-      },
-      valueFormatter: (params: { value: string | number | null }) => {
-        // null 값은 빈 문자열로 표시
-        return params.value !== null ? String(params.value) : "";
-      },
-    },
+
     {
       headerName: "주요경유지",
       resizable: true,

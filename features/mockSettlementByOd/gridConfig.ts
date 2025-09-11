@@ -10,21 +10,29 @@ export function createMockSettlementByOdColDefs(): ColDef<MockSettlementByOdData
       sortable: false,
       filter: false,
       cellRenderer: (params: any) => {
-        // 소계 행인 경우 번호 표시 안함
+        // null 값인 경우 빈 문자열 표시
         if (params.value === null || params.value === undefined) {
           return "";
         }
+        // 문자열인 경우 (소계) 그대로 표시, 숫자인 경우 숫자 표시
         return params.value;
+      },
+      cellStyle: {
+        fontWeight: "bold",
+        textAlign: "center",
       },
     },
     {
-      headerName: "확정경로 포함 여부",
+      headerName: "확정경로",
       field: "confirmed_path",
-      width: 180,
+      width: 120,
       sortable: false,
       filter: false,
       cellRenderer: (params: any) => {
         const value = params.value;
+        if (value === null || value === undefined) {
+          return ""; // null 값은 빈 문자열로 표시
+        }
         if (value === "O") {
           return "포함";
         } else if (value === "X") {
@@ -37,13 +45,13 @@ export function createMockSettlementByOdColDefs(): ColDef<MockSettlementByOdData
       cellStyle: (params: any) => {
         const value = params.value;
         if (value === "O") {
-          return { color: "#000000", fontWeight: "bold" }; // 초록색
+          return { color: "#000000", fontWeight: "bold", textAlign: "center" };
         } else if (value === "X") {
-          return { color: "#000000", fontWeight: "bold" }; // 빨간색
+          return { color: "#000000", fontWeight: "bold", textAlign: "center" };
         } else if (value === "계") {
-          return { color: "#1F2937", fontWeight: "bold" }; // 회색
+          return { color: "#1F2937", fontWeight: "bold", textAlign: "center" };
         }
-        return {};
+        return { color: "inherit", fontWeight: "normal", textAlign: "center" };
       },
     },
     {
@@ -65,14 +73,14 @@ export function createMockSettlementByOdColDefs(): ColDef<MockSettlementByOdData
         if (params.value === "-") {
           return { fontWeight: "bold" };
         }
-        return {};
+        return { fontWeight: "normal" };
       },
     },
     {
-      headerName: "경로 선택 확률(%)",
+      headerName: "경로선택확률(%)",
       field: "path_prob",
       flex: 1,
-      minWidth: 150,
+      maxWidth: 200,
       sortable: false,
       filter: false,
       valueFormatter: (params) => {
@@ -84,16 +92,16 @@ export function createMockSettlementByOdColDefs(): ColDef<MockSettlementByOdData
       cellStyle: (params: any) => {
         // 소계 행인 경우 bold체만 적용
         if (params.data?.path_detail === "-") {
-          return { fontWeight: "bold" };
+          return { fontWeight: "bold", textAlign: "right" };
         }
-        return {};
+        return { fontWeight: "normal", textAlign: "right" };
       },
     },
     {
       headerName: "배분금(원)",
       field: "amt",
       flex: 1,
-      minWidth: 150,
+      maxWidth: 200,
       sortable: false,
       filter: false,
       valueFormatter: (params) => {
@@ -110,7 +118,7 @@ export function createMockSettlementByOdColDefs(): ColDef<MockSettlementByOdData
             textAlign: "right",
           };
         }
-        return { textAlign: "right" };
+        return { fontWeight: "normal", textAlign: "right" };
       },
     },
   ];

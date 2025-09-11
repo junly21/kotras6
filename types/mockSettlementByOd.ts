@@ -11,9 +11,9 @@ export interface MockSettlementByOdData {
   path_prob: number;
   path_id: string;
   amt: number;
-  rn: number;
+  rn: number | string | null; // 순위 (그룹핑을 위해 null 가능, 소계 행은 "소계" 문자열)
   path_key: string;
-  confirmed_path: string;
+  confirmed_path: string | null; // 확정경로 포함 여부 (O/X/계, 그룹핑을 위해 null 가능)
   path_id_list: string; // 경로 ID 목록 (쉼표로 구분)
 }
 

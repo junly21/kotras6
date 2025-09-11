@@ -129,14 +129,48 @@ export default function MockSettlementByOdPage() {
     initializeSettlementName();
   }, [initializeSettlementName]);
 
+  // 모의정산 OD별 조회 결과 데이터 가공 - 그룹의 첫 번째 행에만 번호와 확정경로 표시
+  const processedResults = useMemo(() => {
+    if (!searchResults || searchResults.length === 0) return [];
+
+    let groupNumber = 1;
+
+    return searchResults.map((result, index) => {
+      // 현재 행이 그룹의 첫 번째 행인지 확인
+      // 첫 번째 행이거나 이전 행이 소계 행(path_detail === '-')인 경우가 새로운 그룹의 시작
+      const isFirstInGroup =
+        index === 0 ||
+        (index > 0 && searchResults[index - 1].path_detail === "-");
+
+      // 새로운 그룹이 시작되면 그룹 번호 증가
+      if (isFirstInGroup && result.path_detail !== "-") {
+        groupNumber++;
+      }
+
+      return {
+        ...result,
+        // 그룹의 첫 번째 행이 아닌 경우 번호와 확정경로를 null로 설정
+        // 단, 소계 행(path_detail === '-')은 번호 컬럼에 "소계" 표시하고 확정경로는 빈 셀
+        rn:
+          isFirstInGroup && result.path_detail !== "-"
+            ? groupNumber - 1
+            : result.path_detail === "-"
+            ? "소계"
+            : null,
+        confirmed_path: isFirstInGroup ? result.confirmed_path : null,
+      };
+    });
+  }, [searchResults]);
+
   // 그룹별 배경색 계산
   const getGroupBackgroundColor = useCallback(
     (rowIndex: number) => {
-      if (!searchResults || searchResults.length === 0) return "";
+      if (!processedResults || processedResults.length === 0) return "";
 
       let groupIndex = 0;
       for (let i = 0; i <= rowIndex; i++) {
-        if (searchResults[i].rn === 1) {
+        // 첫 번째 행이거나 이전 행이 소계 행인 경우가 새로운 그룹의 시작
+        if (i === 0 || (i > 0 && processedResults[i - 1].path_detail === "-")) {
           groupIndex++;
         }
       }
@@ -150,7 +184,7 @@ export default function MockSettlementByOdPage() {
 
       return groupColors[groupIndex % groupColors.length];
     },
-    [searchResults]
+    [processedResults]
   );
 
   // 선택된 행 스타일 적용 함수
@@ -686,7 +720,7 @@ export default function MockSettlementByOdPage() {
 
       {hasSearched && (
         <div className="space-y-4">
-          {!isLoading && searchResults.length > 0 && (
+          {!isLoading && processedResults.length > 0 && (
             <>
               <div className="flex justify-between items-center">
                 <h3 className="text-lg font-semibold">OD별 정산결과</h3>{" "}
@@ -694,7 +728,7 @@ export default function MockSettlementByOdPage() {
               <div className="bg-white border border-gray-200 rounded-[24px] p-4">
                 <div style={{ height: `${gridHeight}px` }}>
                   <TestGrid
-                    rowData={searchResults}
+                    rowData={processedResults}
                     columnDefs={columnDefs}
                     gridRef={gridRef}
                     gridOptions={{

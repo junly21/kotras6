@@ -8,10 +8,10 @@ export interface SettlementByOdData {
   path_prob: number; // 경로 선택 확률
   path_id: string; // 경로 ID
   amt: number; // 배분금
-  rn: number; // 순위
+  rn: number | string | null; // 순위 (그룹핑을 위해 null 가능, 소계 행은 "소계" 문자열)
   path_id_list: string; // 경로 ID 목록 (쉼표로 구분)
   path_key: string; // 경로 키
-  confirmed_path: string; // 확정경로 포함 여부 (O/X/계)
+  confirmed_path: string | null; // 확정경로 포함 여부 (O/X/계, 그룹핑을 위해 null 가능)
 }
 
 export interface SettlementByOdDetailData {

@@ -33,7 +33,11 @@ export async function POST(request: NextRequest) {
 
     // CSV 응답인 경우 파일 다운로드로 처리
     if (contentType && contentType.includes("text/csv")) {
-      return new NextResponse(csvData, {
+      // UTF-8 BOM 추가 (Excel에서 한글 인코딩 문제 해결)
+      const bom = "\uFEFF";
+      const csvWithBom = bom + csvData;
+
+      return new NextResponse(csvWithBom, {
         headers: {
           "Content-Type": "text/csv; charset=utf-8",
           "Content-Disposition":

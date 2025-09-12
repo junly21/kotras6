@@ -45,7 +45,6 @@ export default function RouteSearchTestPage() {
   const [selectedRouteForDetail, setSelectedRouteForDetail] =
     useState<RouteSearchResult | null>(null);
   const [hasSearched, setHasSearched] = useState(false);
-  const [focusNodeIds, setFocusNodeIds] = useState<string[]>([]);
 
   // 필터 변경 핸들러 - useCallback으로 최적화
   const handleFilterChange = useCallback((values: RouteSearchTestFilter) => {
@@ -67,16 +66,6 @@ export default function RouteSearchTestPage() {
     (route: RouteSearchResult, checked: boolean) => {
       if (checked) {
         setSelectedPaths((prev) => [...prev, route]);
-
-        // 체크 시 해당 경로의 첫 번째 역번호로 시야 이동
-        if (route.path_key) {
-          // path_key에서 첫 번째 숫자(역번호) 추출
-          // 예: "123_456_789" -> "123"
-          const firstStationId = route.path_key.split("_")[0];
-          if (firstStationId && firstStationId.length > 0) {
-            setFocusNodeIds([firstStationId]);
-          }
-        }
       } else {
         setSelectedPaths((prev) =>
           prev.filter((path) => {
@@ -85,11 +74,23 @@ export default function RouteSearchTestPage() {
             return !(pathId && routeId && pathId === routeId);
           })
         );
-        // 체크 해제 시 시야 이동 초기화
-        setFocusNodeIds([]);
       }
     },
     []
+  );
+
+  // 전체선택/전체해제 핸들러 - useCallback으로 최적화
+  const handleSelectAllChange = useCallback(
+    (checked: boolean) => {
+      if (checked) {
+        // 전체 선택
+        setSelectedPaths([...searchResults]);
+      } else {
+        // 전체 해제
+        setSelectedPaths([]);
+      }
+    },
+    [searchResults]
   );
 
   // 상세 정보 Dialog 열기 - useCallback으로 최적화
@@ -159,6 +160,21 @@ export default function RouteSearchTestPage() {
     return processRouteSearchTestResults(searchResults, selectedPaths);
   }, [searchResults, selectedPaths]);
 
+  // 전체선택 상태 계산 - useMemo로 최적화
+  const selectAllState = useMemo(() => {
+    if (processedResults.length === 0) {
+      return { isAllSelected: false, isIndeterminate: false };
+    }
+
+    const selectedCount = selectedPaths.length;
+    const totalCount = processedResults.length;
+
+    return {
+      isAllSelected: selectedCount === totalCount,
+      isIndeterminate: selectedCount > 0 && selectedCount < totalCount,
+    };
+  }, [selectedPaths.length, processedResults.length]);
+
   // 그룹별 배경색 계산 - path_key 기준으로 그룹화
   const getGroupBackgroundColor = useCallback(
     (rowIndex: number) => {
@@ -209,9 +225,18 @@ export default function RouteSearchTestPage() {
   const colDefs = useMemo(() => {
     return createRouteSearchTestColDefs(
       handleCheckboxChange,
-      handleDetailClick
+      handleDetailClick,
+      handleSelectAllChange,
+      selectAllState.isAllSelected,
+      selectAllState.isIndeterminate
     );
-  }, [handleCheckboxChange, handleDetailClick]);
+  }, [
+    handleCheckboxChange,
+    handleDetailClick,
+    handleSelectAllChange,
+    selectAllState.isAllSelected,
+    selectAllState.isIndeterminate,
+  ]);
 
   // 그리드 높이 동적 계산 - useMemo로 최적화
   const gridHeight = useMemo(() => {
@@ -313,7 +338,7 @@ export default function RouteSearchTestPage() {
               gridRef={gridRef}
               height={gridHeight}
               gridOptions={{
-                onRowDoubleClicked: onRowDoubleClicked,
+                onRowClicked: onRowDoubleClicked,
                 rowSelection: "none", // 체크박스 사용하므로 단일 선택 비활성화
                 suppressScrollOnNewData: true, // 데이터 변경 시 스크롤 위치 유지
                 getRowStyle: getRowStyle, // 그룹별 배경색 적용
@@ -361,7 +386,7 @@ export default function RouteSearchTestPage() {
       {/* 네트워크 맵 */}
       {hasSearched && processedResults.length > 0 && (
         <div className="space-y-4">
-          <div className="bg-white h-[700px] rounded-[24px] p-4">
+          <div className="bg-white h-[calc(100vh-700px)] rounded-[24px] p-4">
             {isMapLoading ? (
               <div className="flex items-center justify-center h-64">
                 <Spinner />

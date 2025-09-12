@@ -16,7 +16,10 @@ interface RouteSearchTestGridData {
 
 export function createRouteSearchTestColDefs(
   onCheckboxChange: (route: RouteSearchTestResult, checked: boolean) => void,
-  onDetailClick: (route: RouteSearchTestResult) => void
+  onDetailClick: (route: RouteSearchTestResult) => void,
+  onSelectAllChange: (checked: boolean) => void,
+  isAllSelected: boolean,
+  isIndeterminate: boolean
 ): ColDef<RouteSearchTestGridData>[] {
   return [
     {
@@ -25,6 +28,33 @@ export function createRouteSearchTestColDefs(
       field: "isSelected",
       width: 50,
       sortable: false,
+      headerComponent: () => {
+        return React.createElement(
+          "div",
+          {
+            style: {
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              height: "100%",
+              width: "100%",
+            },
+          },
+          React.createElement("input", {
+            type: "checkbox",
+            checked: isAllSelected,
+            ref: (input: HTMLInputElement) => {
+              if (input) {
+                input.indeterminate = isIndeterminate;
+              }
+            },
+            onChange: (e: React.ChangeEvent<HTMLInputElement>) =>
+              onSelectAllChange(e.target.checked),
+            onClick: (e: React.MouseEvent) => e.stopPropagation(),
+            className: "w-4 h-4",
+          })
+        );
+      },
       cellRenderer: (params: {
         value: boolean;
         data: { originalData: RouteSearchTestResult };
@@ -73,9 +103,9 @@ export function createRouteSearchTestColDefs(
         height: "100%",
         paddingLeft: "8px",
       },
-      valueFormatter: (params: any) => {
+      valueFormatter: (params: { value: string | number | null }) => {
         // null 값은 빈 문자열로 표시 (첫 번째 행이 아닌 경우)
-        return params.value !== null ? params.value : "";
+        return params.value !== null ? String(params.value) : "";
       },
     },
     {

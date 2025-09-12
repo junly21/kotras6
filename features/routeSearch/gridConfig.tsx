@@ -4,6 +4,7 @@ import { RouteSearchResult } from "@/types/routeSearch";
 
 interface RouteSearchGridData {
   id: number;
+  rn: number; // 순번
   confirmedPath: string;
   confirmedPathDisplay: string | null;
   groupNo: number;
@@ -94,6 +95,24 @@ export function createRouteSearchColDefs(
     //     return params.value !== null ? String(params.value) : "";
     //   },
     // },
+    {
+      headerName: "순번",
+      resizable: false,
+      field: "rn",
+      width: 80,
+      sortable: false,
+      filter: false,
+      cellStyle: {
+        fontWeight: "bold",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        height: "100%",
+      },
+      valueFormatter: (params: { value: number }) => {
+        return params.value ? String(params.value) : "";
+      },
+    },
     // {
     //   headerName: "확정경로",
     //   resizable: false,

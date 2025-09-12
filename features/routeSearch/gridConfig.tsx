@@ -79,7 +79,7 @@ export function createRouteSearchColDefs(
       headerName: "번호",
       resizable: false,
       field: "groupDisplay",
-      width: 90,
+      width: 110,
       sortable: false, // 정렬 비활성화
       filter: false, // 필터 비활성화
       cellStyle: {

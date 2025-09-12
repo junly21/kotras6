@@ -63,7 +63,7 @@ export function createRouteSearchTestColDefs(
       headerName: "경로키",
       resizable: true,
       field: "groupDisplay",
-      width: 150,
+      width: 450,
       sortable: true,
       cellStyle: {
         fontWeight: "bold",

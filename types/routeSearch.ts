@@ -63,6 +63,11 @@ export interface RouteSearchTestFilter {
   PAGESIZE: string;
 }
 
+// Key 검색용 타입
+export interface RouteSearchKeyFilter {
+  PATH_KEY: string;
+}
+
 export interface RouteSearchTestResult {
   // 테스트 페이지용 결과 타입 (기존 RouteSearchResult와 동일)
   id: number;

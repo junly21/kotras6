@@ -99,7 +99,7 @@ export function createRouteSearchColDefs(
       headerName: "순번",
       resizable: false,
       field: "rn",
-      width: 80,
+      width: 110,
       sortable: false,
       filter: false,
       cellStyle: {

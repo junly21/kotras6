@@ -11,7 +11,7 @@ export function getAgencyInfo(agencyCode: string): AgencyInfo {
   if (agencyCode === "ALL") {
     return {
       code: "ALL",
-      name: "대도시광역교통위원회",
+      name: "대도시권광역교통위원회",
       level: "ALL",
     };
   }

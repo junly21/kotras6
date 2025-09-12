@@ -173,8 +173,24 @@ export default function MockSettlementByInstitutionPage() {
       flex: 1,
       minWidth: 100,
       resizable: false,
-      valueFormatter: (params: { value: number | string | null | undefined }) =>
-        formatLocaleValue(params?.value),
+      valueFormatter: (params: {
+        value: number | string | null | undefined;
+      }) => {
+        if (params?.value == null) return "";
+        // pinnedBottomRowData는 이미 포맷된 문자열이므로 그대로 반환
+        if (typeof params.value === "string") {
+          return params.value;
+        }
+        // 일반 데이터는 숫자로 처리
+        const num = Number(params.value);
+        if (unit === "원") {
+          return Math.floor(num).toLocaleString();
+        }
+        return num.toLocaleString(undefined, {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2,
+        });
+      },
       cellStyle: { textAlign: "right" },
     },
   ];
@@ -204,8 +220,24 @@ export default function MockSettlementByInstitutionPage() {
       minWidth: 200,
       flex: 1,
       resizable: false,
-      valueFormatter: (params: { value: number | string | null | undefined }) =>
-        formatLocaleValue(params?.value),
+      valueFormatter: (params: {
+        value: number | string | null | undefined;
+      }) => {
+        if (params?.value == null) return "";
+        // pinnedBottomRowData는 이미 포맷된 문자열이므로 그대로 반환
+        if (typeof params.value === "string") {
+          return params.value;
+        }
+        // 일반 데이터는 숫자로 처리
+        const num = Number(params.value);
+        if (unit === "원") {
+          return Math.floor(num).toLocaleString();
+        }
+        return num.toLocaleString(undefined, {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2,
+        });
+      },
       cellStyle: (params: { node: { rowPinned?: string } }) => {
         const baseStyle = { textAlign: "right" };
         if (params.node.rowPinned === "bottom") {
@@ -225,8 +257,24 @@ export default function MockSettlementByInstitutionPage() {
       minWidth: 200,
       flex: 1,
       resizable: false,
-      valueFormatter: (params: { value: number | string | null | undefined }) =>
-        formatLocaleValue(params?.value),
+      valueFormatter: (params: {
+        value: number | string | null | undefined;
+      }) => {
+        if (params?.value == null) return "";
+        // pinnedBottomRowData는 이미 포맷된 문자열이므로 그대로 반환
+        if (typeof params.value === "string") {
+          return params.value;
+        }
+        // 일반 데이터는 숫자로 처리
+        const num = Number(params.value);
+        if (unit === "원") {
+          return Math.floor(num).toLocaleString();
+        }
+        return num.toLocaleString(undefined, {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2,
+        });
+      },
       cellStyle: (params: { node: { rowPinned?: string } }) => {
         const baseStyle = { textAlign: "right" };
         if (params.node.rowPinned === "bottom") {
@@ -246,8 +294,24 @@ export default function MockSettlementByInstitutionPage() {
       flex: 1,
       minWidth: 200,
       resizable: false,
-      valueFormatter: (params: { value: number | string | null | undefined }) =>
-        formatLocaleValue(params?.value),
+      valueFormatter: (params: {
+        value: number | string | null | undefined;
+      }) => {
+        if (params?.value == null) return "";
+        // pinnedBottomRowData는 이미 포맷된 문자열이므로 그대로 반환
+        if (typeof params.value === "string") {
+          return params.value;
+        }
+        // 일반 데이터는 숫자로 처리
+        const num = Number(params.value);
+        if (unit === "원") {
+          return Math.floor(num).toLocaleString();
+        }
+        return num.toLocaleString(undefined, {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2,
+        });
+      },
       cellStyle: (params: { node: { rowPinned?: string } }) => {
         const baseStyle = { textAlign: "right" };
         if (params.node.rowPinned === "bottom") {
@@ -323,7 +387,10 @@ export default function MockSettlementByInstitutionPage() {
       if (unit === "원") {
         return Math.round(value * unitMultiplier).toLocaleString();
       }
-      return (value * unitMultiplier).toLocaleString();
+      return (value * unitMultiplier).toLocaleString(undefined, {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      });
     };
 
     return [

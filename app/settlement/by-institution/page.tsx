@@ -161,12 +161,15 @@ export default function SettlementByInstitutionPage() {
         ? 1 / 1000000
         : 1 / 100000000; // "억 원"
 
-    // 원 단위일 때는 정수로, 다른 단위는 소수점 포함
+    // 원 단위일 때는 정수로, 다른 단위는 소수점 둘째자리까지
     const formatValue = (value: number) => {
       if (unit === "원") {
         return Math.round(value * unitMultiplier).toLocaleString();
       }
-      return (value * unitMultiplier).toLocaleString();
+      return (value * unitMultiplier).toLocaleString(undefined, {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      });
     };
 
     const result = [
@@ -214,9 +217,19 @@ export default function SettlementByInstitutionPage() {
       minWidth: 200,
       flex: 1,
       resizable: false,
-      valueFormatter: (params: { value: number }) => {
-        // 모든 단위에서 소수점을 포함한 정확한 값 표시
-        return params.value.toLocaleString();
+      valueFormatter: (params: { value: number | string }) => {
+        // pinnedBottomRowData는 이미 포맷된 문자열이므로 그대로 반환
+        if (typeof params.value === "string") {
+          return params.value;
+        }
+        // 일반 데이터는 숫자로 처리
+        if (unit === "원") {
+          return Math.floor(params.value).toLocaleString();
+        }
+        return params.value.toLocaleString(undefined, {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2,
+        });
       },
       cellStyle: (params: { node: { rowPinned?: string } }) => {
         const baseStyle = { textAlign: "right" };
@@ -237,9 +250,19 @@ export default function SettlementByInstitutionPage() {
       minWidth: 200,
       flex: 1,
       resizable: false,
-      valueFormatter: (params: { value: number }) => {
-        // 모든 단위에서 소수점을 포함한 정확한 값 표시
-        return params.value.toLocaleString();
+      valueFormatter: (params: { value: number | string }) => {
+        // pinnedBottomRowData는 이미 포맷된 문자열이므로 그대로 반환
+        if (typeof params.value === "string") {
+          return params.value;
+        }
+        // 일반 데이터는 숫자로 처리
+        if (unit === "원") {
+          return Math.floor(params.value).toLocaleString();
+        }
+        return params.value.toLocaleString(undefined, {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2,
+        });
       },
       cellStyle: (params: { node: { rowPinned?: string } }) => {
         const baseStyle = { textAlign: "right" };
@@ -260,9 +283,19 @@ export default function SettlementByInstitutionPage() {
       minWidth: 200,
       flex: 1,
       resizable: false,
-      valueFormatter: (params: { value: number }) => {
-        // 모든 단위에서 소수점을 포함한 정확한 값 표시
-        return params.value.toLocaleString();
+      valueFormatter: (params: { value: number | string }) => {
+        // pinnedBottomRowData는 이미 포맷된 문자열이므로 그대로 반환
+        if (typeof params.value === "string") {
+          return params.value;
+        }
+        // 일반 데이터는 숫자로 처리
+        if (unit === "원") {
+          return Math.floor(params.value).toLocaleString();
+        }
+        return params.value.toLocaleString(undefined, {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2,
+        });
       },
       cellStyle: (params: { node: { rowPinned?: string } }) => {
         const baseStyle = { textAlign: "right" };

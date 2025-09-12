@@ -21,7 +21,11 @@ export function convertUnits<T extends Record<string, unknown>>(
     Object.fromEntries(
       Object.entries(row).map(([key, val]) => [
         key,
-        typeof val === "number" ? +(val / factor).toFixed(2) : val,
+        typeof val === "number"
+          ? unit === "원"
+            ? Math.round(val / factor)
+            : +(val / factor).toFixed(2)
+          : val,
       ])
     )
   ) as T[];

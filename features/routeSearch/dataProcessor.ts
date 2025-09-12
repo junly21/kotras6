@@ -12,6 +12,8 @@ interface RouteSearchGridData {
   detailedPath: string;
   isSelected: boolean;
   originalData: RouteSearchResult;
+  cnt?: number;
+  path_key?: string;
 }
 
 export function processRouteSearchResults(
@@ -20,21 +22,25 @@ export function processRouteSearchResults(
 ): RouteSearchGridData[] {
   if (!searchResults || searchResults.length === 0) return [];
 
-  // API 응답에서 group_no를 사용하거나, 없으면 path_key별로 그룹화
-  const pathKeyGroups = new Map<string, number>();
+  // API 응답에서 group_no와 transfer_list를 조합해서 그룹화
+  const groupKeyMap = new Map<string, number>();
   let groupCounter = 1;
 
-  // 먼저 path_key별로 그룹 번호 할당 (API에서 group_no가 없는 경우를 대비)
+  // 먼저 그룹 키별로 그룹 번호 할당
   searchResults.forEach((result) => {
-    if (result.path_key && !pathKeyGroups.has(result.path_key)) {
-      pathKeyGroups.set(result.path_key, groupCounter++);
+    // group_no + transfer_list 조합으로 고유 그룹 키 생성
+    const groupKey = `${result.group_no || 0}_${result.transfer_list || ""}`;
+    if (!groupKeyMap.has(groupKey)) {
+      groupKeyMap.set(groupKey, groupCounter++);
     }
   });
 
   // 먼저 그룹별로 정렬
   const sortedResults = [...searchResults].sort((a, b) => {
-    const groupA = a.group_no || pathKeyGroups.get(a.path_key || "") || 0;
-    const groupB = b.group_no || pathKeyGroups.get(b.path_key || "") || 0;
+    const groupKeyA = `${a.group_no || 0}_${a.transfer_list || ""}`;
+    const groupKeyB = `${b.group_no || 0}_${b.transfer_list || ""}`;
+    const groupA = groupKeyMap.get(groupKeyA) || 0;
+    const groupB = groupKeyMap.get(groupKeyB) || 0;
     return groupA - groupB;
   });
 
@@ -85,15 +91,22 @@ export function processRouteSearchResults(
       return index === 0 || station !== pathComponents[index - 1];
     });
 
-    const currentGroupNo =
-      result.group_no || pathKeyGroups.get(result.path_key || "") || 0;
+    // 현재 그룹 키 생성
+    const currentGroupKey = `${result.group_no || 0}_${
+      result.transfer_list || ""
+    }`;
+    const currentGroupNo = groupKeyMap.get(currentGroupKey) || 0;
 
     // 그룹 표시: 같은 그룹의 첫 번째 행에만 그룹 번호 표시
     const isFirstInGroup =
       index === 0 ||
-      (sortedResults[index - 1].group_no ||
-        pathKeyGroups.get(sortedResults[index - 1].path_key || "") ||
-        0) !== currentGroupNo;
+      (() => {
+        const prevGroupKey = `${sortedResults[index - 1].group_no || 0}_${
+          sortedResults[index - 1].transfer_list || ""
+        }`;
+        const prevGroupNo = groupKeyMap.get(prevGroupKey) || 0;
+        return prevGroupNo !== currentGroupNo;
+      })();
 
     // 확정경로 포함 여부 표시: 같은 그룹 내에서 같은 값이 연속될 때 첫 번째에만 표시
     const currentConfirmedPath = result.confirmed_path || "N";
@@ -119,7 +132,7 @@ export function processRouteSearchResults(
         : null,
       groupNo: currentGroupNo,
       groupDisplay: isFirstInGroup ? currentGroupNo : null,
-      mainStations: uniquePathComponents.join(" → "),
+      mainStations: isFirstInGroup ? uniquePathComponents.join(" → ") : "",
       detailedPath: cleanedDetailedPath,
       isSelected: selectedPaths.some((path) => {
         const pathId = getRouteIdentifier(path);
@@ -127,6 +140,8 @@ export function processRouteSearchResults(
         return pathId && resultId && pathId === resultId;
       }),
       originalData: result,
+      cnt: result.cnt || 0,
+      path_key: result.path_key || "",
     };
   });
 }

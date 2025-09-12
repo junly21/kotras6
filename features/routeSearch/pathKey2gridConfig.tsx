@@ -14,6 +14,7 @@ interface RouteSearchGridData {
   isSelected: boolean;
   originalData: RouteSearchResult;
   cnt?: number;
+  path_key?: string;
 }
 
 export function createRouteSearchColDefs(
@@ -98,7 +99,7 @@ export function createRouteSearchColDefs(
     // },
     {
       headerName: "순번",
-      resizable: false,
+      resizable: true,
       field: "groupNo",
       width: 110,
       sortable: false,
@@ -122,6 +123,36 @@ export function createRouteSearchColDefs(
           return "";
         }
         return String(params.data.groupDisplay);
+      },
+    },
+    {
+      headerName: "내역(건)",
+      resizable: true,
+      field: "cnt",
+      width: 120,
+      sortable: false,
+      filter: false,
+      cellStyle: {
+        fontWeight: "bold",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        height: "100%",
+      },
+    },
+    {
+      headerName: "경로키",
+      resizable: true,
+      field: "path_key",
+      width: 450,
+      sortable: true,
+      cellStyle: {
+        fontWeight: "bold",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "flex-start",
+        height: "100%",
+        paddingLeft: "8px",
       },
     },
     // {

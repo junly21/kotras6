@@ -75,59 +75,59 @@ export function createRouteSearchColDefs(
         height: "100%",
       },
     },
-    {
-      headerName: "번호",
-      resizable: false,
-      field: "groupDisplay",
-      width: 110,
-      sortable: false, // 정렬 비활성화
-      filter: false, // 필터 비활성화
-      cellStyle: {
-        fontWeight: "bold",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        height: "100%",
-      },
-      valueFormatter: (params: { value: string | number | null }) => {
-        // null 값은 빈 문자열로 표시
-        return params.value !== null ? String(params.value) : "";
-      },
-    },
-    {
-      headerName: "확정경로",
-      resizable: false,
-      field: "confirmedPathDisplay",
-      width: 120,
-      sortable: false,
-      cellRenderer: (params: { value: string | null }) => {
-        const value = params.value;
-        if (value === "Y") {
-          return React.createElement(
-            "span",
-            {
-              style: { color: "#000000", fontWeight: "bold" },
-            },
-            "포함"
-          );
-        } else if (value === "N") {
-          return React.createElement(
-            "span",
-            {
-              style: { color: "#000000", fontWeight: "bold" },
-            },
-            "미포함"
-          );
-        }
-        return ""; // null 값은 빈 문자열로 표시
-      },
-      cellStyle: {
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        height: "100%",
-      },
-    },
+    // {
+    //   headerName: "번호",
+    //   resizable: false,
+    //   field: "groupDisplay",
+    //   width: 110,
+    //   sortable: false, // 정렬 비활성화
+    //   filter: false, // 필터 비활성화
+    //   cellStyle: {
+    //     fontWeight: "bold",
+    //     display: "flex",
+    //     alignItems: "center",
+    //     justifyContent: "center",
+    //     height: "100%",
+    //   },
+    //   valueFormatter: (params: { value: string | number | null }) => {
+    //     // null 값은 빈 문자열로 표시
+    //     return params.value !== null ? String(params.value) : "";
+    //   },
+    // },
+    // {
+    //   headerName: "확정경로",
+    //   resizable: false,
+    //   field: "confirmedPathDisplay",
+    //   width: 120,
+    //   sortable: false,
+    //   cellRenderer: (params: { value: string | null }) => {
+    //     const value = params.value;
+    //     if (value === "Y") {
+    //       return React.createElement(
+    //         "span",
+    //         {
+    //           style: { color: "#000000", fontWeight: "bold" },
+    //         },
+    //         "포함"
+    //       );
+    //     } else if (value === "N") {
+    //       return React.createElement(
+    //         "span",
+    //         {
+    //           style: { color: "#000000", fontWeight: "bold" },
+    //         },
+    //         "미포함"
+    //       );
+    //     }
+    //     return ""; // null 값은 빈 문자열로 표시
+    //   },
+    //   cellStyle: {
+    //     display: "flex",
+    //     alignItems: "center",
+    //     justifyContent: "center",
+    //     height: "100%",
+    //   },
+    // },
 
     {
       headerName: "주요경유지",

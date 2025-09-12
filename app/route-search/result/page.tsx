@@ -249,11 +249,12 @@ export default function RouteSearchResultPage() {
 
       // 그룹별로 다른 배경색 적용 (3가지 옅은 색상)
       const groupColors = [
-        "#f0f8f0", // 옅은 초록색
-        "#fff8f0", // 옅은 주황색
-        "#f8f0f8", // 옅은 보라색
-        "#f0f0f8", // 옅은 파란색
-        "#f8f8f0", // 옅은 노란색
+        "ffffff",
+        // "#f0f8f0", // 옅은 초록색
+        // "#fff8f0", // 옅은 주황색
+        // "#f8f0f8", // 옅은 보라색
+        // "#f0f0f8", // 옅은 파란색
+        // "#f8f8f0", // 옅은 노란색
       ];
 
       return groupColors[groupIndex % groupColors.length];

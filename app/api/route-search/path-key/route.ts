@@ -1,8 +1,8 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { callExternalApi, createCorsHeaders } from "../../utils/externalApi";
 import { RouteSearchFilter } from "@/types/routeSearch";
 
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
   try {
     console.log("경로탐색 결과 API 호출됨");
 
@@ -19,6 +19,7 @@ export async function POST(request: Request) {
     const { data } = await callExternalApi("selectPathResultCntTestPage.do", {
       method: "POST",
       body: filter,
+      request, // 클라이언트 IP 추출을 위한 request 객체 전달
     });
 
     console.log("외부 API 경로탐색 결과:", data);

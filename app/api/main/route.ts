@@ -44,6 +44,7 @@ export async function POST(request: NextRequest) {
               NET_DT: "LATEST",
             },
             sessionId: extSid, // 세션 ID 전달
+            request, // 클라이언트 IP 추출을 위한 request 객체 전달
           }
         );
         data = lineData;
@@ -57,6 +58,7 @@ export async function POST(request: NextRequest) {
             body: {
               COMMON_CODE: "CARD_DIV",
             },
+            request, // 클라이언트 IP 추출을 위한 request 객체 전달
           }
         );
         data = cardData;
@@ -68,6 +70,7 @@ export async function POST(request: NextRequest) {
           {
             method: "POST",
             body: {},
+            request, // 클라이언트 IP 추출을 위한 request 객체 전달
           }
         );
         data = odData;

@@ -1,3 +1,6 @@
+import { getClientIp, formatXForwardedFor } from "../../../utils/clientIp";
+import { NextRequest } from "next/server";
+
 // 환경별 엔드포인트 자동 설정
 const isDevelopment = process.env.NODE_ENV === "development";
 
@@ -11,30 +14,35 @@ const isDevelopment = process.env.NODE_ENV === "development";
 //   : "http://192.168.110.21:28482";
 
 // 0912 테스트용 포트 번호에 따라 API URL 자동 설정
-const getApiUrlByPort = () => {
-  const port = process.env.PORT || "3000";
+// const getApiUrlByPort = () => {
+//   const port = process.env.PORT || "3000";
 
-  // 포트별 API 서버 매핑
-  switch (port) {
-    case "3000":
-      return "http://192.168.111.152:8080/kotras6";
-    case "3001":
-      return "http://192.168.111.152:8081/kotras6";
-    default:
-      // 기본값 (개발 환경: 8080, 프로덕션 환경: 28480)
-      return isDevelopment
-        ? "http://192.168.111.152:8080/kotras6"
-        : "http://192.168.110.21:28480/kotras6";
-  }
-};
+//   // 포트별 API 서버 매핑
+//   switch (port) {
+//     case "3000":
+//       return "http://192.168.111.152:8080/kotras6";
+//     case "3001":
+//       return "http://192.168.111.152:8081/kotras6";
+//     default:
+//       // 기본값 (개발 환경: 8080, 프로덕션 환경: 28480)
+//       return isDevelopment
+//         ? "http://192.168.111.152:8080/kotras6"
+//         : "http://192.168.110.21:28480/kotras6";
+//   }
+// };
 
-export const EXTERNAL_BASE_URL = getApiUrlByPort();
-export const OPTIMAL_ROUTE_BASE_URL = "http://192.168.111.152:5001";
+// export const EXTERNAL_BASE_URL = getApiUrlByPort();
+// export const OPTIMAL_ROUTE_BASE_URL = "http://192.168.111.152:5001";
 
 //개발 중 서버로 돌리고싶을때
-// export const EXTERNAL_BASE_URL = "http://192.168.110.21:28480/kotras6";
+export const EXTERNAL_BASE_URL = "http://192.168.110.21:28480/kotras6";
 
-// export const OPTIMAL_ROUTE_BASE_URL = "http://192.168.110.21:28482";
+export const OPTIMAL_ROUTE_BASE_URL = "http://192.168.110.21:28482";
+
+//0912 세션 신분당 서교공 동시실행 디버깅용
+// export const EXTERNAL_BASE_URL = "http://192.168.111.152:8080/kotras6";
+
+// export const OPTIMAL_ROUTE_BASE_URL = "http://192.168.111.152:5001";
 
 //도커용 url
 // export const EXTERNAL_BASE_URL = "http://java-api:8080/kotras6";
@@ -57,6 +65,8 @@ export interface ExternalApiConfig {
   params?: Record<string, string | number | boolean>;
   sessionId?: string; // 세션 ID를 매개변수로 받음
   timeout?: number; // 타임아웃 설정 (밀리초)
+  clientIp?: string; // 클라이언트 IP 주소
+  request?: NextRequest; // Next.js 요청 객체 (클라이언트 IP 추출용)
 }
 
 export interface ApiResponse<T = unknown> {
@@ -77,6 +87,8 @@ export async function callExternalApi(
     params = {},
     sessionId,
     timeout = 30 * 60 * 1000, // 30분 타임아웃
+    clientIp,
+    request,
   } = config;
 
   // 세션 쿠키 설정 (매개변수로 받은 sessionId 사용)
@@ -99,10 +111,28 @@ export async function callExternalApi(
     queryString ? `?${queryString}` : ""
   }`;
 
+  // 클라이언트 IP 추출 및 X-Forwarded-For 헤더 설정
+  let actualClientIp = clientIp;
+  if (!actualClientIp && request) {
+    actualClientIp = getClientIp(request);
+  }
+
+  // X-Forwarded-For 헤더 구성
+  let xForwardedForHeader = "";
+  if (actualClientIp && actualClientIp !== "unknown") {
+    const existingXForwardedFor =
+      headers["X-Forwarded-For"] || headers["x-forwarded-for"];
+    xForwardedForHeader = formatXForwardedFor(
+      actualClientIp,
+      existingXForwardedFor
+    );
+  }
+
   // 세션 쿠키가 있으면 헤더에 추가
   const finalHeaders = {
     "Content-Type": "application/json",
     ...(sessionCookie && { Cookie: sessionCookie }),
+    ...(xForwardedForHeader && { "X-Forwarded-For": xForwardedForHeader }),
     ...headers,
   };
 
@@ -111,6 +141,8 @@ export async function callExternalApi(
     url: externalUrl,
     headers: finalHeaders,
     body,
+    clientIp: actualClientIp,
+    xForwardedFor: xForwardedForHeader,
   });
 
   // 타임아웃 설정을 위한 AbortController
@@ -192,17 +224,41 @@ export async function callOptimalRouteApi(
   try {
     const url = `${OPTIMAL_ROUTE_BASE_URL}/${endpoint}`;
     const method = config.method || "GET";
+    const { clientIp, request } = config;
+
+    // 클라이언트 IP 추출 및 X-Forwarded-For 헤더 설정
+    let actualClientIp = clientIp;
+    if (!actualClientIp && request) {
+      actualClientIp = getClientIp(request);
+    }
+
+    // X-Forwarded-For 헤더 구성
+    let xForwardedForHeader = "";
+    if (actualClientIp && actualClientIp !== "unknown") {
+      const existingXForwardedFor =
+        config.headers?.["X-Forwarded-For"] ||
+        config.headers?.["x-forwarded-for"];
+      xForwardedForHeader = formatXForwardedFor(
+        actualClientIp,
+        existingXForwardedFor
+      );
+    }
+
+    const headers = {
+      "Content-Type": "application/json",
+      ...(xForwardedForHeader && { "X-Forwarded-For": xForwardedForHeader }),
+      ...config.headers,
+    };
 
     console.log("최적경로 API 호출 URL:", url);
     console.log("최적경로 API HTTP 메서드:", method);
     console.log("최적경로 API 요청 데이터:", config.body);
+    console.log("최적경로 API 클라이언트 IP:", actualClientIp);
+    console.log("최적경로 API X-Forwarded-For:", xForwardedForHeader);
 
     const response = await fetch(url, {
       method,
-      headers: {
-        "Content-Type": "application/json",
-        ...config.headers,
-      },
+      headers,
       body: config.body ? JSON.stringify(config.body) : undefined,
     });
 

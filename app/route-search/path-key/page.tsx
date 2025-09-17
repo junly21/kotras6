@@ -148,20 +148,6 @@ export default function PathKeyPage() {
     []
   );
 
-  // 전체선택/전체해제 핸들러 - useCallback으로 최적화
-  const handleSelectAllChange = useCallback(
-    (checked: boolean) => {
-      if (checked) {
-        // 전체 선택
-        setSelectedPaths([...searchResults]);
-      } else {
-        // 전체 해제
-        setSelectedPaths([]);
-      }
-    },
-    [searchResults]
-  );
-
   // 상세 정보 Dialog 열기 - useCallback으로 최적화
   const handleDetailClick = useCallback((route: RouteSearchResult) => {
     setSelectedRouteForDetail(route);
@@ -196,6 +182,7 @@ export default function PathKeyPage() {
       .map((route) => {
         if (!route.path_num) return null;
 
+        // path_num이 문자열이므로 배열로 변환
         const nodeIds = route.path_num
           .split(", ")
           .map((id) => id.trim())
@@ -205,32 +192,45 @@ export default function PathKeyPage() {
           type: "path" as const,
           value: nodeIds,
           priority: 1,
-          rgb: route.rgb || "#3B82F6",
-          pathId: getRouteIdentifier(route),
         };
       })
       .filter(Boolean) as NetworkMapHighlight[];
   }, [selectedPaths]);
 
+  // path_key에서 역번호 추출하여 표시할 정보 계산
+  const stationInfo = useMemo(() => {
+    if (selectedPaths.length === 0) return null;
+
+    // 첫 번째 선택된 경로의 path_key에서 역번호 추출
+    const firstRoute = selectedPaths[0];
+    if (!firstRoute.path_key) return null;
+
+    const pathKeyParts = firstRoute.path_key.split("_");
+    if (pathKeyParts.length < 3) return null;
+
+    // 2번째 토큰 이후가 개별 역번호들
+    const stationNumbers = pathKeyParts.slice(2);
+
+    // 역번호를 역명으로 변환
+    const stationNames = stationNumbers.map((stationId) => {
+      const node = nodes.find((n) => n.id === stationId);
+      if (node) {
+        // 원본 노선_이름 형태 그대로 사용 (예: "1_강남")
+        return node.name;
+      }
+      return stationId; // 찾지 못한 경우 원본 ID 반환
+    });
+
+    return {
+      stationNumbers,
+      stationNames,
+    };
+  }, [selectedPaths, nodes]);
+
   // 경로탐색 결과 데이터 가공 - useMemo로 최적화
   const processedResults = useMemo(() => {
     return processPathKeyResults(searchResults, selectedPaths);
   }, [searchResults, selectedPaths]);
-
-  // 전체선택 상태 계산 - useMemo로 최적화
-  const selectAllState = useMemo(() => {
-    if (processedResults.length === 0) {
-      return { isAllSelected: false, isIndeterminate: false };
-    }
-
-    const selectedCount = selectedPaths.length;
-    const totalCount = processedResults.length;
-
-    return {
-      isAllSelected: selectedCount === totalCount,
-      isIndeterminate: selectedCount > 0 && selectedCount < totalCount,
-    };
-  }, [selectedPaths.length, processedResults.length]);
 
   // 그룹별 배경색 계산 - OD별 조회 페이지 로직 참고
   const getGroupBackgroundColor = useCallback(
@@ -279,19 +279,8 @@ export default function PathKeyPage() {
 
   // 그리드 컬럼 정의 - useMemo로 최적화
   const colDefs = useMemo(() => {
-    return createPathKeyColDefs(
-      handleCheckboxChange,
-      handleDetailClick,
-      handleSelectAllChange,
-      selectAllState.isAllSelected,
-      selectAllState.isIndeterminate
-    );
-  }, [
-    handleCheckboxChange,
-    handleDetailClick,
-    handleSelectAllChange,
-    selectAllState,
-  ]);
+    return createPathKeyColDefs(handleCheckboxChange, handleDetailClick);
+  }, [handleCheckboxChange, handleDetailClick]);
 
   // 그리드 높이 동적 계산 - useMemo로 최적화
   const gridHeight = useMemo(() => {
@@ -459,7 +448,18 @@ export default function PathKeyPage() {
       {/* 네트워크 맵 */}
       {hasSearched && processedResults.length > 0 && (
         <div className="space-y-4">
-          <h2 className="text-xl font-semibold">지하철 노선도</h2>
+          <div className="flex items-center gap-6">
+            <h2 className="text-xl font-semibold">지하철 노선도</h2>
+            {stationInfo && (
+              <div className="flex items-center gap-2 text-sm">
+                <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
+                <span className="text-gray-600">환승역:</span>
+                <span className="font-medium">
+                  {stationInfo.stationNames.join(", ")}
+                </span>
+              </div>
+            )}
+          </div>
           <div className="bg-white h-[700px] rounded-[24px] p-4">
             {isMapLoading ? (
               <div className="flex items-center justify-center h-64">
@@ -478,6 +478,7 @@ export default function PathKeyPage() {
                 highlights={routeHighlights}
                 startStationId={filters.RIDE_STN_ID}
                 endStationId={filters.ALGH_STN_ID}
+                focusNodeIds={stationInfo?.stationNumbers || []}
                 config={{
                   width: "100%",
                   height: 600,

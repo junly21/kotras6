@@ -130,7 +130,8 @@ export function processRouteSearchResults(
       confirmedPathDisplay: isFirstConfirmedPathInGroup
         ? currentConfirmedPath
         : null,
-      groupNo: currentGroupNo,
+      // groupNo: currentGroupNo,
+      groupNo: result.group_no || 0,
       groupDisplay: isFirstInGroup ? currentGroupNo : null,
       mainStations: isFirstInGroup ? uniquePathComponents.join(" → ") : "",
       detailedPath: cleanedDetailedPath,

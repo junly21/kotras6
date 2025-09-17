@@ -97,12 +97,16 @@ export function InstitutionChart({ data }: Props) {
     // '억' 단위로 고정하고 소수점 1자리까지 표시
     const valueInEok = value / 100000000;
     // 0.0억은 0억으로 표시
-    if (valueInEok === 0) return "0억";
-    return valueInEok.toFixed(1) + "억";
+    if (valueInEok === 0) return "0";
+    return valueInEok.toFixed(0);
   };
 
   return (
     <div className="h-full flex flex-col">
+      {/* 단위 표시 */}
+      <div className="flex justify-end mb-2">
+        <span className="text-sm text-gray-600 font-medium">단위: 억 원</span>
+      </div>
       <ResponsiveContainer width="100%" height="100%">
         <BarChart
           data={chartData}
@@ -124,7 +128,7 @@ export function InstitutionChart({ data }: Props) {
             domain={[-maxAbs, maxAbs]}
             tickFormatter={(v) => {
               // 음수는 -표시, 양수는 + 없이 표시 (0은 그대로)
-              if (v === 0) return "0억";
+              if (v === 0) return "0";
               if (v < 0) return "-" + formatValue(Math.abs(v));
               return formatValue(v); // 양수는 + 없이
             }}

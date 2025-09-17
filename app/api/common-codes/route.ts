@@ -1,13 +1,14 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { callExternalApi, createCorsHeaders } from "../utils/externalApi";
 
-export async function POST() {
+export async function POST(request: NextRequest) {
   try {
     console.log("공통코드 목록 API 호출됨");
 
     const { data } = await callExternalApi("selectCommonCodeList.do", {
       method: "POST",
       body: {},
+      request, // 클라이언트 IP 추출을 위한 request 객체 전달
     });
 
     return NextResponse.json(data, {

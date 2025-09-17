@@ -17,6 +17,7 @@ export async function POST(request: NextRequest) {
     const { data } = await callExternalApi("selectPayRecvOD.do", {
       method: "POST",
       body: externalApiBody,
+      request, // 클라이언트 IP 추출을 위한 request 객체 전달
     });
 
     console.log("외부 API OD별 정산 결과:", data);

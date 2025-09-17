@@ -19,6 +19,7 @@ export async function GET(request: NextRequest) {
       method: "POST",
       body: {},
       sessionId: extSid, // 세션 ID 전달
+      request, // 클라이언트 IP 추출을 위한 request 객체 전달
     });
 
     // data가 배열인지 확인하고, 아니면 빈 배열 반환

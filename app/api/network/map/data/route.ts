@@ -33,6 +33,7 @@ export async function POST(request: NextRequest) {
           SUBWAY: line,
         },
         sessionId: extSid, // 세션 ID 전달
+        request, // 클라이언트 IP 추출을 위한 request 객체 전달
       }
     );
     console.log("[selectNetWorkNodeList.do] nodeData:", nodeData);

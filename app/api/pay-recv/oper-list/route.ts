@@ -57,6 +57,7 @@ export async function POST(request: NextRequest) {
       const { data } = await callExternalApi("selectPayRecvResult.do", {
         method: "POST",
         body: {}, // 빈 body로 요청
+        request, // 클라이언트 IP 추출을 위한 request 객체 전달
       });
 
       // pay_oper 필드 변환

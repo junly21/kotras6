@@ -31,6 +31,7 @@ export async function POST(request: NextRequest) {
         STN_ID4: STN_ID4 || "",
         STN_ID5: STN_ID5 || "",
       },
+      request, // 클라이언트 IP 추출을 위한 request 객체 전달
     });
     console.log("by-station 외부 API 응답:", data?.length || 0, "개");
 

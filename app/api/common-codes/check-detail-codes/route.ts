@@ -1,7 +1,7 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { callExternalApi, createCorsHeaders } from "../../utils/externalApi";
 
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
   try {
     console.log("상세코드 존재 여부 확인 API 호출됨");
 
@@ -11,6 +11,7 @@ export async function POST(request: Request) {
     const { data } = await callExternalApi("selectDetailCodeList.do", {
       method: "POST",
       body,
+      request, // 클라이언트 IP 추출을 위한 request 객체 전달
     });
 
     // data가 배열이고 길이가 0보다 크면 상세코드가 존재함

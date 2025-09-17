@@ -30,6 +30,7 @@ export async function POST(request: NextRequest) {
         RIDE_STN_ID: STN_ID1,
         ALGH_STN_ID: STN_ID2,
       },
+      request, // 클라이언트 IP 추출을 위한 request 객체 전달
     });
 
     console.log("by-od 외부 API 응답:", data?.length || 0, "개");

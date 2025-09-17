@@ -23,6 +23,7 @@ export async function POST(request: NextRequest) {
         PATH_KEY,
         PATH_ID,
       },
+      request, // 클라이언트 IP 추출을 위한 request 객체 전달
     });
 
     console.log("외부 API 모의정산 OD별 정산 상세정보 결과:", data);
@@ -40,4 +41,4 @@ export async function POST(request: NextRequest) {
       { status: 500, headers: createCorsHeaders() }
     );
   }
-} 
+}

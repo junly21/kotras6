@@ -85,6 +85,7 @@ export function getDetailedPermissions(
       return {
         transaction: {
           analysis: true, // 내역 분석 - 모든 기관
+          amount: true, // 금액 분석 - 대광위 + SERVICE
           detail: true, // 상세 조회 - 대광위만
         },
         settlement: {
@@ -119,6 +120,7 @@ export function getDetailedPermissions(
       return {
         transaction: {
           analysis: true, // 내역 분석 - 모든 기관
+          amount: true, // 대광위 + SERVICE
           detail: true, // 상세 조회 - 대광위만 - 서교공 인교공 대광위요청으로 추가
         },
         settlement: {
@@ -153,6 +155,7 @@ export function getDetailedPermissions(
       return {
         transaction: {
           analysis: true, // 내역 분석 - 모든 기관
+          amount: false, // 대광위 + SERVICE
           detail: false, // 상세 조회 - 대광위만
         },
         settlement: {
@@ -185,7 +188,7 @@ export function getDetailedPermissions(
 
     default:
       return {
-        transaction: { analysis: false, detail: false },
+        transaction: { analysis: false, amount: false, detail: false },
         settlement: {
           overview: false,
           byInstitution: false,
@@ -243,6 +246,9 @@ export function hasPathPermission(agencyCode: string, path: string): boolean {
   }
   if (path.includes("/transaction/analysis")) {
     return hasDetailedPermission(agencyCode, "transaction", "analysis");
+  }
+  if (path.includes("/transaction/amount")) {
+    return hasDetailedPermission(agencyCode, "transaction", "amount");
   }
 
   // Settlement 권한 체크

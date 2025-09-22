@@ -5,13 +5,13 @@ import { NextRequest } from "next/server";
 const isDevelopment = process.env.NODE_ENV === "development";
 
 // 개발 환경: 8080, 5001 포트 / 프로덕션 환경: 28480, 28482 포트
-// export const EXTERNAL_BASE_URL = isDevelopment
-//   ? "http://192.168.111.152:8080/kotras6"
-//   : "http://192.168.110.21:28480/kotras6";
+export const EXTERNAL_BASE_URL = isDevelopment
+  ? "http://192.168.111.152:8080/kotras6"
+  : "http://192.168.110.21:28480/kotras6";
 
-// export const OPTIMAL_ROUTE_BASE_URL = isDevelopment
-//   ? "http://192.168.111.152:5001"
-//   : "http://192.168.110.21:28482";
+export const OPTIMAL_ROUTE_BASE_URL = isDevelopment
+  ? "http://192.168.111.152:5001"
+  : "http://192.168.110.21:28482";
 
 // 0912 테스트용 포트 번호에 따라 API URL 자동 설정
 // const getApiUrlByPort = () => {
@@ -35,9 +35,9 @@ const isDevelopment = process.env.NODE_ENV === "development";
 // export const OPTIMAL_ROUTE_BASE_URL = "http://192.168.111.152:5001";
 
 //개발 중 서버로 돌리고싶을때
-export const EXTERNAL_BASE_URL = "http://192.168.110.21:28480/kotras6";
+// export const EXTERNAL_BASE_URL = "http://192.168.110.21:28480/kotras6";
 
-export const OPTIMAL_ROUTE_BASE_URL = "http://192.168.110.21:28482";
+// export const OPTIMAL_ROUTE_BASE_URL = "http://192.168.110.21:28482";
 
 //0912 세션 신분당 서교공 동시실행 디버깅용
 // export const EXTERNAL_BASE_URL = "http://192.168.111.152:8080/kotras6";

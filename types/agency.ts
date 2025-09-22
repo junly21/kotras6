@@ -21,6 +21,7 @@ export interface DetailedPermissions {
   // Transaction 하위 권한
   transaction: {
     analysis: boolean; // 내역 분석 - 모든 기관
+    amount: boolean; // 금액 분석 - 대광위 + SERVICE
     detail: boolean; // 상세 조회 - 대광위만
   };
 

@@ -107,3 +107,45 @@ export interface RouteSearchTestResult {
   group_no: number;
   cnt: number; // API에서 추가될 예정인 cnt 필드
 }
+
+export interface RouteSearchTestResult2 {
+  // 테스트 페이지용 결과 타입 (기존 RouteSearchResult와 동일)
+  id: number;
+  rn: number;
+  ride_stn_id: string;
+  algh_stn_id: string;
+  start_node: string;
+  end_node: string;
+  path_nm: string;
+  path_num: string;
+  transfer_list: string;
+  transfer_cnt: number;
+  km: number;
+  sta_pass_sec: number;
+  cost: number;
+  oper_list: string;
+  path_prob: number;
+  rgb: string;
+  path_id: string;
+  path_key: string;
+  old_path_key: string;
+  path_seq: number;
+  operline_list: string;
+  tag_oper: string;
+  start_oper: string;
+  trans_sty_sec: number;
+  trans_mv_sec: number;
+  km_oper_list: string;
+  km_elev_oper_list: string;
+  km_g_oper_list: string;
+  km_ung_operline_list: string;
+  km_ung_oper_list: string;
+  km_g_operline_list: string;
+  km_elev_operline_list: string;
+  path_value: number;
+  created_at: number;
+  confirmed_path: string;
+  group_no: number;
+  cnt: number; // API에서 추가될 예정인 cnt 필드
+  old_cnt: number; // API에서 추가될 예정인 cnt 필드
+}

@@ -69,6 +69,7 @@ export async function POST(request: Request) {
           rgb: item.rgb || "#3B82F6",
           path_id: item.path_id || "",
           path_key: item.path_key || "",
+          old_path_key: item.old_path_key || "",
           path_seq: item.path_seq || 0,
           operline_list: item.operline_list || "",
           tag_oper: item.tag_oper || "",
@@ -87,6 +88,7 @@ export async function POST(request: Request) {
           confirmed_path: item.confirmed_path || "N",
           group_no: item.group_no || 1,
           cnt: item.cnt || 0,
+          old_cnt: item.old_cnt || 0,
         }))
       : [];
 

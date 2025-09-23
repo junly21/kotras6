@@ -16,7 +16,10 @@ interface PathKeyGridData {
 
 export function createPathKeyColDefs(
   onCheckboxChange: (route: RouteSearchResult, checked: boolean) => void,
-  onDetailClick: (route: RouteSearchResult) => void
+  onDetailClick: (route: RouteSearchResult) => void,
+  onSelectAllChange: (checked: boolean) => void,
+  isAllSelected: boolean,
+  isIndeterminate: boolean
 ): ColDef<PathKeyGridData>[] {
   return [
     {
@@ -37,7 +40,18 @@ export function createPathKeyColDefs(
               width: "100%",
             },
           },
-          "선택"
+          React.createElement("input", {
+            type: "checkbox",
+            checked: isAllSelected,
+            ref: (input: HTMLInputElement | null) => {
+              if (input) {
+                input.indeterminate = isIndeterminate;
+              }
+            },
+            onChange: (e: React.ChangeEvent<HTMLInputElement>) =>
+              onSelectAllChange(e.target.checked),
+            className: "w-4 h-4",
+          })
         );
       },
       cellRenderer: (params: {

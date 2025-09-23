@@ -1,4 +1,5 @@
 import { RouteSearchResult } from "@/types/routeSearch";
+import { isSameRoute } from "@/utils/routeIdentifier";
 
 interface PathKeyGridData {
   id: number;
@@ -102,7 +103,7 @@ export function processPathKeyResults(
       mainStations: uniquePathComponents.join(" → "),
       pathKey: result.path_key || "",
       cnt: isFirstInGroup ? result.cnt || 0 : null,
-      isSelected: selectedPaths.some((path) => path.id === result.id),
+      isSelected: selectedPaths.some((path) => isSameRoute(path, result)),
       originalData: result,
     };
   });

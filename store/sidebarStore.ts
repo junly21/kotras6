@@ -165,7 +165,7 @@ export const getMenuData = (): MenuItem[] => [
       {
         id: "route-search-result",
         label: "결과 조회",
-        path: "/route-search/result",
+        path: "/route-search/path-key",
       },
     ],
   },

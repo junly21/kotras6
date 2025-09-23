@@ -6,7 +6,7 @@ import { FilterForm } from "@/components/ui/FilterForm";
 import { routeSearchFilterConfig } from "@/features/routeSearch/filterConfig";
 import { createPathKeyColDefs } from "@/features/routeSearch/pathKeyGridConfig";
 import { processPathKeyResults } from "@/features/routeSearch/pathKeyDataProcessor";
-import { useRouteSearchPathKey, useRouteSearch } from "@/hooks/useRouteSearch";
+import { useRouteSearchPathKey } from "@/hooks/useRouteSearch";
 import {
   RouteSearchFilter,
   RouteSearchResult,
@@ -20,7 +20,7 @@ import { NetworkMap } from "@/components/NetworkMap/NetworkMap";
 import { useNetworkData } from "@/hooks/useNetworkData";
 import type { NetworkMapHighlight } from "@/types/network";
 import { RouteDetailDialog } from "@/components/routeSearch/RouteDetailDialog";
-import { getRouteIdentifier } from "@/utils/routeIdentifier";
+import { getRouteIdentifier, isSameRoute } from "@/utils/routeIdentifier";
 
 // Register all Community features
 ModuleRegistry.registerModules([AllCommunityModule]);
@@ -137,15 +137,25 @@ export default function PathKeyPage() {
         setSelectedPaths((prev) => [...prev, route]);
       } else {
         setSelectedPaths((prev) =>
-          prev.filter((path) => {
-            const pathId = getRouteIdentifier(path);
-            const routeId = getRouteIdentifier(route);
-            return !(pathId && routeId && pathId === routeId);
-          })
+          prev.filter((path) => !isSameRoute(path, route))
         );
       }
     },
     []
+  );
+
+  // 전체선택/전체해제 핸들러 - useCallback으로 최적화
+  const handleSelectAllChange = useCallback(
+    (checked: boolean) => {
+      if (checked) {
+        // 전체 선택
+        setSelectedPaths([...searchResults]);
+      } else {
+        // 전체 해제
+        setSelectedPaths([]);
+      }
+    },
+    [searchResults]
   );
 
   // 상세 정보 Dialog 열기 - useCallback으로 최적화
@@ -182,7 +192,6 @@ export default function PathKeyPage() {
       .map((route) => {
         if (!route.path_num) return null;
 
-        // path_num이 문자열이므로 배열로 변환
         const nodeIds = route.path_num
           .split(", ")
           .map((id) => id.trim())
@@ -192,6 +201,8 @@ export default function PathKeyPage() {
           type: "path" as const,
           value: nodeIds,
           priority: 1,
+          rgb: route.rgb || "#3B82F6",
+          pathId: getRouteIdentifier(route),
         };
       })
       .filter(Boolean) as NetworkMapHighlight[];
@@ -231,6 +242,21 @@ export default function PathKeyPage() {
   const processedResults = useMemo(() => {
     return processPathKeyResults(searchResults, selectedPaths);
   }, [searchResults, selectedPaths]);
+
+  // 전체선택 상태 계산 - useMemo로 최적화
+  const selectAllState = useMemo(() => {
+    if (processedResults.length === 0) {
+      return { isAllSelected: false, isIndeterminate: false };
+    }
+
+    const selectedCount = selectedPaths.length;
+    const totalCount = processedResults.length;
+
+    return {
+      isAllSelected: selectedCount === totalCount,
+      isIndeterminate: selectedCount > 0 && selectedCount < totalCount,
+    };
+  }, [selectedPaths.length, processedResults.length]);
 
   // 그룹별 배경색 계산 - OD별 조회 페이지 로직 참고
   const getGroupBackgroundColor = useCallback(
@@ -279,8 +305,19 @@ export default function PathKeyPage() {
 
   // 그리드 컬럼 정의 - useMemo로 최적화
   const colDefs = useMemo(() => {
-    return createPathKeyColDefs(handleCheckboxChange, handleDetailClick);
-  }, [handleCheckboxChange, handleDetailClick]);
+    return createPathKeyColDefs(
+      handleCheckboxChange,
+      handleDetailClick,
+      handleSelectAllChange,
+      selectAllState.isAllSelected,
+      selectAllState.isIndeterminate
+    );
+  }, [
+    handleCheckboxChange,
+    handleDetailClick,
+    handleSelectAllChange,
+    selectAllState,
+  ]);
 
   // 그리드 높이 동적 계산 - useMemo로 최적화
   const gridHeight = useMemo(() => {
@@ -333,7 +370,7 @@ export default function PathKeyPage() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">경로탐색결과조회 (Path Key)</h1>
+        <h1 className="text-2xl font-bold">경로탐색 결과조회</h1>
       </div>
 
       {/* 전체 페이지 로딩 스피너 */}
@@ -450,15 +487,6 @@ export default function PathKeyPage() {
         <div className="space-y-4">
           <div className="flex items-center gap-6">
             <h2 className="text-xl font-semibold">지하철 노선도</h2>
-            {stationInfo && (
-              <div className="flex items-center gap-2 text-sm">
-                <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
-                <span className="text-gray-600">환승역:</span>
-                <span className="font-medium">
-                  {stationInfo.stationNames.join(", ")}
-                </span>
-              </div>
-            )}
           </div>
           <div className="bg-white h-[700px] rounded-[24px] p-4">
             {isMapLoading ? (

@@ -95,7 +95,7 @@ export function RouteDetailDialog({
             </div>
             <div>
               <h3 className="text-sm font-medium text-gray-500 mb-1">
-                소요시간
+                이동시간
               </h3>
               <p className="text-lg font-semibold">
                 {Math.round((route.sta_pass_sec || 0) / 60)}분

@@ -314,7 +314,9 @@ export default function SettlementByStationPage() {
                             headers: {
                               "Content-Type": "application/json",
                             },
-                            body: JSON.stringify({}), // 빈 객체 전송
+                            body: JSON.stringify({
+                              NET_DT: "LATEST",
+                            }), // 빈 객체 전송
                           }
                         );
 

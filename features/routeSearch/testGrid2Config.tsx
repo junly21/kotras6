@@ -110,25 +110,25 @@ export function createRouteSearchTestColDefs(
         return params.value !== null ? String(params.value) : "";
       },
     },
-    {
-      headerName: "old_경로키",
-      resizable: true,
-      field: "groupDisplay2",
-      width: 450,
-      sortable: true,
-      cellStyle: {
-        fontWeight: "bold",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "flex-start",
-        height: "100%",
-        paddingLeft: "8px",
-      },
-      valueFormatter: (params: { value: string | number | null }) => {
-        // null 값은 빈 문자열로 표시 (첫 번째 행이 아닌 경우)
-        return params.value !== null ? String(params.value) : "";
-      },
-    },
+    // {
+    //   headerName: "old_경로키",
+    //   resizable: true,
+    //   field: "groupDisplay2",
+    //   width: 450,
+    //   sortable: true,
+    //   cellStyle: {
+    //     fontWeight: "bold",
+    //     display: "flex",
+    //     alignItems: "center",
+    //     justifyContent: "flex-start",
+    //     height: "100%",
+    //     paddingLeft: "8px",
+    //   },
+    //   valueFormatter: (params: { value: string | number | null }) => {
+    //     // null 값은 빈 문자열로 표시 (첫 번째 행이 아닌 경우)
+    //     return params.value !== null ? String(params.value) : "";
+    //   },
+    // },
 
     {
       headerName: "주요경유지",

@@ -208,36 +208,6 @@ export default function PathKeyPage() {
       .filter(Boolean) as NetworkMapHighlight[];
   }, [selectedPaths]);
 
-  // path_key에서 역번호 추출하여 표시할 정보 계산
-  const stationInfo = useMemo(() => {
-    if (selectedPaths.length === 0) return null;
-
-    // 첫 번째 선택된 경로의 path_key에서 역번호 추출
-    const firstRoute = selectedPaths[0];
-    if (!firstRoute.path_key) return null;
-
-    const pathKeyParts = firstRoute.path_key.split("_");
-    if (pathKeyParts.length < 3) return null;
-
-    // 2번째 토큰 이후가 개별 역번호들
-    const stationNumbers = pathKeyParts.slice(2);
-
-    // 역번호를 역명으로 변환
-    const stationNames = stationNumbers.map((stationId) => {
-      const node = nodes.find((n) => n.id === stationId);
-      if (node) {
-        // 원본 노선_이름 형태 그대로 사용 (예: "1_강남")
-        return node.name;
-      }
-      return stationId; // 찾지 못한 경우 원본 ID 반환
-    });
-
-    return {
-      stationNumbers,
-      stationNames,
-    };
-  }, [selectedPaths, nodes]);
-
   // 경로탐색 결과 데이터 가공 - useMemo로 최적화
   const processedResults = useMemo(() => {
     return processPathKeyResults(searchResults, selectedPaths);
@@ -506,7 +476,6 @@ export default function PathKeyPage() {
                 highlights={routeHighlights}
                 startStationId={filters.RIDE_STN_ID}
                 endStationId={filters.ALGH_STN_ID}
-                focusNodeIds={stationInfo?.stationNumbers || []}
                 config={{
                   width: "100%",
                   height: 600,

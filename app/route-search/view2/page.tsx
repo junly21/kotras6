@@ -4,8 +4,8 @@ import { useState, useMemo, useRef, useCallback } from "react";
 import { z } from "zod";
 import { FilterForm } from "@/components/ui/FilterForm";
 import { routeSearchFilterConfig } from "@/features/routeSearch/filterConfig";
-import { createPathKeyColDefs } from "@/features/routeSearch/view1GridConfig";
-import { processViewResults } from "@/features/routeSearch/viewGridDataProcessor";
+import { createPathKeyColDefs } from "@/features/routeSearch/view2GridConfig";
+import { processView2Results } from "@/features/routeSearch/view2GridDataProcessor";
 import { useRouteSearchPathKey } from "@/hooks/useRouteSearch";
 import {
   RouteSearchFilter,
@@ -16,11 +16,8 @@ import Spinner from "@/components/Spinner";
 import TestGrid from "@/components/TestGrid";
 import { AgGridReact } from "ag-grid-react";
 import { AllCommunityModule, ModuleRegistry } from "ag-grid-community";
-import { NetworkMap } from "@/components/NetworkMap/NetworkMap";
+import { RouteDetailPanel } from "@/components/routeSearch/RouteDetailPanel";
 import { useNetworkData } from "@/hooks/useNetworkData";
-import type { NetworkMapHighlight } from "@/types/network";
-import { RouteDetailDialog } from "@/components/routeSearch/RouteDetailDialog";
-import { getRouteIdentifier, isSameRoute } from "@/utils/routeIdentifier";
 
 // Register all Community features
 ModuleRegistry.registerModules([AllCommunityModule]);
@@ -50,8 +47,6 @@ export default function PathKeyPage() {
     useRouteSearchPathKey();
 
   const [filters, setFilters] = useState<RouteSearchFilter>(defaultValues);
-  const [selectedPaths, setSelectedPaths] = useState<RouteSearchResult[]>([]);
-  const [detailDialogOpen, setDetailDialogOpen] = useState(false);
   const [selectedRouteForDetail, setSelectedRouteForDetail] =
     useState<RouteSearchResult | null>(null);
   const [arrivalStationOptions, setArrivalStationOptions] = useState<
@@ -124,109 +119,34 @@ export default function PathKeyPage() {
       };
 
       handleSearch(searchData);
-      setSelectedPaths([]);
+      setSelectedRouteForDetail(null); // 검색 시 선택된 경로 초기화
       setHasSearched(true);
     },
     [handleSearch, filters]
   );
 
-  // 체크박스 변경 핸들러 - useCallback으로 최적화
-  const handleCheckboxChange = useCallback(
-    (route: RouteSearchResult, checked: boolean) => {
-      if (checked) {
-        setSelectedPaths((prev) => [...prev, route]);
-      } else {
-        setSelectedPaths((prev) =>
-          prev.filter((path) => !isSameRoute(path, route))
-        );
-      }
-    },
-    []
-  );
-
-  // 전체선택/전체해제 핸들러 - useCallback으로 최적화
-  const handleSelectAllChange = useCallback(
-    (checked: boolean) => {
-      if (checked) {
-        // 전체 선택
-        setSelectedPaths([...searchResults]);
-      } else {
-        // 전체 해제
-        setSelectedPaths([]);
-      }
-    },
-    [searchResults]
-  );
-
-  // 상세 정보 Dialog 열기 - useCallback으로 최적화
-  const handleDetailClick = useCallback((route: RouteSearchResult) => {
+  // 행 클릭 핸들러 - 상세 정보 패널에 표시
+  const handleRowClick = useCallback((route: RouteSearchResult) => {
     setSelectedRouteForDetail(route);
-    setDetailDialogOpen(true);
   }, []);
 
   // 행 클릭 핸들러 - useCallback으로 최적화
   const onRowClicked = useCallback(
     (event: { data: { originalData: RouteSearchResult } }) => {
-      console.log("행 클릭 이벤트 (비활성화):", event);
+      console.log("행 클릭 이벤트:", event);
       console.log("path_key:", event.data.originalData.path_key);
+      handleRowClick(event.data.originalData);
     },
-    []
+    [handleRowClick]
   );
 
-  // 네트워크 데이터 로드
-  const {
-    nodes,
-    links,
-    svgText,
-    isLoading: isMapLoading,
-    error: mapError,
-  } = useNetworkData();
-
-  // 체크된 경로들의 하이라이트 계산 - useMemo로 최적화
-  const routeHighlights = useMemo((): NetworkMapHighlight[] => {
-    if (!selectedPaths || selectedPaths.length === 0) {
-      return [];
-    }
-
-    return selectedPaths
-      .map((route) => {
-        if (!route.path_num) return null;
-
-        const nodeIds = route.path_num
-          .split(", ")
-          .map((id) => id.trim())
-          .filter((id) => id.length > 0);
-
-        return {
-          type: "path" as const,
-          value: nodeIds,
-          priority: 1,
-          rgb: route.rgb || "#3B82F6",
-          pathId: getRouteIdentifier(route),
-        };
-      })
-      .filter(Boolean) as NetworkMapHighlight[];
-  }, [selectedPaths]);
+  // 네트워크 데이터 로드 (상세경로에서 역명 변환용)
+  const { nodes } = useNetworkData();
 
   // 경로탐색 결과 데이터 가공 - useMemo로 최적화
   const processedResults = useMemo(() => {
-    return processViewResults(searchResults, selectedPaths, nodes);
-  }, [searchResults, selectedPaths, nodes]);
-
-  // 전체선택 상태 계산 - useMemo로 최적화
-  const selectAllState = useMemo(() => {
-    if (processedResults.length === 0) {
-      return { isAllSelected: false, isIndeterminate: false };
-    }
-
-    const selectedCount = selectedPaths.length;
-    const totalCount = processedResults.length;
-
-    return {
-      isAllSelected: selectedCount === totalCount,
-      isIndeterminate: selectedCount > 0 && selectedCount < totalCount,
-    };
-  }, [selectedPaths.length, processedResults.length]);
+    return processView2Results(searchResults, nodes);
+  }, [searchResults, nodes]);
 
   // 그룹별 배경색 계산 - OD별 조회 페이지 로직 참고
   const getGroupBackgroundColor = useCallback(
@@ -275,19 +195,8 @@ export default function PathKeyPage() {
 
   // 그리드 컬럼 정의 - useMemo로 최적화
   const colDefs = useMemo(() => {
-    return createPathKeyColDefs(
-      handleCheckboxChange,
-      handleDetailClick,
-      handleSelectAllChange,
-      selectAllState.isAllSelected,
-      selectAllState.isIndeterminate
-    );
-  }, [
-    handleCheckboxChange,
-    handleDetailClick,
-    handleSelectAllChange,
-    selectAllState,
-  ]);
+    return createPathKeyColDefs();
+  }, []);
 
   // 그리드 높이 동적 계산 - useMemo로 최적화
   const gridHeight = useMemo(() => {
@@ -410,7 +319,6 @@ export default function PathKeyPage() {
               height={gridHeight}
               gridOptions={{
                 onRowClicked: onRowClicked,
-                rowSelection: "none", // 체크박스 사용하므로 단일 선택 비활성화
                 suppressScrollOnNewData: true, // 데이터 변경 시 스크롤 위치 유지
                 getRowStyle: getRowStyle, // 그룹별 배경색 적용
                 // 셀 병합 기능 활성화
@@ -452,50 +360,15 @@ export default function PathKeyPage() {
         )}
       </div>
 
-      {/* 네트워크 맵 */}
+      {/* 상세 정보 패널 - 하단에 간단한 레이아웃으로 배치 */}
       {hasSearched && processedResults.length > 0 && (
-        <div className="space-y-4">
-          <div className="flex items-center gap-6">
-            <h2 className="text-xl font-semibold">지하철 노선도</h2>
-          </div>
-          <div className="bg-white h-[700px] rounded-[24px] p-4">
-            {isMapLoading ? (
-              <div className="flex items-center justify-center h-64">
-                <Spinner />
-                <p className="ml-2 text-gray-600">노선도를 불러오는 중...</p>
-              </div>
-            ) : mapError ? (
-              <div className="bg-red-50 border border-red-200 rounded-md p-4">
-                <p className="text-red-600">노선도 로드 실패: {mapError}</p>
-              </div>
-            ) : (
-              <NetworkMap
-                nodes={nodes}
-                links={links}
-                svgText={svgText}
-                highlights={routeHighlights}
-                startStationId={filters.RIDE_STN_ID}
-                endStationId={filters.ALGH_STN_ID}
-                config={{
-                  width: "100%",
-                  height: 600,
-                  showZoomControls: true,
-                  showTooltips: true,
-                  defaultZoom: 0.25,
-                  defaultPan: { x: 100, y: -650 },
-                }}
-              />
-            )}
+        <div className="grid grid-cols-1 gap-6">
+          <div className="space-y-4">
+            <h2 className="text-xl font-semibold">상세 정보</h2>
+            <RouteDetailPanel route={selectedRouteForDetail} />
           </div>
         </div>
       )}
-
-      {/* 상세 정보 Dialog */}
-      <RouteDetailDialog
-        open={detailDialogOpen}
-        onOpenChange={setDetailDialogOpen}
-        route={selectedRouteForDetail}
-      />
     </div>
   );
 }

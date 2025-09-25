@@ -1,22 +1,24 @@
 import { RouteSearchResult } from "@/types/routeSearch";
 import { isSameRoute } from "@/utils/routeIdentifier";
+import { Node } from "@/types/network";
 
-interface PathKeyGridData {
+interface ViewGridData {
   id: number;
-  confirmedPath: string;
+  startStation: string;
+  endStation: string;
   groupNo: number;
   groupDisplay: string | number | null;
-  mainStations: string;
-  pathKey: string;
+  detailedPath: string;
   cnt: number | null;
   isSelected: boolean;
   originalData: RouteSearchResult;
 }
 
-export function processPathKeyResults(
+export function processViewResults(
   searchResults: RouteSearchResult[],
-  selectedPaths: RouteSearchResult[]
-): PathKeyGridData[] {
+  selectedPaths: RouteSearchResult[],
+  nodes: Node[] = []
+): ViewGridData[] {
   if (!searchResults || searchResults.length === 0) return [];
 
   // API 응답에서 group_no를 사용하거나, 없으면 path_key별로 그룹화
@@ -38,57 +40,56 @@ export function processPathKeyResults(
   });
 
   return sortedResults.map((result, index) => {
-    // transfer_list 파싱 (JSON 문자열을 배열로 변환)
-    let transferStations: string[] = [];
-    try {
-      if (result.transfer_list && result.transfer_list !== "[]") {
-        transferStations = JSON.parse(result.transfer_list);
-      }
-    } catch {
-      console.warn("transfer_list 파싱 실패:", result.transfer_list);
-    }
+    // 출발역과 도착역 추출
+    let startStationName = "";
+    let endStationName = "";
 
-    // 주요경유지 구성: 출발역 + 환승역 + 도착역
-    const pathComponents: string[] = [];
-
-    // 출발역
     if (result.start_node) {
       const startStation = result.start_node.match(
         /\([^)]+\)[^_]*_([^(]+)\([^)]+\)/
       );
       if (startStation) {
         // @_ 형태의 prefix 제거 (A_, SH_, 2_ 등)
-        const stationName = startStation[1].replace(/^[A-Z0-9]+_/, "");
-        pathComponents.push(stationName);
+        startStationName = startStation[1].replace(/^[A-Z0-9]+_/, "");
       }
     }
 
-    // 환승역들
-    transferStations.forEach((transfer) => {
-      const transferStation = transfer.match(/\([^)]+\)[^_]*_([^(]+)\([^)]+\)/);
-      if (transferStation) {
-        // @_ 형태의 prefix 제거 (A_, SH_, 2_ 등)
-        const stationName = transferStation[1].replace(/^[A-Z0-9]+_/, "");
-        pathComponents.push(stationName);
-      }
-    });
-
-    // 도착역
     if (result.end_node) {
       const endStation = result.end_node.match(
         /\([^)]+\)[^_]*_([^(]+)\([^)]+\)/
       );
       if (endStation) {
         // @_ 형태의 prefix 제거 (A_, SH_, 2_ 등)
-        const stationName = endStation[1].replace(/^[A-Z0-9]+_/, "");
-        pathComponents.push(stationName);
+        endStationName = endStation[1].replace(/^[A-Z0-9]+_/, "");
       }
     }
 
-    // 중복 제거: 연속된 같은 역을 제거
-    const uniquePathComponents = pathComponents.filter((station, index) => {
-      return index === 0 || station !== pathComponents[index - 1];
-    });
+    // 상세경로 구성: path_num의 노드 ID를 역명으로 변환
+    let detailedPath = "";
+    if (result.path_num) {
+      const nodeIds = result.path_num
+        .split(", ")
+        .map((id: string) => id.trim())
+        .filter((id: string) => id.length > 0);
+
+      const stationNames = nodeIds.map((nodeId: string) => {
+        // 노드 데이터에서 해당 ID의 역명 찾기
+        const node = nodes.find((n) => n.id === nodeId);
+        if (node) {
+          // 노드 이름에서 @_ 형태의 prefix 제거 (A_, SH_, 2_ 등)
+          const nodeName = node.name || nodeId;
+          return nodeName.replace(/^[A-Z0-9]+_/, "");
+        }
+        return nodeId; // 노드를 찾지 못한 경우 ID 그대로 표시
+      });
+
+      // 연속된 같은 역명 제거 (A역 -> A역 -> B역 -> B역 -> C역 → A역 -> B역 -> C역)
+      const uniqueStationNames = stationNames.filter((station, index) => {
+        return index === 0 || station !== stationNames[index - 1];
+      });
+
+      detailedPath = uniqueStationNames.join(" → ");
+    }
 
     const currentGroupNo =
       result.group_no || pathKeyGroups.get(result.path_key || "") || 0;
@@ -102,12 +103,13 @@ export function processPathKeyResults(
 
     return {
       id: result.id || index,
-      confirmedPath: isFirstInGroup ? result.confirmed_path || "N" : "",
-      // groupNo: currentGroupNo,
+      //   startStation: isFirstInGroup ? startStationName : "",
+      //   endStation: isFirstInGroup ? endStationName : "",
+      startStation: index === 0 ? startStationName : "",
+      endStation: index === 0 ? endStationName : "",
       groupNo: result.group_no || 0,
       groupDisplay: isFirstInGroup ? currentGroupNo : null,
-      mainStations: uniquePathComponents.join(" → "),
-      pathKey: result.path_key || "",
+      detailedPath: detailedPath,
       cnt: isFirstInGroup ? result.cnt || 0 : null,
       isSelected: selectedPaths.some((path) => isSameRoute(path, result)),
       originalData: result,

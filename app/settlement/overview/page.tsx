@@ -139,8 +139,8 @@ export default function TestGridPage() {
       valueFormatter: getNumberFormatter,
     },
     {
-      headerName: "신분당선",
-      field: "신분당선",
+      headerName: "신분당선주식회사",
+      field: "신분당선주식회사",
       cellStyle: getNumberCellStyle,
       valueFormatter: getNumberFormatter,
     },

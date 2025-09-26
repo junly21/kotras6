@@ -6,6 +6,7 @@ function convertAgencyName(agencyName: string): string {
   const nameMapping: Record<string, string> = {
     용인경전철: "용인경량전철",
     신림선: "남서울경전철",
+    신분당선: "신분당선주식회사",
   };
 
   return nameMapping[agencyName] || agencyName;

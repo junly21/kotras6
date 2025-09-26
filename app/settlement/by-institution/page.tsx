@@ -314,7 +314,7 @@ export default function SettlementByInstitutionPage() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-bold">정산결과 기관별 조회</h1>
+      <h1 className="text-2xl font-bold">연락운임 기관별 조회</h1>
 
       {/* ✅ 필터 폼 로딩 상태 표시 */}
       <div className="relative">

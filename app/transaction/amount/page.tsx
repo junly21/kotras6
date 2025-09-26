@@ -185,7 +185,7 @@ export default function TransactionAmountPage() {
         headerName: subway,
         children: [
           {
-            headerName: "총배분금(원)",
+            headerName: "총보유금(원)",
             field: `${subway}_총배분금`,
             minWidth: 120,
             valueFormatter: (params: { value: number | string }) =>
@@ -267,7 +267,7 @@ export default function TransactionAmountPage() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-bold">거래내역 금액 분석</h1>
+      <h1 className="text-2xl font-bold">이용내역 노선별 내역</h1>
 
       {/* ✅ 필터 폼 로딩 상태 표시 */}
       <div className="relative">
@@ -288,7 +288,14 @@ export default function TransactionAmountPage() {
       {/* CSV 내보내기 버튼 */}
       {hasSearched && apiData && apiData.length > 0 && (
         <div className="flex justify-between items-center mb-4">
-          <h3 className="text-lg font-semibold">거래금액 금액 분석 결과조회</h3>
+          <div className="flex items-center gap-4">
+            <h3 className="text-lg font-semibold">
+              이용내역 노선별 내역 결과조회
+            </h3>
+            <span className="text-sm text-gray-500">
+              하기 금액은 정제 이후의 금액이며 28일치 이용 내역입니다.
+            </span>
+          </div>
           <div className="flex items-center gap-4">
             <CsvExportButton
               gridRef={gridRef}

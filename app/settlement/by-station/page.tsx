@@ -254,7 +254,7 @@ export default function SettlementByStationPage() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">역사별 정산결과 조회</h1>
+        <h1 className="text-2xl font-bold">연락운임 역별 조회</h1>
       </div>
 
       {/* 전체 페이지 로딩 스피너 */}

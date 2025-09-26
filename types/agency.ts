@@ -30,7 +30,7 @@ export interface DetailedPermissions {
     overview: boolean; // 정산 결과 - 모든 기관
     byInstitution: boolean; // 기관별 조회 - 모든 기관
     byRoute: boolean; // 노선별 조회 - 대광위 + SERVICE
-    byStation: boolean; // 역사별 조회 - 대광위 + SERVICE
+    byStation: boolean; // 역별 조회 - 대광위 + SERVICE
     byOd: boolean; // OD별 조회 - 대광위 + SERVICE
   };
 
@@ -40,7 +40,7 @@ export interface DetailedPermissions {
     result: boolean; // 정산 결과 - 대광위만
     byInstitution: boolean; // 기관별 조회 - 대광위만
     byRoute: boolean; // 노선별 조회 - 대광위만
-    byStation: boolean; // 역사별 조회 - 대광위만
+    byStation: boolean; // 역별 조회 - 대광위만
     byOd: boolean; // OD별 조회 - 대광위만
   };
 
@@ -50,6 +50,13 @@ export interface DetailedPermissions {
     line: boolean; // 노선도 조회 - 모든 기관
     optimalRoute: boolean; // 최적경로 - 모든 기관
     fileUpload: boolean; // 파일등록 - 대광위만
+  };
+
+  // Route Search 하위 권한
+  routeSearch: {
+    legacy: boolean; // 결과 조회(구) - 대광위만
+    newAll: boolean; // 결과 조회(신-대광위) - 대광위만
+    newOther: boolean; // 결과 조회(신-대광위 외) - 모든 기관
   };
 
   // Settings 하위 권한

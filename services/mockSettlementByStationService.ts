@@ -31,7 +31,7 @@ export class MockSettlementByStationService {
       const result = await response.json();
       return result;
     } catch (error) {
-      console.error("모의정산 역사별 조회 데이터 조회 실패:", error);
+      console.error("모의정산 역별 조회 데이터 조회 실패:", error);
       return {
         success: false,
         error:

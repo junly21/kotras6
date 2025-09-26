@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import { hasDetailedPermission } from "@/utils/agencyPermissions";
 
 export interface MenuItem {
   id: string;
@@ -106,26 +107,56 @@ export const useSidebarStore = create<SidebarState>((set, get) => ({
   },
 }));
 
+// 메뉴 데이터 필터링 함수
+export const getFilteredMenuData = (agencyCode: string | null): MenuItem[] => {
+  if (!agencyCode) return getMenuData();
+  
+  return getMenuData().map(menu => {
+    if (menu.id === "route-search") {
+      // 경로탐색 메뉴의 경우 권한에 따라 하위 메뉴 필터링
+      const filteredChildren = menu.children?.filter(child => {
+        if (child.label === "결과 조회(구)") {
+          return hasDetailedPermission(agencyCode, "routeSearch", "legacy");
+        }
+        if (child.label === "결과 조회(신-대광위)") {
+          return hasDetailedPermission(agencyCode, "routeSearch", "newAll");
+        }
+        if (child.label === "결과 조회(신-대광위 외)") {
+          return hasDetailedPermission(agencyCode, "routeSearch", "newOther");
+        }
+        return true;
+      });
+      
+      return {
+        ...menu,
+        children: filteredChildren
+      };
+    }
+    
+    return menu;
+  });
+};
+
 // 메뉴 데이터 정의
 export const getMenuData = (): MenuItem[] => [
   {
     id: "transaction",
-    label: "거래내역",
+    label: "이용내역",
     icon: "/icon-gnb-transaction.svg",
     children: [
       {
         id: "transaction-analysis",
-        label: "내역 분석",
+        label: "상위 이용구간",
         path: "/transaction/analysis",
       },
       {
         id: "transaction-amount",
-        label: "금액 분석",
+        label: "노선별 내역",
         path: "/transaction/amount",
       },
       {
         id: "transaction-detail",
-        label: "상세 조회",
+        label: "상세 내역",
         path: "/transaction/detail",
       },
     ],
@@ -164,14 +195,24 @@ export const getMenuData = (): MenuItem[] => [
     children: [
       {
         id: "route-search-result",
-        label: "결과 조회",
+        label: "결과 조회(구)",
         path: "/route-search/path-key",
+      },
+      {
+        id: "route-search-result",
+        label: "결과 조회(신-대광위)",
+        path: "/route-search/view1",
+      },
+      {
+        id: "route-search-result",
+        label: "결과 조회(신-대광위 외)",
+        path: "/route-search/view2",
       },
     ],
   },
   {
     id: "settlement",
-    label: "정산결과",
+    label: "연락운임",
     icon: "/icon-gnb-result.svg",
     children: [
       {
@@ -191,7 +232,7 @@ export const getMenuData = (): MenuItem[] => [
       },
       {
         id: "settlement-by-station",
-        label: "역사별 조회",
+        label: "역별 조회",
         path: "/settlement/by-station",
       },
       {
@@ -228,7 +269,7 @@ export const getMenuData = (): MenuItem[] => [
       },
       {
         id: "mock-settlement-by-station",
-        label: "역사별 조회",
+        label: "역별 조회",
         path: "/mock-settlement/by-station",
       },
       {

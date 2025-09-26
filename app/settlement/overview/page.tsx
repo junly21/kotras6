@@ -193,12 +193,12 @@ export default function TestGridPage() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">정산결과</h1>
+        <h1 className="text-2xl font-bold">연락운임 정산결과</h1>
       </div>
 
       {/* 정산결과 그리드 제목 및 버튼 */}
       <div className="flex justify-between items-center mb-4">
-        <h3 className="text-lg font-semibold">정산결과 조회</h3>
+        <h3 className="text-lg font-semibold">연락운임 정산결과 조회</h3>
         <div className="flex items-center gap-4">
           <UnitRadioGroup value={unit} onChange={setUnit} />
           <CsvExportButton

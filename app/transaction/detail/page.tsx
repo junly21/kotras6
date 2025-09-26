@@ -36,16 +36,16 @@ export default function TransactionDetailPage() {
   });
 
   const onSuccess = useCallback((data: TransactionDetailData[]) => {
-    console.log("상세조회 데이터 로드 성공:", data);
+    console.log("상세내역 데이터 로드 성공:", data);
     setToast({
       isVisible: true,
-      message: `상세조회 데이터를 성공적으로 받았습니다. (총 ${data.length}건)`,
+      message: `상세내역 데이터를 성공적으로 받았습니다. (총 ${data.length}건)`,
       type: "success",
     });
   }, []);
 
   const onError = useCallback((error: string) => {
-    console.error("상세조회 데이터 로드 실패:", error);
+    console.error("상세내역 데이터 로드 실패:", error);
     setToast({
       isVisible: true,
       message: `데이터 로드 실패: ${error}`,
@@ -276,7 +276,7 @@ export default function TransactionDetailPage() {
   return (
     <ProtectedRoute requiredPath="/transaction/detail">
       <div className="space-y-6">
-        <h1 className="text-2xl font-bold">거래내역 상세조회</h1>
+        <h1 className="text-2xl font-bold">이용내역 상세내역</h1>
 
         <TransactionDetailFilterForm
           defaultValues={{
@@ -292,7 +292,7 @@ export default function TransactionDetailPage() {
 
         {/* CSV 내보내기 버튼 */}
         <div className="flex justify-between items-center mb-4">
-          <h3 className="text-lg font-semibold">상세조회 결과</h3>
+          <h3 className="text-lg font-semibold">이용내역 상세내역 조회</h3>
           <div className="flex items-center gap-4">
             <CsvExportButton
               gridRef={gridRef}

@@ -198,7 +198,7 @@ export default function MockSettlementByStationPage() {
         ]);
 
         console.log("by-station 모의정산 정보 응답:", mockResponse);
-        console.log("by-station 역사별 조회 응답:", byStationResponse);
+        console.log("by-station 역별 조회 응답:", byStationResponse);
 
         if (mockResponse.success && mockResponse.data) {
           setMockSettlementData(mockResponse.data);
@@ -209,14 +209,11 @@ export default function MockSettlementByStationPage() {
         }
 
         if (byStationResponse.success && byStationResponse.data) {
-          console.log("역사별 조회 데이터 성공:", byStationResponse.data);
+          console.log("역별 조회 데이터 성공:", byStationResponse.data);
           setByStationData(byStationResponse.data);
         } else {
-          console.error(
-            "역사별 조회 데이터 조회 실패:",
-            byStationResponse.error
-          );
-          console.error("역사별 조회 응답 전체:", byStationResponse);
+          console.error("역별 조회 데이터 조회 실패:", byStationResponse.error);
+          console.error("역별 조회 응답 전체:", byStationResponse);
         }
 
         setToast({
@@ -359,7 +356,7 @@ export default function MockSettlementByStationPage() {
     setSelectedSettlement(null);
   }, []);
 
-  // 하단 그리드 컬럼 정의 (역사별 조회 결과) - 동적 그룹핑 컬럼 사용
+  // 하단 그리드 컬럼 정의 (역별 조회 결과) - 동적 그룹핑 컬럼 사용
   const byStationColumnDefs = useMemo(() => {
     try {
       // API 응답에서 선택된 역 이름들을 추출
@@ -468,7 +465,7 @@ export default function MockSettlementByStationPage() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-bold">모의정산 역사별 조회</h1>
+      <h1 className="text-2xl font-bold">모의정산 역별 조회</h1>
 
       <FilterForm<MockSettlementByStationFilters>
         fields={filterConfigWithErrors.map((field) =>
@@ -552,10 +549,10 @@ export default function MockSettlementByStationPage() {
         </div>
       )}
 
-      {/* 하단: 역사별 조회 결과 그리드 */}
+      {/* 하단: 역별 조회 결과 그리드 */}
       <div className="space-y-4">
         <div className="flex justify-between items-center">
-          <h3 className="text-lg font-semibold">역사별 조회 결과</h3>
+          <h3 className="text-lg font-semibold">역별 조회 결과</h3>
           <div className="flex items-center gap-4">
             <button
               onClick={async () => {

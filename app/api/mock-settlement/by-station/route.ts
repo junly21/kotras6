@@ -42,7 +42,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 정산결과 데이터 매핑 (정산결과>역사별 조회와 동일한 구조)
+    // 정산결과 데이터 매핑 (정산결과>역별 조회와 동일한 구조)
     const arrayData = Array.isArray(data) ? data : [data];
 
     const normalized = arrayData.map((item: Record<string, unknown>) => ({
@@ -58,7 +58,7 @@ export async function POST(request: NextRequest) {
       { headers: createCorsHeaders() }
     );
   } catch (error) {
-    console.error("모의정산 역사별 조회 API 오류:", error);
+    console.error("모의정산 역별 조회 API 오류:", error);
     return NextResponse.json(
       {
         success: false,

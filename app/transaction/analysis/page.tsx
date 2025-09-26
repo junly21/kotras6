@@ -82,7 +82,7 @@ export default function TransactionAnalysisPage() {
   const onSuccess = useCallback(() => {
     setToast({
       isVisible: true,
-      message: "거래내역 분석 데이터를 성공적으로 받았습니다.",
+      message: "이용내역 상위 이용구간 데이터를 성공적으로 받았습니다.",
       type: "success",
     });
   }, []);
@@ -183,7 +183,7 @@ export default function TransactionAnalysisPage() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-bold">거래내역 분석</h1>
+      <h1 className="text-2xl font-bold">이용내역 상위 이용구간</h1>
 
       {/* ✅ 필터 폼 로딩 상태 표시 */}
       <div className="relative">
@@ -204,11 +204,11 @@ export default function TransactionAnalysisPage() {
       {/* CSV 내보내기 버튼 */}
       {hasSearched && apiData && apiData.length > 0 && (
         <div className="flex justify-between items-center mb-4">
-          <h3 className="text-lg font-semibold">상위 거래내역 분석결과</h3>
+          <h3 className="text-lg font-semibold">이용내역 상위 이용구간 조회</h3>
           <div className="flex items-center gap-4">
             <CsvExportButton
               gridRef={gridRef}
-              fileName="거래내역_분석_데이터.csv"
+              fileName="이용내역_분석_데이터.csv"
               className="shadow-lg bg-accent-500"
             />
           </div>

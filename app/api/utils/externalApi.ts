@@ -5,12 +5,19 @@ import { NextRequest } from "next/server";
 const isDevelopment = process.env.NODE_ENV === "development";
 
 // 개발 환경: 8080, 5001 포트 / 프로덕션 환경: 28480, 28482 포트
+// export const EXTERNAL_BASE_URL = isDevelopment
+//   ? "http://192.168.111.152:8080/kotras6"
+//   : "http://192.168.110.21:28480/kotras6";
+
+// export const OPTIMAL_ROUTE_BASE_URL = isDevelopment
+//   ? "http://192.168.111.152:5001"
+//   : "http://192.168.110.21:28482";
 export const EXTERNAL_BASE_URL = isDevelopment
-  ? "http://192.168.111.152:8080/kotras6"
+  ? "http://192.168.111.158:8080/kotras6"
   : "http://192.168.110.21:28480/kotras6";
 
 export const OPTIMAL_ROUTE_BASE_URL = isDevelopment
-  ? "http://192.168.111.152:5001"
+  ? "http://192.168.111.158:5001"
   : "http://192.168.110.21:28482";
 
 // 0912 테스트용 포트 번호에 따라 API URL 자동 설정
@@ -191,17 +198,13 @@ export async function callExternalApi(
       // );
       console.log(data);
     } else {
-      // const textData = await response.text();
-      // console.log(
-      //   "외부 API 텍스트 응답 데이터 (처음 500자):",
-      //   textData.substring(0, 500)
-      // );
+      const textData = await response.text();
+      console.log(
+        "외부 API 텍스트 응답 데이터 (처음 500자):",
+        textData.substring(0, 500)
+      );
 
-      data = {
-        type: "html",
-        content: textData.substring(0, 1000),
-        message: "HTML 응답을 받았습니다. JSON 데이터가 아닙니다.",
-      };
+      data = textData; // 텍스트 데이터를 그대로 반환
     }
 
     return { data, contentType };

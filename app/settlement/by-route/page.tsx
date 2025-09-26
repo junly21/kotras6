@@ -129,7 +129,7 @@ export default function SettlementByRoutePage() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-bold">정산결과 노선별 조회</h1>
+      <h1 className="text-2xl font-bold">연락운임 노선별 조회</h1>
 
       <FilterForm<SettlementByRouteFilters>
         fields={settlementByRouteFields}

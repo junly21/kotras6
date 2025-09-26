@@ -51,25 +51,25 @@ export function createPathKeyColDefs(): ColDef<ViewGridData>[] {
         fontWeight: "bold",
       },
     },
-    {
-      headerName: "그룹",
-      resizable: false,
-      field: "groupDisplay",
-      width: 110,
-      sortable: false, // 정렬 비활성화
-      filter: false, // 필터 비활성화
-      cellStyle: {
-        fontWeight: "bold",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        height: "100%",
-      },
-      valueFormatter: (params: { value: string | number | null }) => {
-        // null 값은 빈 문자열로 표시
-        return params.value !== null ? String(params.value) : "";
-      },
-    },
+    // {
+    //   headerName: "그룹",
+    //   resizable: false,
+    //   field: "groupDisplay",
+    //   width: 110,
+    //   sortable: false, // 정렬 비활성화
+    //   filter: false, // 필터 비활성화
+    //   cellStyle: {
+    //     fontWeight: "bold",
+    //     display: "flex",
+    //     alignItems: "center",
+    //     justifyContent: "center",
+    //     height: "100%",
+    //   },
+    //   valueFormatter: (params: { value: string | number | null }) => {
+    //     // null 값은 빈 문자열로 표시
+    //     return params.value !== null ? String(params.value) : "";
+    //   },
+    // },
     {
       headerName: "상세경로",
       resizable: true,
@@ -100,23 +100,23 @@ export function createPathKeyColDefs(): ColDef<ViewGridData>[] {
         );
       },
     },
-    {
-      headerName: "내역(건)",
-      resizable: false,
-      field: "cnt",
-      width: 140,
-      sortable: false,
-      cellStyle: {
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        height: "100%",
-        fontWeight: "bold",
-      },
-      cellRenderer: (params: { value: number | null }) => {
-        if (params.value === null) return ""; // null 값일 때는 아무것도 표시하지 않음
-        return params.value || 0;
-      },
-    },
+    // {
+    //   headerName: "내역(건)",
+    //   resizable: false,
+    //   field: "cnt",
+    //   width: 140,
+    //   sortable: false,
+    //   cellStyle: {
+    //     display: "flex",
+    //     alignItems: "center",
+    //     justifyContent: "center",
+    //     height: "100%",
+    //     fontWeight: "bold",
+    //   },
+    //   cellRenderer: (params: { value: number | null }) => {
+    //     if (params.value === null) return ""; // null 값일 때는 아무것도 표시하지 않음
+    //     return params.value || 0;
+    //   },
+    // },
   ];
 }

@@ -74,41 +74,41 @@ export function createPathKeyColDefs(
         height: "100%",
       },
     },
-    {
-      headerName: "확정경로",
-      resizable: false,
-      field: "confirmedPath",
-      width: 120,
-      sortable: false,
-      cellRenderer: (params: { value: string }) => {
-        const value = params.value;
-        if (!value) return ""; // 빈 값일 때는 아무것도 표시하지 않음
-        if (value === "Y") {
-          return React.createElement(
-            "span",
-            {
-              style: { color: "#000000", fontWeight: "bold" },
-            },
-            "포함"
-          );
-        } else if (value === "N") {
-          return React.createElement(
-            "span",
-            {
-              style: { color: "#000000", fontWeight: "bold" },
-            },
-            "미포함"
-          );
-        }
-        return value;
-      },
-      cellStyle: {
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        height: "100%",
-      },
-    },
+    // {
+    //   headerName: "확정경로",
+    //   resizable: false,
+    //   field: "confirmedPath",
+    //   width: 120,
+    //   sortable: false,
+    //   cellRenderer: (params: { value: string }) => {
+    //     const value = params.value;
+    //     if (!value) return ""; // 빈 값일 때는 아무것도 표시하지 않음
+    //     if (value === "Y") {
+    //       return React.createElement(
+    //         "span",
+    //         {
+    //           style: { color: "#000000", fontWeight: "bold" },
+    //         },
+    //         "포함"
+    //       );
+    //     } else if (value === "N") {
+    //       return React.createElement(
+    //         "span",
+    //         {
+    //           style: { color: "#000000", fontWeight: "bold" },
+    //         },
+    //         "미포함"
+    //       );
+    //     }
+    //     return value;
+    //   },
+    //   cellStyle: {
+    //     display: "flex",
+    //     alignItems: "center",
+    //     justifyContent: "center",
+    //     height: "100%",
+    //   },
+    // },
     {
       headerName: "그룹",
       resizable: false,
@@ -192,24 +192,24 @@ export function createPathKeyColDefs(
         );
       },
     },
-    {
-      headerName: "내역(건)",
-      resizable: false,
-      field: "cnt",
-      width: 140,
-      sortable: false,
-      cellStyle: {
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        height: "100%",
-        fontWeight: "bold",
-      },
-      cellRenderer: (params: { value: number | null }) => {
-        if (params.value === null) return ""; // null 값일 때는 아무것도 표시하지 않음
-        return params.value || 0;
-      },
-    },
+    // {
+    //   headerName: "내역(건)",
+    //   resizable: false,
+    //   field: "cnt",
+    //   width: 140,
+    //   sortable: false,
+    //   cellStyle: {
+    //     display: "flex",
+    //     alignItems: "center",
+    //     justifyContent: "center",
+    //     height: "100%",
+    //     fontWeight: "bold",
+    //   },
+    //   cellRenderer: (params: { value: number | null }) => {
+    //     if (params.value === null) return ""; // null 값일 때는 아무것도 표시하지 않음
+    //     return params.value || 0;
+    //   },
+    // },
     {
       headerName: "상세정보",
       resizable: false,

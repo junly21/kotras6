@@ -52,13 +52,6 @@ export interface DetailedPermissions {
     fileUpload: boolean; // 파일등록 - 대광위만
   };
 
-  // Route Search 하위 권한
-  routeSearch: {
-    legacy: boolean; // 결과 조회(구) - 대광위만
-    newAll: boolean; // 결과 조회(신-대광위) - 대광위만
-    newOther: boolean; // 결과 조회(신-대광위 외) - 모든 기관
-  };
-
   // Settings 하위 권한
   settings: {
     commonCodes: boolean; // 공통코드 관리 - 대광위만

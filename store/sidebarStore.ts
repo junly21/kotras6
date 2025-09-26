@@ -1,5 +1,4 @@
 import { create } from "zustand";
-import { hasDetailedPermission } from "@/utils/agencyPermissions";
 
 export interface MenuItem {
   id: string;
@@ -107,36 +106,6 @@ export const useSidebarStore = create<SidebarState>((set, get) => ({
   },
 }));
 
-// 메뉴 데이터 필터링 함수
-export const getFilteredMenuData = (agencyCode: string | null): MenuItem[] => {
-  if (!agencyCode) return getMenuData();
-  
-  return getMenuData().map(menu => {
-    if (menu.id === "route-search") {
-      // 경로탐색 메뉴의 경우 권한에 따라 하위 메뉴 필터링
-      const filteredChildren = menu.children?.filter(child => {
-        if (child.label === "결과 조회(구)") {
-          return hasDetailedPermission(agencyCode, "routeSearch", "legacy");
-        }
-        if (child.label === "결과 조회(신-대광위)") {
-          return hasDetailedPermission(agencyCode, "routeSearch", "newAll");
-        }
-        if (child.label === "결과 조회(신-대광위 외)") {
-          return hasDetailedPermission(agencyCode, "routeSearch", "newOther");
-        }
-        return true;
-      });
-      
-      return {
-        ...menu,
-        children: filteredChildren
-      };
-    }
-    
-    return menu;
-  });
-};
-
 // 메뉴 데이터 정의
 export const getMenuData = (): MenuItem[] => [
   {
@@ -199,12 +168,12 @@ export const getMenuData = (): MenuItem[] => [
         path: "/route-search/path-key",
       },
       {
-        id: "route-search-result",
+        id: "route-search-view1",
         label: "결과 조회(신-대광위)",
         path: "/route-search/view1",
       },
       {
-        id: "route-search-result",
+        id: "route-search-view2",
         label: "결과 조회(신-대광위 외)",
         path: "/route-search/view2",
       },

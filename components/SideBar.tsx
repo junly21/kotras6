@@ -2,7 +2,7 @@
 
 import React, { useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { useSidebarStore, getMenuData, getFilteredMenuData, MenuItem } from "../store/sidebarStore";
+import { useSidebarStore, getMenuData, MenuItem } from "../store/sidebarStore";
 import { useSessionContext } from "../contexts/SessionContext";
 import { hasPathPermission } from "../utils/agencyPermissions";
 

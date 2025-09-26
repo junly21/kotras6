@@ -92,7 +92,7 @@ export function getDetailedPermissions(
           overview: true, // 정산 결과 - 모든 기관
           byInstitution: true, // 기관별 조회 - 모든 기관
           byRoute: true, // 노선별 조회 - 대광위 + SERVICE
-          byStation: true, // 역사별 조회 - 대광위 + SERVICE
+          byStation: true, // 역별 조회 - 대광위 + SERVICE
           byOd: true, // OD별 조회 - 대광위만
         },
         mockSettlement: {
@@ -100,7 +100,7 @@ export function getDetailedPermissions(
           result: true, // 정산 결과 - 대광위만
           byInstitution: true, // 기관별 조회 - 대광위만
           byRoute: true, // 노선별 조회 - 대광위만
-          byStation: true, // 역사별 조회 - 대광위만
+          byStation: true, // 역별 조회 - 대광위만
           byOd: true, // OD별 조회 - 대광위만
         },
         network: {
@@ -127,7 +127,7 @@ export function getDetailedPermissions(
           overview: true, // 정산 결과 - 모든 기관
           byInstitution: true, // 기관별 조회 - 모든 기관
           byRoute: true, // 노선별 조회 - 대광위 + SERVICE
-          byStation: true, // 역사별 조회 - 대광위 + SERVICE
+          byStation: true, // 역별 조회 - 대광위 + SERVICE
           byOd: false, // OD별 조회 - 대광위만
         },
         mockSettlement: {
@@ -135,7 +135,7 @@ export function getDetailedPermissions(
           result: false, // 정산 결과 - 대광위만
           byInstitution: false, // 기관별 조회 - 대광위만
           byRoute: false, // 노선별 조회 - 대광위만
-          byStation: false, // 역사별 조회 - 대광위만
+          byStation: false, // 역별 조회 - 대광위만
           byOd: false, // OD별 조회 - 대광위만
         },
         network: {
@@ -162,7 +162,7 @@ export function getDetailedPermissions(
           overview: true, // 정산 결과 - 모든 기관
           byInstitution: true, // 기관별 조회 - 모든 기관
           byRoute: false, // 노선별 조회 - 대광위 + SERVICE
-          byStation: false, // 역사별 조회 - 대광위 + SERVICE
+          byStation: false, // 역별 조회 - 대광위 + SERVICE
           byOd: false, // OD별 조회 - 대광위만
         },
         mockSettlement: {
@@ -170,7 +170,7 @@ export function getDetailedPermissions(
           result: false, // 정산 결과 - 대광위만
           byInstitution: false, // 기관별 조회 - 대광위만
           byRoute: false, // 노선별 조회 - 대광위만
-          byStation: false, // 역사별 조회 - 대광위만
+          byStation: false, // 역별 조회 - 대광위만
           byOd: false, // OD별 조회 - 대광위만
         },
         network: {
@@ -286,6 +286,20 @@ export function hasPathPermission(agencyCode: string, path: string): boolean {
   }
   if (path.includes("/mock-settlement/by-od")) {
     return hasDetailedPermission(agencyCode, "mockSettlement", "byOd");
+  }
+
+  // Route Search 권한 체크
+  if (path.includes("/route-search/path-key")) {
+    // 결과 조회(구) - 대광위만 접근 가능
+    return agencyCode === "ALL";
+  }
+  if (path.includes("/route-search/view1")) {
+    // 결과 조회(신-대광위) - 대광위만 접근 가능
+    return agencyCode === "ALL";
+  }
+  if (path.includes("/route-search/view2")) {
+    // 결과 조회(신-대광위 외) - 모든 기관 접근 가능
+    return true;
   }
 
   // Network 권한 체크

@@ -49,6 +49,9 @@ export default function PathKeyPage() {
   const [filters, setFilters] = useState<RouteSearchFilter>(defaultValues);
   const [selectedRouteForDetail, setSelectedRouteForDetail] =
     useState<RouteSearchResult | null>(null);
+  const [selectedRow, setSelectedRow] = useState<RouteSearchResult | null>(
+    null
+  );
   const [arrivalStationOptions, setArrivalStationOptions] = useState<
     StationOption[]
   >([]);
@@ -120,6 +123,7 @@ export default function PathKeyPage() {
 
       handleSearch(searchData);
       setSelectedRouteForDetail(null); // 검색 시 선택된 경로 초기화
+      setSelectedRow(null); // 검색 시 선택된 행 초기화
       setHasSearched(true);
     },
     [handleSearch, filters]
@@ -128,6 +132,7 @@ export default function PathKeyPage() {
   // 행 클릭 핸들러 - 상세 정보 패널에 표시
   const handleRowClick = useCallback((route: RouteSearchResult) => {
     setSelectedRouteForDetail(route);
+    setSelectedRow(route); // 선택된 행 상태 업데이트
   }, []);
 
   // 행 클릭 핸들러 - useCallback으로 최적화
@@ -179,7 +184,10 @@ export default function PathKeyPage() {
 
   // 행 스타일 적용 함수
   const getRowStyle = useCallback(
-    (params: { rowIndex: number; data: { groupNo: number } }) => {
+    (params: {
+      rowIndex: number;
+      data: { groupNo: number; originalData: RouteSearchResult };
+    }) => {
       const style: React.CSSProperties = {};
 
       // 그룹별 배경색 적용
@@ -188,9 +196,20 @@ export default function PathKeyPage() {
         style.backgroundColor = groupColor;
       }
 
+      // 선택된 행 하이라이트 - view1과 동일한 id 기준으로 비교
+      if (
+        params.data &&
+        selectedRow &&
+        params.data.originalData.id === selectedRow.id
+      ) {
+        style.backgroundColor = "#e3f2fd"; // 선택된 행은 파란색 배경
+        style.border = "3px solid #1976d2"; // 파란색 테두리
+        style.borderRadius = "4px"; // 모서리 둥글게
+      }
+
       return style;
     },
-    [getGroupBackgroundColor]
+    [selectedRow, getGroupBackgroundColor]
   );
 
   // 그리드 컬럼 정의 - useMemo로 최적화

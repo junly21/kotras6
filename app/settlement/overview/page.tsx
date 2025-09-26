@@ -65,7 +65,7 @@ export default function TestGridPage() {
   // 숫자 컬럼용 동적 스타일 함수
   const getNumberCellStyle = (params: { value: number }) => {
     const num = Number(params.value);
-    const color = num > 0 ? "#dc2626" : num < 0 ? "#2563eb" : "#000000";
+    const color = num > 0 ? "#2563eb" : num < 0 ? "#dc2626" : "#000000";
     return {
       textAlign: "right" as const,
       color: color,

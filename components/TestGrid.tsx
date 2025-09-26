@@ -86,9 +86,9 @@ export default function TestGrid({
                     ...baseStyle,
                     color:
                       params.value > 0
-                        ? "#dc2626"
-                        : params.value < 0
                         ? "#2563eb"
+                        : params.value < 0
+                        ? "#dc2626"
                         : "#000000",
                     fontWeight: "bold",
                   };

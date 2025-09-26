@@ -81,8 +81,8 @@ export default function Home() {
 
         // 2. 첫 번째 기관으로 노선도 데이터 요청 (NetworkMapService 사용)
         const firstAgency = agencies[0];
-        const agencyLabel =
-          firstAgency.label === "전체" ? "ALL" : firstAgency.label;
+        const agencyValue2 = firstAgency.value2 || firstAgency.label || "";
+        const agencyLabel = agencyValue2 === "전체" ? "ALL" : agencyValue2;
 
         // line/page.tsx와 동일한 방식으로 NetworkMapService 사용
         const response = await NetworkMapService.getMapData({

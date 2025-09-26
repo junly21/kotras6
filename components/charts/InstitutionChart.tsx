@@ -37,6 +37,10 @@ export function InstitutionChart({ data }: Props) {
         name: item.대상기관,
         value,
         type,
+        // 툴팁에서 원본 데이터 사용을 위해 추가
+        originalPayment: payment,
+        originalReceipt: receipt,
+        originalDifference: Number(item.차액),
       };
     });
   }, [data]);
@@ -111,7 +115,7 @@ export function InstitutionChart({ data }: Props) {
         <BarChart
           data={chartData}
           layout="vertical"
-          margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+          margin={{ top: 20, right: 30, left: 40, bottom: 5 }}>
           <CartesianGrid
             strokeDasharray="3 3"
             stroke="#e0e0e0"
@@ -163,15 +167,33 @@ export function InstitutionChart({ data }: Props) {
           <YAxis
             type="category"
             dataKey="name"
-            width={100}
+            width={120}
             tick={{ fontSize: 12 }}
+            interval={0}
+            angle={0}
+            textAnchor="end"
+            height={undefined}
           />
           <Tooltip
             formatter={(
               v: number,
               n: string,
-              p: { payload?: { type?: "지급" | "수급" } }
-            ) => [formatValue(Math.abs(v)), p?.payload?.type ?? ""]}
+              p: {
+                payload?: {
+                  type?: "지급" | "수급";
+                  originalPayment?: number;
+                  originalReceipt?: number;
+                  originalDifference?: number;
+                };
+              }
+            ) => {
+              // 차액만 정수로 표시 (단위변환 없이)
+              const difference = Math.round(
+                p?.payload?.originalDifference || 0
+              );
+
+              return [`${difference.toLocaleString()}(원)`, "정산 차액"];
+            }}
             labelFormatter={(label) => `기관: ${label}`}
           />
           <Bar
@@ -183,7 +205,7 @@ export function InstitutionChart({ data }: Props) {
             {chartData.map((entry, idx) => (
               <Cell
                 key={`cell-${idx}`}
-                fill={entry.value < 0 ? "#3b82f6" : "#ef4444"}
+                fill={entry.value < 0 ? "#ef4444" : "#3b82f6"}
               />
             ))}
           </Bar>

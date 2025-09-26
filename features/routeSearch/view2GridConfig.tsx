@@ -74,9 +74,9 @@ export function createPathKeyColDefs(): ColDef<ViewGridData>[] {
       headerName: "상세경로",
       resizable: true,
       field: "detailedPath",
-      width: 500,
-      flex: 3,
+      minWidth: 300,
       sortable: false,
+      suppressSizeToFit: false,
       cellStyle: {
         display: "flex",
         alignItems: "center",
@@ -88,7 +88,6 @@ export function createPathKeyColDefs(): ColDef<ViewGridData>[] {
         return React.createElement(
           "div",
           {
-            className: "truncate",
             style: {
               whiteSpace: "nowrap",
               overflow: "hidden",

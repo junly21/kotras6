@@ -64,32 +64,39 @@ export function processViewResults(
       }
     }
 
-    // 상세경로 구성: path_num의 노드 ID를 역명으로 변환
+    // 상세경로 구성: path_nm을 화살표로 연결하여 표시
     let detailedPath = "";
-    if (result.path_num) {
-      const nodeIds = result.path_num
-        .split(", ")
-        .map((id: string) => id.trim())
-        .filter((id: string) => id.length > 0);
-
-      const stationNames = nodeIds.map((nodeId: string) => {
-        // 노드 데이터에서 해당 ID의 역명 찾기
-        const node = nodes.find((n) => n.id === nodeId);
-        if (node) {
-          // 노드 이름에서 @_ 형태의 prefix 제거 (A_, SH_, 2_ 등)
-          const nodeName = node.name || nodeId;
-          return nodeName.replace(/^[A-Z0-9]+_/, "");
-        }
-        return nodeId; // 노드를 찾지 못한 경우 ID 그대로 표시
-      });
-
-      // 연속된 같은 역명 제거 (A역 -> A역 -> B역 -> B역 -> C역 → A역 -> B역 -> C역)
-      const uniqueStationNames = stationNames.filter((station, index) => {
-        return index === 0 || station !== stationNames[index - 1];
-      });
-
-      detailedPath = uniqueStationNames.join(" → ");
+    if (result.path_nm) {
+      // path_nm을 화살표로 연결하여 표시 (RouteDetailPanel의 formatPath와 동일)
+      const stations = result.path_nm
+        .split(",")
+        .map((station: string) => station.trim());
+      detailedPath = stations.join(" → ");
     }
+
+    // 기존 가공 로직 주석처리 (정규식 매칭 및 중복제거)
+    // const nodeIds = result.path_num
+    //   .split(", ")
+    //   .map((id: string) => id.trim())
+    //   .filter((id: string) => id.length > 0);
+
+    // const stationNames = nodeIds.map((nodeId: string) => {
+    //   // 노드 데이터에서 해당 ID의 역명 찾기
+    //   const node = nodes.find((n) => n.id === nodeId);
+    //   if (node) {
+    //     // 노드 이름에서 @_ 형태의 prefix 제거 (A_, SH_, 2_ 등)
+    //     const nodeName = node.name || nodeId;
+    //     return nodeName.replace(/^[A-Z0-9]+_/, "");
+    //   }
+    //   return nodeId; // 노드를 찾지 못한 경우 ID 그대로 표시
+    // });
+
+    // // 연속된 같은 역명 제거 (A역 -> A역 -> B역 -> B역 -> C역 → A역 -> B역 -> C역)
+    // const uniqueStationNames = stationNames.filter((station, index) => {
+    //   return index === 0 || station !== stationNames[index - 1];
+    // });
+
+    // detailedPath = uniqueStationNames.join(" → ");
 
     const currentGroupNo =
       result.group_no || pathKeyGroups.get(result.path_key || "") || 0;

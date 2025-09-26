@@ -140,16 +140,6 @@ export default function PathKeyPage() {
     [handleRowClick]
   );
 
-  // 그리드 준비 완료 핸들러 - 상세경로 컬럼 자동 크기 조정
-  const onGridReady = useCallback(() => {
-    // 상세경로 컬럼을 데이터 내용에 맞게 자동 크기 조정
-    if (gridRef.current?.api) {
-      setTimeout(() => {
-        gridRef.current?.api.autoSizeColumns(["detailedPath"]);
-      }, 100);
-    }
-  }, []);
-
   // 네트워크 데이터 로드 (상세경로에서 역명 변환용)
   const { nodes } = useNetworkData();
 
@@ -329,7 +319,6 @@ export default function PathKeyPage() {
               height={gridHeight}
               gridOptions={{
                 onRowClicked: onRowClicked,
-                onGridReady: onGridReady,
                 suppressScrollOnNewData: true, // 데이터 변경 시 스크롤 위치 유지
                 getRowStyle: getRowStyle, // 그룹별 배경색 적용
                 // 셀 병합 기능 활성화

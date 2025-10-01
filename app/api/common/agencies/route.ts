@@ -6,24 +6,12 @@ export async function GET(request: NextRequest) {
   try {
     console.log("공통 기관 목록 API 호출됨");
 
-    // ext_sid 쿠키 확인
+    // ext_sid 쿠키 확인 (로깅용)
     const extSid = request.cookies.get("ext_sid")?.value;
     console.log("쿠키에서 가져온 ext_sid:", extSid);
 
-    // ✅ 세션이 없으면 에러 반환 (Race Condition 방지)
     if (!extSid) {
-      console.error(
-        "❌ ext_sid 쿠키가 없습니다. 세션이 아직 초기화되지 않았습니다."
-      );
-      return NextResponse.json(
-        {
-          error: "세션이 초기화되지 않았습니다. 잠시 후 다시 시도해주세요.",
-        },
-        {
-          status: 400,
-          headers: createCorsHeaders(),
-        }
-      );
+      console.warn("ext_sid 쿠키가 없습니다. 세션을 먼저 생성해주세요.");
     }
 
     // sessionId를 직접 전달하여 세션 쿠키 설정

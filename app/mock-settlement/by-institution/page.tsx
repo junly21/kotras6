@@ -2,6 +2,7 @@
 import TestGrid from "@/components/TestGrid";
 import Spinner from "@/components/Spinner";
 import CsvExportButton from "@/components/CsvExportButton";
+import ProtectedRoute from "@/components/ProtectedRoute";
 import { FilterForm } from "@/components/ui/FilterForm";
 import { Toast } from "@/components/ui/Toast";
 import { AllCommunityModule, ModuleRegistry } from "ag-grid-community";

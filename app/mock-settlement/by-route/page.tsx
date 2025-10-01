@@ -6,6 +6,7 @@ import { Toast } from "@/components/ui/Toast";
 import TestGrid from "@/components/TestGrid";
 import Spinner from "@/components/Spinner";
 import CsvExportButton from "@/components/CsvExportButton";
+import ProtectedRoute from "@/components/ProtectedRoute";
 import { MockSettlementByRouteService } from "@/services/mockSettlementByRouteService";
 import { MockSettlementResultService } from "@/services/mockSettlementResultService";
 import { MockSettlementControlService } from "@/services/mockSettlementControlService";

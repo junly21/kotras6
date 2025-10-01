@@ -3,6 +3,7 @@
 import { useState, useCallback, useMemo, useRef, useEffect } from "react";
 import { z } from "zod";
 import { FilterForm } from "@/components/ui/FilterForm";
+import ProtectedRoute from "@/components/ProtectedRoute";
 import { Toast } from "@/components/ui/Toast";
 import TestGrid from "@/components/TestGrid";
 import Spinner from "@/components/Spinner";

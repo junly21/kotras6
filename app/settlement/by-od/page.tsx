@@ -24,6 +24,7 @@ import { useNetworkData } from "@/hooks/useNetworkData";
 import { useDestinationOptions } from "@/hooks/useDestinationOptions";
 import type { NetworkMapHighlight, Node, Link } from "@/types/network";
 import { AllCommunityModule, ModuleRegistry } from "ag-grid-community";
+import ProtectedRoute from "@/components/ProtectedRoute";
 
 // Register all Community features
 ModuleRegistry.registerModules([AllCommunityModule]);
@@ -439,191 +440,195 @@ export default function SettlementByOdPage() {
   );
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">연락운임 OD별 조회</h1>
-      </div>
-
-      {/* 전체 페이지 로딩 스피너 */}
-      {isLoading && (
-        <div className="absolute inset-0 flex items-center justify-center bg-white/80 z-50">
-          <div className="text-center">
-            <Spinner />
-            <p className="mt-4 text-gray-600">정산 데이터를 조회하는 중...</p>
-          </div>
+    <ProtectedRoute requiredPath="/settlement/by-od">
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
+          <h1 className="text-2xl font-bold">연락운임 OD별 조회</h1>
         </div>
-      )}
 
-      {/* 에러 메시지 */}
-      {error && (
-        <div className="bg-red-50 border border-red-200 rounded-md p-4">
-          <p className="text-red-600">{error}</p>
-        </div>
-      )}
-
-      {/* 네트워크 맵 에러 메시지 */}
-      {mapError && (
-        <div className="bg-red-50 border border-red-200 rounded-md p-4">
-          <p className="text-red-600">노선도 로드 실패: {mapError}</p>
-        </div>
-      )}
-
-      {/* 필터 폼 */}
-      <FilterForm
-        fields={dynamicFilterConfig}
-        defaultValues={defaultValues}
-        schema={settlementByOdSchema}
-        values={filters}
-        onChange={handleFilterChange}
-        onSearch={handleSearchSubmit}
-      />
-
-      {/* 결과 영역 */}
-      {!hasSearched && (
-        <div className="bg-gray-50 flex flex-col justify-center items-center h-[590px] border-2 border-dashed border-gray-300 rounded-lg p-16">
-          <div className="text-center text-gray-500">
-            <p className="text-lg font-medium">조회 결과</p>
-            <p className="text-sm">
-              출발역과 도착역을 선택하고 조회 버튼을 누르면 결과가 표시됩니다.
-            </p>
-          </div>
-        </div>
-      )}
-
-      {hasSearched && (
-        <div className="space-y-4">
-          {!isLoading && processedResults.length > 0 && (
-            <>
-              <div className="flex justify-between items-center">
-                <h3 className="text-lg font-semibold">OD별 정산결과</h3>
-              </div>
-              <div className="bg-white border border-gray-200 rounded-[24px] p-4">
-                <div style={{ height: `${gridHeight}px` }}>
-                  <TestGrid
-                    rowData={processedResults}
-                    columnDefs={columnDefs}
-                    gridRef={gridRef}
-                    gridOptions={{
-                      headerHeight: 40,
-                      suppressCellFocus: true,
-                      suppressMovableColumns: true,
-                      suppressMenuHide: true,
-                      rowSelection: {
-                        enableClickSelection: false,
-                      },
-                      defaultColDef: {
-                        sortable: false,
-                        filter: false,
-                        resizable: false,
-                        suppressMovable: true,
-                      },
-                      onRowClicked: (event: {
-                        data: SettlementByOdData;
-                        rowIndex: number;
-                      }) => {
-                        // 소계 행(path_detail이 "-")은 클릭 비활성화
-                        if (event.data.path_detail === "-") {
-                          return;
-                        }
-                        handleRowClick(event.data);
-                      },
-                      getRowStyle: getRowStyle, // 행 클릭 시 스타일 적용
-                    }}
-                  />
-                </div>
-              </div>
-            </>
-          )}
-
-          {!isLoading && searchResults.length === 0 && (
-            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-              <p className="text-yellow-800">조회된 데이터가 없습니다.</p>
+        {/* 전체 페이지 로딩 스피너 */}
+        {isLoading && (
+          <div className="absolute inset-0 flex items-center justify-center bg-white/80 z-50">
+            <div className="text-center">
+              <Spinner />
+              <p className="mt-4 text-gray-600">정산 데이터를 조회하는 중...</p>
             </div>
-          )}
+          </div>
+        )}
 
-          {/* 경유지 상세정보 영역 - 데이터가 있고 선택된 행이 있을 때만 표시 */}
-          {searchResults.length > 0 &&
-            selectedRow &&
-            selectedRow.path_detail !== "-" && (
+        {/* 에러 메시지 */}
+        {error && (
+          <div className="bg-red-50 border border-red-200 rounded-md p-4">
+            <p className="text-red-600">{error}</p>
+          </div>
+        )}
+
+        {/* 네트워크 맵 에러 메시지 */}
+        {mapError && (
+          <div className="bg-red-50 border border-red-200 rounded-md p-4">
+            <p className="text-red-600">노선도 로드 실패: {mapError}</p>
+          </div>
+        )}
+
+        {/* 필터 폼 */}
+        <FilterForm
+          fields={dynamicFilterConfig}
+          defaultValues={defaultValues}
+          schema={settlementByOdSchema}
+          values={filters}
+          onChange={handleFilterChange}
+          onSearch={handleSearchSubmit}
+        />
+
+        {/* 결과 영역 */}
+        {!hasSearched && (
+          <div className="bg-gray-50 flex flex-col justify-center items-center h-[590px] border-2 border-dashed border-gray-300 rounded-lg p-16">
+            <div className="text-center text-gray-500">
+              <p className="text-lg font-medium">조회 결과</p>
+              <p className="text-sm">
+                출발역과 도착역을 선택하고 조회 버튼을 누르면 결과가 표시됩니다.
+              </p>
+            </div>
+          </div>
+        )}
+
+        {hasSearched && (
+          <div className="space-y-4">
+            {!isLoading && processedResults.length > 0 && (
               <>
-                <h3 className="text-lg font-semibold mb-4">경유지 상세정보</h3>
+                <div className="flex justify-between items-center">
+                  <h3 className="text-lg font-semibold">OD별 정산결과</h3>
+                </div>
                 <div className="bg-white border border-gray-200 rounded-[24px] p-4">
-                  {isDetailLoading ? (
-                    <div className="flex items-center justify-center h-32">
-                      <Spinner />
-                      <p className="ml-2 text-gray-600">
-                        상세정보를 조회하는 중...
-                      </p>
-                    </div>
-                  ) : (
-                    <div className="h-[300px]">
-                      <TestGrid
-                        rowData={detailData}
-                        columnDefs={detailColumnDefs}
-                        gridRef={detailGridRef}
-                        gridOptions={{
-                          headerHeight: 40,
-                          suppressCellFocus: true,
-                          suppressMovableColumns: true,
-                          suppressMenuHide: true,
-                          rowSelection: {
-                            enableClickSelection: false,
-                          },
-                          defaultColDef: {
-                            sortable: false,
-                            filter: false,
-                            resizable: false,
-                            suppressMovable: true,
-                          },
-                          getRowStyle: getDetailRowStyle, // 마지막 행 스타일 적용
-                        }}
-                      />
-                    </div>
-                  )}
+                  <div style={{ height: `${gridHeight}px` }}>
+                    <TestGrid
+                      rowData={processedResults}
+                      columnDefs={columnDefs}
+                      gridRef={gridRef}
+                      gridOptions={{
+                        headerHeight: 40,
+                        suppressCellFocus: true,
+                        suppressMovableColumns: true,
+                        suppressMenuHide: true,
+                        rowSelection: {
+                          enableClickSelection: false,
+                        },
+                        defaultColDef: {
+                          sortable: false,
+                          filter: false,
+                          resizable: false,
+                          suppressMovable: true,
+                        },
+                        onRowClicked: (event: {
+                          data: SettlementByOdData;
+                          rowIndex: number;
+                        }) => {
+                          // 소계 행(path_detail이 "-")은 클릭 비활성화
+                          if (event.data.path_detail === "-") {
+                            return;
+                          }
+                          handleRowClick(event.data);
+                        },
+                        getRowStyle: getRowStyle, // 행 클릭 시 스타일 적용
+                      }}
+                    />
+                  </div>
                 </div>
               </>
             )}
 
-          {/* 네트워크 맵 영역 - 데이터가 있고 선택된 행이 있을 때만 표시 */}
-          {searchResults.length > 0 &&
-            selectedRow &&
-            selectedRow.path_detail !== "-" &&
-            !isDetailLoading && (
-              <>
-                <h3 className="text-lg font-semibold mb-4">경로 시각화</h3>
-                <div className="bg-white border border-gray-200 rounded-[24px] p-4">
-                  {isMapLoading ? (
-                    <div className="flex items-center justify-center h-64">
-                      <Spinner />
-                      <p className="ml-2 text-gray-600">
-                        노선도를 불러오는 중...
-                      </p>
-                    </div>
-                  ) : (
-                    <div className="h-[450px]">
-                      <NetworkMap
-                        nodes={nodes}
-                        links={links}
-                        svgText={svgText}
-                        config={{
-                          width: "100%",
-                          height: "100%",
-                          showZoomControls: true,
-                          showTooltips: true,
-                          showLegend: true,
-                        }}
-                        highlights={pathHighlights}
-                        tooltips={customTooltips}
-                        startStationId={filters.STN_ID1}
-                        endStationId={filters.STN_ID2}
-                      />
-                    </div>
-                  )}
-                </div>
-              </>
+            {!isLoading && searchResults.length === 0 && (
+              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                <p className="text-yellow-800">조회된 데이터가 없습니다.</p>
+              </div>
             )}
-        </div>
-      )}
-    </div>
+
+            {/* 경유지 상세정보 영역 - 데이터가 있고 선택된 행이 있을 때만 표시 */}
+            {searchResults.length > 0 &&
+              selectedRow &&
+              selectedRow.path_detail !== "-" && (
+                <>
+                  <h3 className="text-lg font-semibold mb-4">
+                    경유지 상세정보
+                  </h3>
+                  <div className="bg-white border border-gray-200 rounded-[24px] p-4">
+                    {isDetailLoading ? (
+                      <div className="flex items-center justify-center h-32">
+                        <Spinner />
+                        <p className="ml-2 text-gray-600">
+                          상세정보를 조회하는 중...
+                        </p>
+                      </div>
+                    ) : (
+                      <div className="h-[300px]">
+                        <TestGrid
+                          rowData={detailData}
+                          columnDefs={detailColumnDefs}
+                          gridRef={detailGridRef}
+                          gridOptions={{
+                            headerHeight: 40,
+                            suppressCellFocus: true,
+                            suppressMovableColumns: true,
+                            suppressMenuHide: true,
+                            rowSelection: {
+                              enableClickSelection: false,
+                            },
+                            defaultColDef: {
+                              sortable: false,
+                              filter: false,
+                              resizable: false,
+                              suppressMovable: true,
+                            },
+                            getRowStyle: getDetailRowStyle, // 마지막 행 스타일 적용
+                          }}
+                        />
+                      </div>
+                    )}
+                  </div>
+                </>
+              )}
+
+            {/* 네트워크 맵 영역 - 데이터가 있고 선택된 행이 있을 때만 표시 */}
+            {searchResults.length > 0 &&
+              selectedRow &&
+              selectedRow.path_detail !== "-" &&
+              !isDetailLoading && (
+                <>
+                  <h3 className="text-lg font-semibold mb-4">경로 시각화</h3>
+                  <div className="bg-white border border-gray-200 rounded-[24px] p-4">
+                    {isMapLoading ? (
+                      <div className="flex items-center justify-center h-64">
+                        <Spinner />
+                        <p className="ml-2 text-gray-600">
+                          노선도를 불러오는 중...
+                        </p>
+                      </div>
+                    ) : (
+                      <div className="h-[450px]">
+                        <NetworkMap
+                          nodes={nodes}
+                          links={links}
+                          svgText={svgText}
+                          config={{
+                            width: "100%",
+                            height: "100%",
+                            showZoomControls: true,
+                            showTooltips: true,
+                            showLegend: true,
+                          }}
+                          highlights={pathHighlights}
+                          tooltips={customTooltips}
+                          startStationId={filters.STN_ID1}
+                          endStationId={filters.STN_ID2}
+                        />
+                      </div>
+                    )}
+                  </div>
+                </>
+              )}
+          </div>
+        )}
+      </div>
+    </ProtectedRoute>
   );
 }

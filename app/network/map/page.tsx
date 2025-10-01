@@ -13,6 +13,7 @@ import { NetworkMapService } from "@/services/networkMapService";
 import { NetworkMapFilters } from "@/types/networkMap";
 import type { NodeData, LineData } from "@/types/networkMap";
 import { FilterForm } from "@/components/ui/FilterForm";
+import ProtectedRoute from "@/components/ProtectedRoute";
 import { useNetworkFilters } from "@/hooks/useNetworkFilters";
 import {
   networkMapSchema,
@@ -207,48 +208,50 @@ export default function NetworkMapPage() {
   }, []);
 
   return (
-    <div className="space-y-6">
-      <h1 className="text-2xl font-bold">네트워크 지도 조회</h1>
+    <ProtectedRoute requiredPath="/network/map">
+      <div className="space-y-6">
+        <h1 className="text-2xl font-bold">네트워크 지도 조회</h1>
 
-      {/* 공통 FilterForm 적용 */}
-      <FilterForm<NetworkMapFilters>
-        fields={networkMapFilterConfig.map((field, index) => ({
-          ...field,
-          options:
-            index === 0
-              ? networkOptions
-              : index === 1
-              ? agencyOptions
-              : lineOptions,
-          disabled:
-            index === 1
-              ? !filters.network
-              : index === 2
-              ? !filters.network || !filters.agency
-              : false,
-          type: index === 2 && isAllAgency ? "combobox" : field.type,
-        }))}
-        defaultValues={{ network: "", agency: "", line: "" }}
-        schema={networkMapSchema}
-        values={filters}
-        onChange={(values) => {
-          handleFilterChange(values);
-        }}
-        onSearch={handleSearchWithToast}
-      />
+        {/* 공통 FilterForm 적용 */}
+        <FilterForm<NetworkMapFilters>
+          fields={networkMapFilterConfig.map((field, index) => ({
+            ...field,
+            options:
+              index === 0
+                ? networkOptions
+                : index === 1
+                ? agencyOptions
+                : lineOptions,
+            disabled:
+              index === 1
+                ? !filters.network
+                : index === 2
+                ? !filters.network || !filters.agency
+                : false,
+            type: index === 2 && isAllAgency ? "combobox" : field.type,
+          }))}
+          defaultValues={{ network: "", agency: "", line: "" }}
+          schema={networkMapSchema}
+          values={filters}
+          onChange={(values) => {
+            handleFilterChange(values);
+          }}
+          onSearch={handleSearchWithToast}
+        />
 
-      {/* 지도 영역 */}
-      <div className="relative h-[590px] overflow-hidden rounded-[24px] border border-gray-200">
-        <div id="network-map" className="h-full w-full" />
+        {/* 지도 영역 */}
+        <div className="relative h-[590px] overflow-hidden rounded-[24px] border border-gray-200">
+          <div id="network-map" className="h-full w-full" />
+        </div>
+
+        {/* 토스트 알림 */}
+        <Toast
+          isVisible={toast.isVisible}
+          message={toast.message}
+          type={toast.type}
+          onClose={() => setToast((prev) => ({ ...prev, isVisible: false }))}
+        />
       </div>
-
-      {/* 토스트 알림 */}
-      <Toast
-        isVisible={toast.isVisible}
-        message={toast.message}
-        type={toast.type}
-        onClose={() => setToast((prev) => ({ ...prev, isVisible: false }))}
-      />
-    </div>
+    </ProtectedRoute>
   );
 }

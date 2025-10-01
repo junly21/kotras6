@@ -2,6 +2,7 @@
 import TestGrid from "@/components/TestGrid";
 import Spinner from "@/components/Spinner";
 import CsvExportButton from "@/components/CsvExportButton";
+import ProtectedRoute from "@/components/ProtectedRoute";
 import { FilterForm } from "@/components/ui/FilterForm";
 import { Toast } from "@/components/ui/Toast";
 import { AllCommunityModule, ModuleRegistry } from "ag-grid-community";
@@ -313,100 +314,104 @@ export default function SettlementByInstitutionPage() {
   ];
 
   return (
-    <div className="space-y-6">
-      <h1 className="text-2xl font-bold">연락운임 기관별 조회</h1>
+    <ProtectedRoute requiredPath="/settlement/by-institution">
+      <div className="space-y-6">
+        <h1 className="text-2xl font-bold">연락운임 기관별 조회</h1>
 
-      {/* ✅ 필터 폼 로딩 상태 표시 */}
-      <div className="relative">
-        {isFilterLoading && (
-          <div className="absolute inset-0 flex items-center justify-center bg-white/80 z-10 rounded-xl">
-            <Spinner />
-          </div>
-        )}
-        <FilterForm<SettlementByInstitutionFilters>
-          fields={settlementByInstitutionFields}
-          defaultValues={filters}
-          values={filters}
-          schema={settlementByInstitutionSchema}
-          onSearch={handleSearch}
-        />
-      </div>
+        {/* ✅ 필터 폼 로딩 상태 표시 */}
+        <div className="relative">
+          {isFilterLoading && (
+            <div className="absolute inset-0 flex items-center justify-center bg-white/80 z-10 rounded-xl">
+              <Spinner />
+            </div>
+          )}
+          <FilterForm<SettlementByInstitutionFilters>
+            fields={settlementByInstitutionFields}
+            defaultValues={filters}
+            values={filters}
+            schema={settlementByInstitutionSchema}
+            onSearch={handleSearch}
+          />
+        </div>
 
-      {/* 좌우 그리드 레이아웃 */}
-      <div className="grid grid-cols-2 gap-6 h-[650px]">
-        {/* 왼쪽: 정산결과 그리드 */}
-        <div className="flex flex-col h-full">
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-lg font-semibold">기관별 조회 결과</h2>
-            <div className="flex items-center gap-4">
-              <UnitRadioGroup value={unit} onChange={setUnit} />
-              <CsvExportButton
+        {/* 좌우 그리드 레이아웃 */}
+        <div className="grid grid-cols-2 gap-6 h-[650px]">
+          {/* 왼쪽: 정산결과 그리드 */}
+          <div className="flex flex-col h-full">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-lg font-semibold">기관별 조회 결과</h2>
+              <div className="flex items-center gap-4">
+                <UnitRadioGroup value={unit} onChange={setUnit} />
+                <CsvExportButton
+                  gridRef={gridRef}
+                  fileName="settlement_by_institution_data.csv"
+                  className="shadow-lg bg-accent-500"
+                />
+              </div>
+            </div>
+            <div className="relative flex-1 h-full">
+              {hasSearched && loading && (
+                <div className="absolute inset-0 flex items-center justify-center bg-white/80 z-10">
+                  <Spinner />
+                </div>
+              )}
+              <TestGrid
+                rowData={hasSearched ? rowData ?? [] : []} // ✅ 원단위 변환된 데이터 사용
+                columnDefs={colDefs}
                 gridRef={gridRef}
-                fileName="settlement_by_institution_data.csv"
-                className="shadow-lg bg-accent-500"
+                gridOptions={{
+                  suppressColumnResize: false,
+                  suppressRowClickSelection: true,
+                  suppressCellFocus: true,
+                  headerHeight: 50,
+                  rowHeight: 35,
+                  suppressScrollOnNewData: true,
+                  pinnedBottomRowData: pinnedBottomRowData,
+                }}
               />
             </div>
           </div>
-          <div className="relative flex-1 h-full">
-            {hasSearched && loading && (
-              <div className="absolute inset-0 flex items-center justify-center bg-white/80 z-10">
-                <Spinner />
-              </div>
-            )}
-            <TestGrid
-              rowData={hasSearched ? rowData ?? [] : []} // ✅ 원단위 변환된 데이터 사용
-              columnDefs={colDefs}
-              gridRef={gridRef}
-              gridOptions={{
-                suppressColumnResize: false,
-                suppressRowClickSelection: true,
-                suppressCellFocus: true,
-                headerHeight: 50,
-                rowHeight: 35,
-                suppressScrollOnNewData: true,
-                pinnedBottomRowData: pinnedBottomRowData,
-              }}
-            />
+
+          {/* 오른쪽: 차트 영역 */}
+          <div className="flex flex-col h-full">
+            <div className="mb-4 h-[40px]"></div>
+            <div className="relative flex-1 h-full">
+              {!hasSearched ? (
+                <div className="h-full flex items-center justify-center bg-gray-50 border-2 border-dashed border-gray-300 rounded">
+                  <div className="text-center text-gray-500">
+                    <p className="text-lg font-medium">
+                      조회 버튼을 눌러주세요
+                    </p>
+                    <p className="text-sm">기관을 선택하고 조회하면</p>
+                    <p className="text-sm">
+                      해당 기관의 정산결과 차트가 표시됩니다.
+                    </p>
+                  </div>
+                </div>
+              ) : hasSearched && apiData && apiData.length > 0 ? (
+                <div className="h-full w-full">
+                  <InstitutionChart data={apiData || []} />
+                </div>
+              ) : (
+                <div className="h-full flex items-center justify-center bg-gray-50 border-2 border-dashed border-gray-300 rounded">
+                  <div className="text-center text-gray-500">
+                    <p className="text-lg font-medium">데이터가 없습니다</p>
+                    <p className="text-sm">조회된 데이터가 없습니다.</p>
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
         </div>
 
-        {/* 오른쪽: 차트 영역 */}
-        <div className="flex flex-col h-full">
-          <div className="mb-4 h-[40px]"></div>
-          <div className="relative flex-1 h-full">
-            {!hasSearched ? (
-              <div className="h-full flex items-center justify-center bg-gray-50 border-2 border-dashed border-gray-300 rounded">
-                <div className="text-center text-gray-500">
-                  <p className="text-lg font-medium">조회 버튼을 눌러주세요</p>
-                  <p className="text-sm">기관을 선택하고 조회하면</p>
-                  <p className="text-sm">
-                    해당 기관의 정산결과 차트가 표시됩니다.
-                  </p>
-                </div>
-              </div>
-            ) : hasSearched && apiData && apiData.length > 0 ? (
-              <div className="h-full w-full">
-                <InstitutionChart data={apiData || []} />
-              </div>
-            ) : (
-              <div className="h-full flex items-center justify-center bg-gray-50 border-2 border-dashed border-gray-300 rounded">
-                <div className="text-center text-gray-500">
-                  <p className="text-lg font-medium">데이터가 없습니다</p>
-                  <p className="text-sm">조회된 데이터가 없습니다.</p>
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
+        {/* 토스트 알림 */}
+        <Toast
+          isVisible={toast.isVisible}
+          message={toast.message}
+          type={toast.type}
+          onClose={() => setToast((prev) => ({ ...prev, isVisible: false }))}
+        />
       </div>
-
-      {/* 토스트 알림 */}
-      <Toast
-        isVisible={toast.isVisible}
-        message={toast.message}
-        type={toast.type}
-        onClose={() => setToast((prev) => ({ ...prev, isVisible: false }))}
-      />
-    </div>
+    </ProtectedRoute>
   );
 }

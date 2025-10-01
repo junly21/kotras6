@@ -3,6 +3,7 @@
 import { useState, useCallback, useMemo, useRef } from "react";
 import { z } from "zod";
 import { FilterForm } from "@/components/ui/FilterForm";
+import ProtectedRoute from "@/components/ProtectedRoute";
 import { settlementByStationFilterConfig } from "@/features/settlementByStation/filterConfig";
 import {
   SettlementByStationFilters,
@@ -252,131 +253,133 @@ export default function SettlementByStationPage() {
   }, [validationErrors]);
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">연락운임 역별 조회</h1>
-      </div>
-
-      {/* 전체 페이지 로딩 스피너 */}
-      {isLoading && (
-        <div className="absolute inset-0 flex items-center justify-center bg-white/80 z-50">
-          <div className="text-center">
-            <Spinner />
-            <p className="mt-4 text-gray-600">정산 데이터를 조회하는 중...</p>
-          </div>
+    <ProtectedRoute requiredPath="/settlement/by-station">
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
+          <h1 className="text-2xl font-bold">연락운임 역별 조회</h1>
         </div>
-      )}
 
-      {/* 에러 메시지 */}
-      {error && (
-        <div className="bg-red-50 border border-red-200 rounded-md p-4">
-          <p className="text-red-600">{error}</p>
-        </div>
-      )}
-
-      {/* 필터 폼 */}
-      <FilterForm
-        fields={filterConfigWithErrors}
-        defaultValues={defaultValues}
-        schema={settlementByStationSchema}
-        values={filters}
-        onChange={handleFilterChange}
-        onSearch={handleSearchSubmit}
-      />
-
-      {/* 결과 영역 */}
-      {!hasSearched && (
-        <div className="bg-gray-50 flex flex-col justify-center items-center h-[590px] border-2 border-dashed border-gray-300 rounded-lg p-16">
-          <div className="text-center text-gray-500">
-            <p className="text-lg font-medium">조회 결과</p>
-            <p className="text-sm">
-              역을 선택하고 조회 버튼을 누르면 결과가 표시됩니다.
-            </p>
-          </div>
-        </div>
-      )}
-
-      {hasSearched && (
-        <div className="space-y-4">
-          {!isLoading && searchResults.length > 0 && (
-            <>
-              <div className="flex justify-between items-center">
-                <h3 className="text-lg font-semibold">역사별 정산결과</h3>
-                {/* CSV Export 버튼 */}
-                {hasSearched && searchResults.length > 0 && (
-                  <button
-                    onClick={async () => {
-                      try {
-                        const response = await fetch(
-                          "/api/settlement/by-station/download",
-                          {
-                            method: "POST",
-                            headers: {
-                              "Content-Type": "application/json",
-                            },
-                            body: JSON.stringify({
-                              NET_DT: "LATEST",
-                            }), // 빈 객체 전송
-                          }
-                        );
-
-                        if (response.ok) {
-                          const blob = await response.blob();
-                          const url = window.URL.createObjectURL(blob);
-                          const a = document.createElement("a");
-                          a.href = url;
-                          a.download = "역사별_정산결과.csv";
-                          document.body.appendChild(a);
-                          a.click();
-                          window.URL.revokeObjectURL(url);
-                          document.body.removeChild(a);
-                        } else {
-                          console.error("CSV 다운로드 실패");
-                        }
-                      } catch (error) {
-                        console.error("CSV 다운로드 중 오류:", error);
-                      }
-                    }}
-                    className="bg-primary font-bold hover:bg-secondary-600 text-white px-4 py-2 rounded-lg transition-colors duration-200 cursor-pointer">
-                    CSV 다운로드
-                  </button>
-                )}
-              </div>
-              <div className="bg-white border border-gray-200 rounded-[24px] p-4">
-                <div className="h-[500px]">
-                  <TestGrid
-                    rowData={processedRowData}
-                    columnDefs={columnDefs}
-                    gridRef={gridRef}
-                    gridOptions={{
-                      headerHeight: 40, // 그룹핑된 헤더를 위한 높이 조정
-                      suppressCellFocus: true,
-                      suppressMovableColumns: true, // 컬럼 드래그 앤 드롭 비활성화
-                      suppressMenuHide: true, // 컬럼 메뉴 숨김 비활성화
-                      rowSelection: {
-                        enableClickSelection: false, // 행 클릭 선택 비활성화
-                      },
-                      defaultColDef: {
-                        sortable: false,
-                        filter: false,
-                        resizable: false,
-                        suppressMovable: true, // 개별 컬럼 이동 비활성화
-                      },
-                      pinnedBottomRowData: footerRowData, // 푸터 행 데이터 추가
-                    }}
-                  />
-                </div>
-              </div>
-            </>
-          )}
-
-          {!isLoading && searchResults.length === 0 && (
-            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-              <p className="text-yellow-800">조회된 데이터가 없습니다.</p>
+        {/* 전체 페이지 로딩 스피너 */}
+        {isLoading && (
+          <div className="absolute inset-0 flex items-center justify-center bg-white/80 z-50">
+            <div className="text-center">
+              <Spinner />
+              <p className="mt-4 text-gray-600">정산 데이터를 조회하는 중...</p>
             </div>
-          )}
-        </div>
-      )}
-    </div>
+          </div>
+        )}
+
+        {/* 에러 메시지 */}
+        {error && (
+          <div className="bg-red-50 border border-red-200 rounded-md p-4">
+            <p className="text-red-600">{error}</p>
+          </div>
+        )}
+
+        {/* 필터 폼 */}
+        <FilterForm
+          fields={filterConfigWithErrors}
+          defaultValues={defaultValues}
+          schema={settlementByStationSchema}
+          values={filters}
+          onChange={handleFilterChange}
+          onSearch={handleSearchSubmit}
+        />
+
+        {/* 결과 영역 */}
+        {!hasSearched && (
+          <div className="bg-gray-50 flex flex-col justify-center items-center h-[590px] border-2 border-dashed border-gray-300 rounded-lg p-16">
+            <div className="text-center text-gray-500">
+              <p className="text-lg font-medium">조회 결과</p>
+              <p className="text-sm">
+                역을 선택하고 조회 버튼을 누르면 결과가 표시됩니다.
+              </p>
+            </div>
+          </div>
+        )}
+
+        {hasSearched && (
+          <div className="space-y-4">
+            {!isLoading && searchResults.length > 0 && (
+              <>
+                <div className="flex justify-between items-center">
+                  <h3 className="text-lg font-semibold">역사별 정산결과</h3>
+                  {/* CSV Export 버튼 */}
+                  {hasSearched && searchResults.length > 0 && (
+                    <button
+                      onClick={async () => {
+                        try {
+                          const response = await fetch(
+                            "/api/settlement/by-station/download",
+                            {
+                              method: "POST",
+                              headers: {
+                                "Content-Type": "application/json",
+                              },
+                              body: JSON.stringify({
+                                NET_DT: "LATEST",
+                              }), // 빈 객체 전송
+                            }
+                          );
+
+                          if (response.ok) {
+                            const blob = await response.blob();
+                            const url = window.URL.createObjectURL(blob);
+                            const a = document.createElement("a");
+                            a.href = url;
+                            a.download = "역사별_정산결과.csv";
+                            document.body.appendChild(a);
+                            a.click();
+                            window.URL.revokeObjectURL(url);
+                            document.body.removeChild(a);
+                          } else {
+                            console.error("CSV 다운로드 실패");
+                          }
+                        } catch (error) {
+                          console.error("CSV 다운로드 중 오류:", error);
+                        }
+                      }}
+                      className="bg-primary font-bold hover:bg-secondary-600 text-white px-4 py-2 rounded-lg transition-colors duration-200 cursor-pointer">
+                      CSV 다운로드
+                    </button>
+                  )}
+                </div>
+                <div className="bg-white border border-gray-200 rounded-[24px] p-4">
+                  <div className="h-[500px]">
+                    <TestGrid
+                      rowData={processedRowData}
+                      columnDefs={columnDefs}
+                      gridRef={gridRef}
+                      gridOptions={{
+                        headerHeight: 40, // 그룹핑된 헤더를 위한 높이 조정
+                        suppressCellFocus: true,
+                        suppressMovableColumns: true, // 컬럼 드래그 앤 드롭 비활성화
+                        suppressMenuHide: true, // 컬럼 메뉴 숨김 비활성화
+                        rowSelection: {
+                          enableClickSelection: false, // 행 클릭 선택 비활성화
+                        },
+                        defaultColDef: {
+                          sortable: false,
+                          filter: false,
+                          resizable: false,
+                          suppressMovable: true, // 개별 컬럼 이동 비활성화
+                        },
+                        pinnedBottomRowData: footerRowData, // 푸터 행 데이터 추가
+                      }}
+                    />
+                  </div>
+                </div>
+              </>
+            )}
+
+            {!isLoading && searchResults.length === 0 && (
+              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                <p className="text-yellow-800">조회된 데이터가 없습니다.</p>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+    </ProtectedRoute>
   );
 }

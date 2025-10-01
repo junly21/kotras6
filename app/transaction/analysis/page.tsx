@@ -2,6 +2,7 @@
 import TestGrid from "@/components/TestGrid";
 import Spinner from "@/components/Spinner";
 import CsvExportButton from "@/components/CsvExportButton";
+import ProtectedRoute from "@/components/ProtectedRoute";
 import { FilterForm } from "@/components/ui/FilterForm";
 import { Toast } from "@/components/ui/Toast";
 import { AllCommunityModule, ModuleRegistry } from "ag-grid-community";
@@ -182,70 +183,74 @@ export default function TransactionAnalysisPage() {
   );
 
   return (
-    <div className="space-y-6">
-      <h1 className="text-2xl font-bold">이용내역 상위 이용구간</h1>
+    <ProtectedRoute requiredPath="/transaction/analysis">
+      <div className="space-y-6">
+        <h1 className="text-2xl font-bold">이용내역 상위 이용구간</h1>
 
-      {/* ✅ 필터 폼 로딩 상태 표시 */}
-      <div className="relative">
-        {isAgencyLoading && (
-          <div className="absolute inset-0 flex items-center justify-center bg-white/80 z-10 rounded-xl">
-            <Spinner />
-          </div>
-        )}
-        <FilterForm<TransactionAnalysisFilters>
-          fields={transactionAnalysisFields}
-          defaultValues={filters}
-          values={filters}
-          schema={transactionAnalysisSchema}
-          onSearch={handleSearch}
-        />
-      </div>
-
-      {/* CSV 내보내기 버튼 */}
-      {hasSearched && apiData && apiData.length > 0 && (
-        <div className="flex justify-between items-center mb-4">
-          <h3 className="text-lg font-semibold">이용내역 상위 이용구간 조회</h3>
-          <div className="flex items-center gap-4">
-            <CsvExportButton
-              gridRef={gridRef}
-              fileName="이용내역_분석_데이터.csv"
-              className="shadow-lg bg-accent-500"
-            />
-          </div>
+        {/* ✅ 필터 폼 로딩 상태 표시 */}
+        <div className="relative">
+          {isAgencyLoading && (
+            <div className="absolute inset-0 flex items-center justify-center bg-white/80 z-10 rounded-xl">
+              <Spinner />
+            </div>
+          )}
+          <FilterForm<TransactionAnalysisFilters>
+            fields={transactionAnalysisFields}
+            defaultValues={filters}
+            values={filters}
+            schema={transactionAnalysisSchema}
+            onSearch={handleSearch}
+          />
         </div>
-      )}
 
-      {/* 그리드 */}
-      <div className="relative h-[calc(100vh-370px)] overflow-y-auto">
-        {hasSearched && loading && (
-          <div className="absolute inset-0 flex items-center justify-center bg-white/80 z-10">
-            <Spinner />
+        {/* CSV 내보내기 버튼 */}
+        {hasSearched && apiData && apiData.length > 0 && (
+          <div className="flex justify-between items-center mb-4">
+            <h3 className="text-lg font-semibold">
+              이용내역 상위 이용구간 조회
+            </h3>
+            <div className="flex items-center gap-4">
+              <CsvExportButton
+                gridRef={gridRef}
+                fileName="이용내역_분석_데이터.csv"
+                className="shadow-lg bg-accent-500"
+              />
+            </div>
           </div>
         )}
-        <TestGrid
-          rowData={hasSearched ? apiData ?? [] : []} // ✅ null 대신 빈 배열
-          columnDefs={colDefs}
-          gridRef={gridRef}
-          gridOptions={{
-            suppressColumnResize: false,
-            suppressRowClickSelection: true,
-            suppressCellFocus: true,
-            headerHeight: 50,
-            rowHeight: 35,
-            suppressScrollOnNewData: true,
-            pinnedBottomRowData: pinnedBottomRowData,
-            getRowStyle: getRowStyle,
-          }}
+
+        {/* 그리드 */}
+        <div className="relative h-[calc(100vh-370px)] overflow-y-auto">
+          {hasSearched && loading && (
+            <div className="absolute inset-0 flex items-center justify-center bg-white/80 z-10">
+              <Spinner />
+            </div>
+          )}
+          <TestGrid
+            rowData={hasSearched ? apiData ?? [] : []} // ✅ null 대신 빈 배열
+            columnDefs={colDefs}
+            gridRef={gridRef}
+            gridOptions={{
+              suppressColumnResize: false,
+              suppressRowClickSelection: true,
+              suppressCellFocus: true,
+              headerHeight: 50,
+              rowHeight: 35,
+              suppressScrollOnNewData: true,
+              pinnedBottomRowData: pinnedBottomRowData,
+              getRowStyle: getRowStyle,
+            }}
+          />
+        </div>
+
+        {/* 토스트 알림 */}
+        <Toast
+          isVisible={toast.isVisible}
+          message={toast.message}
+          type={toast.type}
+          onClose={() => setToast((prev) => ({ ...prev, isVisible: false }))}
         />
       </div>
-
-      {/* 토스트 알림 */}
-      <Toast
-        isVisible={toast.isVisible}
-        message={toast.message}
-        type={toast.type}
-        onClose={() => setToast((prev) => ({ ...prev, isVisible: false }))}
-      />
-    </div>
+    </ProtectedRoute>
   );
 }

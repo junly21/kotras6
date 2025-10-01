@@ -3,6 +3,7 @@
 import React, { useState, useMemo, useCallback, useEffect } from "react";
 import { NetworkMap } from "@/components/NetworkMap/NetworkMap";
 import { FilterForm } from "@/components/ui/FilterForm";
+import ProtectedRoute from "@/components/ProtectedRoute";
 import { useNetworkData } from "@/hooks/useNetworkData";
 import { useApi } from "@/hooks/useApi";
 import { NetworkMapService } from "@/services/networkMapService";
@@ -182,61 +183,63 @@ export default function NetworkLinePage() {
   }
 
   return (
-    <div className="space-y-6">
-      <h1 className="text-2xl font-bold">네트워크 노선도 조회</h1>
+    <ProtectedRoute requiredPath="/network/line">
+      <div className="space-y-6">
+        <h1 className="text-2xl font-bold">네트워크 노선도 조회</h1>
 
-      {/* FilterForm 적용 */}
-      <FilterForm<NetworkMapFilters>
-        fields={[
-          {
-            name: "network",
-            label: "네트워크명",
-            type: "select",
-            options: networkOptions,
-            required: true,
-          },
-          {
-            name: "agency",
-            label: "기관명",
-            type: "select",
-            options: agencyOptions,
-            required: true,
-            disabled: !filters.network,
-          },
-          {
-            name: "line",
-            label: "노선",
-            type: isAllAgency ? "combobox" : "select",
-            options: lineOptions,
-            required: true,
-            disabled: !filters.network || !filters.agency,
-          },
-        ]}
-        defaultValues={{ network: "", agency: "", line: "" }}
-        values={filters}
-        onChange={handleFilterChangeWithLine}
-        onSearch={handleSearchWithLine}
-      />
+        {/* FilterForm 적용 */}
+        <FilterForm<NetworkMapFilters>
+          fields={[
+            {
+              name: "network",
+              label: "네트워크명",
+              type: "select",
+              options: networkOptions,
+              required: true,
+            },
+            {
+              name: "agency",
+              label: "기관명",
+              type: "select",
+              options: agencyOptions,
+              required: true,
+              disabled: !filters.network,
+            },
+            {
+              name: "line",
+              label: "노선",
+              type: isAllAgency ? "combobox" : "select",
+              options: lineOptions,
+              required: true,
+              disabled: !filters.network || !filters.agency,
+            },
+          ]}
+          defaultValues={{ network: "", agency: "", line: "" }}
+          values={filters}
+          onChange={handleFilterChangeWithLine}
+          onSearch={handleSearchWithLine}
+        />
 
-      <div className="flex gap-6">
-        <div className="flex-1 h-[calc(100vh-300px)] border rounded-[24px] p-4 bg-white">
-          {isLoading ? (
-            <div className="flex flex-col items-center justify-center h-64 text-gray-500 space-y-4">
-              <Spinner size="lg" />
-              <p>노선도를 불러오는 중...</p>
-            </div>
-          ) : (
-            <NetworkMap
-              nodes={defaultNodes}
-              links={defaultLinks}
-              svgText={svgText}
-              config={mapConfig}
-              highlights={highlights}
-              apiStationNumbers={apiStationNumbers}
-            />
-          )}
+        <div className="flex gap-6">
+          <div className="flex-1 h-[calc(100vh-300px)] border rounded-[24px] p-4 bg-white">
+            {isLoading ? (
+              <div className="flex flex-col items-center justify-center h-64 text-gray-500 space-y-4">
+                <Spinner size="lg" />
+                <p>노선도를 불러오는 중...</p>
+              </div>
+            ) : (
+              <NetworkMap
+                nodes={defaultNodes}
+                links={defaultLinks}
+                svgText={svgText}
+                config={mapConfig}
+                highlights={highlights}
+                apiStationNumbers={apiStationNumbers}
+              />
+            )}
+          </div>
         </div>
       </div>
-    </div>
+    </ProtectedRoute>
   );
 }

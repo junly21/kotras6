@@ -2,6 +2,7 @@
 import TestGrid from "@/components/TestGrid";
 import Spinner from "@/components/Spinner";
 import CsvExportButton from "@/components/CsvExportButton";
+import ProtectedRoute from "@/components/ProtectedRoute";
 import { Toast } from "@/components/ui/Toast";
 import {
   AllCommunityModule,
@@ -191,49 +192,51 @@ export default function TestGridPage() {
   const rowData = useUnitConversion(apiData, unit);
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">연락운임 정산결과</h1>
-      </div>
+    <ProtectedRoute requiredPath="/settlement/overview">
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
+          <h1 className="text-2xl font-bold">연락운임 정산결과</h1>
+        </div>
 
-      {/* 정산결과 그리드 제목 및 버튼 */}
-      <div className="flex justify-between items-center mb-4">
-        <h3 className="text-lg font-semibold">연락운임 정산결과 조회</h3>
-        <div className="flex items-center gap-4">
-          <UnitRadioGroup value={unit} onChange={setUnit} />
-          <CsvExportButton
+        {/* 정산결과 그리드 제목 및 버튼 */}
+        <div className="flex justify-between items-center mb-4">
+          <h3 className="text-lg font-semibold">연락운임 정산결과 조회</h3>
+          <div className="flex items-center gap-4">
+            <UnitRadioGroup value={unit} onChange={setUnit} />
+            <CsvExportButton
+              gridRef={gridRef}
+              fileName="pay_recv_data.csv"
+              className="shadow-lg bg-accent-500"
+            />
+          </div>
+        </div>
+
+        <div className="relative">
+          {loading && (
+            <div className="absolute inset-0 flex items-center justify-center bg-white/80 z-10">
+              <Spinner />
+            </div>
+          )}
+          <TestGrid
+            rowData={loading ? null : rowData}
+            columnDefs={colDefs}
             gridRef={gridRef}
-            fileName="pay_recv_data.csv"
-            className="shadow-lg bg-accent-500"
+            height={680}
+            enableNumberColoring={true}
+            gridOptions={{
+              rowHeight: 44,
+            }}
           />
         </div>
-      </div>
 
-      <div className="relative">
-        {loading && (
-          <div className="absolute inset-0 flex items-center justify-center bg-white/80 z-10">
-            <Spinner />
-          </div>
-        )}
-        <TestGrid
-          rowData={loading ? null : rowData}
-          columnDefs={colDefs}
-          gridRef={gridRef}
-          height={680}
-          enableNumberColoring={true}
-          gridOptions={{
-            rowHeight: 44,
-          }}
+        {/* 토스트 알림 */}
+        <Toast
+          isVisible={toast.isVisible}
+          message={toast.message}
+          type={toast.type}
+          onClose={() => setToast((prev) => ({ ...prev, isVisible: false }))}
         />
       </div>
-
-      {/* 토스트 알림 */}
-      <Toast
-        isVisible={toast.isVisible}
-        message={toast.message}
-        type={toast.type}
-        onClose={() => setToast((prev) => ({ ...prev, isVisible: false }))}
-      />
-    </div>
+    </ProtectedRoute>
   );
 }

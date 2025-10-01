@@ -3,6 +3,7 @@
 import { useState, useMemo, useRef, useCallback } from "react";
 import { z } from "zod";
 import { FilterForm } from "@/components/ui/FilterForm";
+import ProtectedRoute from "@/components/ProtectedRoute";
 import { routeSearchFilterConfig } from "@/features/routeSearch/filterConfig";
 import { createPathKeyColDefs } from "@/features/routeSearch/view2GridConfig";
 import { processView2Results } from "@/features/routeSearch/view2GridDataProcessor";
@@ -266,128 +267,130 @@ export default function PathKeyPage() {
   const hasError = searchError;
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">경로탐색 결과조회</h1>
-      </div>
-
-      {/* 전체 페이지 로딩 스피너 */}
-      {isLoading && (
-        <div className="absolute inset-0 flex items-center justify-center bg-white/80 z-50">
-          <div className="text-center">
-            <Spinner />
-            <p className="mt-4 text-gray-600">경로를 탐색하는 중...</p>
-          </div>
+    <ProtectedRoute requiredPath="/route-search/view2">
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
+          <h1 className="text-2xl font-bold">경로탐색 결과조회</h1>
         </div>
-      )}
 
-      {/* 에러 메시지 */}
-      {hasError && (
-        <div className="bg-red-50 border border-red-200 rounded-md p-4">
-          <p className="text-red-600">{searchError}</p>
-        </div>
-      )}
-
-      {/* 필터 폼 */}
-      <FilterForm
-        fields={dynamicFilterConfig}
-        defaultValues={defaultValues}
-        schema={routeSearchSchema}
-        values={filters}
-        onChange={handleFilterChange}
-        onSearch={handleSearchSubmit}
-      />
-
-      {/* 결과 그리드 */}
-      <div className="space-y-4">
-        {!hasSearched ? (
-          // 조회 전 안내 메시지
-          <div className="bg-blue-50 flex flex-col justify-center items-center border h-[590px] border-blue-200 rounded-[24px] p-8 text-center">
-            <div className="text-blue-600 mb-2">
-              <svg
-                className="w-12 h-12 mx-auto mb-4"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24">
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                />
-              </svg>
+        {/* 전체 페이지 로딩 스피너 */}
+        {isLoading && (
+          <div className="absolute inset-0 flex items-center justify-center bg-white/80 z-50">
+            <div className="text-center">
+              <Spinner />
+              <p className="mt-4 text-gray-600">경로를 탐색하는 중...</p>
             </div>
-            <h2 className="text-xl font-semibold text-blue-800 mb-2">
-              경로 탐색
-            </h2>
-            <p className="text-blue-600">
-              네트워크를 선택한 후, 출발역과 도착역을 선택하여 &quot;조회&quot;
-              버튼을 클릭해주세요.
-            </p>
           </div>
-        ) : processedResults.length > 0 ? (
-          // 검색 결과가 있는 경우
-          <>
-            <h2 className="text-xl font-semibold">
-              탐색 결과 ({processedResults.length}개)
-            </h2>
-            <TestGrid
-              rowData={processedResults}
-              columnDefs={colDefs}
-              gridRef={gridRef}
-              height={gridHeight}
-              gridOptions={{
-                onRowClicked: onRowClicked,
-                suppressScrollOnNewData: true, // 데이터 변경 시 스크롤 위치 유지
-                getRowStyle: getRowStyle, // 그룹별 배경색 적용
-                // 셀 병합 기능 활성화
-                enableCellSpan: true,
-                // 셀 병합을 위한 추가 설정
-                suppressColumnVirtualisation: true,
-                suppressRowGroupHidesColumns: true,
-                defaultColDef: {
-                  // 모든 셀의 배경색을 부모 요소(행)로부터 상속받도록 설정
-                  cellStyle: {
-                    backgroundColor: "inherit",
+        )}
+
+        {/* 에러 메시지 */}
+        {hasError && (
+          <div className="bg-red-50 border border-red-200 rounded-md p-4">
+            <p className="text-red-600">{searchError}</p>
+          </div>
+        )}
+
+        {/* 필터 폼 */}
+        <FilterForm
+          fields={dynamicFilterConfig}
+          defaultValues={defaultValues}
+          schema={routeSearchSchema}
+          values={filters}
+          onChange={handleFilterChange}
+          onSearch={handleSearchSubmit}
+        />
+
+        {/* 결과 그리드 */}
+        <div className="space-y-4">
+          {!hasSearched ? (
+            // 조회 전 안내 메시지
+            <div className="bg-blue-50 flex flex-col justify-center items-center border h-[590px] border-blue-200 rounded-[24px] p-8 text-center">
+              <div className="text-blue-600 mb-2">
+                <svg
+                  className="w-12 h-12 mx-auto mb-4"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24">
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                  />
+                </svg>
+              </div>
+              <h2 className="text-xl font-semibold text-blue-800 mb-2">
+                경로 탐색
+              </h2>
+              <p className="text-blue-600">
+                네트워크를 선택한 후, 출발역과 도착역을 선택하여
+                &quot;조회&quot; 버튼을 클릭해주세요.
+              </p>
+            </div>
+          ) : processedResults.length > 0 ? (
+            // 검색 결과가 있는 경우
+            <>
+              <h2 className="text-xl font-semibold">
+                탐색 결과 ({processedResults.length}개)
+              </h2>
+              <TestGrid
+                rowData={processedResults}
+                columnDefs={colDefs}
+                gridRef={gridRef}
+                height={gridHeight}
+                gridOptions={{
+                  onRowClicked: onRowClicked,
+                  suppressScrollOnNewData: true, // 데이터 변경 시 스크롤 위치 유지
+                  getRowStyle: getRowStyle, // 그룹별 배경색 적용
+                  // 셀 병합 기능 활성화
+                  enableCellSpan: true,
+                  // 셀 병합을 위한 추가 설정
+                  suppressColumnVirtualisation: true,
+                  suppressRowGroupHidesColumns: true,
+                  defaultColDef: {
+                    // 모든 셀의 배경색을 부모 요소(행)로부터 상속받도록 설정
+                    cellStyle: {
+                      backgroundColor: "inherit",
+                    },
                   },
-                },
-              }}
-            />
-          </>
-        ) : (
-          // 검색 결과가 없는 경우
-          <div className="bg-gray-50 border border-gray-200 rounded-[24px] p-8 text-center">
-            <div className="text-gray-400 mb-2">
-              <svg
-                className="w-12 h-12 mx-auto mb-4"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24">
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M9.172 16.172a4 4 0 015.656 0M9 12h6m-6-4h6m2 5.291A7.962 7.962 0 0112 15c-2.34 0-4.47-.881-6.08-2.33"
-                />
-              </svg>
+                }}
+              />
+            </>
+          ) : (
+            // 검색 결과가 없는 경우
+            <div className="bg-gray-50 border border-gray-200 rounded-[24px] p-8 text-center">
+              <div className="text-gray-400 mb-2">
+                <svg
+                  className="w-12 h-12 mx-auto mb-4"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24">
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M9.172 16.172a4 4 0 015.656 0M9 12h6m-6-4h6m2 5.291A7.962 7.962 0 0112 15c-2.34 0-4.47-.881-6.08-2.33"
+                  />
+                </svg>
+              </div>
+              <h2 className="text-xl font-semibold text-gray-600 mb-2">
+                검색 결과 없음
+              </h2>
+              <p className="text-gray-500">해당 경로에 대한 결과가 없습니다.</p>
             </div>
-            <h2 className="text-xl font-semibold text-gray-600 mb-2">
-              검색 결과 없음
-            </h2>
-            <p className="text-gray-500">해당 경로에 대한 결과가 없습니다.</p>
+          )}
+        </div>
+
+        {/* 상세 정보 패널 - 하단에 간단한 레이아웃으로 배치 */}
+        {hasSearched && processedResults.length > 0 && (
+          <div className="grid grid-cols-1 gap-6">
+            <div className="space-y-4">
+              <h2 className="text-xl font-semibold">상세 정보</h2>
+              <RouteDetailPanel route={selectedRouteForDetail} />
+            </div>
           </div>
         )}
       </div>
-
-      {/* 상세 정보 패널 - 하단에 간단한 레이아웃으로 배치 */}
-      {hasSearched && processedResults.length > 0 && (
-        <div className="grid grid-cols-1 gap-6">
-          <div className="space-y-4">
-            <h2 className="text-xl font-semibold">상세 정보</h2>
-            <RouteDetailPanel route={selectedRouteForDetail} />
-          </div>
-        </div>
-      )}
-    </div>
+    </ProtectedRoute>
   );
 }

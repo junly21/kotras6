@@ -131,13 +131,26 @@ export function TransactionDetailFilterForm({
         );
         const lineLabel = selectedLine?.label || value.line;
 
+        // 기관명의 value2 값을 찾기 (value2가 없으면 label 사용)
+        const agencyOptions = dynamicOptions.agency || [];
+        const selectedAgency = agencyOptions.find(
+          (opt) => opt.value === value.agency
+        );
+        const agencyValue2 =
+          selectedAgency?.value2 || selectedAgency?.label || value.agency;
+        // '전체' 선택 시에는 'ALL'로 전송, 그 외에는 value2 값 사용
+        const agencyValue = agencyValue2 === "전체" ? "ALL" : agencyValue2;
+
         // 역 목록 옵션 로드
         fetch("/api/transaction-detail/stations", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ line: lineLabel }),
+          body: JSON.stringify({
+            line: lineLabel,
+            agency: agencyValue,
+          }),
         })
           .then((res) => res.json())
           .then((data: { options: FieldOption[] }) => {
@@ -152,7 +165,7 @@ export function TransactionDetailFilterForm({
     });
 
     return () => subscription.unsubscribe();
-  }, [form, dynamicOptions.line]);
+  }, [form, dynamicOptions.line, dynamicOptions.agency]);
 
   const handleSubmit = (values: TransactionDetailFilters) => {
     // value를 value2로 변환 (value2가 없으면 label 사용)

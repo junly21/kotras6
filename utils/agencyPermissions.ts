@@ -301,6 +301,21 @@ export function hasPathPermission(agencyCode: string, path: string): boolean {
     // 결과 조회(신-대광위 외) - 모든 기관 접근 가능
     return true;
   }
+  if (path.includes("/route-search/result")) {
+    // 경로탐색 결과조회 - 모든 기관 접근 가능
+    return true;
+  }
+
+  // route-search 테스트 페이지들 - 대광위만 접근 가능
+  if (
+    path.includes("/route-search/snh") ||
+    path.includes("/route-search/snh2") ||
+    path.includes("/route-search/path-key2") ||
+    path.includes("/route-search/key-search") ||
+    path.includes("/route-search/test")
+  ) {
+    return agencyCode === "ALL";
+  }
 
   // Network 권한 체크
   if (path.includes("/network/file-upload")) {

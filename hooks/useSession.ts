@@ -33,6 +33,7 @@ interface UseSessionReturn {
 
 const SESSION_TIMEOUT = 30 * 60 * 1000; // 30분 (밀리초)
 const REFRESH_THRESHOLD = 5 * 60 * 1000; // 5분 전에 갱신 시도
+// 실제 갱신 주기 = 30분 - 5분 = 25분마다
 
 export function useSession(): UseSessionReturn {
   const [session, setSession] = useState<SessionData>({
@@ -53,6 +54,12 @@ export function useSession(): UseSessionReturn {
   const activityTimerRef = useRef<NodeJS.Timeout | null>(null);
   const isInitializingRef = useRef(false); // 초기화 중복 방지
   const hasInitializedRef = useRef(false); // 한 번만 초기화
+  const sessionRef = useRef(session); // 최신 세션 상태 참조용
+
+  // sessionRef를 항상 최신 상태로 유지
+  useEffect(() => {
+    sessionRef.current = session;
+  }, [session]);
 
   // 권한 체크 함수
   const canAccess = useCallback(
@@ -92,6 +99,19 @@ export function useSession(): UseSessionReturn {
         headers: { "Content-Type": "application/json" },
         credentials: "include",
       });
+
+      // ✅ 401/400 에러 발생 시 즉시 페이지 새로고침
+      if (response.status === 401 || response.status === 400) {
+        console.error(
+          `❌ 세션 초기화 인증 실패 (${response.status}) - 페이지를 새로고침합니다.`
+        );
+        setError("세션 인증에 실패했습니다. 페이지를 새로고침합니다.");
+
+        setTimeout(() => {
+          window.location.reload();
+        }, 1000);
+        return;
+      }
 
       if (!response.ok) {
         throw new Error(`세션 초기화 실패: ${response.status}`);
@@ -167,6 +187,18 @@ export function useSession(): UseSessionReturn {
   const refreshSession = useCallback(async () => {
     if (isLoading) return;
 
+    // ✅ 세션 상태 선제 체크 (불필요한 요청 방지)
+    // Note: ext_sid는 httpOnly 쿠키라서 document.cookie로 읽을 수 없음
+    // sessionRef를 사용하여 최신 세션 상태 참조 (클로저 문제 해결)
+    if (!sessionRef.current.sessionId) {
+      console.error("❌ 세션 ID가 없습니다 - 페이지를 새로고침합니다.");
+      setError("세션이 만료되었습니다. 페이지를 새로고침합니다.");
+      setTimeout(() => {
+        window.location.reload();
+      }, 100);
+      return;
+    }
+
     setIsLoading(true);
     setError(null);
 
@@ -176,6 +208,20 @@ export function useSession(): UseSessionReturn {
         headers: { "Content-Type": "application/json" },
         credentials: "include",
       });
+
+      // ✅ 401/400 에러 발생 시 즉시 페이지 새로고침 (백업 방어선)
+      if (response.status === 401 || response.status === 400) {
+        console.error(
+          `❌ 세션 인증 실패 (${response.status}) - 페이지를 새로고침합니다.`
+        );
+        setError("세션이 만료되었습니다. 페이지를 새로고침합니다.");
+
+        // 짧은 지연 후 새로고침 (사용자에게 메시지 표시 시간 제공)
+        setTimeout(() => {
+          window.location.reload();
+        }, 100);
+        return;
+      }
 
       if (!response.ok) {
         throw new Error(`세션 갱신 실패: ${response.status}`);
@@ -280,14 +326,14 @@ export function useSession(): UseSessionReturn {
     // 5분마다 활동 상태 체크
     activityTimerRef.current = setInterval(() => {
       const now = Date.now();
-      const timeSinceLastActivity = now - session.lastActivity;
+      const timeSinceLastActivity = now - sessionRef.current.lastActivity;
 
       // 세션이 만료되었는지 확인
       if (timeSinceLastActivity > SESSION_TIMEOUT) {
         refreshSession();
       }
     }, 300000); // 5분마다 체크
-  }, [session.lastActivity, refreshSession]);
+  }, [refreshSession]);
 
   // 사용자 활동 감지
   const updateActivity = useCallback(() => {

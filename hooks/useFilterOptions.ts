@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useRef, useMemo } from "react";
+import { useSession } from "./useSession";
 
 interface FilterOption {
   value: string;
@@ -36,6 +37,9 @@ export function useFilterOptions(
   const [loading, setLoading] = useState<Record<string, boolean>>({});
   const [errors, setErrors] = useState<Record<string, string | null>>({});
 
+  // ✅ 세션 초기화 상태 확인
+  const { isInitialized: isSessionInitialized } = useSession();
+
   // ✅ 무한 렌더링 방지를 위한 ref 사용
   const hasInitialized = useRef<Record<string, boolean>>({});
   const onOptionChangeRef = useRef(onOptionChange);
@@ -69,6 +73,23 @@ export function useFilterOptions(
         }
 
         const response = await fetch(configItem.endpoint, requestOptions);
+
+        // ✅ 401/400 에러 시 페이지 새로고침 (세션 만료/없음)
+        if (response.status === 401 || response.status === 400) {
+          console.error(
+            `❌ 필터 옵션 로드 실패 (${response.status}) - 세션 오류로 페이지를 새로고침합니다.`
+          );
+          setErrors((prev) => ({
+            ...prev,
+            [key]: "세션이 만료되었거나 없습니다. 페이지를 새로고침합니다.",
+          }));
+
+          setTimeout(() => {
+            window.location.reload();
+          }, 1000);
+          return;
+        }
+
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
@@ -149,12 +170,19 @@ export function useFilterOptions(
     [loading]
   );
 
-  // ✅ 컴포넌트 마운트 시에만 모든 옵션 로드
+  // ✅ 세션 초기화 후 옵션 로드 (Race Condition 방지)
   useEffect(() => {
+    // 세션이 초기화될 때까지 대기
+    if (!isSessionInitialized) {
+      console.log("⏳ 세션 초기화 대기 중...");
+      return;
+    }
+
+    console.log("✅ 세션 초기화 완료 - 필터 옵션 로드 시작");
     // config가 변경될 때 hasInitialized 초기화
     hasInitialized.current = {};
     fetchAllOptions();
-  }, [stableConfig]); // stableConfig 사용
+  }, [isSessionInitialized, stableConfig, fetchAllOptions]); // 세션 초기화 상태 추가
 
   return {
     options,

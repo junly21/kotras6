@@ -162,20 +162,20 @@ export const getMenuData = (): MenuItem[] => [
     label: "경로탐색",
     icon: "/icon-gnb-search.svg",
     children: [
+      // {
+      //   id: "route-search-result",
+      //   label: "결과 조회(구)",
+      //   path: "/route-search/path-key",
+      // },
       {
-        id: "route-search-result",
-        label: "결과 조회(구)",
-        path: "/route-search/path-key",
+        id: "route-search-resultmap",
+        label: "탐색 조회",
+        path: "/route-search/resultmap",
       },
       {
-        id: "route-search-view1",
-        label: "결과 조회(신-대광위)",
-        path: "/route-search/view1",
-      },
-      {
-        id: "route-search-view2",
-        label: "결과 조회(신-대광위 외)",
-        path: "/route-search/view2",
+        id: "route-search-resultdetail",
+        label: "결과 조회",
+        path: "/route-search/resultdetail",
       },
     ],
   },

@@ -293,11 +293,11 @@ export function hasPathPermission(agencyCode: string, path: string): boolean {
     // 결과 조회(구) - 대광위만 접근 가능
     return agencyCode === "ALL";
   }
-  if (path.includes("/route-search/view1")) {
+  if (path.includes("/route-search/resultmap")) {
     // 결과 조회(신-대광위) - 대광위만 접근 가능
     return agencyCode === "ALL";
   }
-  if (path.includes("/route-search/view2")) {
+  if (path.includes("/route-search/resultdetail")) {
     // 결과 조회(신-대광위 외) - 모든 기관 접근 가능
     return true;
   }

@@ -308,175 +308,180 @@ export default function MockSettlementByRoutePage() {
   }, [byRouteData]);
 
   return (
-    <div className="space-y-6">
-      <h1 className="text-2xl font-bold">모의정산 노선별 조회</h1>
+    <ProtectedRoute requiredPath="/mock-settlement/by-route">
+      <div className="space-y-6">
+        <h1 className="text-2xl font-bold">모의정산 노선별 조회</h1>
 
-      {/* 필터 폼 */}
-      <FilterForm<MockSettlementByRouteFilters>
-        fields={mockSettlementByRouteFilterConfig.map((field) =>
-          field.name === "settlementName" ? { ...field, disabled: true } : field
-        )}
-        defaultValues={filters}
-        values={filters}
-        schema={mockSettlementByRouteSchema}
-        onSearch={handleManualSearch}
-      />
-
-      {/* 전체 페이지 로딩 스피너 */}
-      {isLoading && (
-        <div className="absolute inset-0 flex items-center justify-center bg-white/80 z-50">
-          <div className="text-center">
-            <Spinner />
-            <p className="mt-4 text-gray-600">데이터를 조회하는 중...</p>
-          </div>
-        </div>
-      )}
-
-      {/* 에러 메시지 */}
-      {error && (
-        <div className="bg-red-50 border border-red-200 rounded-md p-4">
-          <p className="text-red-600">{error}</p>
-        </div>
-      )}
-
-      {/* 상단: 모의정산 정보 그리드 */}
-      {!hasSearched && (
-        <div className="bg-gray-50 flex flex-col justify-center items-center h-[140px] border-2 border-dashed border-gray-300 rounded-lg p-16">
-          <div className="text-center text-gray-500">
-            <p className="text-lg font-medium">모의정산 정보</p>
-            <p className="text-sm">
-              정산명과 보관기관을 선택하고 조회 버튼을 누르면 결과가 표시됩니다.
-            </p>
-          </div>
-        </div>
-      )}
-
-      {hasSearched && (
-        <div className="space-y-4">
-          {!isLoading && mockSettlementData.length > 0 && (
-            <>
-              <h3 className="text-lg font-semibold mb-4">모의정산 정보</h3>
-              <div className="bg-white border border-gray-200 rounded-[24px] p-2">
-                <div className="h-32">
-                  <TestGrid
-                    rowData={mockSettlementData}
-                    columnDefs={mockSettlementColumnDefs}
-                    gridRef={mockSettlementGridRef}
-                    gridOptions={{
-                      suppressCellFocus: true,
-                      suppressMovableColumns: true,
-                      suppressMenuHide: true,
-                      rowSelection: {
-                        enableClickSelection: false,
-                      },
-                      defaultColDef: {
-                        sortable: false,
-                        filter: false,
-                        resizable: false,
-                        suppressMovable: true,
-                      },
-                      onRowDoubleClicked: handleRowDoubleClick,
-                    }}
-                  />
-                </div>
-              </div>
-            </>
+        {/* 필터 폼 */}
+        <FilterForm<MockSettlementByRouteFilters>
+          fields={mockSettlementByRouteFilterConfig.map((field) =>
+            field.name === "settlementName"
+              ? { ...field, disabled: true }
+              : field
           )}
+          defaultValues={filters}
+          values={filters}
+          schema={mockSettlementByRouteSchema}
+          onSearch={handleManualSearch}
+        />
 
-          {!isLoading && mockSettlementData.length === 0 && (
-            <div className="bg-yellow-50 border border-yellow-200 rounded-[24px] p-4">
-              <p className="text-yellow-800">
-                조회된 모의정산 정보가 없습니다.
+        {/* 전체 페이지 로딩 스피너 */}
+        {isLoading && (
+          <div className="absolute inset-0 flex items-center justify-center bg-white/80 z-50">
+            <div className="text-center">
+              <Spinner />
+              <p className="mt-4 text-gray-600">데이터를 조회하는 중...</p>
+            </div>
+          </div>
+        )}
+
+        {/* 에러 메시지 */}
+        {error && (
+          <div className="bg-red-50 border border-red-200 rounded-md p-4">
+            <p className="text-red-600">{error}</p>
+          </div>
+        )}
+
+        {/* 상단: 모의정산 정보 그리드 */}
+        {!hasSearched && (
+          <div className="bg-gray-50 flex flex-col justify-center items-center h-[140px] border-2 border-dashed border-gray-300 rounded-lg p-16">
+            <div className="text-center text-gray-500">
+              <p className="text-lg font-medium">모의정산 정보</p>
+              <p className="text-sm">
+                정산명과 보관기관을 선택하고 조회 버튼을 누르면 결과가
+                표시됩니다.
               </p>
             </div>
-          )}
-        </div>
-      )}
+          </div>
+        )}
 
-      {/* 하단: 노선별 조회 결과 그리드 */}
-      <div className="space-y-4">
-        <div className="flex justify-between items-center">
-          <h3 className="text-lg font-semibold">노선별 조회 결과</h3>
-          <div className="flex items-center gap-4">
-            <CsvExportButton
-              gridRef={byRouteGridRef}
-              fileName="mock_settlement_by_route_data.csv"
-              className="shadow-lg bg-accent-500"
-            />
+        {hasSearched && (
+          <div className="space-y-4">
+            {!isLoading && mockSettlementData.length > 0 && (
+              <>
+                <h3 className="text-lg font-semibold mb-4">모의정산 정보</h3>
+                <div className="bg-white border border-gray-200 rounded-[24px] p-2">
+                  <div className="h-32">
+                    <TestGrid
+                      rowData={mockSettlementData}
+                      columnDefs={mockSettlementColumnDefs}
+                      gridRef={mockSettlementGridRef}
+                      gridOptions={{
+                        suppressCellFocus: true,
+                        suppressMovableColumns: true,
+                        suppressMenuHide: true,
+                        rowSelection: {
+                          enableClickSelection: false,
+                        },
+                        defaultColDef: {
+                          sortable: false,
+                          filter: false,
+                          resizable: false,
+                          suppressMovable: true,
+                        },
+                        onRowDoubleClicked: handleRowDoubleClick,
+                      }}
+                    />
+                  </div>
+                </div>
+              </>
+            )}
+
+            {!isLoading && mockSettlementData.length === 0 && (
+              <div className="bg-yellow-50 border border-yellow-200 rounded-[24px] p-4">
+                <p className="text-yellow-800">
+                  조회된 모의정산 정보가 없습니다.
+                </p>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* 하단: 노선별 조회 결과 그리드 */}
+        <div className="space-y-4">
+          <div className="flex justify-between items-center">
+            <h3 className="text-lg font-semibold">노선별 조회 결과</h3>
+            <div className="flex items-center gap-4">
+              <CsvExportButton
+                gridRef={byRouteGridRef}
+                fileName="mock_settlement_by_route_data.csv"
+                className="shadow-lg bg-accent-500"
+              />
+            </div>
+          </div>
+
+          <div className="bg-white border border-gray-200 rounded-[24px] p-4">
+            <div className="h-[350px]">
+              <TestGrid
+                rowData={byRouteRowData}
+                columnDefs={byRouteColumnDefs}
+                gridRef={byRouteGridRef}
+                gridOptions={{
+                  headerHeight: 40, // 그룹핑된 헤더를 위한 높이 조정
+                  suppressCellFocus: true,
+                  suppressMovableColumns: true,
+                  suppressMenuHide: true,
+                  rowSelection: {
+                    enableClickSelection: false,
+                  },
+                  defaultColDef: {
+                    sortable: false,
+                    filter: false,
+                    resizable: false,
+                    suppressMovable: true,
+                  },
+                  pinnedBottomRowData: footerRowData, // 푸터 행 데이터 추가
+                }}
+              />
+            </div>
           </div>
         </div>
 
-        <div className="bg-white border border-gray-200 rounded-[24px] p-4">
-          <div className="h-[350px]">
-            <TestGrid
-              rowData={byRouteRowData}
-              columnDefs={byRouteColumnDefs}
-              gridRef={byRouteGridRef}
-              gridOptions={{
-                headerHeight: 40, // 그룹핑된 헤더를 위한 높이 조정
-                suppressCellFocus: true,
-                suppressMovableColumns: true,
-                suppressMenuHide: true,
-                rowSelection: {
-                  enableClickSelection: false,
-                },
-                defaultColDef: {
-                  sortable: false,
-                  filter: false,
-                  resizable: false,
-                  suppressMovable: true,
-                },
-                pinnedBottomRowData: footerRowData, // 푸터 행 데이터 추가
-              }}
-            />
-          </div>
-        </div>
-      </div>
-
-      {/* 토스트 알림 */}
-      <Toast
-        isVisible={toast.isVisible}
-        message={toast.message}
-        type={toast.type}
-        onClose={() => setToast((prev) => ({ ...prev, isVisible: false }))}
-      />
-
-      {/* 모의정산 상세 모달 */}
-      {selectedSettlement && (
-        <MockSettlementDetailModal
-          isOpen={isDetailModalOpen}
-          onClose={handleDetailModalClose}
-          simStmtGrpId={selectedSettlement.simStmtGrpId}
-          gridData={selectedSettlement.data}
+        {/* 토스트 알림 */}
+        <Toast
+          isVisible={toast.isVisible}
+          message={toast.message}
+          type={toast.type}
+          onClose={() => setToast((prev) => ({ ...prev, isVisible: false }))}
         />
-      )}
 
-      {/* 모의정산 실행중 확인 다이얼로그 */}
-      <MockSettlementConfirmDialog
-        isOpen={isConfirmDialogOpen}
-        onClose={() => {
-          setIsConfirmDialogOpen(false);
-          setPendingAction(null);
-        }}
-        onConfirm={async () => {
-          if (pendingAction) {
-            // 모의정산 강제종료
-            const stopResponse =
-              await MockSettlementControlService.stopSimulation();
-            if (stopResponse.success) {
-              // 강제종료 성공 시 pending action 실행
-              pendingAction();
-            } else {
-              setError(
-                "모의정산 강제종료에 실패했습니다: " + stopResponse.error
-              );
+        {/* 모의정산 상세 모달 */}
+        {selectedSettlement && (
+          <MockSettlementDetailModal
+            isOpen={isDetailModalOpen}
+            onClose={handleDetailModalClose}
+            simStmtGrpId={selectedSettlement.simStmtGrpId}
+            gridData={selectedSettlement.data}
+          />
+        )}
+
+        {/* 모의정산 실행중 확인 다이얼로그 */}
+        <MockSettlementConfirmDialog
+          isOpen={isConfirmDialogOpen}
+          onClose={() => {
+            setIsConfirmDialogOpen(false);
+            setPendingAction(null);
+          }}
+          onConfirm={async () => {
+            if (pendingAction) {
+              // 모의정산 강제종료
+              const stopResponse =
+                await MockSettlementControlService.stopSimulation();
+              if (stopResponse.success) {
+                // 강제종료 성공 시 pending action 실행
+                pendingAction();
+              } else {
+                setError(
+                  "모의정산 강제종료에 실패했습니다: " + stopResponse.error
+                );
+              }
             }
-          }
-          setIsConfirmDialogOpen(false);
-          setPendingAction(null);
-        }}
-        actionType="조회"
-      />
-    </div>
+            setIsConfirmDialogOpen(false);
+            setPendingAction(null);
+          }}
+          actionType="조회"
+        />
+      </div>
+    </ProtectedRoute>
   );
 }

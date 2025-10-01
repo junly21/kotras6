@@ -12,7 +12,7 @@ interface ViewGridData {
   originalData: RouteSearchResult;
 }
 
-export function processView2Results(
+export function processresultdetailResults(
   searchResults: RouteSearchResult[],
   nodes: Node[] = []
 ): ViewGridData[] {

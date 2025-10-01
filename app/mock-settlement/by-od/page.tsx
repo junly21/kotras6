@@ -3,6 +3,7 @@
 import { useState, useCallback, useMemo, useRef, useEffect } from "react";
 import { z } from "zod";
 import { FilterForm } from "@/components/ui/FilterForm";
+import ProtectedRoute from "@/components/ProtectedRoute";
 import { mockSettlementByOdFilterConfig } from "@/features/mockSettlementByOd/filterConfig";
 import {
   MockSettlementByOdFilters,
@@ -607,287 +608,293 @@ export default function MockSettlementByOdPage() {
   );
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">모의정산 OD별 조회</h1>
-      </div>
-
-      {/* 전체 페이지 로딩 스피너 */}
-      {isLoading && (
-        <div className="absolute inset-0 flex items-center justify-center bg-white/80 z-50">
-          <div className="text-center">
-            <Spinner />
-            <p className="mt-4 text-gray-600">
-              모의정산 데이터를 조회하는 중...
-            </p>
-          </div>
+    <ProtectedRoute requiredPath="/mock-settlement/by-od">
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
+          <h1 className="text-2xl font-bold">모의정산 OD별 조회</h1>
         </div>
-      )}
 
-      {/* 에러 메시지 */}
-      {error && (
-        <div className="bg-red-50 border border-red-200 rounded-md p-4">
-          <p className="text-red-600">{error}</p>
-        </div>
-      )}
-
-      {/* 네트워크 맵 에러 메시지 */}
-      {mapError && (
-        <div className="bg-red-50 border border-red-200 rounded-md p-4">
-          <p className="text-red-600">노선도 로드 실패: {mapError}</p>
-        </div>
-      )}
-
-      {/* 필터 폼 */}
-      <FilterForm<MockSettlementByOdFilters>
-        fields={mockSettlementByOdFilterConfig.map((field) =>
-          field.name === "settlementName" ? { ...field, disabled: true } : field
-        )}
-        defaultValues={filters}
-        schema={z
-          .object({
-            settlementName: z.string().optional(),
-            STN_ID1: z.string().min(1, "출발역을 선택해주세요"),
-            STN_ID2: z.string().min(1, "도착역을 선택해주세요"),
-          })
-          .refine((data) => data.STN_ID1 !== data.STN_ID2, {
-            message: "출발역과 도착역은 같을 수 없습니다.",
-            path: ["STN_ID2"],
-          })}
-        values={filters}
-        onChange={(values) => setFilters((prev) => ({ ...prev, ...values }))}
-        onSearch={handleSearchSubmit}
-      />
-
-      {/* 모의정산 정보 그리드 - 항상 표시 */}
-      <div className="space-y-4">
-        <h3 className="text-lg font-semibold mb-4">모의정산 정보</h3>
-        {!hasSearched ? (
-          <div className="bg-gray-50 border flex flex-col justify-center items-center h-[140px] border-2 border-dashed border-gray-300 rounded-lg p-16">
-            <div className="text-center text-gray-500">
-              <p className="text-lg font-medium">모의정산 정보</p>
-              <p className="text-sm">
-                정산명, 출발역, 도착역을 선택하고 조회 버튼을 누르면 모의정산
-                정보가 표시됩니다.
+        {/* 전체 페이지 로딩 스피너 */}
+        {isLoading && (
+          <div className="absolute inset-0 flex items-center justify-center bg-white/80 z-50">
+            <div className="text-center">
+              <Spinner />
+              <p className="mt-4 text-gray-600">
+                모의정산 데이터를 조회하는 중...
               </p>
             </div>
           </div>
-        ) : (
-          <>
-            {settlementInfo.length > 0 && (
-              <div className="bg-white border border-gray-200 rounded-[24px] p-4">
-                <div className="h-32">
-                  <TestGrid
-                    rowData={settlementInfo}
-                    columnDefs={mockSettlementColumnDefs}
-                    gridRef={infoGridRef}
-                    gridOptions={{
-                      headerHeight: 40,
-                      suppressCellFocus: true,
-                      suppressMovableColumns: true,
-                      suppressMenuHide: true,
-                      rowSelection: {
-                        enableClickSelection: false,
-                      },
-                      defaultColDef: {
-                        sortable: false,
-                        filter: false,
-                        resizable: false,
-                        suppressMovable: true,
-                      },
-                      onRowDoubleClicked: handleInfoRowDoubleClick,
-                    }}
-                  />
-                </div>
-              </div>
-            )}
-          </>
         )}
-      </div>
 
-      {/* 결과 영역 */}
-      {!hasSearched && (
-        <div className="bg-gray-50 flex flex-col justify-center items-center h-[450px] border-2 border-dashed border-gray-300 rounded-lg p-16">
-          <div className="text-center text-gray-500">
-            <p className="text-lg font-medium">OD별 조회 결과</p>
-            <p className="text-sm">
-              정산명, 출발역, 도착역을 선택하고 조회 버튼을 누르면 OD별
-              정산결과가 표시됩니다.
-            </p>
+        {/* 에러 메시지 */}
+        {error && (
+          <div className="bg-red-50 border border-red-200 rounded-md p-4">
+            <p className="text-red-600">{error}</p>
           </div>
-        </div>
-      )}
+        )}
 
-      {hasSearched && (
+        {/* 네트워크 맵 에러 메시지 */}
+        {mapError && (
+          <div className="bg-red-50 border border-red-200 rounded-md p-4">
+            <p className="text-red-600">노선도 로드 실패: {mapError}</p>
+          </div>
+        )}
+
+        {/* 필터 폼 */}
+        <FilterForm<MockSettlementByOdFilters>
+          fields={mockSettlementByOdFilterConfig.map((field) =>
+            field.name === "settlementName"
+              ? { ...field, disabled: true }
+              : field
+          )}
+          defaultValues={filters}
+          schema={z
+            .object({
+              settlementName: z.string().optional(),
+              STN_ID1: z.string().min(1, "출발역을 선택해주세요"),
+              STN_ID2: z.string().min(1, "도착역을 선택해주세요"),
+            })
+            .refine((data) => data.STN_ID1 !== data.STN_ID2, {
+              message: "출발역과 도착역은 같을 수 없습니다.",
+              path: ["STN_ID2"],
+            })}
+          values={filters}
+          onChange={(values) => setFilters((prev) => ({ ...prev, ...values }))}
+          onSearch={handleSearchSubmit}
+        />
+
+        {/* 모의정산 정보 그리드 - 항상 표시 */}
         <div className="space-y-4">
-          {!isLoading && processedResults.length > 0 && (
+          <h3 className="text-lg font-semibold mb-4">모의정산 정보</h3>
+          {!hasSearched ? (
+            <div className="bg-gray-50 border flex flex-col justify-center items-center h-[140px] border-2 border-dashed border-gray-300 rounded-lg p-16">
+              <div className="text-center text-gray-500">
+                <p className="text-lg font-medium">모의정산 정보</p>
+                <p className="text-sm">
+                  정산명, 출발역, 도착역을 선택하고 조회 버튼을 누르면 모의정산
+                  정보가 표시됩니다.
+                </p>
+              </div>
+            </div>
+          ) : (
             <>
-              <div className="flex justify-between items-center">
-                <h3 className="text-lg font-semibold">OD별 정산결과</h3>{" "}
-              </div>
-              <div className="bg-white border border-gray-200 rounded-[24px] p-4">
-                <div style={{ height: `${gridHeight}px` }}>
-                  <TestGrid
-                    rowData={processedResults}
-                    columnDefs={columnDefs}
-                    gridRef={gridRef}
-                    gridOptions={{
-                      headerHeight: 40,
-                      suppressCellFocus: true,
-                      suppressMovableColumns: true,
-                      suppressMenuHide: true,
-                      rowSelection: {
-                        enableClickSelection: true,
-                        suppressRowDeselection: true,
-                      },
-                      defaultColDef: {
-                        sortable: false,
-                        filter: false,
-                        resizable: false,
-                        suppressMovable: true,
-                      },
-                      onRowClicked: (event: {
-                        data: MockSettlementByOdData;
-                        rowIndex: number;
-                      }) => {
-                        // 소계 행(path_detail이 "-")은 클릭 비활성화
-                        if (event.data.path_detail === "-") {
-                          return;
-                        }
-                        handleRowClick(event.data);
-                      },
-                      getRowStyle: getRowStyle, // 행 클릭 시 스타일 적용
-                    }}
-                  />
+              {settlementInfo.length > 0 && (
+                <div className="bg-white border border-gray-200 rounded-[24px] p-4">
+                  <div className="h-32">
+                    <TestGrid
+                      rowData={settlementInfo}
+                      columnDefs={mockSettlementColumnDefs}
+                      gridRef={infoGridRef}
+                      gridOptions={{
+                        headerHeight: 40,
+                        suppressCellFocus: true,
+                        suppressMovableColumns: true,
+                        suppressMenuHide: true,
+                        rowSelection: {
+                          enableClickSelection: false,
+                        },
+                        defaultColDef: {
+                          sortable: false,
+                          filter: false,
+                          resizable: false,
+                          suppressMovable: true,
+                        },
+                        onRowDoubleClicked: handleInfoRowDoubleClick,
+                      }}
+                    />
+                  </div>
                 </div>
-              </div>
+              )}
             </>
           )}
-
-          {!isLoading && searchResults.length === 0 && (
-            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-              <p className="text-yellow-800">조회된 데이터가 없습니다.</p>
-            </div>
-          )}
-
-          {/* 경유지 상세정보 영역 - 데이터가 있고 선택된 행이 있을 때만 표시 */}
-          {searchResults.length > 0 &&
-            selectedRow &&
-            selectedRow.path_detail !== "-" && (
-              <>
-                <h3 className="text-lg font-semibold mb-4">경유지 상세정보</h3>
-                <div className="bg-white border border-gray-200 rounded-[24px] p-4">
-                  {isDetailLoading ? (
-                    <div className="flex items-center justify-center h-32">
-                      <Spinner />
-                      <p className="ml-2 text-gray-600">
-                        상세정보를 조회하는 중...
-                      </p>
-                    </div>
-                  ) : (
-                    <div className="h-[300px]">
-                      <TestGrid
-                        rowData={detailData}
-                        columnDefs={detailColumnDefs}
-                        gridRef={detailGridRef}
-                        gridOptions={{
-                          headerHeight: 40,
-                          suppressCellFocus: true,
-                          suppressMovableColumns: true,
-                          suppressMenuHide: true,
-                          rowSelection: {
-                            enableClickSelection: false,
-                          },
-                          defaultColDef: {
-                            sortable: false,
-                            filter: false,
-                            resizable: false,
-                            suppressMovable: true,
-                          },
-                          getRowStyle: getDetailRowStyle, // 마지막 행 스타일 적용
-                        }}
-                      />
-                    </div>
-                  )}
-                </div>
-              </>
-            )}
-
-          {/* 네트워크 맵 영역 - 데이터가 있고 선택된 행이 있을 때만 표시 */}
-          {searchResults.length > 0 &&
-            selectedRow &&
-            selectedRow.path_detail !== "-" &&
-            !isDetailLoading && (
-              <>
-                <h3 className="text-lg font-semibold mb-4">경로 시각화</h3>
-                <div className="bg-white border border-gray-200 rounded-[24px] p-4">
-                  {isMapLoading ? (
-                    <div className="flex items-center justify-center h-64">
-                      <Spinner />
-                      <p className="ml-2 text-gray-600">
-                        노선도를 불러오는 중...
-                      </p>
-                    </div>
-                  ) : (
-                    <div className="h-[450px]">
-                      <NetworkMap
-                        nodes={nodes}
-                        links={links}
-                        svgText={svgText}
-                        config={{
-                          width: "100%",
-                          height: "100%",
-                          showLegend: true,
-                        }}
-                        highlights={pathHighlights}
-                        tooltips={customTooltips}
-                        startStationId={filters.STN_ID1}
-                        endStationId={filters.STN_ID2}
-                      />
-                    </div>
-                  )}
-                </div>
-              </>
-            )}
         </div>
-      )}
 
-      {/* 모의정산 상세 모달 */}
-      {selectedSettlement && (
-        <MockSettlementDetailModal
-          isOpen={isDetailModalOpen}
-          onClose={handleDetailModalClose}
-          simStmtGrpId={selectedSettlement.simStmtGrpId}
-          gridData={selectedSettlement.data}
-        />
-      )}
+        {/* 결과 영역 */}
+        {!hasSearched && (
+          <div className="bg-gray-50 flex flex-col justify-center items-center h-[450px] border-2 border-dashed border-gray-300 rounded-lg p-16">
+            <div className="text-center text-gray-500">
+              <p className="text-lg font-medium">OD별 조회 결과</p>
+              <p className="text-sm">
+                정산명, 출발역, 도착역을 선택하고 조회 버튼을 누르면 OD별
+                정산결과가 표시됩니다.
+              </p>
+            </div>
+          </div>
+        )}
 
-      {/* 모의정산 실행중 확인 다이얼로그 */}
-      <MockSettlementConfirmDialog
-        isOpen={isConfirmDialogOpen}
-        onClose={() => {
-          setIsConfirmDialogOpen(false);
-          setPendingAction(null);
-        }}
-        onConfirm={async () => {
-          if (pendingAction) {
-            // 모의정산 강제종료
-            const stopResponse =
-              await MockSettlementControlService.stopSimulation();
-            if (stopResponse.success) {
-              // 강제종료 성공 시 pending action 실행
-              pendingAction();
-            } else {
-              setError(
-                "모의정산 강제종료에 실패했습니다: " + stopResponse.error
-              );
+        {hasSearched && (
+          <div className="space-y-4">
+            {!isLoading && processedResults.length > 0 && (
+              <>
+                <div className="flex justify-between items-center">
+                  <h3 className="text-lg font-semibold">OD별 정산결과</h3>{" "}
+                </div>
+                <div className="bg-white border border-gray-200 rounded-[24px] p-4">
+                  <div style={{ height: `${gridHeight}px` }}>
+                    <TestGrid
+                      rowData={processedResults}
+                      columnDefs={columnDefs}
+                      gridRef={gridRef}
+                      gridOptions={{
+                        headerHeight: 40,
+                        suppressCellFocus: true,
+                        suppressMovableColumns: true,
+                        suppressMenuHide: true,
+                        rowSelection: {
+                          enableClickSelection: true,
+                          suppressRowDeselection: true,
+                        },
+                        defaultColDef: {
+                          sortable: false,
+                          filter: false,
+                          resizable: false,
+                          suppressMovable: true,
+                        },
+                        onRowClicked: (event: {
+                          data: MockSettlementByOdData;
+                          rowIndex: number;
+                        }) => {
+                          // 소계 행(path_detail이 "-")은 클릭 비활성화
+                          if (event.data.path_detail === "-") {
+                            return;
+                          }
+                          handleRowClick(event.data);
+                        },
+                        getRowStyle: getRowStyle, // 행 클릭 시 스타일 적용
+                      }}
+                    />
+                  </div>
+                </div>
+              </>
+            )}
+
+            {!isLoading && searchResults.length === 0 && (
+              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                <p className="text-yellow-800">조회된 데이터가 없습니다.</p>
+              </div>
+            )}
+
+            {/* 경유지 상세정보 영역 - 데이터가 있고 선택된 행이 있을 때만 표시 */}
+            {searchResults.length > 0 &&
+              selectedRow &&
+              selectedRow.path_detail !== "-" && (
+                <>
+                  <h3 className="text-lg font-semibold mb-4">
+                    경유지 상세정보
+                  </h3>
+                  <div className="bg-white border border-gray-200 rounded-[24px] p-4">
+                    {isDetailLoading ? (
+                      <div className="flex items-center justify-center h-32">
+                        <Spinner />
+                        <p className="ml-2 text-gray-600">
+                          상세정보를 조회하는 중...
+                        </p>
+                      </div>
+                    ) : (
+                      <div className="h-[300px]">
+                        <TestGrid
+                          rowData={detailData}
+                          columnDefs={detailColumnDefs}
+                          gridRef={detailGridRef}
+                          gridOptions={{
+                            headerHeight: 40,
+                            suppressCellFocus: true,
+                            suppressMovableColumns: true,
+                            suppressMenuHide: true,
+                            rowSelection: {
+                              enableClickSelection: false,
+                            },
+                            defaultColDef: {
+                              sortable: false,
+                              filter: false,
+                              resizable: false,
+                              suppressMovable: true,
+                            },
+                            getRowStyle: getDetailRowStyle, // 마지막 행 스타일 적용
+                          }}
+                        />
+                      </div>
+                    )}
+                  </div>
+                </>
+              )}
+
+            {/* 네트워크 맵 영역 - 데이터가 있고 선택된 행이 있을 때만 표시 */}
+            {searchResults.length > 0 &&
+              selectedRow &&
+              selectedRow.path_detail !== "-" &&
+              !isDetailLoading && (
+                <>
+                  <h3 className="text-lg font-semibold mb-4">경로 시각화</h3>
+                  <div className="bg-white border border-gray-200 rounded-[24px] p-4">
+                    {isMapLoading ? (
+                      <div className="flex items-center justify-center h-64">
+                        <Spinner />
+                        <p className="ml-2 text-gray-600">
+                          노선도를 불러오는 중...
+                        </p>
+                      </div>
+                    ) : (
+                      <div className="h-[450px]">
+                        <NetworkMap
+                          nodes={nodes}
+                          links={links}
+                          svgText={svgText}
+                          config={{
+                            width: "100%",
+                            height: "100%",
+                            showLegend: true,
+                          }}
+                          highlights={pathHighlights}
+                          tooltips={customTooltips}
+                          startStationId={filters.STN_ID1}
+                          endStationId={filters.STN_ID2}
+                        />
+                      </div>
+                    )}
+                  </div>
+                </>
+              )}
+          </div>
+        )}
+
+        {/* 모의정산 상세 모달 */}
+        {selectedSettlement && (
+          <MockSettlementDetailModal
+            isOpen={isDetailModalOpen}
+            onClose={handleDetailModalClose}
+            simStmtGrpId={selectedSettlement.simStmtGrpId}
+            gridData={selectedSettlement.data}
+          />
+        )}
+
+        {/* 모의정산 실행중 확인 다이얼로그 */}
+        <MockSettlementConfirmDialog
+          isOpen={isConfirmDialogOpen}
+          onClose={() => {
+            setIsConfirmDialogOpen(false);
+            setPendingAction(null);
+          }}
+          onConfirm={async () => {
+            if (pendingAction) {
+              // 모의정산 강제종료
+              const stopResponse =
+                await MockSettlementControlService.stopSimulation();
+              if (stopResponse.success) {
+                // 강제종료 성공 시 pending action 실행
+                pendingAction();
+              } else {
+                setError(
+                  "모의정산 강제종료에 실패했습니다: " + stopResponse.error
+                );
+              }
             }
-          }
-          setIsConfirmDialogOpen(false);
-          setPendingAction(null);
-        }}
-        actionType="조회"
-      />
-    </div>
+            setIsConfirmDialogOpen(false);
+            setPendingAction(null);
+          }}
+          actionType="조회"
+        />
+      </div>
+    </ProtectedRoute>
   );
 }

@@ -405,180 +405,182 @@ export default function MockSettlementByInstitutionPage() {
   }, [byInstitutionData, unit]);
 
   return (
-    <div className="space-y-6">
-      <h1 className="text-2xl font-bold">모의정산 기관별 조회</h1>
+    <ProtectedRoute requiredPath="/mock-settlement/by-institution">
+      <div className="space-y-6">
+        <h1 className="text-2xl font-bold">모의정산 기관별 조회</h1>
 
-      <FilterForm<MockSettlementByInstitutionFilters>
-        fields={mockSettlementByInstitutionFilterConfig}
-        defaultValues={{ settlementName: "", agency: "" }}
-        schema={mockSettlementByInstitutionSchema}
-        onSearch={handleSearch}
-      />
+        <FilterForm<MockSettlementByInstitutionFilters>
+          fields={mockSettlementByInstitutionFilterConfig}
+          defaultValues={{ settlementName: "", agency: "" }}
+          schema={mockSettlementByInstitutionSchema}
+          onSearch={handleSearch}
+        />
 
-      {/* 전체 페이지 로딩 스피너 */}
-      {isLoading && (
-        <div className="absolute inset-0 flex items-center justify-center bg-white/80 z-50">
-          <div className="text-center">
-            <Spinner />
-            <p className="mt-4 text-gray-600">데이터를 조회하는 중...</p>
+        {/* 전체 페이지 로딩 스피너 */}
+        {isLoading && (
+          <div className="absolute inset-0 flex items-center justify-center bg-white/80 z-50">
+            <div className="text-center">
+              <Spinner />
+              <p className="mt-4 text-gray-600">데이터를 조회하는 중...</p>
+            </div>
           </div>
-        </div>
-      )}
+        )}
 
-      {/* 에러 메시지 */}
-      {error && (
-        <div className="bg-red-50 border border-red-200 rounded-md p-4">
-          <p className="text-red-600">{error}</p>
-        </div>
-      )}
-
-      {/* 상단: 모의정산 정보 그리드 */}
-      {!hasSearched && (
-        <div className="bg-gray-50 flex flex-col justify-center items-center h-[140px] border-2 border-dashed border-gray-300 rounded-lg p-16">
-          <div className="text-center text-gray-500">
-            <p className="text-lg font-medium">모의정산 정보</p>
-            <p className="text-sm">
-              정산명과 기관명을 선택하고 조회 버튼을 누르면 결과가 표시됩니다.
-            </p>
+        {/* 에러 메시지 */}
+        {error && (
+          <div className="bg-red-50 border border-red-200 rounded-md p-4">
+            <p className="text-red-600">{error}</p>
           </div>
-        </div>
-      )}
+        )}
 
-      {hasSearched && (
-        <div className="space-y-4">
-          {!isLoading && mockSettlementData.length > 0 && (
-            <>
-              <h3 className="text-lg font-semibold mb-4">모의정산 정보</h3>
-              <div className="bg-white border border-gray-200 rounded-[24px] p-2">
-                <div className="h-32">
-                  <TestGrid
-                    rowData={mockSettlementData}
-                    columnDefs={mockSettlementColumnDefs}
-                    gridRef={mockSettlementGridRef}
-                    gridOptions={{
-                      suppressCellFocus: true,
-                      suppressMovableColumns: true,
-                      suppressMenuHide: true,
-                      rowSelection: {
-                        enableClickSelection: false,
-                      },
-                      defaultColDef: {
-                        sortable: false,
-                        filter: false,
-                        resizable: false,
-                        suppressMovable: true,
-                      },
-                      onRowDoubleClicked: handleRowDoubleClick,
-                    }}
+        {/* 상단: 모의정산 정보 그리드 */}
+        {!hasSearched && (
+          <div className="bg-gray-50 flex flex-col justify-center items-center h-[140px] border-2 border-dashed border-gray-300 rounded-lg p-16">
+            <div className="text-center text-gray-500">
+              <p className="text-lg font-medium">모의정산 정보</p>
+              <p className="text-sm">
+                정산명과 기관명을 선택하고 조회 버튼을 누르면 결과가 표시됩니다.
+              </p>
+            </div>
+          </div>
+        )}
+
+        {hasSearched && (
+          <div className="space-y-4">
+            {!isLoading && mockSettlementData.length > 0 && (
+              <>
+                <h3 className="text-lg font-semibold mb-4">모의정산 정보</h3>
+                <div className="bg-white border border-gray-200 rounded-[24px] p-2">
+                  <div className="h-32">
+                    <TestGrid
+                      rowData={mockSettlementData}
+                      columnDefs={mockSettlementColumnDefs}
+                      gridRef={mockSettlementGridRef}
+                      gridOptions={{
+                        suppressCellFocus: true,
+                        suppressMovableColumns: true,
+                        suppressMenuHide: true,
+                        rowSelection: {
+                          enableClickSelection: false,
+                        },
+                        defaultColDef: {
+                          sortable: false,
+                          filter: false,
+                          resizable: false,
+                          suppressMovable: true,
+                        },
+                        onRowDoubleClicked: handleRowDoubleClick,
+                      }}
+                    />
+                  </div>
+                </div>
+              </>
+            )}
+
+            {!isLoading && mockSettlementData.length === 0 && (
+              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                <p className="text-yellow-800">
+                  조회된 모의정산 정보가 없습니다.
+                </p>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* 하단: 기관별 조회 결과 그리드 */}
+        <div className="space-y-2">
+          {/* 좌우 그리드 레이아웃 */}
+          <div className="grid grid-cols-2 gap-6 h-[calc(100vh-550px)] min-h-[350px]">
+            {/* 왼쪽: 기관별 조회 결과 그리드 */}
+            <div className="flex flex-col h-full">
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-lg font-semibold">기관별 조회 결과</h3>
+                <div className="flex items-center gap-4">
+                  <UnitRadioGroup value={unit} onChange={setUnit} />
+                  <CsvExportButton
+                    gridRef={byInstitutionGridRef}
+                    fileName="mock_settlement_by_institution_data.csv"
+                    className="shadow-lg bg-accent-500"
                   />
                 </div>
               </div>
-            </>
-          )}
-
-          {!isLoading && mockSettlementData.length === 0 && (
-            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-              <p className="text-yellow-800">
-                조회된 모의정산 정보가 없습니다.
-              </p>
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* 하단: 기관별 조회 결과 그리드 */}
-      <div className="space-y-2">
-        {/* 좌우 그리드 레이아웃 */}
-        <div className="grid grid-cols-2 gap-6 h-[calc(100vh-550px)] min-h-[350px]">
-          {/* 왼쪽: 기관별 조회 결과 그리드 */}
-          <div className="flex flex-col h-full">
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="text-lg font-semibold">기관별 조회 결과</h3>
-              <div className="flex items-center gap-4">
-                <UnitRadioGroup value={unit} onChange={setUnit} />
-                <CsvExportButton
+              <div className="relative flex-1 h-full ">
+                {hasSearched && isLoading && (
+                  <div className="absolute inset-0 h-100vh flex items-center justify-center bg-white/80 z-10">
+                    <Spinner />
+                  </div>
+                )}
+                <TestGrid
+                  rowData={hasSearched ? byInstitutionRowData ?? [] : []}
+                  columnDefs={byInstitutionColumnDefs}
                   gridRef={byInstitutionGridRef}
-                  fileName="mock_settlement_by_institution_data.csv"
-                  className="shadow-lg bg-accent-500"
+                  gridOptions={{
+                    suppressColumnResize: false,
+                    suppressRowClickSelection: true,
+                    suppressCellFocus: true,
+                    headerHeight: 50,
+                    suppressScrollOnNewData: true,
+                    pinnedBottomRowData: pinnedBottomRowData,
+                  }}
                 />
               </div>
             </div>
-            <div className="relative flex-1 h-full ">
-              {hasSearched && isLoading && (
-                <div className="absolute inset-0 h-100vh flex items-center justify-center bg-white/80 z-10">
-                  <Spinner />
-                </div>
-              )}
-              <TestGrid
-                rowData={hasSearched ? byInstitutionRowData ?? [] : []}
-                columnDefs={byInstitutionColumnDefs}
-                gridRef={byInstitutionGridRef}
-                gridOptions={{
-                  suppressColumnResize: false,
-                  suppressRowClickSelection: true,
-                  suppressCellFocus: true,
-                  headerHeight: 50,
-                  suppressScrollOnNewData: true,
-                  pinnedBottomRowData: pinnedBottomRowData,
-                }}
-              />
-            </div>
-          </div>
 
-          {/* 오른쪽: 차트 영역 */}
-          <div className="flex flex-col h-full">
-            <div className="mb-4 h-[40px]"></div>
-            <div className="relative flex-1 h-full">
-              {!hasSearched ? (
-                <div className="h-full max-h-[425px] flex items-center justify-center bg-gray-50 border-2 border-dashed border-gray-300 rounded">
-                  <div className="text-center text-gray-500">
-                    <p className="text-lg font-medium">
-                      조회 버튼을 눌러주세요
-                    </p>
-                    <p className="text-sm">
-                      정산명과 기관명을 선택하고 조회하면
-                    </p>
-                    <p className="text-sm">
-                      해당 기관의 모의정산 결과 차트가 표시됩니다.
-                    </p>
+            {/* 오른쪽: 차트 영역 */}
+            <div className="flex flex-col h-full">
+              <div className="mb-4 h-[40px]"></div>
+              <div className="relative flex-1 h-full">
+                {!hasSearched ? (
+                  <div className="h-full max-h-[425px] flex items-center justify-center bg-gray-50 border-2 border-dashed border-gray-300 rounded">
+                    <div className="text-center text-gray-500">
+                      <p className="text-lg font-medium">
+                        조회 버튼을 눌러주세요
+                      </p>
+                      <p className="text-sm">
+                        정산명과 기관명을 선택하고 조회하면
+                      </p>
+                      <p className="text-sm">
+                        해당 기관의 모의정산 결과 차트가 표시됩니다.
+                      </p>
+                    </div>
                   </div>
-                </div>
-              ) : hasSearched &&
-                byInstitutionData &&
-                byInstitutionData.length > 0 ? (
-                <div className="h-full w-full">
-                  <InstitutionChart data={byInstitutionData || []} />
-                </div>
-              ) : (
-                <div className="h-full flex items-center justify-center bg-gray-50 border-2 border-dashed border-gray-300 rounded">
-                  <div className="text-center text-gray-500">
-                    <p className="text-lg font-medium">데이터가 없습니다</p>
-                    <p className="text-sm">조회된 데이터가 없습니다.</p>
+                ) : hasSearched &&
+                  byInstitutionData &&
+                  byInstitutionData.length > 0 ? (
+                  <div className="h-full w-full">
+                    <InstitutionChart data={byInstitutionData || []} />
                   </div>
-                </div>
-              )}
+                ) : (
+                  <div className="h-full flex items-center justify-center bg-gray-50 border-2 border-dashed border-gray-300 rounded">
+                    <div className="text-center text-gray-500">
+                      <p className="text-lg font-medium">데이터가 없습니다</p>
+                      <p className="text-sm">조회된 데이터가 없습니다.</p>
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </div>
-      </div>
 
-      {/* 모의정산 상세 모달 */}
-      {selectedSettlement && (
-        <MockSettlementDetailModal
-          isOpen={isDetailModalOpen}
-          onClose={handleDetailModalClose}
-          simStmtGrpId={selectedSettlement.simStmtGrpId}
-          gridData={selectedSettlement.data}
+        {/* 모의정산 상세 모달 */}
+        {selectedSettlement && (
+          <MockSettlementDetailModal
+            isOpen={isDetailModalOpen}
+            onClose={handleDetailModalClose}
+            simStmtGrpId={selectedSettlement.simStmtGrpId}
+            gridData={selectedSettlement.data}
+          />
+        )}
+
+        {/* 토스트 알림 */}
+        <Toast
+          isVisible={toast.isVisible}
+          message={toast.message}
+          type={toast.type}
+          onClose={() => setToast((prev) => ({ ...prev, isVisible: false }))}
         />
-      )}
-
-      {/* 토스트 알림 */}
-      <Toast
-        isVisible={toast.isVisible}
-        message={toast.message}
-        type={toast.type}
-        onClose={() => setToast((prev) => ({ ...prev, isVisible: false }))}
-      />
-    </div>
+      </div>
+    </ProtectedRoute>
   );
 }

@@ -259,8 +259,12 @@ export function useSettlementFilters(
       endpoint: "/api/common/agencies",
       autoSelectFirst: true,
       // '전체'를 제외한 첫 번째 기관 선택
-      filterOptions: (options: any[]) =>
+      filterOptions: (options: Array<{ label: string; value: string }>) =>
         options.filter((opt) => opt.label !== "전체"),
+    },
+    stmtGrpId: {
+      endpoint: "/api/stmt_grp_id",
+      autoSelectFirst: true,
     },
   };
 

@@ -1,6 +1,7 @@
 // 정산결과 기관별 조회 필터 타입
 export interface SettlementByInstitutionFilters {
   agency: string; // 기관명
+  stmtGrpId: string; // 대안 (STMT_GRP_ID)
 }
 
 // 정산결과 기관별 조회 데이터 타입 (외부 API 응답 구조)

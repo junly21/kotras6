@@ -29,6 +29,7 @@ ModuleRegistry.registerModules([AllCommunityModule]);
 export default function SettlementByInstitutionPage() {
   const gridRef = useRef<AgGridReact>(null);
   const [filters, setFilters] = useState<SettlementByInstitutionFilters>({
+    stmtGrpId: "",
     agency: "",
   });
 
@@ -43,13 +44,30 @@ export default function SettlementByInstitutionPage() {
   const { isLoading: isFilterLoading, isAllOptionsLoaded: isFilterLoaded } =
     useSettlementFilters(handleFilterChange);
 
-  // ✅ 모든 필터 옵션이 로드되고 첫 번째 기관이 선택되면 자동 조회
+  // ✅ 첫 번째 옵션 자동 선택을 위한 ref
+  const hasAutoSelected = useRef(false);
+
+  // ✅ 모든 필터 옵션이 로드되면 자동 선택 완료 표시 (실제 선택은 useSettlementFilters에서 처리)
   useEffect(() => {
-    if (isFilterLoaded && filters.agency && !hasSearched) {
-      console.log("자동 조회 실행:", filters.agency);
+    if (isFilterLoaded && !hasAutoSelected.current) {
+      hasAutoSelected.current = true;
+      console.log("필터 옵션 로드 완료, 자동 선택 대기 중");
+    }
+  }, [isFilterLoaded]);
+
+  // ✅ 모든 필터가 선택되면 자동 조회
+  useEffect(() => {
+    if (
+      isFilterLoaded &&
+      filters.agency &&
+      filters.stmtGrpId &&
+      !hasSearched &&
+      hasAutoSelected.current
+    ) {
+      console.log("자동 조회 실행:", filters);
       setHasSearched(true);
     }
-  }, [isFilterLoaded, filters.agency, hasSearched]);
+  }, [isFilterLoaded, filters, hasSearched]);
 
   // 원단위 상태 추가
   const [unit, setUnit] = useState<Unit>("원");

@@ -1,7 +1,7 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { callExternalApi, createCorsHeaders } from "../../utils/externalApi";
 
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
   try {
     console.log("정산결과 기관별 조회 API 호출됨");
 
@@ -12,6 +12,7 @@ export async function POST(request: Request) {
       method: "POST",
       body: {
         OPER_ID: body.agency,
+        STMT_GRP_ID: body.stmtGrpId,
       },
       request, // 클라이언트 IP 추출을 위한 request 객체 전달
     });

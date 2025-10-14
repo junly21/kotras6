@@ -60,15 +60,7 @@ export function TransactionDetailFilterForm({
         }));
       });
 
-    // 카드구분 옵션 로드
-    fetch("/api/transaction-detail/card-types")
-      .then((res) => res.json())
-      .then((data: { options: FieldOption[] }) => {
-        setDynamicOptions((prev) => ({
-          ...prev,
-          cardType: data.options ?? [],
-        }));
-      });
+    // 카드구분 옵션 로드 제거됨
 
     // 기관명 옵션 로드
     fetch("/api/common/agencies")
@@ -168,7 +160,7 @@ export function TransactionDetailFilterForm({
   }, [form, dynamicOptions.line, dynamicOptions.agency]);
 
   const handleSubmit = (values: TransactionDetailFilters) => {
-    // value를 value2로 변환 (value2가 없으면 label 사용)
+    // 기관명은 value (ID)를 직접 사용, '전체' 선택 시에만 'ALL'로 전송
     const agencyOptions = dynamicOptions.agency || [];
     const lineOptions = dynamicOptions.line || [];
 
@@ -177,10 +169,8 @@ export function TransactionDetailFilterForm({
     );
     const selectedLine = lineOptions.find((opt) => opt.value === values.line);
 
-    const agencyValue2 =
-      selectedAgency?.value2 || selectedAgency?.label || values.agency;
-    // '전체' 선택 시에는 'ALL'로 전송, 그 외에는 value2 값 사용
-    const agencyValue = agencyValue2 === "전체" ? "ALL" : agencyValue2;
+    // '전체' 선택 시에는 'ALL'로 전송, 그 외에는 value (ID) 값 사용
+    const agencyValue = values.agency === "ALL" ? "ALL" : values.agency;
 
     const convertedValues = {
       ...values,
@@ -198,10 +188,10 @@ export function TransactionDetailFilterForm({
       <form
         onSubmit={form.handleSubmit(handleSubmit)}
         className={cn(
-          "bg-[#E9E9E9] border border-[#D9D9D9] p-4 rounded-xl flex items-center",
+          "bg-[#E9E9E9] border border-[#D9D9D9] p-4 rounded-xl",
           className
         )}>
-        <div className="flex flex-wrap gap-4 items-center">
+        <div className="flex flex-wrap gap-4 items-end">
           {/* 거래일자 */}
           <FormField
             control={form.control}
@@ -232,35 +222,7 @@ export function TransactionDetailFilterForm({
             )}
           />
 
-          {/* 카드구분 */}
-          <FormField
-            control={form.control}
-            name="cardType"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>
-                  카드구분
-                  <span className="text-red-500">*</span>
-                </FormLabel>
-                <FormControl>
-                  <Select onValueChange={field.onChange} value={field.value}>
-                    <SelectTrigger className="w-48 bg-white border border-[#d9d9d9]">
-                      <SelectValue placeholder="카드구분을 선택하세요" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {(dynamicOptions.cardType || []).map((opt, index) => (
-                        <SelectItem
-                          key={opt.value || `cardType-${index}`}
-                          value={String(opt.value)}>
-                          {opt.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </FormControl>
-              </FormItem>
-            )}
-          />
+          {/* 카드구분 필드 제거됨 */}
 
           {/* 기관명 */}
           <FormField
@@ -386,20 +348,11 @@ export function TransactionDetailFilterForm({
               );
             }}
           />
-        </div>
 
-        {/* 버튼 영역 - 항상 오른쪽 정렬 */}
-        <div className="flex justify-end gap-2 mt-4">
+          {/* 조회 버튼 */}
           <Button type="submit" className="rounded-lg">
             조회
           </Button>
-          {/* <Button
-            type="button"
-            className="rounded-lg"
-            variant="outline"
-            onClick={() => form.reset()}>
-            초기화
-          </Button> */}
         </div>
       </form>
 

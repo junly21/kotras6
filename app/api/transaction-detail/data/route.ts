@@ -9,7 +9,6 @@ export async function POST(request: NextRequest) {
 
     // body 안의 params 객체에서 필터 추출
     const tradeDate = body.params?.tradeDate || "";
-    const cardType = body.params?.cardType || "";
     const agency = body.params?.agency || "";
     const line = body.params?.line || "";
     const stationDiv = body.params?.stationDiv || "";
@@ -17,7 +16,6 @@ export async function POST(request: NextRequest) {
 
     console.log("Selected filters:", {
       tradeDate,
-      cardType,
       agency,
       line,
       stationDiv,
@@ -28,8 +26,7 @@ export async function POST(request: NextRequest) {
       method: "POST",
       body: {
         RIDE_OPRN_DT: tradeDate,
-        CARD_DIV: cardType,
-        OPER_NM: agency,
+        OPER_ID: agency, // OPER_NM에서 OPER_ID로 변경
         LINE_NM: line,
         STN_DIV: stationDiv,
         STN_ID_LIST: stations,

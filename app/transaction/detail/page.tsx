@@ -60,27 +60,20 @@ export default function TransactionDetailPage() {
   const calculateTotals = useCallback((data: TransactionDetailData[]) => {
     const totals = data.reduce(
       (acc, item) => ({
-        fnl_dist_amt: acc.fnl_dist_amt + (item.fnl_dist_amt || 0),
-        base_dist_amt: acc.base_dist_amt + (item.base_dist_amt || 0),
-        ubrw_adtn_use_amt:
-          acc.ubrw_adtn_use_amt + (item.ubrw_adtn_use_amt || 0),
+        cnt: acc.cnt + (item.cnt || 0),
       }),
       {
-        fnl_dist_amt: 0,
-        base_dist_amt: 0,
-        ubrw_adtn_use_amt: 0,
+        cnt: 0,
       }
     );
 
     return {
-      trcr_no: `총 ${data.length}건`,
-      ride_dtm: "",
-      algh_dtm: "",
-      ride_nm: "",
-      algh_nm: "",
-      fnl_dist_amt: totals.fnl_dist_amt,
-      base_dist_amt: totals.base_dist_amt,
-      ubrw_adtn_use_amt: totals.ubrw_adtn_use_amt,
+      line_nm: "",
+      stn_nm: "",
+      card_div: "",
+      oper_nm: "",
+      ride_oprn_dt: `총 ${data.length}건`,
+      cnt: totals.cnt,
     };
   }, []);
 
@@ -116,10 +109,10 @@ export default function TransactionDetailPage() {
   // 컬럼 정의
   const colDefs = [
     {
-      headerName: "카드번호",
-      field: "trcr_no",
+      headerName: "거래일자",
+      field: "ride_oprn_dt",
       flex: 1,
-      minWidth: 180,
+      minWidth: 120,
       resizable: false,
       cellStyle: (params: any) => {
         if (params.node.rowPinned === "bottom") {
@@ -133,14 +126,10 @@ export default function TransactionDetailPage() {
       },
     },
     {
-      headerName: "승차시각",
-      field: "ride_dtm",
-      minWidth: 180,
+      headerName: "카드구분",
+      field: "card_div",
+      minWidth: 120,
       flex: 1,
-      valueFormatter: (params: { value: number | null | undefined }) => {
-        if (!params.value) return "";
-        return new Date(params.value).toLocaleString();
-      },
       cellStyle: (params: any) => {
         if (params.node.rowPinned === "bottom") {
           return {
@@ -154,29 +143,8 @@ export default function TransactionDetailPage() {
       resizable: false,
     },
     {
-      headerName: "하차시각",
-      field: "algh_dtm",
-      minWidth: 180,
-      flex: 1,
-      valueFormatter: (params: { value: number | null | undefined }) => {
-        if (!params.value) return "";
-        return new Date(params.value).toLocaleString();
-      },
-      cellStyle: (params: any) => {
-        if (params.node.rowPinned === "bottom") {
-          return {
-            fontWeight: "bold",
-            backgroundColor: "#f8f9fa",
-            borderTop: "2px solid #dee2e6",
-          };
-        }
-        return {};
-      },
-      resizable: false,
-    },
-    {
-      headerName: "최초승차역",
-      field: "ride_nm",
+      headerName: "기관명",
+      field: "oper_nm",
       minWidth: 150,
       flex: 1,
       cellStyle: (params: any) => {
@@ -192,9 +160,9 @@ export default function TransactionDetailPage() {
       resizable: false,
     },
     {
-      headerName: "최종하차역",
-      field: "algh_nm",
-      minWidth: 150,
+      headerName: "노선명",
+      field: "line_nm",
+      minWidth: 120,
       flex: 1,
       cellStyle: (params: any) => {
         if (params.node.rowPinned === "bottom") {
@@ -209,51 +177,26 @@ export default function TransactionDetailPage() {
       resizable: false,
     },
     {
-      headerName: "총배분금(원)",
-      field: "fnl_dist_amt",
-      minWidth: 150,
+      headerName: "역명",
+      field: "stn_nm",
+      minWidth: 120,
       flex: 1,
-      valueFormatter: (params: { value: number | null | undefined }) =>
-        (params.value || 0).toLocaleString(),
       cellStyle: (params: any) => {
-        const baseStyle = { textAlign: "right" };
         if (params.node.rowPinned === "bottom") {
           return {
-            ...baseStyle,
             fontWeight: "bold",
             backgroundColor: "#f8f9fa",
             borderTop: "2px solid #dee2e6",
           };
         }
-        return baseStyle;
+        return {};
       },
       resizable: false,
     },
     {
-      headerName: "기본배분금(원)",
-      field: "base_dist_amt",
-      minWidth: 150,
-      flex: 1,
-      valueFormatter: (params: { value: number | null | undefined }) =>
-        (params.value || 0).toLocaleString(),
-      cellStyle: (params: any) => {
-        const baseStyle = { textAlign: "right" };
-        if (params.node.rowPinned === "bottom") {
-          return {
-            ...baseStyle,
-            fontWeight: "bold",
-            backgroundColor: "#f8f9fa",
-            borderTop: "2px solid #dee2e6",
-          };
-        }
-        return baseStyle;
-      },
-      resizable: false,
-    },
-    {
-      headerName: "도시철도부가사용금(원)",
-      field: "ubrw_adtn_use_amt",
-      minWidth: 220,
+      headerName: "건수",
+      field: "cnt",
+      minWidth: 100,
       flex: 1,
       valueFormatter: (params: { value: number | null | undefined }) =>
         (params.value || 0).toLocaleString(),
@@ -281,7 +224,6 @@ export default function TransactionDetailPage() {
         <TransactionDetailFilterForm
           defaultValues={{
             tradeDate: "",
-            cardType: "",
             agency: "",
             line: "",
             stationDiv: "",
@@ -296,7 +238,7 @@ export default function TransactionDetailPage() {
           <div className="flex items-center gap-4">
             <CsvExportButton
               gridRef={gridRef}
-              fileName="transaction_detail_data.csv"
+              fileName="transaction_detail_summary.csv"
               className="shadow-lg bg-accent-500"
             />
           </div>

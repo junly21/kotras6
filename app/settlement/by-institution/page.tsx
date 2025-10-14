@@ -107,7 +107,7 @@ export default function SettlementByInstitutionPage() {
   }, []);
 
   const {
-    data: apiData,
+    data: rawApiData,
     loading,
     refetch,
   } = useApi<SettlementByInstitutionData[]>(apiCall, {
@@ -115,6 +115,18 @@ export default function SettlementByInstitutionPage() {
     onSuccess,
     onError,
   });
+
+  // 총계 객체 제외하고 일반 데이터만 추출
+  const apiData = useMemo(() => {
+    if (!rawApiData) return [];
+    return rawApiData.filter((item) => item.대상기관 !== "총계");
+  }, [rawApiData]);
+
+  // 총계 객체에서 총계 값 추출
+  const totalObject = useMemo(() => {
+    if (!rawApiData) return null;
+    return rawApiData.find((item) => item.대상기관 === "총계") || null;
+  }, [rawApiData]);
 
   useEffect(() => {
     if (hasSearched) {
@@ -130,45 +142,14 @@ export default function SettlementByInstitutionPage() {
   // 그리드용 단위변환된 데이터
   const rowData = useUnitConversion(apiData, unit);
 
-  // 하단 고정 행 데이터 (총계)
+  // 하단 고정 행 데이터 (총계) - 외부 API에서 제공된 총계 사용
   const pinnedBottomRowData = useMemo(() => {
-    if (!apiData || apiData.length === 0) return [];
+    if (!totalObject || !apiData || apiData.length === 0) return [];
 
-    // 디버깅을 위한 로그 추가
-    console.log("원 단위일 때 총계 계산:", {
-      unit,
-      sampleData: apiData[0],
-      지급액Type: typeof apiData[0]?.지급액,
-      수급액Type: typeof apiData[0]?.수급액,
-      차액Type: typeof apiData[0]?.차액,
-    });
-
-    const totalPayment = apiData.reduce(
-      (sum, item) => sum + (Number(item.지급액) || 0),
-      0
-    );
-    const totalReceipt = apiData.reduce(
-      (sum, item) => sum + (Number(item.수급액) || 0),
-      0
-    );
-    const totalDifference = apiData.reduce(
-      (sum, item) => sum + (Number(item.차액) || 0),
-      0
-    );
-
-    console.log("총계 계산 결과:", {
-      totalPayment,
-      totalReceipt,
-      totalDifference,
-      unitMultiplier:
-        unit === "원"
-          ? 1
-          : unit === "천 원"
-          ? 1 / 1000
-          : unit === "백만 원"
-          ? 1 / 1000000
-          : 1 / 100000000,
-    });
+    // 외부 API에서 제공된 총계 값 사용
+    const totalPayment = Number(totalObject.지급액 || 0);
+    const totalReceipt = Number(totalObject.수급액 || 0);
+    const totalDifference = Number(totalObject.차액 || 0);
 
     // 단위변환 적용
     const unitMultiplier =
@@ -200,9 +181,8 @@ export default function SettlementByInstitutionPage() {
       },
     ];
 
-    console.log("pinnedBottomRowData 최종 결과:", result);
     return result;
-  }, [apiData, unit]);
+  }, [totalObject, apiData, unit]);
 
   // pinnedBottomRowData 변경 시 디버깅
   useEffect(() => {

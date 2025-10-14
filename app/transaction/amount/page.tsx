@@ -191,7 +191,7 @@ export default function TransactionAmountPage() {
         cellStyle: { fontWeight: "bold", textAlign: "center" },
       },
       {
-        headerName: "총계(원)",
+        headerName: "보유금 총계(원)",
         field: "total_amount",
         minWidth: 120,
         pinned: "left",

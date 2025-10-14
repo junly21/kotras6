@@ -93,7 +93,7 @@ export function getDetailedPermissions(
           byInstitution: true, // 기관별 조회 - 모든 기관
           byRoute: true, // 노선별 조회 - 대광위 + SERVICE
           byStation: true, // 역별 조회 - 대광위 + SERVICE
-          byOd: false, // OD별 조회 - 대광위만
+          byOd: true, // OD별 조회 - 대광위만
         },
         mockSettlement: {
           register: true, // 정산 등록 - 대광위만
@@ -101,7 +101,7 @@ export function getDetailedPermissions(
           byInstitution: true, // 기관별 조회 - 대광위만
           byRoute: true, // 노선별 조회 - 대광위만
           byStation: true, // 역별 조회 - 대광위만
-          byOd: false, // OD별 조회 - 대광위만
+          byOd: true, // OD별 조회 - 대광위만
         },
         network: {
           map: true, // 지도 조회 - 모든 기관

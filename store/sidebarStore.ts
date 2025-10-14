@@ -119,14 +119,14 @@ export const getMenuData = (): MenuItem[] => [
         path: "/transaction/analysis",
       },
       {
-        id: "transaction-amount",
-        label: "노선별 내역",
-        path: "/transaction/amount",
-      },
-      {
         id: "transaction-detail",
         label: "상세 내역",
         path: "/transaction/detail",
+      },
+      {
+        id: "transaction-amount",
+        label: "노선별 내역",
+        path: "/transaction/amount",
       },
     ],
   },

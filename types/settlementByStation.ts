@@ -1,5 +1,6 @@
 // 정산결과 역별 조회 필터 타입
 export interface SettlementByStationFilters {
+  stmtGrpId: string; // 대안 (STMT_GRP_ID)
   STN_ID1: string; // 선택역1
   STN_ID2: string; // 선택역2
   STN_ID3: string; // 선택역3

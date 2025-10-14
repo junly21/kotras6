@@ -45,4 +45,12 @@ export const settlementByStationFilterConfig: FieldConfig[] = [
     optionsEndpoint: "/api/selectNetWorkNodeSelectBoxSession",
     dependsOn: "STN_ID4", // STN_ID4가 선택되어야 활성화
   },
+  {
+    name: "stmtGrpId",
+    label: "대안",
+    type: "select",
+    required: true,
+    placeholder: "대안을 선택하세요",
+    optionsEndpoint: "/api/stmt_grp_id",
+  },
 ];

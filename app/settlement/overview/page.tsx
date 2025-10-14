@@ -1,8 +1,10 @@
 "use client";
+import { useEffect } from "react";
 import TestGrid from "@/components/TestGrid";
 import Spinner from "@/components/Spinner";
 import CsvExportButton from "@/components/CsvExportButton";
 import ProtectedRoute from "@/components/ProtectedRoute";
+import { FilterForm } from "@/components/ui/FilterForm";
 import { Toast } from "@/components/ui/Toast";
 import {
   AllCommunityModule,
@@ -15,6 +17,12 @@ import { useCallback, useRef, useState } from "react";
 import { AgGridReact } from "ag-grid-react";
 import { UnitRadioGroup, type Unit } from "@/components/ui/UnitRadioGroup";
 import { useUnitConversion } from "@/hooks/useUnitConversion";
+import {
+  settlementOverviewFields,
+  settlementOverviewSchema,
+  SettlementOverviewFilters,
+} from "@/features/settlementOverview/filterConfig";
+import { useFilterOptions } from "@/hooks/useFilterOptions";
 
 // Register all Community features
 ModuleRegistry.registerModules([AllCommunityModule]);
@@ -23,6 +31,55 @@ export default function TestGridPage() {
   // gridRef 생성
   const gridRef = useRef<AgGridReact>(null);
   const [unit, setUnit] = useState<Unit>("원");
+
+  // 필터 상태
+  const [filters, setFilters] = useState<SettlementOverviewFilters>({
+    stmtGrpId: "",
+  });
+
+  // ✅ 검색 수행 여부 상태 추가
+  const [hasSearched, setHasSearched] = useState(false);
+
+  // ✅ 정산 필터 옵션 훅 사용
+  const handleFilterChange = useCallback((key: string, value: string) => {
+    setFilters((prev) => ({ ...prev, [key]: value }));
+  }, []);
+
+  // ✅ 대안만 관리하는 필터 옵션 훅 사용
+  const { isLoading: isFilterLoading, isAllOptionsLoaded: isFilterLoaded } =
+    useFilterOptions(
+      {
+        stmtGrpId: {
+          endpoint: "/api/stmt_grp_id",
+          autoSelectFirst: true,
+        },
+      },
+      handleFilterChange
+    );
+
+  // ✅ 첫 번째 옵션 자동 선택을 위한 ref
+  const hasAutoSelected = useRef(false);
+
+  // ✅ 모든 필터 옵션이 로드되면 자동 선택 완료 표시 (실제 선택은 useFilterOptions에서 처리)
+  useEffect(() => {
+    if (isFilterLoaded && !hasAutoSelected.current) {
+      hasAutoSelected.current = true;
+      console.log("필터 옵션 로드 완료, 자동 선택 대기 중");
+    }
+  }, [isFilterLoaded]);
+
+  // ✅ 대안이 선택되면 자동 조회
+  useEffect(() => {
+    if (
+      isFilterLoaded &&
+      filters.stmtGrpId &&
+      !hasSearched &&
+      hasAutoSelected.current
+    ) {
+      console.log("자동 조회 실행:", filters);
+      setHasSearched(true);
+    }
+  }, [isFilterLoaded, filters, hasSearched]);
 
   // 토스트 상태
   const [toast, setToast] = useState<{
@@ -36,7 +93,10 @@ export default function TestGridPage() {
   });
 
   // apiCall 함수를 메모이제이션
-  const apiCall = useCallback(() => PayRecvService.getOperList(), []);
+  const apiCall = useCallback(
+    () => PayRecvService.getOperList(filters.stmtGrpId),
+    [filters.stmtGrpId]
+  );
 
   // 콜백 함수들도 메모이제이션
   const onSuccess = useCallback((data: PayRecvOperData[]) => {
@@ -57,11 +117,27 @@ export default function TestGridPage() {
     });
   }, []);
 
-  const { data: apiData, loading } = useApi<PayRecvOperData[]>(apiCall, {
-    autoFetch: true,
+  const {
+    data: apiData,
+    loading,
+    refetch,
+  } = useApi<PayRecvOperData[]>(apiCall, {
+    autoFetch: false,
     onSuccess,
     onError,
   });
+
+  useEffect(() => {
+    if (hasSearched) {
+      refetch();
+    }
+  }, [filters, refetch, hasSearched]);
+
+  // 검색 핸들러
+  const handleSearch = useCallback((values: SettlementOverviewFilters) => {
+    setHasSearched(true); // ✅ 검색 시작
+    setFilters(values);
+  }, []);
 
   // 숫자 컬럼용 동적 스타일 함수
   const getNumberCellStyle = (params: { value: number }) => {
@@ -198,36 +274,70 @@ export default function TestGridPage() {
           <h1 className="text-2xl font-bold">연락운임 정산결과</h1>
         </div>
 
-        {/* 정산결과 그리드 제목 및 버튼 */}
-        <div className="flex justify-between items-center mb-4">
-          <h3 className="text-lg font-semibold">연락운임 정산결과 조회</h3>
-          <div className="flex items-center gap-4">
-            <UnitRadioGroup value={unit} onChange={setUnit} />
-            <CsvExportButton
-              gridRef={gridRef}
-              fileName="pay_recv_data.csv"
-              className="shadow-lg bg-accent-500"
-            />
-          </div>
-        </div>
-
+        {/* 필터 폼 */}
         <div className="relative">
-          {loading && (
-            <div className="absolute inset-0 flex items-center justify-center bg-white/80 z-10">
+          {isFilterLoading && (
+            <div className="absolute inset-0 flex items-center justify-center bg-white/80 z-10 rounded-xl">
               <Spinner />
             </div>
           )}
-          <TestGrid
-            rowData={loading ? null : rowData}
-            columnDefs={colDefs}
-            gridRef={gridRef}
-            height={680}
-            enableNumberColoring={true}
-            gridOptions={{
-              rowHeight: 44,
-            }}
+          <FilterForm<SettlementOverviewFilters>
+            fields={settlementOverviewFields}
+            defaultValues={filters}
+            values={filters}
+            schema={settlementOverviewSchema}
+            onSearch={handleSearch}
           />
         </div>
+
+        {/* 결과 영역 */}
+        {!hasSearched && (
+          <div className="bg-gray-50 flex flex-col justify-center items-center h-[600px] border-2 border-dashed border-gray-300 rounded-lg p-16">
+            <div className="text-center text-gray-500">
+              <p className="text-lg font-medium">조회 결과</p>
+              <p className="text-sm">
+                대안을 선택하고 조회 버튼을 누르면 결과가 표시됩니다.
+              </p>
+            </div>
+          </div>
+        )}
+
+        {hasSearched && (
+          <>
+            {/* 정산결과 그리드 제목 및 버튼 */}
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-semibold">연락운임 정산결과 조회</h3>
+              <div className="flex items-center gap-4">
+                <UnitRadioGroup value={unit} onChange={setUnit} />
+                <CsvExportButton
+                  gridRef={gridRef}
+                  fileName="pay_recv_data.csv"
+                  className="shadow-lg bg-accent-500"
+                />
+              </div>
+            </div>
+
+            <div className="relative h-[calc(100vh-370px)]">
+              {loading && (
+                <div className="absolute inset-0 flex items-center justify-center bg-white/80 z-10">
+                  <Spinner />
+                </div>
+              )}
+              <div className="w-full h-full">
+                <TestGrid
+                  rowData={loading ? null : rowData}
+                  columnDefs={colDefs}
+                  gridRef={gridRef}
+                  height="100%"
+                  enableNumberColoring={true}
+                  gridOptions={{
+                    rowHeight: 40,
+                  }}
+                />
+              </div>
+            </div>
+          </>
+        )}
 
         {/* 토스트 알림 */}
         <Toast

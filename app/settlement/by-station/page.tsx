@@ -18,9 +18,10 @@ import { AllCommunityModule, ModuleRegistry } from "ag-grid-community";
 // Register all Community features
 ModuleRegistry.registerModules([AllCommunityModule]);
 
-// 검증 스키마 (첫 번째 역은 필수, 나머지 역은 선택사항)
+// 검증 스키마 (대안은 필수, 첫 번째 역은 필수, 나머지 역은 선택사항)
 const settlementByStationSchema = z
   .object({
+    stmtGrpId: z.string().min(1, "대안을 선택해주세요"),
     STN_ID1: z.string().min(1, "첫 번째 역을 선택해주세요"),
     STN_ID2: z.string().optional(),
     STN_ID3: z.string().optional(),
@@ -55,6 +56,7 @@ const settlementByStationSchema = z
 
 // 기본값
 const defaultValues: SettlementByStationFilters = {
+  stmtGrpId: "",
   STN_ID1: "",
   STN_ID2: "",
   STN_ID3: "",
@@ -74,6 +76,10 @@ export default function SettlementByStationPage() {
   const [validationErrors, setValidationErrors] = useState<{
     [key: string]: string;
   }>({});
+
+  // ✅ 조회 버튼을 눌렀을 때의 필터 상태 저장 (CSV 다운로드용)
+  const [lastSearchedFilters, setLastSearchedFilters] =
+    useState<SettlementByStationFilters>(defaultValues);
 
   // AG Grid ref
   const gridRef = useRef(null);
@@ -220,6 +226,8 @@ export default function SettlementByStationPage() {
 
       setHasSearched(true);
       setFilters(values);
+      // ✅ 조회 버튼을 눌렀을 때의 필터 상태 저장
+      setLastSearchedFilters(values);
       setIsLoading(true);
       setError(null);
 
@@ -318,7 +326,8 @@ export default function SettlementByStationPage() {
                               },
                               body: JSON.stringify({
                                 NET_DT: "LATEST",
-                              }), // 빈 객체 전송
+                                STMT_GRP_ID: lastSearchedFilters.stmtGrpId,
+                              }),
                             }
                           );
 

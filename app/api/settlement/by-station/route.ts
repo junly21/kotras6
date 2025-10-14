@@ -9,6 +9,7 @@ export async function POST(request: NextRequest) {
     console.log("Body:", body);
 
     const filter: SettlementByStationFilters = {
+      stmtGrpId: body.stmtGrpId || "",
       STN_ID1: body.STN_ID1 || "",
       STN_ID2: body.STN_ID2 || "",
       STN_ID3: body.STN_ID3 || "",
@@ -19,7 +20,10 @@ export async function POST(request: NextRequest) {
     // 외부 API에서 역사별 정산 데이터 조회
     const { data } = await callExternalApi("selectPayRecvNode.do", {
       method: "POST",
-      body: filter,
+      body: {
+        ...filter,
+        STMT_GRP_ID: filter.stmtGrpId, // STMT_GRP_ID로 매핑
+      },
       request, // 클라이언트 IP 추출을 위한 request 객체 전달
     });
 

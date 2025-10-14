@@ -14,10 +14,12 @@ export interface SettlementByRouteData {
 export class SettlementByRouteService {
   // 정산결과 노선별 조회
   static async getSettlementByRoute(
-    agency: string
+    agency: string,
+    stmtGrpId: string
   ): Promise<ApiResponse<SettlementByRouteData[]>> {
     return ApiClient.post<SettlementByRouteData[]>("/settlement/by-route", {
       agency,
+      stmtGrpId,
     });
   }
 }

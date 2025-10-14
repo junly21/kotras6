@@ -3,6 +3,7 @@ import { ApiClient, ApiResponse } from "./apiClient";
 // 타입 정의
 export interface PayRecvOperParams {
   limit: number;
+  stmtGrpId: string;
   // oper_id: string;
 }
 
@@ -24,9 +25,13 @@ export interface PayRecvOperData {
 }
 
 export class PayRecvService {
-  static async getOperList(): Promise<ApiResponse<PayRecvOperData[]>> {
-    // 빈 body로 POST 요청
-    return ApiClient.post<PayRecvOperData[]>("/pay-recv/oper-list", {});
+  static async getOperList(
+    stmtGrpId?: string
+  ): Promise<ApiResponse<PayRecvOperData[]>> {
+    // 대안 필드를 포함한 POST 요청
+    return ApiClient.post<PayRecvOperData[]>("/pay-recv/oper-list", {
+      stmtGrpId: stmtGrpId || "",
+    });
   }
 
   static async createOper(

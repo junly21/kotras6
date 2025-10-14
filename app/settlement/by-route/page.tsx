@@ -25,6 +25,10 @@ export default function SettlementByRoutePage() {
   const [loading, setLoading] = useState(false);
   const [data, setData] = useState<SettlementByRouteData[]>([]);
 
+  // ✅ 조회 버튼을 눌렀을 때의 필터 상태 저장 (CSV 다운로드용)
+  const [lastSearchedFilters, setLastSearchedFilters] =
+    useState<SettlementByRouteFilters>({ stmtGrpId: "", agency: "" });
+
   // 토스트 상태
   const [toast, setToast] = useState<{
     isVisible: boolean;
@@ -75,7 +79,14 @@ export default function SettlementByRoutePage() {
   // 소수점 제거된 그리드 데이터
   const processedRowData = useMemo(() => {
     return data.map((item) => {
-      const processedItem: Record<string, string | number> = { ...item };
+      const processedItem: Record<string, string | number> = {};
+
+      // 각 키-값 쌍을 안전하게 변환
+      Object.entries(item).forEach(([key, value]) => {
+        if (typeof value === "number" || typeof value === "string") {
+          processedItem[key] = value;
+        }
+      });
 
       // 모든 숫자 필드에서 소수점 제거
       Object.keys(processedItem).forEach((key) => {
@@ -91,11 +102,14 @@ export default function SettlementByRoutePage() {
   const handleSearch = useCallback(async (values: SettlementByRouteFilters) => {
     console.log("노선별 조회 검색:", values);
     setHasSearched(true);
+    // ✅ 조회 버튼을 눌렀을 때의 필터 상태 저장
+    setLastSearchedFilters(values);
     setLoading(true);
 
     try {
       const response = await SettlementByRouteService.getSettlementByRoute(
-        values.agency
+        values.agency,
+        values.stmtGrpId
       );
 
       if (response.success && response.data) {
@@ -135,7 +149,7 @@ export default function SettlementByRoutePage() {
 
         <FilterForm<SettlementByRouteFilters>
           fields={settlementByRouteFields}
-          defaultValues={{ agency: "" }}
+          defaultValues={{ stmtGrpId: "", agency: "" }}
           schema={settlementByRouteSchema}
           onSearch={handleSearch}
         />
@@ -159,11 +173,43 @@ export default function SettlementByRoutePage() {
                 <div className="flex justify-between items-center">
                   <h3 className="text-lg font-semibold">노선별 조회 결과</h3>
                   {hasSearched && data.length > 0 && (
-                    <CsvExportButton
-                      gridRef={gridRef}
-                      fileName="settlement_by_route_data.csv"
-                      className="shadow-lg bg-accent-500"
-                    />
+                    <button
+                      onClick={async () => {
+                        try {
+                          const response = await fetch(
+                            "/api/settlement/by-route/download",
+                            {
+                              method: "POST",
+                              headers: {
+                                "Content-Type": "application/json",
+                              },
+                              body: JSON.stringify({
+                                STMT_GRP_ID: lastSearchedFilters.stmtGrpId,
+                                OPER_ID: lastSearchedFilters.agency,
+                              }),
+                            }
+                          );
+
+                          if (response.ok) {
+                            const blob = await response.blob();
+                            const url = window.URL.createObjectURL(blob);
+                            const a = document.createElement("a");
+                            a.href = url;
+                            a.download = "settlement_by_route_data.csv";
+                            document.body.appendChild(a);
+                            a.click();
+                            window.URL.revokeObjectURL(url);
+                            document.body.removeChild(a);
+                          } else {
+                            console.error("CSV 다운로드 실패");
+                          }
+                        } catch (error) {
+                          console.error("CSV 다운로드 중 오류:", error);
+                        }
+                      }}
+                      className="bg-primary font-bold hover:bg-secondary-600 text-white px-4 py-2 rounded-lg transition-colors duration-200 cursor-pointer shadow-lg bg-accent-500">
+                      CSV 다운로드
+                    </button>
                   )}
                 </div>
                 <div className="bg-white border border-gray-200 rounded-[24px] p-4">

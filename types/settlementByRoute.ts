@@ -1,5 +1,6 @@
 // 정산결과 노선별 조회 필터 타입
 export interface SettlementByRouteFilters {
+  stmtGrpId: string; // 대안 (STMT_GRP_ID)
   agency: string; // 기관명
 }
 

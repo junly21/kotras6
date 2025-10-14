@@ -104,7 +104,7 @@ export function FilterForm<T extends FieldValues>({
           className
         )}>
         {/* 요소가 3개 이하일 때: 1줄에 모든 요소와 조회버튼 배치 */}
-        {fields.length <= 3 && (
+        {fields.length <= 4 && (
           <div className="flex flex-wrap gap-4 items-start">
             {fields.map((f) => {
               let options = f.optionsEndpoint
@@ -208,7 +208,7 @@ export function FilterForm<T extends FieldValues>({
         )}
 
         {/* 요소가 4개 이상일 때: 2줄로 분할 */}
-        {fields.length > 3 && (
+        {fields.length > 5 && (
           <>
             {/* 첫 번째 줄 */}
             <div className="flex flex-wrap gap-4 items-start mb-4">

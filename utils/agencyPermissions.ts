@@ -94,6 +94,7 @@ export function getDetailedPermissions(
           byRoute: true, // 노선별 조회 - 대광위 + SERVICE
           byStation: true, // 역별 조회 - 대광위 + SERVICE
           byOd: true, // OD별 조회 - 대광위만
+          consignment: true, // 위탁구간 조회 - 대광위 + SERVICE
         },
         mockSettlement: {
           register: true, // 정산 등록 - 대광위만
@@ -129,6 +130,7 @@ export function getDetailedPermissions(
           byRoute: true, // 노선별 조회 - 대광위 + SERVICE
           byStation: true, // 역별 조회 - 대광위 + SERVICE
           byOd: false, // OD별 조회 - 대광위만
+          consignment: true, // 위탁구간 조회 - 대광위 + SERVICE
         },
         mockSettlement: {
           register: false, // 정산 등록 - 대광위만
@@ -164,6 +166,7 @@ export function getDetailedPermissions(
           byRoute: false, // 노선별 조회 - 대광위 + SERVICE
           byStation: false, // 역별 조회 - 대광위 + SERVICE
           byOd: false, // OD별 조회 - 대광위만
+          consignment: false, // 위탁구간 조회 - 대광위 + SERVICE
         },
         mockSettlement: {
           register: false, // 정산 등록 - 대광위만
@@ -195,6 +198,7 @@ export function getDetailedPermissions(
           byRoute: false,
           byStation: false,
           byOd: false,
+          consignment: false,
         },
         mockSettlement: {
           register: false,
@@ -266,6 +270,9 @@ export function hasPathPermission(agencyCode: string, path: string): boolean {
   }
   if (path.includes("/settlement/by-od")) {
     return hasDetailedPermission(agencyCode, "settlement", "byOd");
+  }
+  if (path.includes("/settlement/consignment")) {
+    return hasDetailedPermission(agencyCode, "settlement", "consignment");
   }
 
   // Mock Settlement 권한 체크

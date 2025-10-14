@@ -32,6 +32,7 @@ export interface DetailedPermissions {
     byRoute: boolean; // 노선별 조회 - 대광위 + SERVICE
     byStation: boolean; // 역별 조회 - 대광위 + SERVICE
     byOd: boolean; // OD별 조회 - 대광위 + SERVICE
+    consignment: boolean; // 위탁구간 조회 - 대광위 + SERVICE
   };
 
   // Mock Settlement 하위 권한

@@ -26,6 +26,7 @@ interface UseFilterOptionsReturn {
   isLoading: boolean; // 전체 로딩 상태
   isAllOptionsLoaded: boolean; // 모든 옵션이 로드되었는지
   getLoadingState: (key: string) => boolean; // 특정 필터의 로딩 상태
+  refetchOptions: (key: string) => void; // 특정 필터 옵션 다시 요청
 }
 
 export function useFilterOptions(
@@ -166,6 +167,12 @@ export function useFilterOptions(
     isLoading,
     isAllOptionsLoaded,
     getLoadingState,
+    refetchOptions: (key: string) => {
+      const configItem = stableConfig[key];
+      if (configItem) {
+        fetchOptions(key, configItem);
+      }
+    },
   };
 }
 

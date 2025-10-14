@@ -209,6 +209,11 @@ export const getMenuData = (): MenuItem[] => [
         label: "OD별 조회",
         path: "/settlement/by-od",
       },
+      {
+        id: "settlement-consignment",
+        label: "위탁구간 조회",
+        path: "/settlement/consignment",
+      },
     ],
   },
   {

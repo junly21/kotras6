@@ -147,6 +147,18 @@ export default function TransactionAmountPage() {
           ride_oprn_dt: date,
         };
 
+        // 총계 컬럼 추가 (fnl_dist_amt_sum이 있으면 사용, 없으면 계산)
+        const firstItem = dateData[0];
+        if (firstItem?.fnl_dist_amt_sum !== undefined) {
+          row.total_amount = firstItem.fnl_dist_amt_sum;
+        } else {
+          // fnl_dist_amt_sum이 없으면 각 노선의 총배분금을 합산
+          row.total_amount = dateData.reduce(
+            (sum, item) => sum + (item.fnl_dist_amt || 0),
+            0
+          );
+        }
+
         // 각 지하철 노선별로 금액 데이터 추가
         uniqueSubways.forEach((subway) => {
           const subwayData = dateData.find((item) => item.subway === subway);
@@ -177,6 +189,20 @@ export default function TransactionAmountPage() {
         pinned: "left",
         resizable: false,
         cellStyle: { fontWeight: "bold", textAlign: "center" },
+      },
+      {
+        headerName: "총계(원)",
+        field: "total_amount",
+        minWidth: 120,
+        pinned: "left",
+        resizable: false,
+        valueFormatter: (params: { value: number | string }) =>
+          params.value ? Number(params.value).toLocaleString() : "0",
+        cellStyle: {
+          fontWeight: "bold",
+          textAlign: "right",
+          backgroundColor: "#f8fafc",
+        },
       },
     ];
 
@@ -227,6 +253,13 @@ export default function TransactionAmountPage() {
     const totalsRow: TransactionAmountData = {
       ride_oprn_dt: `총 ${apiData.length}일`,
     };
+
+    // 총계 컬럼의 총합 계산
+    const totalAmountSum = apiData.reduce(
+      (sum, item) => sum + Number(item.total_amount || 0),
+      0
+    );
+    totalsRow.total_amount = totalAmountSum;
 
     // 각 지하철 노선별 총계 계산
     uniqueSubways.forEach((subway) => {

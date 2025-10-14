@@ -12,6 +12,7 @@ export interface TransactionAmountRawData {
   fnl_dist_amt: number; // 총배분금
   ubrw_adtn_use_amt: number; // 도시철도부가사용금
   base_dist_amt: number; // 기본배분금
+  fnl_dist_amt_sum?: number; // 해당 날짜의 모든 노선별 총배분금 합계
 }
 
 // 그리드에 표시할 데이터 구조 (날짜별로 각 지하철 노선의 금액)

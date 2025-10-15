@@ -607,7 +607,7 @@ export default function MockSettlementByStationPage() {
                     다운로드 중...
                   </div>
                 ) : (
-                  "CSV 다운로드"
+                  "CSV 내보내기"
                 )}
               </button>
             </div>

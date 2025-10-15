@@ -349,7 +349,7 @@ export default function SettlementByStationPage() {
                         }
                       }}
                       className="bg-primary font-bold hover:bg-secondary-600 text-white px-4 py-2 rounded-lg transition-colors duration-200 cursor-pointer">
-                      CSV 다운로드
+                      CSV 내보내기
                     </button>
                   )}
                 </div>

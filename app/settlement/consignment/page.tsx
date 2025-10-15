@@ -54,7 +54,7 @@ export default function SettlementConsignmentPage() {
           const firstAgency = agencyOptions[0].value;
           setFilters((prev) => ({ ...prev, oper_id: firstAgency }));
 
-          // 기관명이 선택되면 노선코드와 대상기관 옵션도 로드
+          // 기관명이 선택되면 노선명와 대상기관 옵션도 로드
           await loadDependentOptions(firstAgency);
         }
 
@@ -71,12 +71,12 @@ export default function SettlementConsignmentPage() {
       }
     };
 
-    // 노선코드와 대상기관 옵션 로드 함수
+    // 노선명와 대상기관 옵션 로드 함수
     const loadDependentOptions = async (operId: string) => {
       setIsFilterLoading(true);
 
       try {
-        // 노선코드 옵션 로드
+        // 노선명 옵션 로드
         const lineCdResponse = await fetch(`/api/line_cd?oper_id=${operId}`);
         const lineCdData = await lineCdResponse.json();
         const lineCdOptions = lineCdData.options || [];
@@ -116,7 +116,7 @@ export default function SettlementConsignmentPage() {
   // 필터 변경 핸들러 - route-search와 같은 방식
   const handleFilterChange = useCallback(
     (values: SettlementConsignmentFilters) => {
-      // 기관명이 변경되면 노선코드와 대상기관 초기화 및 옵션 로드
+      // 기관명이 변경되면 노선명와 대상기관 초기화 및 옵션 로드
       if (values.oper_id && values.oper_id !== filters.oper_id) {
         console.log("기관명 선택됨:", values.oper_id);
 
@@ -130,20 +130,20 @@ export default function SettlementConsignmentPage() {
         setLineCdOptions([]);
         setTargetOperIdOptions([]);
 
-        // 노선코드 옵션 로드
+        // 노선명 옵션 로드
         setIsFilterLoading(true);
         fetch(`/api/line_cd?oper_id=${values.oper_id}`)
           .then((res) => res.json())
           .then((data: { options: any[] }) => {
             console.log(
-              "노선코드 옵션 로드 완료:",
+              "노선명 옵션 로드 완료:",
               data.options?.length || 0,
               "개"
             );
             const options = data.options || [];
             setLineCdOptions(options);
 
-            // 노선코드 첫 번째 옵션을 자동 선택
+            // 노선명 첫 번째 옵션을 자동 선택
             if (options.length > 0) {
               const firstOption = options[0].value;
               setFilters((prev) => ({
@@ -153,7 +153,7 @@ export default function SettlementConsignmentPage() {
             }
           })
           .catch((error) => {
-            console.error("노선코드 옵션 로드 실패:", error);
+            console.error("노선명 옵션 로드 실패:", error);
           });
 
         // 대상기관 옵션 로드
@@ -285,12 +285,9 @@ export default function SettlementConsignmentPage() {
     const totalSettle = Number(totalObject.settle_amt || 0);
     const totalCount = Number(totalObject.cnt_28 || 0);
 
-    // 숫자 포맷팅 (소수 넷째자리에서 반올림해서 셋째자리까지)
+    // 숫자 포맷팅 (소수 첫째자리에서 반올림해서 정수로)
     const formatValue = (value: number) => {
-      return (Math.round(value * 1000) / 1000).toLocaleString(undefined, {
-        minimumFractionDigits: 3,
-        maximumFractionDigits: 3,
-      });
+      return Math.round(value).toLocaleString();
     };
 
     const result = [
@@ -353,15 +350,9 @@ export default function SettlementConsignmentPage() {
         if (typeof params.value === "string") {
           return params.value;
         }
-        // 일반 데이터는 숫자로 처리 (소수 넷째자리에서 반올림해서 셋째자리까지)
+        // 일반 데이터는 숫자로 처리 (소수 첫째자리에서 반올림해서 정수로)
         if (params.value == null) return "";
-        return (Math.round(params.value * 1000) / 1000).toLocaleString(
-          undefined,
-          {
-            minimumFractionDigits: 3,
-            maximumFractionDigits: 3,
-          }
-        );
+        return Math.round(params.value).toLocaleString();
       },
       cellStyle: (params: { node: { rowPinned?: string } }) => {
         const baseStyle = { textAlign: "right" };
@@ -387,15 +378,9 @@ export default function SettlementConsignmentPage() {
         if (typeof params.value === "string") {
           return params.value;
         }
-        // 일반 데이터는 숫자로 처리 (소수 넷째자리에서 반올림해서 셋째자리까지)
+        // 일반 데이터는 숫자로 처리 (소수 첫째자리에서 반올림해서 정수로)
         if (params.value == null) return "";
-        return (Math.round(params.value * 1000) / 1000).toLocaleString(
-          undefined,
-          {
-            minimumFractionDigits: 3,
-            maximumFractionDigits: 3,
-          }
-        );
+        return Math.round(params.value).toLocaleString();
       },
       cellStyle: (params: { node: { rowPinned?: string } }) => {
         const baseStyle = { textAlign: "right" };
@@ -421,15 +406,9 @@ export default function SettlementConsignmentPage() {
         if (typeof params.value === "string") {
           return params.value;
         }
-        // 일반 데이터는 숫자로 처리 (소수 넷째자리에서 반올림해서 셋째자리까지)
+        // 일반 데이터는 숫자로 처리 (소수 첫째자리에서 반올림해서 정수로)
         if (params.value == null) return "";
-        return (Math.round(params.value * 1000) / 1000).toLocaleString(
-          undefined,
-          {
-            minimumFractionDigits: 3,
-            maximumFractionDigits: 3,
-          }
-        );
+        return Math.round(params.value).toLocaleString();
       },
       cellStyle: (params: { node: { rowPinned?: string } }) => {
         const baseStyle = { textAlign: "right" };

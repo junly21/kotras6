@@ -21,10 +21,10 @@ export const settlementConsignmentFields: FieldConfig[] = [
   },
   {
     name: "lineCd",
-    label: "노선코드",
+    label: "노선명",
     type: "select",
     required: true,
-    placeholder: "노선코드를 선택하세요",
+    placeholder: "노선명을 선택하세요",
     disabled: true, // 초기에는 비활성화
     dependsOn: "oper_id", // 기관명 선택에 의존
   },

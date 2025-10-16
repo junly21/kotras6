@@ -404,7 +404,7 @@ export default function MockSettlementByRoutePage() {
             <div className="flex items-center gap-4">
               <CsvExportButton
                 gridRef={byRouteGridRef}
-                fileName="mock_settlement_by_route_data.csv"
+                fileName="모의정산_노선별조회결과.csv"
                 className="shadow-lg bg-accent-500"
               />
             </div>

@@ -238,7 +238,7 @@ export default function TransactionDetailPage() {
           <div className="flex items-center gap-4">
             <CsvExportButton
               gridRef={gridRef}
-              fileName="transaction_detail_summary.csv"
+              fileName="이용내역_상세내역_조회결과.csv"
               className="shadow-lg bg-accent-500"
             />
           </div>

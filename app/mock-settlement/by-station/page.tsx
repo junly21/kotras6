@@ -585,7 +585,7 @@ export default function MockSettlementByStationPage() {
                       const url = window.URL.createObjectURL(blob);
                       const a = document.createElement("a");
                       a.href = url;
-                      a.download = "mock_settlement_by_station_data.csv";
+                      a.download = "모의정산_역사별조회결과.csv";
                       document.body.appendChild(a);
                       a.click();
                       window.URL.revokeObjectURL(url);

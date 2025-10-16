@@ -499,7 +499,7 @@ export default function MockSettlementByInstitutionPage() {
                   <UnitRadioGroup value={unit} onChange={setUnit} />
                   <CsvExportButton
                     gridRef={byInstitutionGridRef}
-                    fileName="mock_settlement_by_institution_data.csv"
+                    fileName="모의정산_기관별조회결과.csv"
                     className="shadow-lg bg-accent-500"
                   />
                 </div>

@@ -311,7 +311,7 @@ export default function TestGridPage() {
                 <UnitRadioGroup value={unit} onChange={setUnit} />
                 <CsvExportButton
                   gridRef={gridRef}
-                  fileName="pay_recv_data.csv"
+                  fileName="정산결과조회.csv"
                   className="shadow-lg bg-accent-500"
                 />
               </div>

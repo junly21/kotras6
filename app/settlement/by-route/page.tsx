@@ -173,43 +173,11 @@ export default function SettlementByRoutePage() {
                 <div className="flex justify-between items-center">
                   <h3 className="text-lg font-semibold">노선별 조회 결과</h3>
                   {hasSearched && data.length > 0 && (
-                    <button
-                      onClick={async () => {
-                        try {
-                          const response = await fetch(
-                            "/api/settlement/by-route/download",
-                            {
-                              method: "POST",
-                              headers: {
-                                "Content-Type": "application/json",
-                              },
-                              body: JSON.stringify({
-                                STMT_GRP_ID: lastSearchedFilters.stmtGrpId,
-                                OPER_ID: lastSearchedFilters.agency,
-                              }),
-                            }
-                          );
-
-                          if (response.ok) {
-                            const blob = await response.blob();
-                            const url = window.URL.createObjectURL(blob);
-                            const a = document.createElement("a");
-                            a.href = url;
-                            a.download = "settlement_by_route_data.csv";
-                            document.body.appendChild(a);
-                            a.click();
-                            window.URL.revokeObjectURL(url);
-                            document.body.removeChild(a);
-                          } else {
-                            console.error("CSV 다운로드 실패");
-                          }
-                        } catch (error) {
-                          console.error("CSV 다운로드 중 오류:", error);
-                        }
-                      }}
-                      className="bg-primary font-bold hover:bg-secondary-600 text-white px-4 py-2 rounded-lg transition-colors duration-200 cursor-pointer shadow-lg bg-accent-500">
-                      CSV 내보내기
-                    </button>
+                    <CsvExportButton
+                      gridRef={gridRef}
+                      fileName="노선별조회결과.csv"
+                      className="shadow-lg bg-accent-500"
+                    />
                   )}
                 </div>
                 <div className="bg-white border border-gray-200 rounded-[24px] p-4">

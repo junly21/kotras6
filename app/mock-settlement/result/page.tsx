@@ -440,7 +440,7 @@ export default function MockSettlementResultPage() {
                 <UnitRadioGroup value={unit} onChange={setUnit} />
                 <CsvExportButton
                   gridRef={settlementGridRef}
-                  fileName="settlement_result_data.csv"
+                  fileName="모의정산_결과조회.csv"
                   className="shadow-lg bg-accent-500"
                 />
               </div>

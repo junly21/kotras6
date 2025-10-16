@@ -336,7 +336,7 @@ export default function SettlementByStationPage() {
                             const url = window.URL.createObjectURL(blob);
                             const a = document.createElement("a");
                             a.href = url;
-                            a.download = "역사별_정산결과.csv";
+                            a.download = "역사별조회결과.csv";
                             document.body.appendChild(a);
                             a.click();
                             window.URL.revokeObjectURL(url);

@@ -328,13 +328,13 @@ export default function TransactionAmountPage() {
                 이용내역 노선별 내역 결과조회
               </h3>
               <span className="text-sm text-gray-500">
-                하기 금액은 정제 이후의 금액이며 28일치 이용 내역입니다.
+                하기 금액은 샘플 기간 동안의 정제 이후 금액임.
               </span>
             </div>
             <div className="flex items-center gap-4">
               <CsvExportButton
                 gridRef={gridRef}
-                fileName="거래금액_총계_데이터.csv"
+                fileName="이용내역_노선별_내역.csv"
                 className="shadow-lg bg-accent-500"
               />
             </div>

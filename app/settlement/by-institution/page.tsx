@@ -342,7 +342,7 @@ export default function SettlementByInstitutionPage() {
                 <UnitRadioGroup value={unit} onChange={setUnit} />
                 <CsvExportButton
                   gridRef={gridRef}
-                  fileName="settlement_by_institution_data.csv"
+                  fileName="기관별조회결과.csv"
                   className="shadow-lg bg-accent-500"
                 />
               </div>

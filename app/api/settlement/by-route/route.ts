@@ -12,7 +12,8 @@ export async function POST(request: Request) {
       method: "POST",
       body: {
         OPER_ID: body.agency,
-        STMT_GRP_ID: body.stmtGrpId,
+        // STMT_GRP_ID: body.stmtGrpId,
+        STMT_GRP_ID: "SG002",
       },
     });
 

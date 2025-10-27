@@ -12,7 +12,8 @@ export async function POST(request: NextRequest) {
       method: "POST",
       body: {
         OPER_ID: body.agency,
-        STMT_GRP_ID: body.stmtGrpId,
+        // STMT_GRP_ID: body.stmtGrpId,
+        STMT_GRP_ID: "SG002",
       },
       request, // 클라이언트 IP 추출을 위한 request 객체 전달
     });

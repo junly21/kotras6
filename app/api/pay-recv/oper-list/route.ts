@@ -58,7 +58,8 @@ export async function POST(request: NextRequest) {
       const { data } = await callExternalApi("selectPayRecvResult.do", {
         method: "POST",
         body: {
-          STMT_GRP_ID: body.stmtGrpId, // 대안 필드 추가
+          // STMT_GRP_ID: body.stmtGrpId, // 대안 필드 추가
+          STMT_GRP_ID: "SG002",
         },
         request, // 클라이언트 IP 추출을 위한 request 객체 전달
       });

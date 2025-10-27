@@ -9,7 +9,7 @@ export async function POST(request: NextRequest) {
     console.log("Body:", body);
 
     const filter: SettlementByStationFilters = {
-      stmtGrpId: body.stmtGrpId || "",
+      // stmtGrpId: body.stmtGrpId || "",
       STN_ID1: body.STN_ID1 || "",
       STN_ID2: body.STN_ID2 || "",
       STN_ID3: body.STN_ID3 || "",
@@ -22,8 +22,9 @@ export async function POST(request: NextRequest) {
       method: "POST",
       body: {
         ...filter,
-        STMT_GRP_ID: filter.stmtGrpId, // STMT_GRP_ID로 매핑
+        STMT_GRP_ID: "SG002", // STMT_GRP_ID로 매핑
       },
+      // body: filter,
       request, // 클라이언트 IP 추출을 위한 request 객체 전달
     });
 

@@ -207,8 +207,8 @@ export function FilterForm<T extends FieldValues>({
           </div>
         )}
 
-        {/* 요소가 4개 이상일 때: 2줄로 분할 */}
-        {fields.length > 5 && (
+        {/* 요소가 5개 이상일 때: 2줄로 분할 */}
+        {fields.length >= 5 && (
           <>
             {/* 첫 번째 줄 */}
             <div className="flex flex-wrap gap-4 items-start mb-4">

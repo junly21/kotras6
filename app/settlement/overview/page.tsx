@@ -274,7 +274,7 @@ export default function TestGridPage() {
           <h1 className="text-2xl font-bold">연락운임 정산결과</h1>
         </div>
 
-        {/* 필터 폼 */}
+        {/* 필터 폼
         <div className="relative">
           {isFilterLoading && (
             <div className="absolute inset-0 flex items-center justify-center bg-white/80 z-10 rounded-xl">
@@ -288,7 +288,7 @@ export default function TestGridPage() {
             schema={settlementOverviewSchema}
             onSearch={handleSearch}
           />
-        </div>
+        </div> */}
 
         {/* 결과 영역 */}
         {!hasSearched && (
@@ -317,7 +317,7 @@ export default function TestGridPage() {
               </div>
             </div>
 
-            <div className="relative h-[calc(100vh-370px)]">
+            <div className="relative h-[calc(100vh-300px)]">
               {loading && (
                 <div className="absolute inset-0 flex items-center justify-center bg-white/80 z-10">
                   <Spinner />

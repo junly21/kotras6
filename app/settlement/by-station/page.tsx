@@ -21,7 +21,7 @@ ModuleRegistry.registerModules([AllCommunityModule]);
 // 검증 스키마 (대안은 필수, 첫 번째 역은 필수, 나머지 역은 선택사항)
 const settlementByStationSchema = z
   .object({
-    stmtGrpId: z.string().min(1, "대안을 선택해주세요"),
+    // stmtGrpId: z.string().min(1, "대안을 선택해주세요"),
     STN_ID1: z.string().min(1, "첫 번째 역을 선택해주세요"),
     STN_ID2: z.string().optional(),
     STN_ID3: z.string().optional(),
@@ -326,7 +326,8 @@ export default function SettlementByStationPage() {
                               },
                               body: JSON.stringify({
                                 NET_DT: "LATEST",
-                                STMT_GRP_ID: lastSearchedFilters.stmtGrpId,
+                                // STMT_GRP_ID: lastSearchedFilters.stmtGrpId,
+                                STMT_GRP_ID: "SG002",
                               }),
                             }
                           );

@@ -17,7 +17,8 @@ export async function POST(request: NextRequest) {
     // 소문자 필드명을 대문자로 변환
     const apiBody = {
       OPER_ID: body.oper_id,
-      STMT_GRP_ID: body.stmtGrpId,
+      // STMT_GRP_ID: body.stmtGrpId,
+      STMT_GRP_ID: "SG002",
       LINE_CD: body.lineCd,
       TARGET_OPER_ID: body.targetOperId,
     };

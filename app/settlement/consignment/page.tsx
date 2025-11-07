@@ -7,7 +7,6 @@ import { FilterForm } from "@/components/ui/FilterForm";
 import { Toast } from "@/components/ui/Toast";
 import { AllCommunityModule, ModuleRegistry } from "ag-grid-community";
 import { useApi } from "@/hooks/useApi";
-import { useFilterOptions } from "@/hooks/useFilterOptions";
 import { SettlementConsignmentService } from "@/services/settlementConsignmentService";
 import { useCallback, useRef, useState, useEffect, useMemo } from "react";
 import { AgGridReact } from "ag-grid-react";
@@ -58,14 +57,10 @@ export default function SettlementConsignmentPage() {
           await loadDependentOptions(firstAgency);
         }
 
-        // 대안 옵션 로드 및 첫 번째 선택
-        const stmtResponse = await fetch("/api/stmt_grp_id");
-        const stmtData = await stmtResponse.json();
-        const stmtOptions = stmtData.options || [];
-        if (stmtOptions.length > 0) {
-          const firstStmt = stmtOptions[0].value;
-          setFilters((prev) => ({ ...prev, stmtGrpId: firstStmt }));
-        }
+        // 대안 옵션 로드 (실제로는 사용하지 않지만 API 호출은 유지)
+        await fetch("/api/stmt_grp_id");
+        // SG002로 고정 설정 (서버 route.ts에서도 SG002로 하드코딩되어 있음)
+        setFilters((prev) => ({ ...prev, stmtGrpId: "SG002" }));
       } catch (error) {
         console.error("초기 옵션 로드 실패:", error);
       }
@@ -250,10 +245,21 @@ export default function SettlementConsignmentPage() {
   }, [rawApiData]);
 
   useEffect(() => {
-    if (hasSearched) {
-      refetch();
+    if (!hasSearched) {
+      return;
     }
-  }, [hasSearched, refetch]);
+
+    if (
+      !filters.oper_id ||
+      !filters.stmtGrpId ||
+      !filters.lineCd ||
+      !filters.targetOperId
+    ) {
+      return;
+    }
+
+    refetch();
+  }, [filters, hasSearched, refetch]);
 
   const handleSearch = useCallback((values: SettlementConsignmentFilters) => {
     // 필수 필드가 모두 채워졌는지 확인
@@ -268,8 +274,10 @@ export default function SettlementConsignmentPage() {
     }
 
     console.log("검색 실행:", values);
+    // SG002로 고정 (서버에서도 SG002로 하드코딩)
+    const fixedValues = { ...values, stmtGrpId: "SG002" };
+    setFilters(fixedValues);
     setHasSearched(true); // ✅ 검색 시작
-    setFilters(values);
   }, []);
 
   // 그리드용 데이터

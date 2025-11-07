@@ -11,14 +11,14 @@ export const settlementConsignmentFields: FieldConfig[] = [
     optionsEndpoint: "/api/settlement/consignment/agencies",
     filterOptions: (options) => options.filter((opt) => opt.label !== "전체"),
   },
-  {
-    name: "stmtGrpId",
-    label: "대안",
-    type: "select",
-    required: true,
-    placeholder: "대안을 선택하세요",
-    optionsEndpoint: "/api/stmt_grp_id",
-  },
+  // {
+  //   name: "stmtGrpId",
+  //   label: "대안",
+  //   type: "select",
+  //   required: true,
+  //   placeholder: "대안을 선택하세요",
+  //   optionsEndpoint: "/api/stmt_grp_id",
+  // },
   {
     name: "lineCd",
     label: "노선명",

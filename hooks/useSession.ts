@@ -79,9 +79,11 @@ export function useSession(): UseSessionReturn {
   const initializeSession = useCallback(async () => {
     // 이미 초기화 중이거나 완료된 경우 중복 호출 방지
     if (isInitializingRef.current || hasInitializedRef.current || isLoading) {
+      // console.log("⏭️ 세션 초기화 건너뜀 (이미 진행 중이거나 완료됨)");
       return;
     }
 
+    // console.log("🚀 세션 초기화 시작");
     isInitializingRef.current = true;
     setIsLoading(true);
     setError(null);
@@ -140,6 +142,7 @@ export function useSession(): UseSessionReturn {
 
         // 초기화 완료 표시
         hasInitializedRef.current = true;
+        // console.log("✅ 세션 초기화 완료");
       } else {
         throw new Error(data.error || "세션 초기화 실패");
       }
@@ -147,11 +150,13 @@ export function useSession(): UseSessionReturn {
       const errorMessage =
         err instanceof Error ? err.message : "알 수 없는 오류";
       setError(errorMessage);
-      console.error("세션 초기화 오류:", err);
+      // console.error("❌ 세션 초기화 오류:", err);
 
       // 실패 시 재시도 (5초 후) - 한 번만
       if (!hasInitializedRef.current) {
+        // console.log("🔄 세션 초기화 재시도 스케줄링 (5초 후)");
         setTimeout(() => {
+          // console.log("🔄 세션 초기화 재시도 시작");
           isInitializingRef.current = false;
           initializeSession();
         }, 5000);
@@ -161,12 +166,13 @@ export function useSession(): UseSessionReturn {
       setIsInitialized(true);
       isInitializingRef.current = false;
     }
-  }, [isLoading]);
+  }, [isLoading]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // 세션 갱신 (getSession)
   const refreshSession = useCallback(async () => {
     if (isLoading) return;
 
+    // console.log("🔄 세션 갱신 시작");
     setIsLoading(true);
     setError(null);
 
@@ -178,6 +184,9 @@ export function useSession(): UseSessionReturn {
       });
 
       if (!response.ok) {
+        // console.log(
+        //   `⚠️ 세션 갱신 실패: ${response.status} (예상된 상황일 수 있음)`
+        // );
         throw new Error(`세션 갱신 실패: ${response.status}`);
       }
 
@@ -228,21 +237,31 @@ export function useSession(): UseSessionReturn {
 
         // 세션 갱신 타이머 재설정
         scheduleSessionRefresh(now);
+        // console.log("✅ 세션 갱신 성공");
       } else {
         throw new Error(data.error || "세션 갱신 실패");
       }
     } catch (err) {
       const errorMessage =
         err instanceof Error ? err.message : "알 수 없는 오류";
-      setError(errorMessage);
-      console.error("세션 갱신 오류:", err);
+
+      // 401 에러는 예상된 상황이므로 에러 로그를 info 레벨로 변경하고 에러 상태를 설정하지 않음
+      if (errorMessage.includes("401")) {
+        // console.info("ℹ️ 세션 만료됨, 재초기화 시도:", err);
+        // 401 에러는 사용자에게 에러로 표시하지 않음
+      } else {
+        // console.error("❌ 세션 갱신 오류:", err);
+        setError(errorMessage);
+      }
 
       // 갱신 실패 시 세션을 비활성화하고 재초기화 시도 (한 번만)
       if (hasInitializedRef.current) {
+        // console.log("🔄 세션 재초기화 스케줄링 (3초 후)");
         setSession((prev) => ({ ...prev, isActive: false }));
 
         // 3초 후 재초기화 시도
         setTimeout(() => {
+          // console.log("🔄 세션 재초기화 시작");
           hasInitializedRef.current = false;
           isInitializingRef.current = false;
           initializeSession();
@@ -251,7 +270,7 @@ export function useSession(): UseSessionReturn {
     } finally {
       setIsLoading(false);
     }
-  }, [isLoading, initializeSession]);
+  }, [isLoading, initializeSession]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // 세션 갱신 타이머 스케줄링
   const scheduleSessionRefresh = useCallback(
@@ -264,7 +283,10 @@ export function useSession(): UseSessionReturn {
       const timeSinceLastActivity = Date.now() - lastActivity;
       const delay = Math.max(0, timeUntilRefresh - timeSinceLastActivity);
 
+      // console.log(`⏰ 세션 갱신 타이머 설정: ${Math.round(delay / 1000)}초 후`);
+
       refreshTimerRef.current = setTimeout(() => {
+        // console.log("⏰ 세션 갱신 타이머 실행");
         refreshSession();
       }, delay);
     },
@@ -336,7 +358,7 @@ export function useSession(): UseSessionReturn {
         clearInterval(activityTimerRef.current);
       }
     };
-  }, []); // 의존성 배열을 비워서 한 번만 실행
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // 사용자 활동 이벤트 리스너
   useEffect(() => {

@@ -57,7 +57,11 @@ export function createSettlementByRouteColDefs(
           // 기관명_노선명 형태에서 노선명만 추출
           const parts = params.value.split("_");
           if (parts.length >= 2) {
-            return parts[1]; // 노선명 부분만 반환
+            const agency = parts[0];
+            const lineName = parts[1];
+            const isIncheonOverall =
+              agency === "인천교통공사" && lineName === "7호선";
+            return isIncheonOverall ? `${lineName}(인천전체)` : lineName;
           }
         }
         return params.value || "";
@@ -92,7 +96,9 @@ export function createSettlementByRouteColDefs(
 
       const groupKey = `${agencyName}_${lineName}`;
       // 노선명만 표시 (기관명 제거)
-      const groupName = lineName;
+      const isIncheonOverall =
+        agencyName === "인천교통공사" && lineName === "7호선";
+      const groupName = isIncheonOverall ? `${lineName}(인천전체)` : lineName;
 
       if (!groupMap.has(groupKey)) {
         groupMap.set(groupKey, {

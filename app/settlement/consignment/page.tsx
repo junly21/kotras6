@@ -348,7 +348,7 @@ export default function SettlementConsignmentPage() {
       },
     },
     {
-      headerName: "지급액",
+      headerName: "지급액(A)",
       field: "pay_amt",
       minWidth: 150,
       flex: 1,
@@ -376,7 +376,7 @@ export default function SettlementConsignmentPage() {
       },
     },
     {
-      headerName: "수급액",
+      headerName: "수급액(B)",
       field: "recv_amt",
       minWidth: 150,
       flex: 1,
@@ -404,7 +404,7 @@ export default function SettlementConsignmentPage() {
       },
     },
     {
-      headerName: "정산금액",
+      headerName: "정산금액(B-A)",
       field: "settle_amt",
       minWidth: 150,
       flex: 1,

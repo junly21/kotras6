@@ -188,7 +188,7 @@ export default function NetworkMapPage() {
         new Tile({
           visible: true,
           source: new XYZ({
-            url: `http://api.vworld.kr/req/wmts/1.0.0/1A2BB1EC-4324-34AA-B2D2-A9C06A2B5928/Base/{z}/{y}/{x}.png`,
+            url: `http://api.vworld.kr/req/wmts/1.0.0/87D83D87-66B3-3AAC-B518-4D1103F9ACDA/Base/{z}/{y}/{x}.png`,
           }),
         }),
         vectorLayer,

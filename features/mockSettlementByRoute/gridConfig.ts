@@ -63,7 +63,19 @@ export function createMockSettlementByRouteColDefs(
           // 기관명_노선명 형태에서 노선명만 추출
           const parts = params.value.split("_");
           if (parts.length >= 2) {
-            return parts[1]; // 노선명 부분만 반환
+            const agency = parts[0];
+            const lineName = parts[1];
+            const isIncheonOverall =
+              agency === "인천교통공사" && lineName === "7호선";
+            const isSeoulMetro9 =
+              agency === "서울시메트로9호선" && lineName === "9호선";
+            if (isIncheonOverall) {
+              return `${lineName}(인천전체)`;
+            }
+            if (isSeoulMetro9) {
+              return `${lineName}(서울시메트로)`;
+            }
+            return lineName;
           }
         }
         return params.value || "";
@@ -98,7 +110,16 @@ export function createMockSettlementByRouteColDefs(
 
       const groupKey = `${agencyName}_${lineName}`;
       // 노선명만 표시 (기관명 제거)
-      const groupName = lineName;
+      const isIncheonOverall =
+        agencyName === "인천교통공사" && lineName === "7호선";
+      const isSeoulMetro9 =
+        agencyName === "서울시메트로9호선" && lineName === "9호선";
+      let groupName = lineName;
+      if (isIncheonOverall) {
+        groupName = `${lineName}(인천전체)`;
+      } else if (isSeoulMetro9) {
+        groupName = `${lineName}(서울시메트로)`;
+      }
 
       if (!groupMap.has(groupKey)) {
         groupMap.set(groupKey, {

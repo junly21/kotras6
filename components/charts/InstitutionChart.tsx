@@ -215,11 +215,11 @@ export function InstitutionChart({ data }: Props) {
       {/* 간단한 범례 */}
       <div className="flex justify-center gap-6 mt-2 text-sm">
         <div className="flex items-center gap-2">
-          <div className="w-4 h-4 bg-blue-500 rounded"></div>
+          <div className="w-4 h-4 bg-red-500 rounded"></div>
           <span>지급 금액</span>
         </div>
         <div className="flex items-center gap-2">
-          <div className="w-4 h-4 bg-red-500 rounded"></div>
+          <div className="w-4 h-4 bg-blue-500 rounded"></div>
           <span>수급 금액</span>
         </div>
       </div>

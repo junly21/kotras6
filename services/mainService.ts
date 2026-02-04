@@ -1,4 +1,3 @@
-import { callExternalApi } from "@/app/api/utils/externalApi";
 import {
   NetworkLink,
   Node,
@@ -105,48 +104,6 @@ export class MainService {
       return { success: true, data: convertedData };
     } catch (error) {
       console.error("네트워크 링크 조회 에러:", error);
-      return {
-        success: false,
-        error: error instanceof Error ? error.message : String(error),
-      };
-    }
-  }
-
-  // 권종별 통행수 조회
-  static async getCardStats(): Promise<ApiResponse<CardStats[]>> {
-    try {
-      const { data } = await callExternalApi("selectCntStatsList.do", {
-        method: "POST",
-        body: {
-          COMMON_CODE: "CARD_DIV",
-        },
-      });
-
-      // 외부 API에서 직접 배열을 반환하므로 data 자체가 배열
-      const rawData = data as CardStats[];
-      return { success: true, data: rawData || [] };
-    } catch (error) {
-      console.error("권종별 통행수 조회 에러:", error);
-      return {
-        success: false,
-        error: error instanceof Error ? error.message : String(error),
-      };
-    }
-  }
-
-  // OD Pair 통계 조회
-  static async getODPairStats(): Promise<ApiResponse<ODPairStats[]>> {
-    try {
-      const { data } = await callExternalApi("selectCntODPairStatsList.do", {
-        method: "POST",
-        body: {},
-      });
-
-      // 외부 API에서 직접 배열을 반환하므로 data 자체가 배열
-      const rawData = data as ODPairStats[];
-      return { success: true, data: rawData || [] };
-    } catch (error) {
-      console.error("OD Pair 통계 조회 에러:", error);
       return {
         success: false,
         error: error instanceof Error ? error.message : String(error),

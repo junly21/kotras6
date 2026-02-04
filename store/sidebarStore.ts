@@ -125,7 +125,7 @@ export const getMenuData = (): MenuItem[] => [
       },
       {
         id: "transaction-detail-statistics",
-        label: "상세통계",
+        label: "상세 통계",
         path: "/transaction/detail_statistics",
       },
       {

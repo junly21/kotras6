@@ -87,6 +87,7 @@ export function getDetailedPermissions(
           analysis: true, // 내역 분석 - 모든 기관
           amount: true, // 금액 분석 - 대광위 + SERVICE
           detail: true, // 상세 조회 - 대광위만
+          detailStatistics: true, // 상세통계 - ALL + SERVICE
         },
         settlement: {
           overview: true, // 정산 결과 - 모든 기관
@@ -123,6 +124,7 @@ export function getDetailedPermissions(
           analysis: true, // 내역 분석 - 모든 기관
           amount: true, // 대광위 + SERVICE
           detail: true, // 상세 조회 - 대광위만 - 서교공 인교공 대광위요청으로 추가
+          detailStatistics: true, // 상세통계 - ALL + SERVICE
         },
         settlement: {
           overview: true, // 정산 결과 - 모든 기관
@@ -159,6 +161,7 @@ export function getDetailedPermissions(
           analysis: true, // 내역 분석 - 모든 기관
           amount: false, // 대광위 + SERVICE
           detail: false, // 상세 조회 - 대광위만
+          detailStatistics: false, // 상세통계 - ALL + SERVICE만
         },
         settlement: {
           overview: true, // 정산 결과 - 모든 기관
@@ -191,7 +194,12 @@ export function getDetailedPermissions(
 
     default:
       return {
-        transaction: { analysis: false, amount: false, detail: false },
+        transaction: {
+          analysis: false,
+          amount: false,
+          detail: false,
+          detailStatistics: false,
+        },
         settlement: {
           overview: false,
           byInstitution: false,
@@ -244,7 +252,10 @@ export function hasDetailedPermission(
 
 // 경로별 권한 확인 함수
 export function hasPathPermission(agencyCode: string, path: string): boolean {
-  // Transaction 권한 체크
+  // Transaction 권한 체크 (detail_statistics는 detail보다 먼저 체크)
+  if (path.includes("/transaction/detail_statistics")) {
+    return hasDetailedPermission(agencyCode, "transaction", "detailStatistics");
+  }
   if (path.includes("/transaction/detail")) {
     return hasDetailedPermission(agencyCode, "transaction", "detail");
   }
